@@ -207,8 +207,10 @@ export default function PatientDashboard() {
       )}
 
       {/* Mood tracker */}
+      {/* MoodTracker: recibe hasta 30 registros para historial y gráfica semanal */}
       <MoodTracker moodData={moodData} userId={user?.id} onSave={(entry) => {
-        setMoodData((d) => [...d.slice(-6), entry])
+        // Agregar el nuevo registro al final (orden cronológico)
+        setMoodData((d) => [...d, entry])
       }} />
 
       {/* Tareas pendientes */}
