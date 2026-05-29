@@ -41,6 +41,9 @@ import TherapistProfileView from '@/pages/patient/TherapistProfileView'
 import ChatPage  from '@/pages/shared/ChatPage'
 import VideoCall from '@/pages/shared/VideoCall'
 
+// Tests psicométricos
+import TakeTestPage from '@/pages/patient/TakeTestPage'
+
 // Pagos
 import PaymentSuccess from '@/pages/payment/PaymentSuccess'
 import PaymentCancel  from '@/pages/payment/PaymentCancel'
@@ -79,6 +82,11 @@ export default function App() {
         {/* Video call — fuera del layout (pantalla completa) */}
         <Route path="/video-call/:sessionId" element={
           <ProtectedRoute><VideoCall /></ProtectedRoute>
+        } />
+
+        {/* Test psicométrico — pantalla completa sin layout */}
+        <Route path="/patient/tests/:assignmentId" element={
+          <ProtectedRoute><TakeTestPage /></ProtectedRoute>
         } />
 
         {/* Pago — fuera del layout */}

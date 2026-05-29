@@ -10,6 +10,7 @@ import { formatSessionDate, formatPrice, canStartVideo } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import MoodTracker from '@/components/patient/MoodTracker'
 import AICheckin from '@/components/patient/AICheckin'
+import PendingTestsSection from '@/components/psychometrics/PendingTestsSection'
 import StarRating from '@/components/ui/StarRating'
 import { Textarea } from '@/components/ui/Input'
 import toast from 'react-hot-toast'
@@ -226,6 +227,9 @@ export default function PatientDashboard() {
         // Agregar el nuevo registro al final (orden cronológico)
         setMoodData((d) => [...d, entry])
       }} />
+
+      {/* Tests psicométricos pendientes */}
+      <PendingTestsSection userId={user?.id} />
 
       {/* Tareas pendientes */}
       {tasks.length > 0 && (
