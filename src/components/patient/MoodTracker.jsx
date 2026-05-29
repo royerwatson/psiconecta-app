@@ -64,18 +64,33 @@ export default function MoodTracker({ moodData = [], userId, onSave }) {
 
   const saveMood = async () => {
     if (!selected) return
+    if (!userId) {
+      toast.error('No se pudo identificar al usuario. Recarga la página.')
+      return
+    }
     setSaving(true)
     const entry = {
-      patient_id:    userId,
-      mood_score:    selected,
-      context_tags:  tags,
-      note:          note.trim() || null,
-      created_at:    new Date().toISOString(),
+      patient_id:   userId,
+      mood_score:   selected,
+      context_tags: tags,
+      note:         note.trim() || null,
+      created_at:   new Date().toISOString(),
     }
-    const { error } = await supabase.from('mood_logs').insert(entry)
-    if (error) { toast.error('Error guardando estado de ánimo'); setSaving(false); return }
+    const { data: inserted, error } = await supabase
+      .from('mood_logs')
+      .insert(entry)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Error guardando estado de ánimo:', error)
+      toast.error('No se pudo guardar el registro. Intenta de nuevo.')
+      setSaving(false)
+      return
+    }
     toast.success('Estado de ánimo registrado 🌟')
-    onSave?.(entry)
+    // Notificar al padre con el objeto real del DB (tiene el ID correcto)
+    onSave?.(inserted ?? entry)
     setStep('done')
     setSaving(false)
   }
