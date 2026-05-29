@@ -54,29 +54,37 @@ export default function PatientDashboard() {
 
   const fetchData = async () => {
     setLoading(true)
-    const [{ data: sess }, { data: tsk }, { data: mood }, { data: doneSess }] = await Promise.all([
-      supabase.from('sessions').select(`
-        *, therapist:profiles!sessions_therapist_id_fkey(id, full_name, avatar_url, therapist_profiles(specialty))
-      `).eq('patient_id', user.id).in('status', ['scheduled', 'in_progress'])
-        .gte('scheduled_at', new Date(Date.now() - 90 * 60 * 1000).toISOString())
-        .order('scheduled_at').limit(1),
-      supabase.from('tasks').select('*').eq('patient_id', user.id).eq('completed', false).order('due_date').limit(5),
-      supabase.from('mood_logs').select('*').eq('patient_id', user.id).order('created_at', { ascending: false }).limit(30),
-      supabase.from('sessions').select(`
-        id, scheduled_at,
-        therapist:profiles!sessions_therapist_id_fkey(id, full_name),
-        reviews(id)
-      `).eq('patient_id', user.id).eq('status', 'completed')
-        .order('scheduled_at', { ascending: false }).limit(5),
-    ])
-    setNextSession(sess?.[0] ?? null)
-    setTasks(tsk ?? [])
-    setMoodData(((mood ?? []).slice(0, 7)).reverse())
-    setStreak(calcStreak(mood ?? []))
-    // Find first completed session without a review
-    const unreviewed = (doneSess ?? []).find(s => !s.reviews || s.reviews.length === 0)
-    setPendingReview(unreviewed ?? null)
-    setLoading(false)
+    try {
+      const [{ data: sess }, { data: tsk }, { data: mood }, { data: doneSess }] = await Promise.all([
+        supabase.from('sessions').select(`
+          *, therapist:profiles!sessions_therapist_id_fkey(id, full_name, avatar_url, therapist_profiles(specialty))
+        `).eq('patient_id', user.id).in('status', ['scheduled', 'in_progress'])
+          .gte('scheduled_at', new Date(Date.now() - 90 * 60 * 1000).toISOString())
+          .order('scheduled_at').limit(1),
+        supabase.from('tasks').select('*').eq('patient_id', user.id).eq('completed', false).order('due_date').limit(5),
+        // Traer 30 registros para historial y gráfica semanal
+        supabase.from('mood_logs').select('*').eq('patient_id', user.id).order('created_at', { ascending: false }).limit(30),
+        supabase.from('sessions').select(`
+          id, scheduled_at,
+          therapist:profiles!sessions_therapist_id_fkey(id, full_name),
+          reviews(id)
+        `).eq('patient_id', user.id).eq('status', 'completed')
+          .order('scheduled_at', { ascending: false }).limit(5),
+      ])
+      setNextSession(sess?.[0] ?? null)
+      setTasks(tsk ?? [])
+      // Invertir a orden cronológico para que la gráfica y el historial muestren
+      // los datos más recientes últimos (el MoodTracker hace su propia deduplicación por día)
+      setMoodData((mood ?? []).reverse())
+      setStreak(calcStreak(mood ?? []))
+      // Encontrar la primera sesión completada sin reseña
+      const unreviewed = (doneSess ?? []).find(s => !s.reviews || s.reviews.length === 0)
+      setPendingReview(unreviewed ?? null)
+    } catch (err) {
+      console.error('Error cargando dashboard:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const markTaskDone = async (taskId) => {

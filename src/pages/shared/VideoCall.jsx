@@ -29,7 +29,7 @@ export default function VideoCall() {
   }, [sessionId])
 
   const fetchSession = async () => {
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('sessions')
       .select(`
         *,
@@ -38,6 +38,13 @@ export default function VideoCall() {
       `)
       .eq('id', sessionId)
       .single()
+
+    // Si la sesión no existe (ej. ID de sesión grupal o ID inválido), mostrar error
+    if (error || !data) {
+      toast.error('Sesión no encontrada. Verifica el enlace.')
+      setLoading(false)
+      return
+    }
 
     setSession(data)
 
@@ -51,7 +58,7 @@ export default function VideoCall() {
       await createRoom(data)
       setLoading(false)
     } else {
-      // Paciente: espera polling hasta que el terapeuta cree la sala
+      // Paciente: polling hasta que el terapeuta cree la sala
       setLoading(false)
       setPolling(true)
       startPolling()
@@ -163,6 +170,20 @@ export default function VideoCall() {
   const other = session
     ? (role === 'therapist' ? session.patient : session.therapist)
     : null
+
+  // Si la sesión no se encontró mostrar pantalla de error
+  if (!loading && !session) {
+    return (
+      <div className="fixed inset-0 bg-warm-900 flex flex-col items-center justify-center z-50 gap-4">
+        <span className="text-5xl">❌</span>
+        <p className="text-white font-medium">Sesión no encontrada</p>
+        <p className="text-warm-400 text-sm">El ID de sesión no es válido o la sesión fue eliminada</p>
+        <Button onClick={() => navigate(-1)} variant="secondary">
+          ← Volver
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 bg-warm-900 flex flex-col z-50">

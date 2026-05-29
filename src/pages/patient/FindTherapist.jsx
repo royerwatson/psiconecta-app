@@ -14,7 +14,6 @@ import { useAuthStore } from '@/store/authStore'
 import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
 import toast from 'react-hot-toast'
-import { addHours, isBefore } from 'date-fns'
 
 const SPECIALTIES = [
   'Todas', 'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
