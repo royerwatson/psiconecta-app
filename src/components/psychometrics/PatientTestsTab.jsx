@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import Button from '@/components/ui/Button'
 import AssignTestModal from './AssignTestModal'
@@ -31,6 +32,7 @@ const SEVERITY_COLORS = {
 }
 
 export default function PatientTestsTab({ therapistId, patientId }) {
+  const navigate = useNavigate()
   const [assignments, setAssignments]       = useState([])
   const [loading, setLoading]               = useState(true)
   const [showAssign, setShowAssign]         = useState(false)
@@ -257,17 +259,15 @@ export default function PatientTestsTab({ therapistId, patientId }) {
 
                             {/* Acciones */}
                             <div className="flex gap-2 flex-wrap">
-                              {!allReleased && (
-                                <button
-                                  onClick={() => releaseToPatient(session.id)}
-                                  className="text-xs px-3 py-1.5 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors"
-                                >
-                                  Liberar resultado al paciente
-                                </button>
-                              )}
+                              <button
+                                onClick={() => navigate(`/therapist/test-result/${session.id}`)}
+                                className="text-xs px-3 py-1.5 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors"
+                              >
+                                Ver resultado completo →
+                              </button>
                               {allReleased && (
                                 <span className="text-xs px-3 py-1.5 rounded-lg bg-green-100 text-green-700 font-medium">
-                                  ✓ Resultado liberado al paciente
+                                  ✓ Resultado liberado
                                 </span>
                               )}
                             </div>
