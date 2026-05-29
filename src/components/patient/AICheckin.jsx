@@ -64,12 +64,16 @@ export default function AICheckin({ userId }) {
   }, [userId])
 
   const checkTodayCheckin = async () => {
-    const today = new Date().toISOString().split('T')[0]
+    if (!userId) return
+    const now = new Date()
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
+    const endOfDay   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
     const { data } = await supabase
       .from('ai_checkins')
-      .select('id, risk_level')
+      .select('id')
       .eq('patient_id', userId)
-      .gte('created_at', today + 'T00:00:00')
+      .gte('created_at', startOfDay)
+      .lt('created_at', endOfDay)
       .limit(1)
     if (data?.length > 0) setCheckedToday(true)
   }
