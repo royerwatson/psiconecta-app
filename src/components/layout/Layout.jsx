@@ -119,8 +119,8 @@ export default function Layout() {
         </div>
       </header>
 
-      {/* Contenido principal */}
-      <main className="flex-1 max-w-5xl mx-auto w-full px-4 py-6 pb-24 sm:pb-8">
+      {/* Contenido principal — margen izquierdo en desktop para la sidebar */}
+      <main className="flex-1 max-w-3xl mx-auto w-full px-4 py-6 pb-24 sm:pb-8 sm:pl-48">
         <Outlet />
       </main>
 
@@ -158,30 +158,37 @@ export default function Layout() {
         </div>
       </nav>
 
-      {/* Navegación lateral (desktop) */}
-      <nav className="fixed top-16 left-4 hidden sm:flex flex-col gap-1 bg-white rounded-2xl shadow-card border border-warm-100 p-2 z-20">
+      {/* Navegación lateral (desktop) — posicionada junto al contenido principal */}
+      <nav className="fixed top-20 left-4 hidden sm:flex flex-col gap-1 bg-white rounded-2xl shadow-card border border-warm-100 p-2 z-20 min-w-[160px]">
         {nav.map(({ to, icon, label }) => {
           const isChat = label === 'Mensajes'
           return (
             <NavLink key={to} to={to}
               className={({ isActive }) => cn(
                 'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
-                isActive ? 'bg-primary-50 text-primary-700' : 'text-warm-500 hover:bg-warm-50 hover:text-warm-800',
+                isActive
+                  ? 'bg-gradient-to-r from-primary-50 to-calm-50 text-primary-700 shadow-sm'
+                  : 'text-warm-500 hover:bg-warm-50 hover:text-warm-800',
               )}
             >
-              <span className="relative">
-                <span className="text-lg">{icon}</span>
-                {isChat && unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5">
-                    {unreadCount > 9 ? '9+' : unreadCount}
+              {({ isActive }) => (
+                <>
+                  <span className="relative shrink-0">
+                    <span className={cn('text-lg block transition-transform', isActive && 'scale-110')}>{icon}</span>
+                    {isChat && unreadCount > 0 && (
+                      <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5">
+                        {unreadCount > 9 ? '9+' : unreadCount}
+                      </span>
+                    )}
                   </span>
-                )}
-              </span>
-              <span>{label}</span>
-              {isChat && unreadCount > 0 && (
-                <span className="ml-auto bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5">
-                  {unreadCount > 9 ? '9+' : unreadCount}
-                </span>
+                  <span className="flex-1">{label}</span>
+                  {/* Badge de no leídos en la sidebar */}
+                  {isChat && unreadCount > 0 && (
+                    <span className="bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 shrink-0">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
+                  )}
+                </>
               )}
             </NavLink>
           )
