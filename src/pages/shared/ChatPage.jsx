@@ -7,6 +7,7 @@ import Input from '@/components/ui/Input'
 import Button from '@/components/ui/Button'
 import { formatRelative } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
+import toast from 'react-hot-toast'
 
 export default function ChatPage() {
   const { user, role } = useAuthStore()
@@ -109,6 +110,7 @@ export default function ChatPage() {
     if (!newMessage.trim() || !activeConv) return
     setSending(true)
 
+    const tempId = 'temp-' + Date.now()
     const msg = {
       sender_id: user.id,
       receiver_id: activeConv.id,
@@ -116,12 +118,20 @@ export default function ChatPage() {
       created_at: new Date().toISOString(),
     }
 
-    // Optimistic update
-    setMessages((m) => [...m, { ...msg, id: 'temp-' + Date.now() }])
+    // Actualización optimista: el mensaje aparece de inmediato para el remitente
+    setMessages((m) => [...m, { ...msg, id: tempId }])
     setNewMessage('')
 
     const { error } = await supabase.from('messages').insert(msg)
-    if (error) { console.error('Error enviando mensaje:', error); setSending(false); return }
+    if (error) {
+      // Si falla, eliminar el mensaje optimista y restaurar el input
+      console.error('Error enviando mensaje:', error)
+      setMessages((m) => m.filter((x) => x.id !== tempId))
+      setNewMessage(msg.content)
+      toast.error('No se pudo enviar el mensaje. Intenta de nuevo.')
+      setSending(false)
+      return
+    }
 
     // Notificar al destinatario por email (best-effort, no bloquea la UI)
     supabase.auth.getSession().then(({ data: { session: authSession } }) => {
@@ -136,7 +146,7 @@ export default function ChatPage() {
           recipientId: activeConv.id,
           messagePreview: msg.content,
         }),
-      }).catch(() => {}) // Silenciar errores de red
+      }).catch(() => {}) // Silenciar errores de red — notificación es best-effort
     })
 
     setSending(false)

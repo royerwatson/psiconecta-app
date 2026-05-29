@@ -40,7 +40,8 @@ export default function MyAppointments() {
         therapist:profiles!sessions_therapist_id_fkey(
           id, full_name, avatar_url,
           therapist_profiles(specialty)
-        )
+        ),
+        reviews(id)
       `)
       .eq('patient_id', user.id)
       .order('scheduled_at', { ascending: false })

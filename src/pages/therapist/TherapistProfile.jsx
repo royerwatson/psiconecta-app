@@ -20,11 +20,12 @@ const SPECIALTIES = [
 export default function TherapistProfile() {
   const { profile, user, updateProfile } = useAuthStore()
   const navigate = useNavigate()
-  const therapist = profile?.therapist_profiles
+  // therapist_profiles viene como array (relación 1-a-muchos desde profiles)
+  const therapist = profile?.therapist_profiles?.[0]
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({
     bio:       therapist?.bio ?? '',
-    specialty: therapist?.specialty ?? '',
+    specialty: therapist?.specialty ?? SPECIALTIES[0],
     price:     therapist?.price_per_session ?? 0,
   })
   const [saving, setSaving] = useState(false)

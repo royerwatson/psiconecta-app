@@ -79,7 +79,8 @@ export default function TherapistDashboard() {
     }
   }
 
-  const therapist = profile?.therapist_profiles
+  // therapist_profiles viene como array (relación 1-a-muchos desde profiles)
+  const therapist = profile?.therapist_profiles?.[0]
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
@@ -171,7 +172,7 @@ export default function TherapistDashboard() {
                 key={session.id}
                 session={session}
                 onStart={() => navigate(`/video-call/${session.id}`)}
-                onView={() => navigate(`/therapist/session/${session.id}`)}
+                onView={() => navigate(`/therapist/patients/${session.patient?.id}`)}
               />
             ))}
           </div>

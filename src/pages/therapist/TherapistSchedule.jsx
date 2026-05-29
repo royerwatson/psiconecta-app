@@ -91,18 +91,27 @@ export default function TherapistSchedule() {
     fetchWeek()
   }
 
+  /**
+   * Alterna entre "solo días laborales" y "todos los días".
+   * - Si ya están seleccionados los 5 días laborales (sin fines de semana): deselecciona todo.
+   * - Si no: selecciona lunes-viernes y quita sábado-domingo.
+   */
   const toggleNoWeekends = () => {
     const weekdays = [1, 2, 3, 4, 5]
-    const hasWeekend = selectedDays.includes(6) || selectedDays.includes(7)
-    if (hasWeekend) {
-      setSelectedDays(prev => prev.filter(d => d !== 6 && d !== 7))
+    const onlyWeekdays = weekdays.every(d => selectedDays.includes(d)) &&
+      !selectedDays.includes(6) && !selectedDays.includes(7)
+
+    if (onlyWeekdays) {
+      // Ya están solo laborales → deseleccionar todo
+      setSelectedDays([])
     } else {
-      // If all weekdays selected, just remove weekends; otherwise keep current
-      setSelectedDays(prev => prev.filter(d => d !== 6 && d !== 7))
+      // Seleccionar lunes-viernes y quitar sábado-domingo
+      setSelectedDays(weekdays)
     }
   }
 
-  const noWeekendsActive = !selectedDays.includes(6) && !selectedDays.includes(7) && selectedDays.length > 0
+  const noWeekendsActive = [1,2,3,4,5].every(d => selectedDays.includes(d)) &&
+    !selectedDays.includes(6) && !selectedDays.includes(7)
 
   const saveAvailability = async () => {
     if (selectedDays.length === 0) { toast.error('Selecciona al menos un día'); return }
