@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Open Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply bg-warm-50 text-warm-800;
+    min-height: 100dvh;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Lora', Georgia, serif;
+    @apply text-warm-900;
+  }
+
+  /* Safe area para dispositivos iOS con notch */
+  #root {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+@layer components {
+  /* Scrollbar personalizado */
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-warm-100;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary-200 rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary-300;
+  }
+
+  /* Gradiente de fondo suave — marca Psiconecta */
+  .bg-psiconecta {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 50%, #f8fafc 100%);
+  }
+
+  /* Card con sombra calma */
+  .card {
+    @apply bg-white rounded-2xl shadow-card p-6;
+  }
+
+  /* Animación de entrada estándar */
+  .animate-enter {
+    @apply animate-fade-in;
+  }
+
+  /* Estado de carga */
+  .skeleton {
+    @apply bg-warm-200 animate-pulse rounded-xl;
+  }
+
+  /* Línea separadora suave */
+  .divider {
+    @apply border-t border-warm-100 my-4;
+  }
+
+  /* Badge de estado */
+  .status-badge {
+    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+@layer utilities {
+  /* Texto gradiente azul */
+  .text-gradient {
+    @apply bg-gradient-to-r from-primary-700 to-calm-500 bg-clip-text text-transparent;
+  }
+
+  /* Sombra de botón */
+  .btn-shadow {
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  }
+}
