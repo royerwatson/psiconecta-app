@@ -1,3 +1,24 @@
+/**
+ * Página de mensajería interna entre paciente y terapeuta.
+ *
+ * Arquitectura de conversaciones:
+ *   - No existe una tabla "conversations". Las conversaciones se infieren
+ *     agrupando las sesiones compartidas y deduplicando por interlocutor.
+ *   - Cada conversación corresponde a un par (usuario_actual ↔ otro_usuario).
+ *
+ * Flujo de mensajes:
+ *   1. fetchConversations — detecta interlocutores desde la tabla sessions
+ *   2. fetchMessages      — carga hasta 100 mensajes del par activo (orden ASC)
+ *   3. subscribeToMessages — suscripción Supabase Realtime (postgres_changes INSERT)
+ *      · Filtra por receiver_id=eq.${user.id} y valida que sender_id sea el activo
+ *      · Deduplica por ID para evitar duplicados ante reconexiones
+ *   4. sendMessage — actualización optimista: muestra el mensaje con id temp-*
+ *      antes del INSERT; si falla, revierte el estado y restaura el texto
+ *
+ * Parámetros URL:
+ *   ?patient=<id>    → abre automáticamente la conversación con ese paciente
+ *   ?therapist=<id>  → abre automáticamente la conversación con ese terapeuta
+ */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'

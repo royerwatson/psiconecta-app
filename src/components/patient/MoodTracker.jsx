@@ -1,3 +1,26 @@
+/**
+ * Componente de registro y visualización del estado de ánimo del paciente.
+ *
+ * Props:
+ *   moodData — array de registros mood_log en orden cronológico (más antiguo primero).
+ *              El componente padre (PatientDashboard) envía hasta 30 registros.
+ *   userId   — ID del paciente; requerido para el INSERT en mood_logs.
+ *   onSave   — callback invocado con el objeto insertado (tiene el ID real del DB).
+ *
+ * Flujo de 3 pasos:
+ *   1. 'pick'    — el usuario elige un emoji de ánimo (score 1-5)
+ *   2. 'context' — etiquetas opcionales + nota de texto libre
+ *   3. 'done'    — confirmación visual; el estado 'todayLogged' bloquea re-registro
+ *
+ * Deduplicación:
+ *   - Se mantiene solo el último registro por día (byDay map keyed por toDateString).
+ *   - La gráfica muestra los últimos 7 días deduplicados.
+ *   - El historial completo se muestra en orden descendente (más reciente primero).
+ *
+ * Gráfica:
+ *   - Recharts LineChart; eje Y oculto, dominio [1-5].
+ *   - Tooltip muestra el label del ánimo (no el número).
+ */
 import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
 import Card, { CardHeader, CardTitle } from '@/components/ui/Card'

@@ -1,3 +1,16 @@
+/**
+ * Store global de autenticación — Zustand + persistencia en localStorage
+ *
+ * Estado:
+ *   user     — objeto de Supabase Auth (id, email, etc.)
+ *   profile  — registro de la tabla `profiles` (full_name, role, avatar_url, therapist_profiles[])
+ *   role     — 'therapist' | 'client' | 'admin' | null
+ *   loading  — true mientras se inicializa la sesión al arrancar la app
+ *   initialized — false hasta que initialize() termine (evita flashes de login)
+ *
+ * Nota: `therapist_profiles` dentro de `profile` es un ARRAY (relación 1-a-muchos).
+ * Acceder siempre como `profile.therapist_profiles?.[0]` para obtener los datos del terapeuta.
+ */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabase } from '@/lib/supabase'
