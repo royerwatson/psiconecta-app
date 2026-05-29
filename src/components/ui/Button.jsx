@@ -1,3 +1,13 @@
+/**
+ * Componente Button reutilizable.
+ *
+ * Props:
+ *   variant  — 'primary' | 'secondary' | 'ghost' | 'danger' | 'calm' | 'outline'
+ *   size     — 'sm' | 'md' | 'lg' | 'xl' | 'icon'
+ *   loading  — muestra spinner y deshabilita el botón
+ *   fullWidth — width: 100%
+ *   disabled — deshabilita el botón (también se aplica cuando loading=true)
+ */
 import { cn } from '@/lib/utils'
 
 const variants = {

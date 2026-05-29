@@ -1,3 +1,14 @@
+/**
+ * Utilidades compartidas de la app Psiconecta.
+ *
+ * Incluye:
+ *   - Formateo de fechas en español (date-fns)
+ *   - Helper de clases CSS condicionales (cn)
+ *   - Generación de iniciales y colores de avatar
+ *   - Formateo de precios
+ *   - Mapas de estado para sesiones y check-ins
+ *   - Lógica de ventana de tiempo para iniciar videollamada
+ */
 import { format, formatDistanceToNow, isToday, isTomorrow, parseISO } from 'date-fns'
 import { es } from 'date-fns/locale'
 

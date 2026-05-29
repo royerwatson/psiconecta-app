@@ -1,3 +1,17 @@
+/**
+ * Dashboard principal del terapeuta.
+ *
+ * Carga en paralelo:
+ *   - Próximas sesiones (scheduled | in_progress, hasta 5 resultados)
+ *   - Conteo de sesiones para hoy
+ *   - Número total de pacientes atendidos
+ *   - Alertas de IA: check-ins de riesgo alto no notificados (máx. 3)
+ *
+ * Notas de arquitectura:
+ *   - `profile.therapist_profiles` es un ARRAY (relación 1-a-muchos desde profiles).
+ *     Usar siempre `profile.therapist_profiles?.[0]` para los datos del terapeuta.
+ *   - `SessionCard` es un sub-componente interno para la fila de cada sesión.
+ */
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'

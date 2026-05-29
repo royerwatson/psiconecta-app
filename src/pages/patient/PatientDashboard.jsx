@@ -14,6 +14,20 @@ import StarRating from '@/components/ui/StarRating'
 import { Textarea } from '@/components/ui/Input'
 import toast from 'react-hot-toast'
 
+/**
+ * Dashboard principal del paciente.
+ *
+ * Carga en paralelo:
+ *   - Próxima sesión programada (con terapeuta y especialidad)
+ *   - Tareas pendientes (máx. 5)
+ *   - Registros de estado de ánimo de los últimos 30 días
+ *   - Sesiones completadas sin reseña (para prompt de review)
+ *
+ * Estado local clave:
+ *   streak        — racha de días consecutivos con registro de ánimo
+ *   pendingReview — primera sesión completada sin reseña del paciente
+ *   moodData      — array cronológico (más antiguo → más reciente) para MoodTracker
+ */
 export default function PatientDashboard() {
   const { profile, user } = useAuthStore()
   const [nextSession, setNextSession] = useState(null)

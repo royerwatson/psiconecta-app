@@ -1,3 +1,27 @@
+/**
+ * Página de videollamada integrada con Daily.co.
+ *
+ * Flujo según rol:
+ *   Terapeuta:
+ *     1. fetchSession — carga los datos de la sesión por :sessionId
+ *     2. createRoom   — llama a la API de Daily.co para crear una sala con:
+ *          · exp: 2 horas desde ahora
+ *          · max_participants: 2 (sesiones individuales)
+ *     3. Guarda la URL en sessions.video_room_url y cambia status → 'in_progress'
+ *     4. initCall     — carga @daily-co/daily-js de forma lazy y renderiza el iframe
+ *
+ *   Paciente:
+ *     1. fetchSession — si video_room_url aún no existe inicia polling cada 3 s
+ *     2. startPolling — consulta sessions.video_room_url hasta que el terapeuta cree la sala
+ *     3. Al detectar URL válida: para el polling y llama a initCall
+ *
+ * Variables de entorno:
+ *   VITE_DAILY_API_KEY — API Key de Daily.co (solo para crear salas desde el cliente;
+ *                        en producción mover a Edge Function por seguridad)
+ *
+ * Conocido: max_participants=2 impide sesiones grupales a través de esta ruta.
+ * Ver PENDIENTES.md para el plan de soporte a grupos.
+ */
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'

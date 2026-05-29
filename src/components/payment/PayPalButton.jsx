@@ -1,10 +1,30 @@
+/**
+ * PayPalButton — Botón de pago integrado con PayPal SDK.
+ *
+ * Flujo de pago:
+ *   1. createOrder  → llama a Edge Function `create-paypal-order`
+ *                     que crea la sesión en DB con status='payment_pending'
+ *                     y devuelve { orderId, bookingId }
+ *   2. onApprove    → llama a Edge Function `capture-paypal-order`
+ *                     que captura el pago y actualiza la sesión a 'scheduled'
+ *   3. onSuccess    → callback del padre para navegar al paso de éxito
+ *   4. onCancel     → elimina la sesión payment_pending (best-effort)
+ *
+ * Variables de entorno requeridas:
+ *   VITE_PAYPAL_CLIENT_ID — Client ID de la app PayPal (sandbox o producción)
+ *   VITE_SUPABASE_URL     — Para llamar a las Edge Functions
+ *
+ * Props:
+ *   therapistId   — ID del terapeuta
+ *   scheduledAt   — ISO string de la fecha/hora de la sesión
+ *   isUrgent      — boolean, aplica el 30% extra
+ *   priceBase     — precio base de la sesión (USD)
+ *   therapistName — nombre del terapeuta (para el resumen en PayPal)
+ *   onSuccess     — callback cuando el pago es exitoso
+ *   onError       — callback con mensaje de error
+ */
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
-
-/**
- * Carga el SDK de PayPal desde CDN y renderiza los botones de pago.
- * No requiere ningún paquete npm adicional.
- */
 export default function PayPalButton({
   therapistId,
   scheduledAt,
