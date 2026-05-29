@@ -30,6 +30,7 @@ export default function FindTherapist() {
   const [priceMax, setPriceMax] = useState('')
   const [showPriceFilter, setShowPriceFilter] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [fetchError, setFetchError] = useState(null)
   const [selectedTherapist, setSelectedTherapist] = useState(null)
   const [bookingForm, setBookingForm] = useState({ date: '', time: '' })
   const [bookingStep, setBookingStep] = useState('form') // 'form' | 'payment' | 'success'
@@ -39,29 +40,35 @@ export default function FindTherapist() {
 
   const fetchTherapists = async () => {
     setLoading(true)
-    let query = supabase
-      .from('therapist_profiles')
-      .select(`
-        *,
-        profile:profiles!therapist_profiles_user_id_fkey(id, full_name, avatar_url)
-      `)
-      .eq('verified', true)
+    setFetchError(null)
+    try {
+      let query = supabase
+        .from('therapist_profiles')
+        .select(`
+          *,
+          profile:profiles!therapist_profiles_user_id_fkey(id, full_name, avatar_url)
+        `)
+        .eq('verified', true)
 
-    if (specialty !== 'Todas') query = query.eq('specialty', specialty)
-    if (isUrgent) query = query.eq('available_urgent', true)
+      if (specialty !== 'Todas') query = query.eq('specialty', specialty)
+      if (isUrgent) query = query.eq('available_urgent', true)
 
-    const { data, error } = await query.order('rating', { ascending: false })
+      const { data, error: queryError } = await query.order('rating', { ascending: false })
+      if (queryError) throw queryError
 
-    if (error) console.error('fetchTherapists error:', error)
+      const withRating = (data ?? []).map((t) => ({
+        ...t,
+        avg_rating: t.rating ?? 0,
+        review_count: t.review_count ?? 0,
+      }))
 
-    const withRating = (data ?? []).map((t) => ({
-      ...t,
-      avg_rating: t.rating ?? 0,
-      review_count: t.review_count ?? 0,
-    }))
-
-    setTherapists(withRating)
-    setLoading(false)
+      setTherapists(withRating)
+    } catch (err) {
+      console.error('fetchTherapists error:', err)
+      setFetchError('No pudimos cargar los terapeutas. Intenta de nuevo.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const filteredTherapists = therapists.filter((t) => {
@@ -151,6 +158,12 @@ export default function FindTherapist() {
       {/* Lista */}
       {loading ? (
         <div className="flex flex-col gap-3">{[1,2,3].map((i) => <Skeleton key={i} className="h-32" />)}</div>
+      ) : fetchError ? (
+        <Card className="text-center py-10">
+          <div className="text-4xl mb-2">⚠️</div>
+          <p className="text-warm-600 font-medium">{fetchError}</p>
+          <Button size="sm" className="mt-4" onClick={fetchTherapists}>Reintentar</Button>
+        </Card>
       ) : filteredTherapists.length === 0 ? (
         <Card className="text-center py-10">
           <div className="text-4xl mb-2">🔍</div>

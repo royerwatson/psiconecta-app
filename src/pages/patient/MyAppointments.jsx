@@ -19,6 +19,7 @@ export default function MyAppointments() {
   const [sessions, setSessions] = useState([])
   const [tab, setTab] = useState('upcoming')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [reviewModal, setReviewModal] = useState(null)
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' })
   const [changeModal, setChangeModal] = useState(null)
@@ -33,23 +34,29 @@ export default function MyAppointments() {
 
   const fetchSessions = async () => {
     setLoading(true)
-    const { data, error } = await supabase
-      .from('sessions')
-      .select(`
-        *,
-        therapist:profiles!sessions_therapist_id_fkey(
-          id, full_name, avatar_url,
-          therapist_profiles(specialty)
-        ),
-        reviews(id)
-      `)
-      .eq('patient_id', user.id)
-      .order('scheduled_at', { ascending: false })
+    setError(null)
+    try {
+      const { data, error: fetchError } = await supabase
+        .from('sessions')
+        .select(`
+          *,
+          therapist:profiles!sessions_therapist_id_fkey(
+            id, full_name, avatar_url,
+            therapist_profiles(specialty)
+          ),
+          reviews(id)
+        `)
+        .eq('patient_id', user.id)
+        .order('scheduled_at', { ascending: false })
 
-    if (error) console.error('fetchSessions error:', error)
-
-    setSessions(data ?? [])
-    setLoading(false)
+      if (fetchError) throw fetchError
+      setSessions(data ?? [])
+    } catch (err) {
+      console.error('fetchSessions error:', err)
+      setError('No pudimos cargar tus citas. Intenta de nuevo.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const cancelSession = async (session) => {
@@ -173,6 +180,16 @@ export default function MyAppointments() {
   const upcoming = sessions.filter((s) => s.status === 'scheduled')
   const past      = sessions.filter((s) => s.status !== 'scheduled')
   const displayed = tab === 'upcoming' ? upcoming : past
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <span className="text-5xl">⚠️</span>
+        <p className="font-medium text-warm-800">{error}</p>
+        <Button onClick={fetchSessions} size="sm">Reintentar</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
