@@ -101,11 +101,6 @@ export default function PatientDashboard() {
     setSubmittingReview(false)
   }
 
-  const markTaskDone = async (taskId) => {
-    await supabase.from('tasks').update({ completed: true }).eq('id', taskId)
-    setTasks((t) => t.filter((task) => task.id !== taskId))
-  }
-
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       {/* Bienvenida */}
