@@ -15,6 +15,7 @@ export default function TherapistDashboard() {
   const [stats, setStats]       = useState({ today: 0, week: 0, patients: 0, earnings: 0 })
   const [alerts, setAlerts]     = useState([])
   const [loading, setLoading]   = useState(true)
+  const [error, setError]       = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -73,7 +74,8 @@ export default function TherapistDashboard() {
       })
       setAlerts(alertsData ?? [])
     } catch (err) {
-      console.error(err)
+      console.error('Error cargando dashboard terapeuta:', err)
+      setError('No pudimos cargar tu información. Verifica tu conexión.')
     } finally {
       setLoading(false)
     }
@@ -81,6 +83,16 @@ export default function TherapistDashboard() {
 
   // therapist_profiles viene como array (relación 1-a-muchos desde profiles)
   const therapist = profile?.therapist_profiles?.[0]
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <span className="text-5xl">⚠️</span>
+        <p className="font-medium text-warm-800">{error}</p>
+        <Button onClick={fetchData} size="sm">Reintentar</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">

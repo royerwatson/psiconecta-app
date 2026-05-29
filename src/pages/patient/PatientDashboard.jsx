@@ -20,6 +20,7 @@ export default function PatientDashboard() {
   const [tasks, setTasks] = useState([])
   const [moodData, setMoodData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [streak, setStreak] = useState(0)
   const [pendingReview, setPendingReview] = useState(null)
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' })
@@ -54,6 +55,7 @@ export default function PatientDashboard() {
 
   const fetchData = async () => {
     setLoading(true)
+    setError(null)
     try {
       const [{ data: sess }, { data: tsk }, { data: mood }, { data: doneSess }] = await Promise.all([
         supabase.from('sessions').select(`
@@ -82,6 +84,7 @@ export default function PatientDashboard() {
       setPendingReview(unreviewed ?? null)
     } catch (err) {
       console.error('Error cargando dashboard:', err)
+      setError('No pudimos cargar tu información. Verifica tu conexión.')
     } finally {
       setLoading(false)
     }
@@ -107,6 +110,17 @@ export default function PatientDashboard() {
     setPendingReview(null)
     setReviewForm({ rating: 0, comment: '' })
     setSubmittingReview(false)
+  }
+
+  // Pantalla de error — nunca dejar al usuario con pantalla en blanco
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 py-20">
+        <span className="text-5xl">⚠️</span>
+        <p className="font-medium text-warm-800">{error}</p>
+        <Button onClick={fetchData} size="sm">Reintentar</Button>
+      </div>
+    )
   }
 
   return (

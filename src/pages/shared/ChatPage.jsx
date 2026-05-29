@@ -17,6 +17,7 @@ export default function ChatPage() {
   const [messages, setMessages] = useState([])
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [sending, setSending] = useState(false)
   const bottomRef = useRef(null)
   const channelRef = useRef(null)
@@ -42,39 +43,47 @@ export default function ChatPage() {
 
   const fetchConversations = async () => {
     setLoading(true)
-    // Traer todos los usuarios con quienes ha tenido sesiones
-    const field = role === 'therapist' ? 'patient_id' : 'therapist_id'
-    const otherField = role === 'therapist' ? 'therapist_id' : 'patient_id'
-    const profileJoin = role === 'therapist'
-      ? 'patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url)'
-      : 'therapist:profiles!sessions_therapist_id_fkey(id, full_name, avatar_url)'
+    setError(null)
+    try {
+      // Traer todos los usuarios con quienes ha tenido sesiones
+      const otherField = role === 'therapist' ? 'therapist_id' : 'patient_id'
+      const profileJoin = role === 'therapist'
+        ? 'patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url)'
+        : 'therapist:profiles!sessions_therapist_id_fkey(id, full_name, avatar_url)'
 
-    const { data } = await supabase
-      .from('sessions')
-      .select(`id, ${profileJoin}`)
-      .eq(`${otherField}`, user.id)
-      .order('scheduled_at', { ascending: false })
+      const { data, error: fetchError } = await supabase
+        .from('sessions')
+        .select(`id, ${profileJoin}`)
+        .eq(`${otherField}`, user.id)
+        .order('scheduled_at', { ascending: false })
 
-    // Deduplicar
-    const seen = new Set()
-    const convs = []
-    for (const s of (data ?? [])) {
-      const other = role === 'therapist' ? s.patient : s.therapist
-      if (other && !seen.has(other.id)) {
-        seen.add(other.id)
-        convs.push({ id: other.id, ...other })
+      if (fetchError) throw fetchError
+
+      // Deduplicar por ID de la otra persona
+      const seen = new Set()
+      const convs = []
+      for (const s of (data ?? [])) {
+        const other = role === 'therapist' ? s.patient : s.therapist
+        if (other && !seen.has(other.id)) {
+          seen.add(other.id)
+          convs.push({ id: other.id, ...other })
+        }
       }
-    }
-    setConversations(convs)
+      setConversations(convs)
 
-    // Auto-abrir si hay target
-    if (targetId) {
-      const target = convs.find((c) => c.id === targetId)
-      if (target) setActiveConv(target)
-    } else if (convs.length > 0) {
-      setActiveConv(convs[0])
+      // Auto-abrir si hay target en query param
+      if (targetId) {
+        const target = convs.find((c) => c.id === targetId)
+        if (target) setActiveConv(target)
+      } else if (convs.length > 0) {
+        setActiveConv(convs[0])
+      }
+    } catch (err) {
+      console.error('Error cargando conversaciones:', err)
+      setError('No pudimos cargar tus mensajes. Intenta de nuevo.')
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   const fetchMessages = async (conv) => {
@@ -150,6 +159,16 @@ export default function ChatPage() {
     })
 
     setSending(false)
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center gap-4 h-[calc(100dvh-8rem)]">
+        <span className="text-5xl">⚠️</span>
+        <p className="font-medium text-warm-800">{error}</p>
+        <Button onClick={fetchConversations} size="sm">Reintentar</Button>
+      </div>
+    )
   }
 
   return (

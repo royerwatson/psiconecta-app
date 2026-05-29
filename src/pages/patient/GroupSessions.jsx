@@ -16,25 +16,34 @@ export default function GroupSessions() {
   const [myGroups, setMyGroups] = useState([])
   const [tab, setTab] = useState('available')
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => { if (user) fetchGroups() }, [user])
 
   const fetchGroups = async () => {
     setLoading(true)
-    const [{ data: all }, { data: mine }] = await Promise.all([
-      supabase.from('group_sessions').select(`
-        *,
-        therapist:profiles!group_sessions_therapist_id_fkey(id, full_name, avatar_url),
-        participants:group_session_participants(patient_id, profile:profiles!group_session_participants_patient_id_fkey(full_name))
-      `).gte('scheduled_at', new Date().toISOString()).order('scheduled_at'),
-      supabase.from('group_session_participants').select(`
-        group_session:group_sessions(*, therapist:profiles!group_sessions_therapist_id_fkey(id, full_name))
-      `).eq('patient_id', user.id),
-    ])
-    setGroups(all ?? [])
-    setMyGroups((mine ?? []).map(m => m.group_session).filter(Boolean))
-    setLoading(false)
+    setError(null)
+    try {
+      const [{ data: all, error: e1 }, { data: mine, error: e2 }] = await Promise.all([
+        supabase.from('group_sessions').select(`
+          *,
+          therapist:profiles!group_sessions_therapist_id_fkey(id, full_name, avatar_url),
+          participants:group_session_participants(patient_id, profile:profiles!group_session_participants_patient_id_fkey(full_name))
+        `).gte('scheduled_at', new Date().toISOString()).order('scheduled_at'),
+        supabase.from('group_session_participants').select(`
+          group_session:group_sessions(*, therapist:profiles!group_sessions_therapist_id_fkey(id, full_name))
+        `).eq('patient_id', user.id),
+      ])
+      if (e1 || e2) throw e1 ?? e2
+      setGroups(all ?? [])
+      setMyGroups((mine ?? []).map(m => m.group_session).filter(Boolean))
+    } catch (err) {
+      console.error('Error cargando sesiones grupales:', err)
+      setError('No pudimos cargar las sesiones grupales. Intenta de nuevo.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const joinGroup = async (group) => {
@@ -85,6 +94,12 @@ export default function GroupSessions() {
 
       {loading ? (
         <div className="flex flex-col gap-3">{[1,2].map(i => <Skeleton key={i} className="h-40" />)}</div>
+      ) : error ? (
+        <Card className="text-center py-10">
+          <div className="text-4xl mb-2">⚠️</div>
+          <p className="text-warm-600 font-medium">{error}</p>
+          <Button size="sm" className="mt-4" onClick={fetchGroups}>Reintentar</Button>
+        </Card>
       ) : displayed.length === 0 ? (
         <Card className="text-center py-10">
           <div className="text-4xl mb-2">👥</div>
