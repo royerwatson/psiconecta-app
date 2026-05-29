@@ -34,12 +34,27 @@ export default function TherapistProfile() {
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
   const saveProfile = async () => {
+    // Validaciones
+    if (!form.specialty) {
+      toast.error('Selecciona una especialidad')
+      return
+    }
+    if (Number(form.price) < 0) {
+      toast.error('El precio no puede ser negativo')
+      return
+    }
     setSaving(true)
     const { error } = await supabase.from('therapist_profiles').update({
-      bio: form.bio, specialty: form.specialty, price_per_session: Number(form.price),
+      bio:               form.bio.trim(),
+      specialty:         form.specialty,
+      price_per_session: Number(form.price),
     }).eq('user_id', user.id)
-    if (error) { toast.error('Error guardando perfil'); setSaving(false); return }
-    toast.success('Perfil actualizado')
+    if (error) { toast.error('Error al guardar el perfil. Intenta de nuevo.'); setSaving(false); return }
+    // Sincronizar el store local con los nuevos datos
+    updateProfile({
+      therapist_profiles: [{ ...therapist, bio: form.bio.trim(), specialty: form.specialty, price_per_session: Number(form.price) }],
+    })
+    toast.success('Perfil actualizado correctamente')
     setEditing(false)
     setSaving(false)
   }

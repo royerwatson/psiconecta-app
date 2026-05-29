@@ -43,20 +43,38 @@ export default function TherapistProfileView() {
   }
 
   const bookSession = async () => {
-    if (!bookForm.date || !bookForm.time) { toast.error('Selecciona fecha y hora'); return }
-    setBooking(true)
+    // Validaciones
+    if (!bookForm.date || !bookForm.time) {
+      toast.error('Selecciona fecha y hora para tu cita')
+      return
+    }
     const scheduledAt = new Date(`${bookForm.date}T${bookForm.time}`)
+    if (scheduledAt <= new Date()) {
+      toast.error('La fecha y hora deben ser en el futuro')
+      return
+    }
+
+    setBooking(true)
     const hoursUntil = (scheduledAt - new Date()) / 1000 / 60 / 60
-    const isUrgent = hoursUntil < 24
-    const price = (therapist?.price_per_session ?? 0) * (isUrgent ? 1.3 : 1)
+    const isUrgent   = hoursUntil < 24
+    const price      = (therapist?.price_per_session ?? 0) * (isUrgent ? 1.3 : 1)
 
     const { error } = await supabase.from('sessions').insert({
-      therapist_id: therapistId, patient_id: user.id,
-      scheduled_at: scheduledAt.toISOString(), status: 'scheduled',
-      price: Math.round(price), is_urgent: isUrgent, duration: 60,
+      therapist_id: therapistId,
+      patient_id:   user.id,
+      scheduled_at: scheduledAt.toISOString(),
+      status:       'scheduled',
+      price:        Math.round(price),
+      is_urgent:    isUrgent,
+      duration:     60,
     })
-    if (error) { toast.error('Error agendando sesión'); setBooking(false); return }
+    if (error) {
+      toast.error('Error al agendar la sesión. Intenta de nuevo.')
+      setBooking(false)
+      return
+    }
     toast.success('✅ Cita agendada exitosamente')
+    setShowBook(false)
     navigate('/patient/appointments')
   }
 
@@ -124,8 +142,9 @@ export default function TherapistProfileView() {
       )}
 
       {/* Modal agendar */}
-      <Modal isOpen={showBook} onClose={() => setShowBook(false)} title="Agendar sesión">
+      <Modal isOpen={showBook} onClose={() => !booking && setShowBook(false)} title="Agendar sesión">
         <div className="flex flex-col gap-4">
+          {/* Info del terapeuta */}
           <div className="flex items-center gap-3 bg-warm-50 rounded-xl p-3">
             <Avatar name={therapist.profile?.full_name ?? ''} size="md" />
             <div>
@@ -133,12 +152,43 @@ export default function TherapistProfileView() {
               <p className="text-sm text-warm-500">{therapist.specialty}</p>
             </div>
           </div>
+
           <Input label="Fecha" type="date" value={bookForm.date}
             onChange={(e) => setBookForm(f => ({ ...f, date: e.target.value }))}
-            min={new Date().toISOString().split('T')[0]} />
+            min={new Date().toISOString().split('T')[0]}
+            required />
+
           <Input label="Hora" type="time" value={bookForm.time}
-            onChange={(e) => setBookForm(f => ({ ...f, time: e.target.value }))} />
-          <Button fullWidth loading={booking} onClick={bookSession}>Confirmar cita</Button>
+            onChange={(e) => setBookForm(f => ({ ...f, time: e.target.value }))}
+            required />
+
+          {/* Vista previa del precio al seleccionar fecha y hora */}
+          {bookForm.date && bookForm.time && (() => {
+            const dt = new Date(`${bookForm.date}T${bookForm.time}`)
+            const hoursUntil = (dt - new Date()) / 1000 / 60 / 60
+            const urgent = hoursUntil < 24
+            const price  = (therapist?.price_per_session ?? 0) * (urgent ? 1.3 : 1)
+            return (
+              <div className={`rounded-xl p-3 text-sm ${urgent ? 'bg-orange-50 border border-orange-200' : 'bg-primary-50 border border-primary-100'}`}>
+                <p className={`font-medium ${urgent ? 'text-orange-800' : 'text-primary-800'}`}>
+                  {urgent ? '⚡ Cita urgente' : '📅 Cita estándar'}
+                </p>
+                <p className={`text-xs mt-0.5 ${urgent ? 'text-orange-600' : 'text-primary-600'}`}>
+                  Total: <strong>{formatPrice(price)} USD</strong>
+                  {urgent && ' · tarifa urgente +30%'}
+                </p>
+              </div>
+            )
+          })()}
+
+          <Button
+            fullWidth
+            loading={booking}
+            disabled={!bookForm.date || !bookForm.time}
+            onClick={bookSession}
+          >
+            Confirmar cita
+          </Button>
         </div>
       </Modal>
     </div>
