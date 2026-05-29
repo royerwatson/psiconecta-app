@@ -251,7 +251,14 @@ export default function FindTherapist() {
 
                 <Button fullWidth
                   disabled={!bookingForm.date || !bookingForm.time}
-                  onClick={() => setBookingStep('payment')}>
+                  onClick={() => {
+                    const dt = new Date(`${bookingForm.date}T${bookingForm.time}`)
+                    if (dt <= new Date()) {
+                      toast.error('La fecha y hora deben ser en el futuro')
+                      return
+                    }
+                    setBookingStep('payment')
+                  }}>
                   Continuar al pago →
                 </Button>
               </>

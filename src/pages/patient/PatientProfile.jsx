@@ -78,11 +78,22 @@ export default function PatientProfile() {
   const togglePref = (key) => setPrefs(p => ({ ...p, [key]: !p[key] }))
 
   const saveProfile = async () => {
+    if (!form.full_name.trim()) {
+      toast.error('El nombre no puede estar vacío')
+      return
+    }
+    if (form.full_name.trim().length < 3) {
+      toast.error('El nombre debe tener al menos 3 caracteres')
+      return
+    }
     setSaving(true)
-    const { error } = await supabase.from('profiles').update({ full_name: form.full_name }).eq('id', user.id)
-    if (error) { toast.error('Error guardando perfil'); setSaving(false); return }
-    updateProfile({ full_name: form.full_name })
-    toast.success('Perfil actualizado')
+    const { error } = await supabase
+      .from('profiles')
+      .update({ full_name: form.full_name.trim() })
+      .eq('id', user.id)
+    if (error) { toast.error('Error al guardar el perfil. Intenta de nuevo.'); setSaving(false); return }
+    updateProfile({ full_name: form.full_name.trim() })
+    toast.success('Perfil actualizado correctamente')
     setEditing(false)
     setSaving(false)
   }

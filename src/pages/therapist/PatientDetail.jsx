@@ -71,12 +71,17 @@ export default function PatientDetail() {
   }
 
   const saveHistory = async () => {
+    // Validar que al menos un campo tenga contenido
+    if (!historyForm.diagnosis && !historyForm.treatment_plan && !historyForm.session_notes) {
+      toast.error('Completa al menos un campo para guardar la nota clínica')
+      return
+    }
     const { error } = await supabase.from('clinical_history').insert({
-      patient_id: patientId,
+      patient_id:   patientId,
       therapist_id: user.id,
       ...historyForm,
     })
-    if (error) { toast.error('Error guardando historial'); return }
+    if (error) { toast.error('Error guardando nota clínica'); return }
     toast.success('Nota clínica guardada')
     setShowHistoryModal(false)
     setHistoryForm({ diagnosis: '', treatment_plan: '', session_notes: '', risk_level: 'low' })
@@ -84,10 +89,15 @@ export default function PatientDetail() {
   }
 
   const saveTask = async () => {
+    if (!taskForm.title.trim()) {
+      toast.error('El título de la tarea es obligatorio')
+      return
+    }
     const { error } = await supabase.from('tasks').insert({
-      patient_id: patientId,
+      patient_id:   patientId,
       therapist_id: user.id,
       ...taskForm,
+      title: taskForm.title.trim(),
     })
     if (error) { toast.error('Error guardando tarea'); return }
     toast.success('Tarea asignada al paciente')
