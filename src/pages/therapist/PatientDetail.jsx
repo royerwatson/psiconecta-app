@@ -11,6 +11,7 @@ import Input, { Textarea, Select } from '@/components/ui/Input'
 import { formatDate, formatDateTime, formatPrice } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import PatientTestsTab from '@/components/psychometrics/PatientTestsTab'
 
 export default function PatientDetail() {
   const { patientId } = useParams()
@@ -115,9 +116,10 @@ export default function PatientDetail() {
   if (!patient) return <p className="text-center text-warm-500 mt-20">Paciente no encontrado</p>
 
   const TABS = [
-    { id: 'history', label: '📋 Historial clínico', count: history.length },
-    { id: 'tasks',   label: '✅ Tareas',             count: tasks.length   },
-    { id: 'sessions',label: '📅 Sesiones',           count: sessions.length},
+    { id: 'history', label: '📋 Historial clínico', count: history.length  },
+    { id: 'tasks',   label: '✅ Tareas',             count: tasks.length    },
+    { id: 'sessions',label: '📅 Sesiones',           count: sessions.length },
+    { id: 'tests',   label: '🧪 Tests',              count: 0               },
   ]
 
   return (
@@ -246,6 +248,13 @@ export default function PatientDetail() {
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Tests psicométricos */}
+      {tab === 'tests' && (
+        <Card>
+          <PatientTestsTab therapistId={user.id} patientId={patientId} />
+        </Card>
       )}
 
       {/* Modal historial */}
