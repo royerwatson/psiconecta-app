@@ -28,6 +28,7 @@ import TherapistSchedule  from '@/pages/therapist/TherapistSchedule'
 import PatientList        from '@/pages/therapist/PatientList'
 import PatientDetail      from '@/pages/therapist/PatientDetail'
 import TherapistProfile   from '@/pages/therapist/TherapistProfile'
+import TestResultPage     from '@/pages/therapist/TestResultPage'
 
 // Paciente
 import PatientDashboard from '@/pages/patient/PatientDashboard'
@@ -118,6 +119,9 @@ export default function App() {
           } />
           <Route path="/therapist/profile" element={
             <TherapistRoute><TherapistProfile /></TherapistRoute>
+          } />
+          <Route path="/therapist/test-result/:sessionId" element={
+            <TherapistRoute><TestResultPage /></TherapistRoute>
           } />
 
           {/* ── Paciente ── */}
