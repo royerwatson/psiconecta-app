@@ -13,6 +13,7 @@ const therapistNav = [
   { to: '/therapist/dashboard', icon: '🏠', label: 'Inicio'     },
   { to: '/therapist/schedule',  icon: '📅', label: 'Agenda'     },
   { to: '/therapist/patients',  icon: '👥', label: 'Pacientes'  },
+  { to: '/therapist/tests',     icon: '🧪', label: 'Tests'      },
   { to: '/therapist/chat',      icon: '💬', label: 'Mensajes'   },
   { to: '/therapist/profile',   icon: '⚙️', label: 'Perfil'     },
 ]

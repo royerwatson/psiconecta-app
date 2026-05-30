@@ -23,12 +23,13 @@ import ForgotPassword from '@/pages/auth/ForgotPassword'
 import ResetPassword  from '@/pages/auth/ResetPassword'
 
 // Terapeuta
-import TherapistDashboard from '@/pages/therapist/TherapistDashboard'
-import TherapistSchedule  from '@/pages/therapist/TherapistSchedule'
-import PatientList        from '@/pages/therapist/PatientList'
-import PatientDetail      from '@/pages/therapist/PatientDetail'
-import TherapistProfile   from '@/pages/therapist/TherapistProfile'
-import TestResultPage     from '@/pages/therapist/TestResultPage'
+import TherapistDashboard  from '@/pages/therapist/TherapistDashboard'
+import TherapistSchedule   from '@/pages/therapist/TherapistSchedule'
+import PatientList         from '@/pages/therapist/PatientList'
+import PatientDetail       from '@/pages/therapist/PatientDetail'
+import TherapistProfile    from '@/pages/therapist/TherapistProfile'
+import TestResultPage      from '@/pages/therapist/TestResultPage'
+import TherapistTestsPage  from '@/pages/therapist/TherapistTestsPage'
 
 // Paciente
 import PatientDashboard from '@/pages/patient/PatientDashboard'
@@ -124,6 +125,9 @@ export default function App() {
           } />
           <Route path="/therapist/test-result/:sessionId" element={
             <TherapistRoute><TestResultPage /></TherapistRoute>
+          } />
+          <Route path="/therapist/tests" element={
+            <TherapistRoute><TherapistTestsPage /></TherapistRoute>
           } />
 
           {/* ── Paciente ── */}
