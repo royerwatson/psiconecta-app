@@ -16,7 +16,12 @@ const therapistNav = [
   { to: '/therapist/tests',     icon: '🧪', label: 'Tests'      },
   { to: '/therapist/dsm',       icon: '📖', label: 'DSM-5-TR'   },
   { to: '/therapist/cie',       icon: '🏥', label: 'CIE-11'     },
-  { to: '/therapist/chat',      icon: '💬', label: 'Mensajes'   },
+  { to: '/therapist/scales',      icon: '🧮', label: 'Escalas'    },
+  { to: '/therapist/safety-plan', icon: '🛡️', label: 'Plan Crisis' },
+  { to: '/therapist/library',     icon: '📚', label: 'Biblioteca'  },
+  { to: '/therapist/peers',       icon: '👨‍⚕️', label: 'Colegas'    },
+  { to: '/therapist/protocols',   icon: '🗂️', label: 'Protocolos' },
+  { to: '/therapist/chat',        icon: '💬', label: 'Mensajes'   },
   { to: '/therapist/profile',   icon: '⚙️', label: 'Perfil'     },
 ]
 
@@ -164,7 +169,7 @@ export default function Layout() {
 
           {/* ── Sidebar desktop (sticky) ── */}
           <aside className="hidden sm:block w-52 shrink-0">
-            <nav className="sticky top-24 flex flex-col gap-0.5 bg-white rounded-2xl shadow-card border border-warm-100 p-2">
+            <nav className="sticky top-24 flex flex-col gap-0.5 bg-white rounded-2xl shadow-card border border-warm-100 p-2 max-h-[calc(100dvh-7rem)] overflow-y-auto">
               {nav.map(({ to, icon, label }) => {
                 const isChat = label === 'Mensajes'
                 return (
@@ -228,20 +233,20 @@ export default function Layout() {
         className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-warm-100 sm:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="flex items-stretch">
+        <div className="flex items-stretch overflow-x-auto scrollbar-none">
           {nav.map(({ to, icon, label }) => {
             const isChat = label === 'Mensajes'
             return (
               <NavLink key={to} to={to}
                 className={({ isActive }) => cn(
-                  'flex-1 flex flex-col items-center justify-center gap-0.5 py-2.5 text-xs font-medium transition-colors',
+                  'shrink-0 flex flex-col items-center justify-center gap-0.5 py-2 px-2 min-w-[52px] text-[10px] font-medium transition-colors',
                   isActive ? 'text-primary-600' : 'text-warm-400 hover:text-warm-600',
                 )}
               >
                 {({ isActive }) => (
                   <>
                     <span className="relative">
-                      <span className={cn('text-xl transition-transform block', isActive && 'scale-110')}>
+                      <span className={cn('text-lg transition-transform block', isActive && 'scale-110')}>
                         {icon}
                       </span>
                       {isChat && unreadCount > 0 && (
@@ -250,8 +255,8 @@ export default function Layout() {
                         </span>
                       )}
                     </span>
-                    <span>{label}</span>
-                    {isActive && <span className="w-1 h-1 rounded-full bg-primary-500 mt-0.5" />}
+                    <span className="truncate max-w-[48px] text-center">{label}</span>
+                    {isActive && <span className="w-1 h-1 rounded-full bg-primary-500" />}
                   </>
                 )}
               </NavLink>

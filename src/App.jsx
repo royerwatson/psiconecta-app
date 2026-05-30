@@ -32,6 +32,11 @@ import TestResultPage      from '@/pages/therapist/TestResultPage'
 import TherapistTestsPage  from '@/pages/therapist/TherapistTestsPage'
 import DSMReferencePage    from '@/pages/therapist/DSMReferencePage'
 import CIE11ReferencePage  from '@/pages/therapist/CIE11ReferencePage'
+import ClinicalScalesPage  from '@/pages/therapist/ClinicalScalesPage'
+import SafetyPlanPage           from '@/pages/therapist/SafetyPlanPage'
+import TherapeuticLibraryPage  from '@/pages/therapist/TherapeuticLibraryPage'
+import PeerConsultationPage         from '@/pages/therapist/PeerConsultationPage'
+import TherapeuticProtocolsPage    from '@/pages/therapist/TherapeuticProtocolsPage'
 
 // Paciente
 import PatientDashboard from '@/pages/patient/PatientDashboard'
@@ -136,6 +141,21 @@ export default function App() {
           } />
           <Route path="/therapist/cie" element={
             <TherapistRoute><CIE11ReferencePage /></TherapistRoute>
+          } />
+          <Route path="/therapist/scales" element={
+            <TherapistRoute><ClinicalScalesPage /></TherapistRoute>
+          } />
+          <Route path="/therapist/safety-plan" element={
+            <TherapistRoute><SafetyPlanPage /></TherapistRoute>
+          } />
+          <Route path="/therapist/library" element={
+            <TherapistRoute><TherapeuticLibraryPage /></TherapistRoute>
+          } />
+          <Route path="/therapist/peers" element={
+            <TherapistRoute><PeerConsultationPage /></TherapistRoute>
+          } />
+          <Route path="/therapist/protocols" element={
+            <TherapistRoute><TherapeuticProtocolsPage /></TherapistRoute>
           } />
 
           {/* ── Paciente ── */}
