@@ -78,7 +78,7 @@ export default function PatientDashboard() {
         `).eq('patient_id', user.id).in('status', ['scheduled', 'in_progress'])
           .gte('scheduled_at', new Date(Date.now() - 90 * 60 * 1000).toISOString())
           .order('scheduled_at').limit(1),
-        supabase.from('tasks').select('*').eq('patient_id', user.id).eq('completed', false).order('due_date').limit(5),
+        supabase.from('patient_tasks').select('*').eq('patient_id', user.id).is('completed_at', null).order('due_date', { nullsFirst: false }).limit(5),
         // Traer 30 registros para historial y gráfica semanal
         supabase.from('mood_logs').select('*').eq('patient_id', user.id).order('created_at', { ascending: false }).limit(30),
         supabase.from('sessions').select(`
@@ -106,8 +106,11 @@ export default function PatientDashboard() {
   }
 
   const markTaskDone = async (taskId) => {
-    await supabase.from('tasks').update({ completed: true }).eq('id', taskId)
+    await supabase.from('patient_tasks')
+      .update({ status: 'completed', completed_at: new Date().toISOString() })
+      .eq('id', taskId)
     setTasks((t) => t.filter((task) => task.id !== taskId))
+    toast.success('¡Tarea completada! 🎉')
   }
 
   const submitReview = async () => {
@@ -267,25 +270,49 @@ export default function PatientDashboard() {
         <div>
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-serif text-lg font-semibold text-warm-900">
-              Mis actividades pendientes
+              Mis tareas pendientes
             </h2>
-            <Badge variant="warning">{tasks.length}</Badge>
+            <button
+              onClick={() => navigate('/patient/tasks')}
+              className="text-xs text-primary-500 font-medium hover:text-primary-700 transition-colors"
+            >
+              Ver todas →
+            </button>
           </div>
           <div className="flex flex-col gap-2">
             {tasks.map((task) => (
               <Card key={task.id} className="flex items-center gap-3 py-3 px-4">
                 <button
                   onClick={() => markTaskDone(task.id)}
-                  className="w-5 h-5 rounded-full border-2 border-warm-300 hover:border-success hover:bg-green-50 transition-colors shrink-0"
+                  className="w-5 h-5 rounded-full border-2 border-warm-300 hover:border-success hover:bg-green-50 transition-colors shrink-0 flex items-center justify-center"
+                  title="Marcar como completada"
                 />
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-warm-800 truncate">{task.title}</p>
-                  {task.due_date && (
-                    <p className="text-xs text-warm-400 mt-0.5">
-                      Hasta el {new Date(task.due_date).toLocaleDateString('es-MX')}
-                    </p>
-                  )}
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {task.category && (
+                      <span className="text-xs text-warm-400">{task.category}</span>
+                    )}
+                    {task.due_date && (
+                      <span className={`text-xs ${
+                        new Date(task.due_date + 'T23:59:59') < new Date()
+                          ? 'text-red-500 font-medium'
+                          : 'text-warm-400'
+                      }`}>
+                        📅 {new Date(task.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                      </span>
+                    )}
+                  </div>
                 </div>
+                <button
+                  onClick={() => navigate('/patient/tasks')}
+                  className="text-warm-300 hover:text-warm-500 transition-colors"
+                  title="Ver detalle"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
               </Card>
             ))}
           </div>
@@ -299,8 +326,8 @@ export default function PatientDashboard() {
           {[
             { icon: '🔍', label: 'Buscar terapeuta', to: '/patient/find',         color: 'from-primary-50 to-primary-100/50' },
             { icon: '📅', label: 'Mis citas',         to: '/patient/appointments', color: 'from-calm-50 to-calm-100/50'     },
+            { icon: '📋', label: 'Mis tareas',         to: '/patient/tasks',        color: 'from-amber-50 to-amber-100/50'   },
             { icon: '💬', label: 'Mensajes',           to: '/patient/chat',         color: 'from-violet-50 to-violet-100/50' },
-            { icon: '👥', label: 'Sesiones grupales',  to: '/patient/groups',       color: 'from-teal-50 to-teal-100/50'    },
           ].map(({ icon, label, to, color }) => (
             <button key={to} onClick={() => navigate(to)}
               className={`bg-gradient-to-br ${color} border border-warm-100 rounded-2xl p-4 flex flex-col items-center gap-2 hover:shadow-calm transition-all active:scale-95`}>

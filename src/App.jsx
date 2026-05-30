@@ -44,6 +44,7 @@ import FindTherapist    from '@/pages/patient/FindTherapist'
 import MyAppointments   from '@/pages/patient/MyAppointments'
 import GroupSessions    from '@/pages/patient/GroupSessions'
 import PatientProfile   from '@/pages/patient/PatientProfile'
+import MyTasksPage     from '@/pages/patient/MyTasksPage'
 import TherapistProfileView from '@/pages/patient/TherapistProfileView'
 
 // Compartido
@@ -173,6 +174,9 @@ export default function App() {
           } />
           <Route path="/patient/groups" element={
             <ClientRoute><GroupSessions /></ClientRoute>
+          } />
+          <Route path="/patient/tasks" element={
+            <ClientRoute><MyTasksPage /></ClientRoute>
           } />
           <Route path="/patient/chat" element={
             <ClientRoute><ChatPage /></ClientRoute>
