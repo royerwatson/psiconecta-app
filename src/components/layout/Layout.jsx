@@ -15,6 +15,7 @@ const therapistNav = [
   { to: '/therapist/patients',  icon: '👥', label: 'Pacientes'  },
   { to: '/therapist/tests',     icon: '🧪', label: 'Tests'      },
   { to: '/therapist/dsm',       icon: '📖', label: 'DSM-5-TR'   },
+  { to: '/therapist/cie',       icon: '🏥', label: 'CIE-11'     },
   { to: '/therapist/chat',      icon: '💬', label: 'Mensajes'   },
   { to: '/therapist/profile',   icon: '⚙️', label: 'Perfil'     },
 ]

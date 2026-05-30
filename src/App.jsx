@@ -31,6 +31,7 @@ import TherapistProfile    from '@/pages/therapist/TherapistProfile'
 import TestResultPage      from '@/pages/therapist/TestResultPage'
 import TherapistTestsPage  from '@/pages/therapist/TherapistTestsPage'
 import DSMReferencePage    from '@/pages/therapist/DSMReferencePage'
+import CIE11ReferencePage  from '@/pages/therapist/CIE11ReferencePage'
 
 // Paciente
 import PatientDashboard from '@/pages/patient/PatientDashboard'
@@ -132,6 +133,9 @@ export default function App() {
           } />
           <Route path="/therapist/dsm" element={
             <TherapistRoute><DSMReferencePage /></TherapistRoute>
+          } />
+          <Route path="/therapist/cie" element={
+            <TherapistRoute><CIE11ReferencePage /></TherapistRoute>
           } />
 
           {/* ── Paciente ── */}
