@@ -27,6 +27,8 @@ export default function PatientDetail() {
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [showTaskModal, setShowTaskModal] = useState(false)
   const [historyForm, setHistoryForm] = useState({ diagnosis: '', treatment_plan: '', session_notes: '', risk_level: 'low' })
+  const [releasingId, setReleasingId] = useState(null)   // id del entry con panel de liberar abierto
+  const [releasedNotesEdit, setReleasedNotesEdit] = useState('')
   const [taskForm, setTaskForm] = useState({ title: '', description: '', due_date: '' })
 
   useEffect(() => {
@@ -112,6 +114,17 @@ export default function PatientDetail() {
     fetchAll()
   }
 
+  const toggleReleaseNote = async (histId, currentReleased, releasedNotes) => {
+    const next = !currentReleased
+    const { error } = await supabase
+      .from('clinical_history')
+      .update({ is_released: next, released_notes: next ? releasedNotes : null })
+      .eq('id', histId)
+    if (error) { toast.error('No se pudo actualizar'); return }
+    toast.success(next ? 'Notas compartidas con el paciente ✅' : 'Notas retiradas del paciente')
+    fetchAll()
+  }
+
   if (loading) return <div className="flex flex-col gap-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32" />)}</div>
   if (!patient) return <p className="text-center text-warm-500 mt-20">Paciente no encontrado</p>
 
@@ -188,13 +201,65 @@ export default function PatientDetail() {
                   <p className="text-xs text-warm-400">{formatDateTime(h.created_at)}</p>
                   <p className="text-xs text-warm-400">por {h.therapist?.full_name}</p>
                 </div>
-                <Badge variant={h.risk_level === 'high' ? 'danger' : h.risk_level === 'medium' ? 'warning' : 'success'}>
-                  Riesgo {h.risk_level}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={h.risk_level === 'high' ? 'danger' : h.risk_level === 'medium' ? 'warning' : 'success'}>
+                    Riesgo {h.risk_level}
+                  </Badge>
+                  {h.is_released && (
+                    <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">
+                      👁 Visible al paciente
+                    </span>
+                  )}
+                </div>
               </div>
               {h.diagnosis && <div className="mb-2"><p className="text-xs font-semibold text-warm-500 uppercase">Diagnóstico</p><p className="text-sm text-warm-800 mt-1">{h.diagnosis}</p></div>}
               {h.treatment_plan && <div className="mb-2"><p className="text-xs font-semibold text-warm-500 uppercase">Plan de tratamiento</p><p className="text-sm text-warm-800 mt-1">{h.treatment_plan}</p></div>}
               {h.session_notes && <div><p className="text-xs font-semibold text-warm-500 uppercase">Notas de sesión</p><p className="text-sm text-warm-800 mt-1">{h.session_notes}</p></div>}
+
+              {/* Panel liberar notas al paciente */}
+              {releasingId === h.id ? (
+                <div className="mt-4 pt-4 border-t border-warm-100 flex flex-col gap-2">
+                  <p className="text-xs font-semibold text-warm-600">
+                    Resumen amigable para el paciente (opcional)
+                  </p>
+                  <Textarea
+                    value={releasedNotesEdit}
+                    onChange={e => setReleasedNotesEdit(e.target.value)}
+                    rows={3}
+                    placeholder="Escribe un resumen en lenguaje accesible para el paciente. Si lo dejas vacío, se compartirán las notas de sesión originales."
+                  />
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="secondary" onClick={() => setReleasingId(null)}>
+                      Cancelar
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        toggleReleaseNote(h.id, h.is_released, releasedNotesEdit)
+                        setReleasingId(null)
+                      }}
+                    >
+                      {h.is_released ? 'Retirar del paciente' : '✅ Compartir con paciente'}
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="mt-3 pt-3 border-t border-warm-50">
+                  <button
+                    onClick={() => {
+                      setReleasingId(h.id)
+                      setReleasedNotesEdit(h.released_notes ?? '')
+                    }}
+                    className={`text-xs font-medium transition-colors ${
+                      h.is_released
+                        ? 'text-green-600 hover:text-red-500'
+                        : 'text-primary-500 hover:text-primary-700'
+                    }`}
+                  >
+                    {h.is_released ? '👁 Ocultar al paciente' : '🔓 Compartir resumen con el paciente'}
+                  </button>
+                </div>
+              )}
             </Card>
           ))}
           </>
