@@ -15,6 +15,8 @@ export default function AdminTherapists() {
   const [selected, setSelected]     = useState(null)
   const [acting, setActing]         = useState(false)
   const [toggling, setToggling]     = useState(null)
+  const [credentials, setCredentials] = useState([])
+  const [loadingCreds, setLoadingCreds] = useState(false)
 
   useEffect(() => { fetchTherapists() }, [])
 
@@ -63,6 +65,27 @@ export default function AdminTherapists() {
     toast.success(newState ? '✅ Cuenta reactivada' : '🚫 Cuenta desactivada')
     setToggling(null)
     fetchTherapists()
+  }
+
+  const openDetail = async (t) => {
+    setSelected(t)
+    setLoadingCreds(true)
+    setCredentials([])
+    const { data } = await supabase
+      .from('therapist_credentials')
+      .select('id, document_url, status, created_at')
+      .eq('therapist_id', t.user_id)
+      .order('created_at', { ascending: false })
+
+    // Generar URLs firmadas para cada documento
+    const withUrls = await Promise.all((data ?? []).map(async (doc) => {
+      const { data: signed } = await supabase.storage
+        .from('credentials')
+        .createSignedUrl(doc.document_url, 3600)
+      return { ...doc, signedUrl: signed?.signedUrl ?? null }
+    }))
+    setCredentials(withUrls)
+    setLoadingCreds(false)
   }
 
   const updateStatus = async (therapistId, userId, status) => {
@@ -172,7 +195,7 @@ export default function AdminTherapists() {
 
               {t.verification_status === 'pending' && (
                 <div className="flex gap-2 mt-3 pt-3 border-t border-warm-100">
-                  <Button size="sm" onClick={() => setSelected(t)} fullWidth variant="secondary">
+                  <Button size="sm" onClick={() => openDetail(t)} fullWidth variant="secondary">
                     Ver detalles
                   </Button>
                   <Button size="sm" onClick={() => updateStatus(t.id, t.user_id, 'verified')} fullWidth>
@@ -237,6 +260,52 @@ export default function AdminTherapists() {
                 {selected.bio}
               </div>
             )}
+
+            {/* Documentos de credenciales */}
+            <div>
+              <p className="text-xs text-warm-400 font-semibold uppercase tracking-wider mb-2">
+                📄 Documentos subidos
+              </p>
+              {loadingCreds ? (
+                <div className="bg-warm-50 rounded-xl p-4 text-center text-sm text-warm-400 animate-pulse">
+                  Cargando documentos...
+                </div>
+              ) : credentials.length === 0 ? (
+                <div className="bg-warm-50 rounded-xl p-4 text-center text-sm text-warm-400">
+                  No ha subido documentos aún
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {credentials.map((doc, i) => {
+                    const isImage = /\.(jpg|jpeg|png|webp)$/i.test(doc.document_url)
+                    const isPDF   = /\.pdf$/i.test(doc.document_url)
+                    return (
+                      <div key={doc.id} className="bg-warm-50 rounded-xl p-3 flex items-center gap-3">
+                        <span className="text-2xl shrink-0">{isPDF ? '📋' : isImage ? '🖼️' : '📄'}</span>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-warm-700 truncate">
+                            Documento {i + 1}
+                          </p>
+                          <p className="text-xs text-warm-400">
+                            {new Date(doc.created_at).toLocaleDateString('es-DO', { dateStyle: 'medium' })}
+                          </p>
+                        </div>
+                        {doc.signedUrl && (
+                          <a
+                            href={doc.signedUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg bg-primary-50 text-primary-600 border border-primary-200 hover:bg-primary-100 transition-colors"
+                          >
+                            Ver →
+                          </a>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
 
             <div className="flex gap-2">
               <Button fullWidth loading={acting}

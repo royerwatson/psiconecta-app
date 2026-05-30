@@ -2,13 +2,16 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 
 const NAV = [
-  { to: '/admin/dashboard',   icon: '📊', label: 'Dashboard'  },
-  { to: '/admin/ai-alerts',   icon: '🤖', label: 'Alertas IA' },
-  { to: '/admin/therapists',  icon: '🧠', label: 'Terapeutas' },
-  { to: '/admin/patients',    icon: '👥', label: 'Pacientes'  },
-  { to: '/admin/sessions',    icon: '📅', label: 'Sesiones'   },
-  { to: '/admin/groups',      icon: '🫂', label: 'Grupales'   },
-  { to: '/admin/stats',       icon: '📈', label: 'Estadísticas' },
+  { to: '/admin/dashboard',   icon: '📊', label: 'Dashboard'    },
+  { to: '/admin/ai-alerts',   icon: '🤖', label: 'Alertas IA'  },
+  { to: '/admin/therapists',  icon: '🧠', label: 'Terapeutas'  },
+  { to: '/admin/patients',    icon: '👥', label: 'Pacientes'   },
+  { to: '/admin/sessions',    icon: '📅', label: 'Sesiones'    },
+  { to: '/admin/groups',      icon: '🫂', label: 'Grupales'    },
+  { to: '/admin/stats',       icon: '📈', label: 'Estadísticas'},
+  { to: '/admin/financial',   icon: '💰', label: 'Finanzas'    },
+  { to: '/admin/activity',    icon: '📋', label: 'Actividad'   },
+  { to: '/admin/reviews',     icon: '⭐', label: 'Reseñas'     },
 ]
 
 export default function AdminLayout() {
