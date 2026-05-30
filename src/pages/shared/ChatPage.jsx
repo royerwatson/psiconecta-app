@@ -75,7 +75,7 @@ export default function ChatPage() {
       const otherField = role === 'therapist' ? 'therapist_id' : 'patient_id'
       const profileJoin = role === 'therapist'
         ? 'patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url)'
-        : 'therapist:profiles!sessions_therapist_id_fkey(id, full_name, avatar_url)'
+        : 'therapist:profiles!sessions_therapist_id_fkey(id, full_name, avatar_url, therapist_profiles(specialty))'
 
       const { data, error: fetchError } = await supabase
         .from('sessions')
@@ -278,21 +278,35 @@ export default function ChatPage() {
                 Reserva una sesión para comenzar a chatear
               </p>
             </div>
-          ) : conversations.map((conv) => (
-            <button
-              key={conv.id}
-              onClick={() => setActiveConv(conv)}
-              className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-warm-50 transition-colors text-left ${
-                activeConv?.id === conv.id ? 'bg-primary-50 border-r-2 border-primary-400' : ''
-              }`}
-            >
-              <Avatar name={conv.full_name} size="md" />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm text-warm-800 truncate">{conv.full_name}</p>
-                <p className="text-xs text-warm-400">Toca para chatear</p>
-              </div>
-            </button>
-          ))}
+          ) : conversations.map((conv) => {
+            const subtitle = role === 'therapist'
+              ? 'Paciente'
+              : (conv.therapist_profiles?.[0]?.specialty ?? 'Terapeuta')
+            const isActive = activeConv?.id === conv.id
+            return (
+              <button
+                key={conv.id}
+                onClick={() => setActiveConv(conv)}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 hover:bg-warm-50 transition-colors text-left border-b border-warm-50 last:border-b-0 ${
+                  isActive ? 'bg-primary-50 border-r-2 border-r-primary-400' : ''
+                }`}
+              >
+                <div className="relative shrink-0">
+                  <Avatar name={conv.full_name} size="md" />
+                  {isActive && (
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className={`font-medium text-sm truncate ${isActive ? 'text-primary-700' : 'text-warm-800'}`}>
+                    {conv.full_name}
+                  </p>
+                  <p className="text-xs text-warm-400 truncate">{subtitle}</p>
+                </div>
+                {isActive && <span className="w-2 h-2 rounded-full bg-primary-400 shrink-0" />}
+              </button>
+            )
+          })}
         </div>
       </div>
 

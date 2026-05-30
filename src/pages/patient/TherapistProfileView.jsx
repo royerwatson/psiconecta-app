@@ -14,6 +14,24 @@ import { formatDate, formatPrice, formatRelative } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 
+/** Barra de distribución de estrellas (5→1) */
+function RatingBar({ star, count, total }) {
+  const pct = total > 0 ? Math.round((count / total) * 100) : 0
+  return (
+    <div className="flex items-center gap-2 text-xs">
+      <span className="text-warm-500 w-3">{star}</span>
+      <span className="text-amber-400 text-[11px]">★</span>
+      <div className="flex-1 h-1.5 bg-warm-100 rounded-full overflow-hidden">
+        <div
+          className="h-full bg-amber-400 rounded-full transition-all duration-500"
+          style={{ width: `${pct}%` }}
+        />
+      </div>
+      <span className="text-warm-400 w-4 text-right">{count}</span>
+    </div>
+  )
+}
+
 export default function TherapistProfileView() {
   const { therapistId } = useParams()
   const { user } = useAuthStore()
@@ -35,7 +53,7 @@ export default function TherapistProfileView() {
       `).eq('user_id', therapistId).single(),
       supabase.from('reviews').select(`
         *, patient:profiles!reviews_patient_id_fkey(full_name)
-      `).eq('therapist_id', therapistId).order('created_at', { ascending: false }).limit(10),
+      `).eq('therapist_id', therapistId).order('created_at', { ascending: false }).limit(20),
     ])
     setTherapist(t)
     setReviews(r ?? [])
@@ -43,7 +61,6 @@ export default function TherapistProfileView() {
   }
 
   const bookSession = async () => {
-    // Validaciones
     if (!bookForm.date || !bookForm.time) {
       toast.error('Selecciona fecha y hora para tu cita')
       return
@@ -78,108 +95,201 @@ export default function TherapistProfileView() {
     navigate('/patient/appointments')
   }
 
+  // Métricas de reseñas
   const avgRating = reviews.length
     ? reviews.reduce((a, r) => a + r.rating, 0) / reviews.length
     : 0
 
-  if (loading) return <div className="flex flex-col gap-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32" />)}</div>
-  if (!therapist) return <p className="text-center text-warm-500 mt-20">Terapeuta no encontrado</p>
+  const ratingDist = [5, 4, 3, 2, 1].map((star) => ({
+    star,
+    count: reviews.filter((r) => r.rating === star).length,
+  }))
+
+  // Vista previa de precio en el modal
+  const bookingPreview = bookForm.date && bookForm.time ? (() => {
+    const dt = new Date(`${bookForm.date}T${bookForm.time}`)
+    const hoursUntil = (dt - new Date()) / 1000 / 60 / 60
+    const urgent = hoursUntil < 24
+    const price  = (therapist?.price_per_session ?? 0) * (urgent ? 1.3 : 1)
+    return { urgent, price }
+  })() : null
+
+  if (loading) {
+    return (
+      <div className="flex flex-col gap-4 animate-fade-in">
+        <Skeleton className="h-8 w-24" />
+        <Skeleton className="h-48" />
+        <Skeleton className="h-32" />
+        <Skeleton className="h-24" />
+      </div>
+    )
+  }
+  if (!therapist) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-3">
+        <span className="text-5xl">🔍</span>
+        <p className="font-semibold text-warm-700">Terapeuta no encontrado</p>
+        <Button size="sm" variant="ghost" onClick={() => navigate(-1)}>← Volver</Button>
+      </div>
+    )
+  }
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
-      <Button size="sm" variant="ghost" onClick={() => navigate(-1)}>← Volver</Button>
+      <Button size="sm" variant="ghost" onClick={() => navigate(-1)} className="self-start">
+        ← Volver
+      </Button>
 
-      {/* Header */}
+      {/* ── Card principal ── */}
       <Card>
         <div className="flex items-start gap-4">
           <Avatar name={therapist.profile?.full_name ?? ''} size="xl" />
-          <div className="flex-1">
-            <h1 className="font-serif text-xl font-bold text-warm-900">{therapist.profile?.full_name}</h1>
-            <p className="text-warm-500 text-sm">{therapist.specialty}</p>
+          <div className="flex-1 min-w-0">
+            <h1 className="font-serif text-xl font-bold text-warm-900 leading-tight">
+              {therapist.profile?.full_name}
+            </h1>
+            <p className="text-warm-500 text-sm mt-0.5">{therapist.specialty}</p>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <VerificationBadge status={therapist.verified ? 'verified' : 'pending'} />
-              <RatingDisplay value={avgRating} reviews={reviews.length} />
+              {reviews.length > 0 && (
+                <RatingDisplay value={avgRating} reviews={reviews.length} />
+              )}
             </div>
-            <p className="text-primary-600 font-semibold mt-2">{formatPrice(therapist.price_per_session)}/sesión</p>
+            <p className="text-primary-600 font-bold text-lg mt-2">
+              {formatPrice(therapist.price_per_session)}
+              <span className="text-sm font-normal text-warm-500">/sesión</span>
+            </p>
           </div>
         </div>
+
         {therapist.bio && (
           <div className="mt-4 pt-4 border-t border-warm-100">
             <p className="text-sm text-warm-700 leading-relaxed">{therapist.bio}</p>
           </div>
         )}
-        <Button fullWidth className="mt-4" onClick={() => setShowBook(true)}>
-          Agendar sesión
-        </Button>
+
+        {/* Botones de acción */}
+        <div className="grid grid-cols-2 gap-3 mt-4">
+          <Button
+            variant="secondary"
+            onClick={() => navigate(`/patient/chat?therapist=${therapistId}`)}
+          >
+            💬 Escribir
+          </Button>
+          <Button onClick={() => setShowBook(true)}>
+            📅 Agendar
+          </Button>
+        </div>
       </Card>
 
-      {/* Reseñas */}
-      {reviews.length > 0 && (
-        <div>
-          <h2 className="font-serif text-lg font-semibold text-warm-900 mb-3">
-            Reseñas ({reviews.length})
-          </h2>
-          <div className="flex flex-col gap-3">
-            {reviews.map((r) => (
-              <Card key={r.id}>
-                <div className="flex items-start justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <Avatar name={r.patient?.full_name ?? ''} size="sm" />
-                    <p className="text-sm font-medium text-warm-800">{r.patient?.full_name}</p>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    {[1,2,3,4,5].map(s => (
-                      <span key={s} className={s <= r.rating ? 'text-amber-400' : 'text-warm-200'}>★</span>
+      {/* ── Sección de reseñas ── */}
+      <div>
+        <h2 className="font-serif text-lg font-semibold text-warm-900 mb-3">
+          Reseñas {reviews.length > 0 && <span className="text-warm-400 font-normal text-base">({reviews.length})</span>}
+        </h2>
+
+        {reviews.length === 0 ? (
+          <Card className="text-center py-8">
+            <p className="text-3xl mb-2">⭐</p>
+            <p className="font-medium text-warm-700 text-sm">Aún sin reseñas</p>
+            <p className="text-xs text-warm-400 mt-1 max-w-xs mx-auto">
+              Sé el primero en dejar una reseña después de tu sesión
+            </p>
+          </Card>
+        ) : (
+          <>
+            {/* Resumen de rating */}
+            <Card className="mb-3">
+              <div className="flex items-center gap-6">
+                {/* Promedio grande */}
+                <div className="flex flex-col items-center shrink-0">
+                  <span className="text-4xl font-bold text-warm-900">{avgRating.toFixed(1)}</span>
+                  <div className="flex gap-0.5 mt-1">
+                    {[1,2,3,4,5].map((s) => (
+                      <span key={s} className={`text-base ${s <= Math.round(avgRating) ? 'text-amber-400' : 'text-warm-200'}`}>★</span>
                     ))}
                   </div>
+                  <span className="text-xs text-warm-400 mt-1">{reviews.length} reseña{reviews.length !== 1 ? 's' : ''}</span>
                 </div>
-                {r.comment && <p className="text-sm text-warm-600">{r.comment}</p>}
-                <p className="text-xs text-warm-400 mt-2">{formatRelative(r.created_at)}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      )}
+                {/* Barras de distribución */}
+                <div className="flex-1 flex flex-col gap-1.5">
+                  {ratingDist.map(({ star, count }) => (
+                    <RatingBar key={star} star={star} count={count} total={reviews.length} />
+                  ))}
+                </div>
+              </div>
+            </Card>
 
-      {/* Modal agendar */}
+            {/* Lista de reseñas */}
+            <div className="flex flex-col gap-3 stagger-children">
+              {reviews.map((r) => (
+                <Card key={r.id}>
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Avatar name={r.patient?.full_name ?? ''} size="sm" />
+                      <p className="text-sm font-medium text-warm-800">{r.patient?.full_name}</p>
+                    </div>
+                    <div className="flex items-center gap-0.5 shrink-0">
+                      {[1,2,3,4,5].map((s) => (
+                        <span key={s} className={`text-sm ${s <= r.rating ? 'text-amber-400' : 'text-warm-200'}`}>★</span>
+                      ))}
+                    </div>
+                  </div>
+                  {r.comment && (
+                    <p className="text-sm text-warm-600 leading-relaxed">"{r.comment}"</p>
+                  )}
+                  <p className="text-xs text-warm-300 mt-2">{formatRelative(r.created_at)}</p>
+                </Card>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* ── Modal agendar ── */}
       <Modal isOpen={showBook} onClose={() => !booking && setShowBook(false)} title="Agendar sesión">
         <div className="flex flex-col gap-4">
           {/* Info del terapeuta */}
           <div className="flex items-center gap-3 bg-warm-50 rounded-xl p-3">
             <Avatar name={therapist.profile?.full_name ?? ''} size="md" />
             <div>
-              <p className="font-semibold">{therapist.profile?.full_name}</p>
+              <p className="font-semibold text-warm-900">{therapist.profile?.full_name}</p>
               <p className="text-sm text-warm-500">{therapist.specialty}</p>
             </div>
           </div>
 
-          <Input label="Fecha" type="date" value={bookForm.date}
-            onChange={(e) => setBookForm(f => ({ ...f, date: e.target.value }))}
-            min={new Date().toISOString().split('T')[0]}
-            required />
+          <div className="grid grid-cols-2 gap-3">
+            <Input label="Fecha" type="date" value={bookForm.date}
+              onChange={(e) => setBookForm(f => ({ ...f, date: e.target.value }))}
+              min={new Date().toISOString().split('T')[0]}
+              required />
+            <Input label="Hora" type="time" value={bookForm.time}
+              onChange={(e) => setBookForm(f => ({ ...f, time: e.target.value }))}
+              required />
+          </div>
 
-          <Input label="Hora" type="time" value={bookForm.time}
-            onChange={(e) => setBookForm(f => ({ ...f, time: e.target.value }))}
-            required />
-
-          {/* Vista previa del precio al seleccionar fecha y hora */}
-          {bookForm.date && bookForm.time && (() => {
-            const dt = new Date(`${bookForm.date}T${bookForm.time}`)
-            const hoursUntil = (dt - new Date()) / 1000 / 60 / 60
-            const urgent = hoursUntil < 24
-            const price  = (therapist?.price_per_session ?? 0) * (urgent ? 1.3 : 1)
-            return (
-              <div className={`rounded-xl p-3 text-sm ${urgent ? 'bg-orange-50 border border-orange-200' : 'bg-primary-50 border border-primary-100'}`}>
-                <p className={`font-medium ${urgent ? 'text-orange-800' : 'text-primary-800'}`}>
-                  {urgent ? '⚡ Cita urgente' : '📅 Cita estándar'}
+          {/* Vista previa del precio */}
+          {bookingPreview && (
+            <div className={`rounded-xl p-4 text-sm transition-all ${
+              bookingPreview.urgent
+                ? 'bg-orange-50 border border-orange-200'
+                : 'bg-primary-50 border border-primary-100'
+            }`}>
+              <div className="flex items-center justify-between">
+                <p className={`font-semibold ${bookingPreview.urgent ? 'text-orange-800' : 'text-primary-800'}`}>
+                  {bookingPreview.urgent ? '⚡ Cita urgente' : '📅 Cita estándar'}
                 </p>
-                <p className={`text-xs mt-0.5 ${urgent ? 'text-orange-600' : 'text-primary-600'}`}>
-                  Total: <strong>{formatPrice(price)} USD</strong>
-                  {urgent && ' · tarifa urgente +30%'}
+                <p className={`text-lg font-bold ${bookingPreview.urgent ? 'text-orange-700' : 'text-primary-700'}`}>
+                  {formatPrice(bookingPreview.price)}
                 </p>
               </div>
-            )
-          })()}
+              {bookingPreview.urgent && (
+                <p className="text-orange-600 text-xs mt-1">
+                  Tarifa urgente aplicada (+30%) por ser menos de 24 horas
+                </p>
+              )}
+            </div>
+          )}
 
           <Button
             fullWidth
@@ -189,6 +299,10 @@ export default function TherapistProfileView() {
           >
             Confirmar cita
           </Button>
+
+          <p className="text-xs text-warm-400 text-center">
+            Puedes cambiar de terapeuta hasta 48 horas antes de la sesión
+          </p>
         </div>
       </Modal>
     </div>

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
@@ -30,6 +30,22 @@ export default function TherapistProfile() {
   })
   const [saving, setSaving] = useState(false)
   const [uploadingDoc, setUploadingDoc] = useState(false)
+  const [stats, setStats] = useState({ sessions: 0, patients: 0 })
+
+  useEffect(() => {
+    if (user) fetchStats()
+  }, [user])
+
+  const fetchStats = async () => {
+    const { data } = await supabase
+      .from('sessions')
+      .select('id, patient_id, status')
+      .eq('therapist_id', user.id)
+    if (!data) return
+    const completed  = data.filter(s => s.status === 'completed').length
+    const patients   = new Set(data.map(s => s.patient_id)).size
+    setStats({ sessions: completed, patients })
+  }
 
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
@@ -89,18 +105,30 @@ export default function TherapistProfile() {
       <Card>
         <div className="flex items-center gap-4">
           <AvatarUpload size="xl" />
-          <div className="flex-1">
-            <h2 className="font-serif text-xl font-bold text-warm-900">{profile?.full_name}</h2>
-            <p className="text-warm-500 text-sm">{therapist?.specialty}</p>
+          <div className="flex-1 min-w-0">
+            <h2 className="font-serif text-xl font-bold text-warm-900 leading-tight">{profile?.full_name}</h2>
+            <p className="text-warm-500 text-sm mt-0.5">{therapist?.specialty}</p>
             {editing && (
-              <p className="text-xs text-warm-400 mt-1 italic">El nombre no se puede modificar por razones de profesionalismo.</p>
+              <p className="text-xs text-warm-400 mt-1 italic">El nombre se gestiona a través del administrador.</p>
             )}
-            <div className="flex items-center gap-2 mt-2">
+            <div className="flex items-center gap-2 mt-2 flex-wrap">
               <VerificationBadge status={therapist?.verification_status ?? 'pending'} />
               {therapist?.rating > 0 && (
                 <RatingDisplay value={therapist.rating} reviews={therapist.review_count ?? 0} />
               )}
             </div>
+          </div>
+        </div>
+
+        {/* Stats rápidas */}
+        <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-warm-100">
+          <div className="bg-primary-50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-primary-600">{stats.sessions}</p>
+            <p className="text-xs text-primary-500 mt-0.5">Sesiones completadas</p>
+          </div>
+          <div className="bg-calm-50 rounded-xl p-3 text-center">
+            <p className="text-2xl font-bold text-calm-600">{stats.patients}</p>
+            <p className="text-xs text-calm-500 mt-0.5">Pacientes atendidos</p>
           </div>
         </div>
       </Card>
