@@ -70,12 +70,15 @@ export default function AICheckin({ userId }) {
     const endOfDay   = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
     const { data } = await supabase
       .from('ai_checkins')
-      .select('id')
+      .select('id, risk_level, ai_message')
       .eq('patient_id', userId)
       .gte('created_at', startOfDay)
       .lt('created_at', endOfDay)
       .limit(1)
-    if (data?.length > 0) setCheckedToday(true)
+    if (data?.length > 0) {
+      setCheckedToday(true)
+      if (data[0].ai_message) setResult({ risk_level: data[0].risk_level, message: data[0].ai_message })
+    }
   }
 
   const selectAnswer = async (answer) => {
@@ -122,13 +125,31 @@ export default function AICheckin({ userId }) {
   }
 
   if (checkedToday) {
+    const rl = result?.risk_level ?? 'low'
     return (
-      <div className="bg-green-50 border border-green-100 rounded-2xl p-4 flex items-center gap-3">
-        <span className="text-2xl">✅</span>
-        <div>
-          <p className="font-medium text-green-800 text-sm">Check-in diario completado</p>
-          <p className="text-xs text-green-600 mt-0.5">Tu terapeuta ha recibido tu estado de hoy</p>
+      <div className={`border rounded-2xl p-4 ${
+        rl === 'high'   ? 'bg-red-50 border-red-100' :
+        rl === 'medium' ? 'bg-amber-50 border-amber-100' :
+                          'bg-green-50 border-green-100'
+      }`}>
+        <div className="flex items-center gap-2 mb-1">
+          <span className="text-lg">
+            {rl === 'high' ? '🔴' : rl === 'medium' ? '🟡' : '✅'}
+          </span>
+          <p className={`font-semibold text-sm ${
+            rl === 'high' ? 'text-red-800' : rl === 'medium' ? 'text-amber-800' : 'text-green-800'
+          }`}>
+            Check-in diario completado
+          </p>
         </div>
+        {result?.message && (
+          <p className={`text-xs mt-1 leading-relaxed ${
+            rl === 'high' ? 'text-red-700' : rl === 'medium' ? 'text-amber-700' : 'text-green-700'
+          }`}>
+            {result.message}
+          </p>
+        )}
+        <p className="text-xs text-warm-400 mt-1.5">Tu terapeuta recibe tu estado diariamente</p>
       </div>
     )
   }
