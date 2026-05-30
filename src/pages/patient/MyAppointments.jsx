@@ -219,19 +219,30 @@ export default function MyAppointments() {
       {loading ? (
         <div className="flex flex-col gap-3">{[1,2,3].map(i => <Skeleton key={i} className="h-28" />)}</div>
       ) : displayed.length === 0 ? (
-        <Card className="text-center py-10">
-          <div className="text-4xl mb-2">{tab === 'upcoming' ? '📅' : '📖'}</div>
-          <p className="text-warm-600 font-medium">
-            {tab === 'upcoming' ? 'No tienes citas próximas' : 'No hay sesiones anteriores'}
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4 text-3xl">
+            {tab === 'upcoming' ? '📅' : '📖'}
+          </div>
+          <p className="font-semibold text-warm-800 mb-1">
+            {tab === 'upcoming' ? 'Sin citas próximas' : 'Sin sesiones anteriores'}
+          </p>
+          <p className="text-sm text-warm-400 max-w-xs leading-relaxed">
+            {tab === 'upcoming'
+              ? 'Encuentra un terapeuta y agenda tu primera sesión cuando quieras.'
+              : 'Aquí verás el historial de todas tus sesiones completadas.'
+            }
           </p>
           {tab === 'upcoming' && (
-            <Button size="sm" className="mt-4" onClick={() => navigate('/patient/find')}>
-              Agendar sesión
-            </Button>
+            <button
+              onClick={() => navigate('/patient/find')}
+              className="mt-5 px-5 py-2.5 rounded-xl bg-primary-500 text-white text-sm font-semibold hover:bg-primary-600 active:scale-95 transition-all"
+            >
+              Buscar terapeuta
+            </button>
           )}
-        </Card>
+        </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 stagger-children">
           {displayed.map((session) => {
             const canVideo = canStartVideo(session.scheduled_at)
             const hasReview = (session.reviews ?? []).length > 0

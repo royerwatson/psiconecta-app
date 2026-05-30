@@ -43,6 +43,7 @@ export default function PatientProfile() {
   // Modales
   const [notifModal, setNotifModal]   = useState(false)
   const [privModal, setPrivModal]     = useState(false)
+  const [showLogout, setShowLogout]   = useState(false)
 
   // Preferencias de notificaciones
   const [prefs, setPrefs]             = useState(DEFAULT_PREFS)
@@ -150,9 +151,24 @@ export default function PatientProfile() {
         </div>
       </Card>
 
-      <Button variant="danger" fullWidth onClick={() => { signOut(); navigate('/login') }}>
+      <Button variant="danger" fullWidth onClick={() => setShowLogout(true)}>
         Cerrar sesión
       </Button>
+
+      {/* ── Modal confirmación de salida ── */}
+      <Modal isOpen={showLogout} onClose={() => setShowLogout(false)} title="">
+        <div className="flex flex-col items-center gap-4 py-2">
+          <span className="text-5xl">👋</span>
+          <div className="text-center">
+            <p className="font-serif text-lg font-semibold text-warm-900">¿Cerrar sesión?</p>
+            <p className="text-sm text-warm-500 mt-1">Puedes volver cuando quieras.</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 w-full mt-2">
+            <Button variant="secondary" fullWidth onClick={() => setShowLogout(false)}>Cancelar</Button>
+            <Button variant="danger" fullWidth onClick={() => { signOut(); navigate('/login') }}>Salir</Button>
+          </div>
+        </div>
+      </Modal>
 
       {/* ── Modal notificaciones ── */}
       <Modal isOpen={notifModal} onClose={() => setNotifModal(false)} title="🔔 Notificaciones">
