@@ -21,7 +21,8 @@ export default function PatientDetail() {
   const [sessions, setSessions] = useState([])
   const [history, setHistory] = useState([])
   const [tasks, setTasks] = useState([])
-  const [tab, setTab] = useState('history') // 'history' | 'tasks' | 'sessions'
+  const [checkins, setCheckins] = useState([])
+  const [tab, setTab] = useState('history') // 'history' | 'tasks' | 'sessions' | 'checkins'
   const [loading, setLoading] = useState(true)
   const [hasAccess, setHasAccess] = useState(false) // tiene sesión con este paciente
   const [showHistoryModal, setShowHistoryModal] = useState(false)
@@ -49,10 +50,11 @@ export default function PatientDetail() {
     const access = (mySession ?? []).length > 0
     setHasAccess(access)
 
-    const [{ data: pat }, { data: sess }, { data: tsk }] = await Promise.all([
+    const [{ data: pat }, { data: sess }, { data: tsk }, { data: chk }] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', patientId).single(),
       supabase.from('sessions').select('*').eq('patient_id', patientId).order('scheduled_at', { ascending: false }).limit(10),
       supabase.from('tasks').select('*').eq('patient_id', patientId).eq('therapist_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('ai_checkins').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(30),
     ])
 
     // El historial clínico solo se carga si hay acceso
@@ -70,6 +72,7 @@ export default function PatientDetail() {
     setSessions(sess ?? [])
     setHistory(hist)
     setTasks(tsk ?? [])
+    setCheckins(chk ?? [])
     setLoading(false)
   }
 
@@ -114,6 +117,12 @@ export default function PatientDetail() {
     fetchAll()
   }
 
+  const markCheckinReviewed = async (checkinId) => {
+    await supabase.from('ai_checkins').update({ notified: true }).eq('id', checkinId)
+    setCheckins(prev => prev.map(c => c.id === checkinId ? { ...c, notified: true } : c))
+    toast.success('Alerta marcada como revisada')
+  }
+
   const toggleReleaseNote = async (histId, currentReleased, releasedNotes) => {
     const next = !currentReleased
     const { error } = await supabase
@@ -128,11 +137,14 @@ export default function PatientDetail() {
   if (loading) return <div className="flex flex-col gap-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32" />)}</div>
   if (!patient) return <p className="text-center text-warm-500 mt-20">Paciente no encontrado</p>
 
+  const unreadCheckins = checkins.filter(c => c.risk_level === 'high' && !c.notified).length
+
   const TABS = [
-    { id: 'history', label: '📋 Historial clínico', count: history.length  },
-    { id: 'tasks',   label: '✅ Tareas',             count: tasks.length    },
-    { id: 'sessions',label: '📅 Sesiones',           count: sessions.length },
-    { id: 'tests',   label: '🧪 Tests',              count: 0               },
+    { id: 'history',  label: '📋 Historial clínico', count: history.length   },
+    { id: 'tasks',    label: '✅ Tareas',             count: tasks.length     },
+    { id: 'sessions', label: '📅 Sesiones',           count: sessions.length  },
+    { id: 'checkins', label: '🤖 Check-ins',          count: unreadCheckins, alert: unreadCheckins > 0 },
+    { id: 'tests',    label: '🧪 Tests',              count: 0                },
   ]
 
   return (
@@ -168,6 +180,7 @@ export default function PatientDetail() {
             }`}>
             {t.label}
             {t.count > 0 && <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+              t.alert ? 'bg-red-500 text-white' :
               tab === t.id ? 'bg-primary-100 text-primary-600' : 'bg-warm-200 text-warm-500'
             }`}>{t.count}</span>}
           </button>
@@ -312,6 +325,72 @@ export default function PatientDetail() {
               </Badge>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Check-ins de IA */}
+      {tab === 'checkins' && (
+        <div className="flex flex-col gap-3">
+          {checkins.length === 0 ? (
+            <Card className="text-center py-8">
+              <p className="text-3xl mb-2">🤖</p>
+              <p className="text-warm-500 text-sm">Este paciente aún no ha completado check-ins diarios</p>
+            </Card>
+          ) : checkins.map((c) => {
+            const isHigh   = c.risk_level === 'high'
+            const isMedium = c.risk_level === 'medium'
+            const unread   = isHigh && !c.notified
+            return (
+              <Card key={c.id} className={unread ? 'border-red-200 bg-red-50/30' : ''}>
+                <div className="flex items-start justify-between gap-3 mb-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+                      isHigh   ? 'bg-red-100 text-red-700 border border-red-200' :
+                      isMedium ? 'bg-amber-100 text-amber-700 border border-amber-200' :
+                                 'bg-green-100 text-green-700 border border-green-200'
+                    }`}>
+                      {isHigh ? '🔴 Riesgo alto' : isMedium ? '🟡 Riesgo medio' : '🟢 Sin riesgo'}
+                    </span>
+                    {unread && (
+                      <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-semibold">
+                        ⚠️ Sin revisar
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-warm-400 shrink-0">
+                    {new Date(c.created_at).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+
+                {c.ai_message && (
+                  <p className="text-sm text-warm-700 mb-2 italic">"{c.ai_message}"</p>
+                )}
+
+                {c.questions_answers && (
+                  <details className="mt-1">
+                    <summary className="text-xs text-warm-400 cursor-pointer hover:text-warm-600 transition-colors">
+                      Ver respuestas completas
+                    </summary>
+                    <div className="mt-2 bg-warm-50 rounded-xl p-3 text-xs text-warm-600 leading-relaxed whitespace-pre-line">
+                      {c.questions_answers}
+                    </div>
+                  </details>
+                )}
+
+                {unread && (
+                  <div className="mt-3 pt-3 border-t border-red-100">
+                    <Button
+                      size="sm"
+                      variant="secondary"
+                      onClick={() => markCheckinReviewed(c.id)}
+                    >
+                      ✅ Marcar como revisado
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            )
+          })}
         </div>
       )}
 
