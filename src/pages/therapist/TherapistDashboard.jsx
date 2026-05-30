@@ -25,11 +25,12 @@ import { Skeleton } from '@/components/ui/Spinner'
 
 export default function TherapistDashboard() {
   const { profile, user } = useAuthStore()
-  const [sessions, setSessions] = useState([])
-  const [stats, setStats]       = useState({ today: 0, week: 0, patients: 0, earnings: 0 })
-  const [alerts, setAlerts]     = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [error, setError]       = useState(null)
+  const [sessions, setSessions]     = useState([])
+  const [stats, setStats]           = useState({ today: 0, week: 0, patients: 0, earnings: 0 })
+  const [alerts, setAlerts]         = useState([])
+  const [expandedAlert, setExpandedAlert] = useState(null)
+  const [loading, setLoading]       = useState(true)
+  const [error, setError]           = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -69,15 +70,14 @@ export default function TherapistDashboard() {
         .eq('therapist_id', user.id)
         .eq('status', 'completed')
 
-      // Alertas de IA (check-ins de riesgo)
+      // Alertas de IA (check-ins de riesgo alto y medio)
       const { data: alertsData } = await supabase
         .from('ai_checkins')
-        .select('*, patient:profiles!ai_checkins_patient_id_fkey(full_name)')
+        .select('*, patient:profiles!ai_checkins_patient_id_fkey(id, full_name, avatar_url)')
         .eq('therapist_id', user.id)
-        .eq('risk_level', 'high')
-        .eq('notified', false)
+        .in('risk_level', ['high', 'medium'])
         .order('created_at', { ascending: false })
-        .limit(3)
+        .limit(5)
 
       setSessions(sessionsData ?? [])
       setStats({
@@ -155,23 +155,103 @@ export default function TherapistDashboard() {
         </div>
       )}
 
-      {/* Alertas IA de riesgo */}
+      {/* Check-ins IA de pacientes */}
       {alerts.length > 0 && (
-        <div className="bg-red-50 border border-red-200 rounded-2xl p-4">
-          <p className="font-semibold text-red-800 text-sm mb-3 flex items-center gap-2">
-            🚨 Alertas de bienestar — Revisión urgente
-          </p>
-          {alerts.map((alert) => (
-            <div key={alert.id} className="flex items-center justify-between py-2 border-t border-red-100 first:border-0">
-              <div className="flex items-center gap-2">
-                <Avatar name={alert.patient?.full_name ?? ''} size="xs" />
-                <span className="text-sm text-red-700 font-medium">{alert.patient?.full_name}</span>
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between">
+            <h2 className="font-serif text-lg font-semibold text-warm-900">
+              🤖 Check-ins de bienestar
+            </h2>
+            <span className="text-xs text-warm-400">Últimas respuestas de tus pacientes</span>
+          </div>
+
+          {alerts.map((alert) => {
+            const isHigh   = alert.risk_level === 'high'
+            const isExp    = expandedAlert === alert.id
+            const qa       = (alert.questions_answers ?? '')
+              .split('\n').filter(Boolean)
+              .map(line => { const i = line.indexOf(':'); return i === -1 ? { q: line, a: '' } : { q: line.slice(0, i).trim(), a: line.slice(i + 1).trim() } })
+
+            return (
+              <div key={alert.id}
+                className={`rounded-2xl border ${
+                  isHigh
+                    ? 'bg-red-50 border-red-200'
+                    : 'bg-amber-50 border-amber-200'
+                }`}>
+                {/* Cabecera */}
+                <div className="p-4">
+                  <div className="flex items-start gap-3">
+                    <Avatar name={alert.patient?.full_name ?? ''} size="md" />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2 flex-wrap">
+                        <div>
+                          <p className="font-semibold text-warm-900">{alert.patient?.full_name}</p>
+                          <p className="text-xs text-warm-500 mt-0.5">
+                            {new Date(alert.created_at).toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' })}
+                            {' — '}
+                            {new Date(alert.created_at).toLocaleTimeString('es-DO', { timeStyle: 'short' })}
+                          </p>
+                        </div>
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${
+                          isHigh
+                            ? 'bg-red-100 text-red-700'
+                            : 'bg-amber-100 text-amber-700'
+                        }`}>
+                          {isHigh ? '🔴 Riesgo alto' : '🟡 Riesgo medio'}
+                        </span>
+                      </div>
+
+                      {/* Mensaje IA */}
+                      {alert.ai_message && (
+                        <p className={`text-sm mt-2 leading-relaxed ${isHigh ? 'text-red-800' : 'text-amber-800'}`}>
+                          💬 {alert.ai_message}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Acciones */}
+                  <div className="flex gap-2 mt-3 pt-3 border-t border-current/10">
+                    <button
+                      onClick={() => setExpandedAlert(isExp ? null : alert.id)}
+                      className={`flex-1 text-xs font-medium py-2 rounded-xl border transition-colors ${
+                        isHigh
+                          ? 'border-red-200 text-red-700 hover:bg-red-100'
+                          : 'border-amber-200 text-amber-700 hover:bg-amber-100'
+                      }`}
+                    >
+                      {isExp ? '▲ Ocultar respuestas' : `▼ Ver ${qa.length} respuestas`}
+                    </button>
+                    <Button
+                      size="sm"
+                      variant={isHigh ? 'danger' : 'secondary'}
+                      onClick={() => navigate(`/therapist/patients/${alert.patient?.id}`)}
+                    >
+                      Ver paciente →
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Respuestas expandidas */}
+                {isExp && qa.length > 0 && (
+                  <div className={`border-t px-4 pb-4 pt-3 ${isHigh ? 'border-red-200 bg-red-50/50' : 'border-amber-200 bg-amber-50/50'}`}>
+                    <p className="text-xs font-semibold opacity-60 uppercase tracking-wider mb-3">
+                      Respuestas del paciente
+                    </p>
+                    <div className="flex flex-col gap-2">
+                      {qa.map((item, idx) => (
+                        <div key={idx} className="bg-white/70 rounded-xl px-3 py-2.5">
+                          <p className="text-xs text-warm-500 mb-0.5">{item.q}</p>
+                          <p className="text-sm font-semibold text-warm-800">{item.a}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
-              <Button size="sm" variant="danger" onClick={() => navigate(`/therapist/patients/${alert.patient_id}`)}>
-                Ver paciente
-              </Button>
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 
