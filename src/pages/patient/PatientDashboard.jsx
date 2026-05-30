@@ -80,7 +80,7 @@ export default function PatientDashboard() {
           .order('scheduled_at').limit(1),
         supabase.from('patient_tasks').select('*').eq('patient_id', user.id).is('completed_at', null).order('due_date', { nullsFirst: false }).limit(5),
         // Traer 30 registros para historial y gráfica semanal
-        supabase.from('mood_logs').select('*').eq('patient_id', user.id).order('created_at', { ascending: false }).limit(30),
+        supabase.from('mood_entries').select('mood, created_at').eq('patient_id', user.id).order('created_at', { ascending: false }).limit(30),
         supabase.from('sessions').select(`
           id, scheduled_at,
           therapist:profiles!sessions_therapist_id_fkey(id, full_name),
@@ -239,11 +239,7 @@ export default function PatientDashboard() {
       )}
 
       {/* Mood tracker */}
-      {/* MoodTracker: recibe hasta 30 registros para historial y gráfica semanal */}
-      <MoodTracker moodData={moodData} userId={user?.id} onSave={(entry) => {
-        // Agregar el nuevo registro al final (orden cronológico)
-        setMoodData((d) => [...d, entry])
-      }} />
+      <MoodTracker userId={user?.id} />
 
       {/* Tests psicométricos pendientes */}
       <PendingTestsSection userId={user?.id} />

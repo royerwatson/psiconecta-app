@@ -6,6 +6,7 @@ import Avatar from '@/components/ui/Avatar'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import OnboardingSlides from '@/components/onboarding/OnboardingSlides'
+import NotificationBell from '@/components/ui/NotificationBell'
 
 // ─── Navegación ───────────────────────────────────────────────────────────────
 
@@ -132,6 +133,11 @@ export default function Layout() {
 
           {/* Derecha: campana alertas + usuario */}
           <div className="flex items-center gap-2">
+
+            {/* Campana notificaciones — solo paciente */}
+            {role === 'patient' && (
+              <NotificationBell userId={user?.id} />
+            )}
 
             {/* Campana alertas IA — solo terapeuta */}
             {role === 'therapist' && alertCount > 0 && (
