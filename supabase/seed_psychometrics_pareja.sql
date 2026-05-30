@@ -17,7 +17,7 @@ WITH t AS (
     'das7',
     'DAS-7 — Escala de Ajuste Diádico (Forma Breve)',
     'Versión breve de 7 ítems de la Escala de Ajuste Diádico. Evalúa la satisfacción, cohesión y acuerdo en la relación de pareja. Punto de corte ≤ 21 sugiere relación en riesgo o insatisfacción significativa.',
-    'pareja', 'public_domain', 1,
+    'relacional', 'public_domain', 1,
     'Spanier GB (1976) — Forma breve: Sharpley & Cross (1982)',
     18, 5, '["self"]'::jsonb,
     14, 3.0, ARRAY['clinica','pareja']
@@ -84,7 +84,7 @@ WITH t AS (
     'ras',
     'RAS — Escala de Evaluación de la Relación',
     'Medida breve de 7 ítems de la satisfacción global con la relación de pareja. Simple, rápida y con buena validez convergente. Puntuación media por ítem: < 3.0 sugiere insatisfacción.',
-    'pareja', 'public_domain', 1,
+    'relacional', 'public_domain', 1,
     'Hendrick SS (1988)',
     16, 3, '["self"]'::jsonb,
     14, 0.5, ARRAY['clinica','pareja']
@@ -149,7 +149,7 @@ WITH t AS (
     'csi16',
     'CSI-16 — Índice de Satisfacción de Pareja (16 ítems)',
     'Instrumento de 16 ítems con formato de respuesta mixto que mide satisfacción marital/de pareja. Supera psicométricamente a instrumentos clásicos como el DAS. Punto de corte distress: ≤ 51.5.',
-    'pareja', 'public_domain', 1,
+    'relacional', 'public_domain', 1,
     'Funk JL & Rogge RD (2007)',
     18, 6, '["self"]'::jsonb,
     14, 5.0, ARRAY['clinica','pareja']
@@ -224,7 +224,7 @@ WITH t AS (
     'csi4',
     'CSI-4 — Índice de Satisfacción de Pareja (4 ítems)',
     'Versión ultracorta del CSI. 4 ítems de alta carga factorial para cribado rápido de distress relacional en sesión. Punto de corte distress: ≤ 13.',
-    'pareja', 'public_domain', 1,
+    'relacional', 'public_domain', 1,
     'Funk JL & Rogge RD (2007)',
     18, 2, '["self"]'::jsonb,
     7, 2.0, ARRAY['clinica','pareja']
@@ -287,7 +287,7 @@ WITH t AS (
     'faces-iv',
     'FACES-IV — Escalas de Adaptabilidad y Cohesión Familiar IV',
     'Basado en el Modelo Circumplex de Olson. Evalúa 6 dimensiones del funcionamiento familiar: cohesión equilibrada, sobreinvolucrada y desvinculada; flexibilidad equilibrada, rígida y caótica. Incluye escalas de comunicación y satisfacción familiar.',
-    'familia', 'restricted', 4,
+    'relacional', 'restricted', 4,
     'Olson DH (2011)',
     12, 15, '["self","parent"]'::jsonb,
     30, 5.0, ARRAY['clinica','pareja','infantil']
@@ -419,7 +419,7 @@ WITH t AS (
     'fad-gfs',
     'FAD-GFS — Escala de Funcionamiento General Familiar',
     'Subescala de Funcionamiento General del Family Assessment Device de 12 ítems. Evalúa el funcionamiento familiar global. Punto de corte de disfunción: puntuación media > 2.0.',
-    'familia', 'public_domain', 1,
+    'relacional', 'public_domain', 1,
     'Epstein NB, Baldwin LM, Bishop DS (1983)',
     12, 4, '["self","parent"]'::jsonb,
     14, 0.3, ARRAY['clinica','pareja','infantil']
@@ -489,7 +489,7 @@ WITH t AS (
     'cts2',
     'CTS-2 Breve — Escala de Tácticas de Conflicto Revisada (Forma Breve)',
     'Versión breve del CTS-2. Evalúa tácticas utilizadas durante conflictos de pareja: negociación, agresión psicológica, violencia física, lesiones corporales y coerción sexual. Cualquier ítem de violencia física o sexual debe generar alerta prioritaria al terapeuta.',
-    'pareja', 'restricted', 2,
+    'relacional', 'restricted', 2,
     'Straus MA, Hamby SL, Boney-McCoy S, Sugarman DB (1996)',
     18, 8, '["self"]'::jsonb,
     30, 1.0, ARRAY['clinica','pareja']

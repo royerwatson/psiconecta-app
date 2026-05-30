@@ -300,16 +300,16 @@ s AS (
 i AS (
   INSERT INTO items (section_id, order_index, text, item_code, item_type, subscale, alert_threshold)
   VALUES
-    ((SELECT id FROM s), 0,  '¿Alguna de tus relaciones ha sido tan inestable que en un momento amabas a esa persona y en otro momento la odiabas?', 'MSI_Q1',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 1,  '¿Con frecuencia haces cosas impulsivas que más tarde lamentas?',                                                         'MSI_Q2',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 2,  '¿Con frecuencia tus emociones cambian rápidamente?',                                                                     'MSI_Q3',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 3,  '¿Con frecuencia te sientes enojado/a sin saber por qué o sientes que tu enojo es fuera de control?',                    'MSI_Q4',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 4,  '¿Con frecuencia te sientes vacío/a?',                                                                                   'MSI_Q5',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 5,  '¿Alguna vez te has lastimado intencionalmente (p. ej., cortarte, quemarte) o has intentado suicidarte?',                'MSI_Q6',  'binary', 'total', 1),
-    ((SELECT id FROM s), 6,  '¿Con frecuencia sientes que no sabes quién eres o que no tienes identidad?',                                            'MSI_Q7',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 7,  '¿Con frecuencia haces grandes esfuerzos para evitar que la gente te abandone?',                                         'MSI_Q8',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 8,  '¿Has tenido experiencias de sentirte desconectado/a de tu mente o cuerpo, o como si las cosas no fueran reales?',       'MSI_Q9',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 9,  '¿Con frecuencia te sientes sospechoso/a de los demás sin razón?',                                                       'MSI_Q10', 'binary', 'total', NULL)
+    ((SELECT id FROM s), 0,  '¿Alguna de tus relaciones ha sido tan inestable que en un momento amabas a esa persona y en otro momento la odiabas?', 'MSI_Q1',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 1,  '¿Con frecuencia haces cosas impulsivas que más tarde lamentas?',                                                         'MSI_Q2',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 2,  '¿Con frecuencia tus emociones cambian rápidamente?',                                                                     'MSI_Q3',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 3,  '¿Con frecuencia te sientes enojado/a sin saber por qué o sientes que tu enojo es fuera de control?',                    'MSI_Q4',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 4,  '¿Con frecuencia te sientes vacío/a?',                                                                                   'MSI_Q5',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 5,  '¿Alguna vez te has lastimado intencionalmente (p. ej., cortarte, quemarte) o has intentado suicidarte?',                'MSI_Q6',  'multiple_choice', 'total', 1),
+    ((SELECT id FROM s), 6,  '¿Con frecuencia sientes que no sabes quién eres o que no tienes identidad?',                                            'MSI_Q7',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 7,  '¿Con frecuencia haces grandes esfuerzos para evitar que la gente te abandone?',                                         'MSI_Q8',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 8,  '¿Has tenido experiencias de sentirte desconectado/a de tu mente o cuerpo, o como si las cosas no fueran reales?',       'MSI_Q9',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 9,  '¿Con frecuencia te sientes sospechoso/a de los demás sin razón?',                                                       'MSI_Q10', 'multiple_choice', 'total', NULL)
   RETURNING id, order_index, item_code
 )
 INSERT INTO response_options (item_id, order_index, label, value)
@@ -367,55 +367,55 @@ i AS (
   INSERT INTO items (section_id, order_index, text, item_code, item_type, subscale, alert_threshold)
   VALUES
     -- Paranoide (PAR)
-    ((SELECT id FROM s), 0,  'Desconfío de la mayoría de las personas, incluso si no tengo razón para hacerlo', 'PDQ_Q1', 'binary', 'paranoide', NULL),
-    ((SELECT id FROM s), 1,  'La gente intenta engañarme o utilizarme',                                          'PDQ_Q2', 'binary', 'paranoide', NULL),
-    ((SELECT id FROM s), 2,  'Cuando alguien me halaga, pienso que tiene algún motivo oculto',                   'PDQ_Q3', 'binary', 'paranoide', NULL),
-    ((SELECT id FROM s), 3,  'No perdono fácilmente las ofensas de los demás',                                   'PDQ_Q4', 'binary', 'paranoide', NULL),
+    ((SELECT id FROM s), 0,  'Desconfío de la mayoría de las personas, incluso si no tengo razón para hacerlo', 'PDQ_Q1', 'multiple_choice', 'paranoide', NULL),
+    ((SELECT id FROM s), 1,  'La gente intenta engañarme o utilizarme',                                          'PDQ_Q2', 'multiple_choice', 'paranoide', NULL),
+    ((SELECT id FROM s), 2,  'Cuando alguien me halaga, pienso que tiene algún motivo oculto',                   'PDQ_Q3', 'multiple_choice', 'paranoide', NULL),
+    ((SELECT id FROM s), 3,  'No perdono fácilmente las ofensas de los demás',                                   'PDQ_Q4', 'multiple_choice', 'paranoide', NULL),
     -- Esquizoide (ESQ)
-    ((SELECT id FROM s), 4,  'Prefiero hacer las cosas solo/a que con otras personas',                           'PDQ_Q5', 'binary', 'esquizoide', NULL),
-    ((SELECT id FROM s), 5,  'Me importa poco tener amigos íntimos',                                             'PDQ_Q6', 'binary', 'esquizoide', NULL),
-    ((SELECT id FROM s), 6,  'Las relaciones sexuales no me interesan especialmente',                            'PDQ_Q7', 'binary', 'esquizoide', NULL),
-    ((SELECT id FROM s), 7,  'Pocas cosas de la vida me dan placer',                                             'PDQ_Q8', 'binary', 'esquizoide', NULL),
+    ((SELECT id FROM s), 4,  'Prefiero hacer las cosas solo/a que con otras personas',                           'PDQ_Q5', 'multiple_choice', 'esquizoide', NULL),
+    ((SELECT id FROM s), 5,  'Me importa poco tener amigos íntimos',                                             'PDQ_Q6', 'multiple_choice', 'esquizoide', NULL),
+    ((SELECT id FROM s), 6,  'Las relaciones sexuales no me interesan especialmente',                            'PDQ_Q7', 'multiple_choice', 'esquizoide', NULL),
+    ((SELECT id FROM s), 7,  'Pocas cosas de la vida me dan placer',                                             'PDQ_Q8', 'multiple_choice', 'esquizoide', NULL),
     -- Esquizotípico (ESQT)
-    ((SELECT id FROM s), 8,  'Tengo poderes especiales para predecir lo que va a ocurrir',                       'PDQ_Q9',  'binary', 'esquizotipico', NULL),
-    ((SELECT id FROM s), 9,  'A veces siento que hay mensajes dirigidos a mí en la televisión o en la radio',   'PDQ_Q10', 'binary', 'esquizotipico', NULL),
-    ((SELECT id FROM s), 10, 'La gente me dice que hablo de forma extraña o que no se me entiende bien',        'PDQ_Q11', 'binary', 'esquizotipico', NULL),
-    ((SELECT id FROM s), 11, 'Me siento incómodo/a y nervioso/a con otras personas',                             'PDQ_Q12', 'binary', 'esquizotipico', NULL),
+    ((SELECT id FROM s), 8,  'Tengo poderes especiales para predecir lo que va a ocurrir',                       'PDQ_Q9',  'multiple_choice', 'esquizotipico', NULL),
+    ((SELECT id FROM s), 9,  'A veces siento que hay mensajes dirigidos a mí en la televisión o en la radio',   'PDQ_Q10', 'multiple_choice', 'esquizotipico', NULL),
+    ((SELECT id FROM s), 10, 'La gente me dice que hablo de forma extraña o que no se me entiende bien',        'PDQ_Q11', 'multiple_choice', 'esquizotipico', NULL),
+    ((SELECT id FROM s), 11, 'Me siento incómodo/a y nervioso/a con otras personas',                             'PDQ_Q12', 'multiple_choice', 'esquizotipico', NULL),
     -- Antisocial (ANT)
-    ((SELECT id FROM s), 12, 'Me meto en peleas con más frecuencia que la mayoría de las personas',              'PDQ_Q13', 'binary', 'antisocial', NULL),
-    ((SELECT id FROM s), 13, 'Hago lo que quiero sin importarme si es ilegal',                                   'PDQ_Q14', 'binary', 'antisocial', NULL),
-    ((SELECT id FROM s), 14, 'Miento sin problema para conseguir lo que quiero',                                 'PDQ_Q15', 'binary', 'antisocial', NULL),
-    ((SELECT id FROM s), 15, 'Raramente me siento culpable por las cosas que hago',                              'PDQ_Q16', 'binary', 'antisocial', NULL),
+    ((SELECT id FROM s), 12, 'Me meto en peleas con más frecuencia que la mayoría de las personas',              'PDQ_Q13', 'multiple_choice', 'antisocial', NULL),
+    ((SELECT id FROM s), 13, 'Hago lo que quiero sin importarme si es ilegal',                                   'PDQ_Q14', 'multiple_choice', 'antisocial', NULL),
+    ((SELECT id FROM s), 14, 'Miento sin problema para conseguir lo que quiero',                                 'PDQ_Q15', 'multiple_choice', 'antisocial', NULL),
+    ((SELECT id FROM s), 15, 'Raramente me siento culpable por las cosas que hago',                              'PDQ_Q16', 'multiple_choice', 'antisocial', NULL),
     -- Límite (LIM)
-    ((SELECT id FROM s), 16, 'He intentado hacerme daño o quitarme la vida',                                    'PDQ_Q17', 'binary', 'limite', 1),
-    ((SELECT id FROM s), 17, 'Mis relaciones son muy intensas pero inestables',                                  'PDQ_Q18', 'binary', 'limite', NULL),
-    ((SELECT id FROM s), 18, 'Cuando estoy solo/a me siento muy mal emocionalmente',                             'PDQ_Q19', 'binary', 'limite', NULL),
-    ((SELECT id FROM s), 19, 'Mis emociones cambian muy rápidamente',                                            'PDQ_Q20', 'binary', 'limite', NULL),
+    ((SELECT id FROM s), 16, 'He intentado hacerme daño o quitarme la vida',                                    'PDQ_Q17', 'multiple_choice', 'limite', 1),
+    ((SELECT id FROM s), 17, 'Mis relaciones son muy intensas pero inestables',                                  'PDQ_Q18', 'multiple_choice', 'limite', NULL),
+    ((SELECT id FROM s), 18, 'Cuando estoy solo/a me siento muy mal emocionalmente',                             'PDQ_Q19', 'multiple_choice', 'limite', NULL),
+    ((SELECT id FROM s), 19, 'Mis emociones cambian muy rápidamente',                                            'PDQ_Q20', 'multiple_choice', 'limite', NULL),
     -- Histriónico (HIS)
-    ((SELECT id FROM s), 20, 'Me gusta ser el centro de atención',                                               'PDQ_Q21', 'binary', 'histrionico', NULL),
-    ((SELECT id FROM s), 21, 'Uso mi apariencia física para llamar la atención de los demás',                   'PDQ_Q22', 'binary', 'histrionico', NULL),
-    ((SELECT id FROM s), 22, 'Mi vida emocional es muy dramática e intensa',                                    'PDQ_Q23', 'binary', 'histrionico', NULL),
-    ((SELECT id FROM s), 23, 'Me molesta no ser el centro de las conversaciones',                                'PDQ_Q24', 'binary', 'histrionico', NULL),
+    ((SELECT id FROM s), 20, 'Me gusta ser el centro de atención',                                               'PDQ_Q21', 'multiple_choice', 'histrionico', NULL),
+    ((SELECT id FROM s), 21, 'Uso mi apariencia física para llamar la atención de los demás',                   'PDQ_Q22', 'multiple_choice', 'histrionico', NULL),
+    ((SELECT id FROM s), 22, 'Mi vida emocional es muy dramática e intensa',                                    'PDQ_Q23', 'multiple_choice', 'histrionico', NULL),
+    ((SELECT id FROM s), 23, 'Me molesta no ser el centro de las conversaciones',                                'PDQ_Q24', 'multiple_choice', 'histrionico', NULL),
     -- Narcisista (NAR)
-    ((SELECT id FROM s), 24, 'Merezco más respeto del que la gente me da',                                       'PDQ_Q25', 'binary', 'narcisista', NULL),
-    ((SELECT id FROM s), 25, 'Soy una persona especial y los demás deberían reconocerlo',                        'PDQ_Q26', 'binary', 'narcisista', NULL),
-    ((SELECT id FROM s), 26, 'Me molesta que la gente no aprecie mis logros',                                    'PDQ_Q27', 'binary', 'narcisista', NULL),
-    ((SELECT id FROM s), 27, 'Tengo derecho a esperar que los demás me hagan favores especiales',               'PDQ_Q28', 'binary', 'narcisista', NULL),
+    ((SELECT id FROM s), 24, 'Merezco más respeto del que la gente me da',                                       'PDQ_Q25', 'multiple_choice', 'narcisista', NULL),
+    ((SELECT id FROM s), 25, 'Soy una persona especial y los demás deberían reconocerlo',                        'PDQ_Q26', 'multiple_choice', 'narcisista', NULL),
+    ((SELECT id FROM s), 26, 'Me molesta que la gente no aprecie mis logros',                                    'PDQ_Q27', 'multiple_choice', 'narcisista', NULL),
+    ((SELECT id FROM s), 27, 'Tengo derecho a esperar que los demás me hagan favores especiales',               'PDQ_Q28', 'multiple_choice', 'narcisista', NULL),
     -- Evitativo (EVI)
-    ((SELECT id FROM s), 28, 'Evito el trabajo o actividades sociales porque temo ser criticado/a',             'PDQ_Q29', 'binary', 'evitativo', NULL),
-    ((SELECT id FROM s), 29, 'Me preocupa mucho no gustar a los demás',                                         'PDQ_Q30', 'binary', 'evitativo', NULL),
-    ((SELECT id FROM s), 30, 'Me contengo en situaciones nuevas porque temo pasar vergüenza',                   'PDQ_Q31', 'binary', 'evitativo', NULL),
-    ((SELECT id FROM s), 31, 'Pienso que soy inferior a los demás',                                              'PDQ_Q32', 'binary', 'evitativo', NULL),
+    ((SELECT id FROM s), 28, 'Evito el trabajo o actividades sociales porque temo ser criticado/a',             'PDQ_Q29', 'multiple_choice', 'evitativo', NULL),
+    ((SELECT id FROM s), 29, 'Me preocupa mucho no gustar a los demás',                                         'PDQ_Q30', 'multiple_choice', 'evitativo', NULL),
+    ((SELECT id FROM s), 30, 'Me contengo en situaciones nuevas porque temo pasar vergüenza',                   'PDQ_Q31', 'multiple_choice', 'evitativo', NULL),
+    ((SELECT id FROM s), 31, 'Pienso que soy inferior a los demás',                                              'PDQ_Q32', 'multiple_choice', 'evitativo', NULL),
     -- Dependiente (DEP)
-    ((SELECT id FROM s), 32, 'Me resulta difícil tomar decisiones sin el consejo de los demás',                 'PDQ_Q33', 'binary', 'dependiente', NULL),
-    ((SELECT id FROM s), 33, 'Necesito que los demás me digan qué hacer',                                        'PDQ_Q34', 'binary', 'dependiente', NULL),
-    ((SELECT id FROM s), 34, 'Me resulta difícil discrepar con los demás por miedo a perderlos',                'PDQ_Q35', 'binary', 'dependiente', NULL),
-    ((SELECT id FROM s), 35, 'Me siento incapaz de cuidar de mí mismo/a solo/a',                                'PDQ_Q36', 'binary', 'dependiente', NULL),
+    ((SELECT id FROM s), 32, 'Me resulta difícil tomar decisiones sin el consejo de los demás',                 'PDQ_Q33', 'multiple_choice', 'dependiente', NULL),
+    ((SELECT id FROM s), 33, 'Necesito que los demás me digan qué hacer',                                        'PDQ_Q34', 'multiple_choice', 'dependiente', NULL),
+    ((SELECT id FROM s), 34, 'Me resulta difícil discrepar con los demás por miedo a perderlos',                'PDQ_Q35', 'multiple_choice', 'dependiente', NULL),
+    ((SELECT id FROM s), 35, 'Me siento incapaz de cuidar de mí mismo/a solo/a',                                'PDQ_Q36', 'multiple_choice', 'dependiente', NULL),
     -- Obsesivo-Compulsivo (OCP)
-    ((SELECT id FROM s), 36, 'Me cuesta delegar tareas a los demás porque no las harán bien',                   'PDQ_Q37', 'binary', 'obsesivo_compulsivo', NULL),
-    ((SELECT id FROM s), 37, 'Soy muy perfeccionista: las cosas tienen que estar hechas exactamente como digo', 'PDQ_Q38', 'binary', 'obsesivo_compulsivo', NULL),
-    ((SELECT id FROM s), 38, 'El trabajo me importa tanto que apenas tengo tiempo para la familia o amigos',    'PDQ_Q39', 'binary', 'obsesivo_compulsivo', NULL),
-    ((SELECT id FROM s), 39, 'Me resulta muy difícil tirar cosas aunque ya no las necesite',                    'PDQ_Q40', 'binary', 'obsesivo_compulsivo', NULL)
+    ((SELECT id FROM s), 36, 'Me cuesta delegar tareas a los demás porque no las harán bien',                   'PDQ_Q37', 'multiple_choice', 'obsesivo_compulsivo', NULL),
+    ((SELECT id FROM s), 37, 'Soy muy perfeccionista: las cosas tienen que estar hechas exactamente como digo', 'PDQ_Q38', 'multiple_choice', 'obsesivo_compulsivo', NULL),
+    ((SELECT id FROM s), 38, 'El trabajo me importa tanto que apenas tengo tiempo para la familia o amigos',    'PDQ_Q39', 'multiple_choice', 'obsesivo_compulsivo', NULL),
+    ((SELECT id FROM s), 39, 'Me resulta muy difícil tirar cosas aunque ya no las necesite',                    'PDQ_Q40', 'multiple_choice', 'obsesivo_compulsivo', NULL)
   RETURNING id, order_index, item_code
 )
 INSERT INTO response_options (item_id, order_index, label, value)

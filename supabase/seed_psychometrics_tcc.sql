@@ -216,7 +216,7 @@ WITH t AS (
     'ptgi',
     'PTGI — Inventario de Crecimiento Postraumático',
     'Instrumento de 21 ítems que mide el crecimiento positivo experimentado como resultado de la lucha con eventos traumáticos en 5 dimensiones. Mayor puntuación indica mayor crecimiento percibido.',
-    'trauma', 'restricted', 1,
+    'sintomas', 'restricted', 1,
     'Tedeschi RG & Calhoun LG (1996)',
     17, 10, '["self"]'::jsonb,
     30, 8.0, ARRAY['clinica','trauma']
