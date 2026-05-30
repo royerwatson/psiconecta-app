@@ -47,6 +47,7 @@ import PatientProfile   from '@/pages/patient/PatientProfile'
 import MyTasksPage     from '@/pages/patient/MyTasksPage'
 import JournalPage          from '@/pages/patient/JournalPage'
 import SessionHistoryPage   from '@/pages/patient/SessionHistoryPage'
+import CrisisPage          from '@/pages/patient/CrisisPage'
 import TherapistProfileView from '@/pages/patient/TherapistProfileView'
 
 // Compartido
@@ -185,6 +186,9 @@ export default function App() {
           } />
           <Route path="/patient/sessions" element={
             <ClientRoute><SessionHistoryPage /></ClientRoute>
+          } />
+          <Route path="/patient/crisis" element={
+            <ClientRoute><CrisisPage /></ClientRoute>
           } />
           <Route path="/patient/chat" element={
             <ClientRoute><ChatPage /></ClientRoute>
