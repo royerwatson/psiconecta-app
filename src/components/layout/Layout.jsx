@@ -268,6 +268,19 @@ export default function Layout() {
         </div>
       </nav>
 
+      {/* ── Botón flotante de crisis — solo paciente ── */}
+      {role === 'patient' && (
+        <button
+          onClick={() => navigate('/patient/crisis')}
+          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 bg-calm-600 hover:bg-calm-700 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-float transition-all"
+          title="Apoyo en crisis"
+        >
+          <span className="text-base">💙</span>
+          <span className="hidden sm:inline">Apoyo en crisis</span>
+          <span className="sm:hidden">SOS</span>
+        </button>
+      )}
+
       {/* ── Modal logout con confirmación ── */}
       {showLogout && (
         <div
