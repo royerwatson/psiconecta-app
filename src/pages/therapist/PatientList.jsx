@@ -103,12 +103,30 @@ export default function PatientList() {
           {[1,2,3,4].map((i) => <Skeleton key={i} className="h-24" />)}
         </div>
       ) : filtered.length === 0 ? (
-        <Card className="text-center py-10">
-          <div className="text-4xl mb-2">👥</div>
-          <p className="text-warm-600 font-medium">No se encontraron pacientes</p>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4 text-3xl">
+            {search ? '🔍' : '👥'}
+          </div>
+          <p className="font-semibold text-warm-800 mb-1">
+            {search ? 'Sin resultados' : 'Aún no tienes pacientes'}
+          </p>
+          <p className="text-sm text-warm-400 max-w-xs leading-relaxed">
+            {search
+              ? `No encontramos pacientes con el nombre "${search}"`
+              : 'Cuando un paciente agende una sesión contigo, aparecerá aquí automáticamente.'
+            }
+          </p>
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="mt-4 text-sm text-primary-600 hover:text-primary-700 font-medium"
+            >
+              Limpiar búsqueda
+            </button>
+          )}
+        </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 stagger-children">
           {filtered.map(({ patient, scheduled_at, status, clinical_history, nextSession, lastSession }) => (
             <Card key={patient.id} hover onClick={() => navigate(`/therapist/patients/${patient.id}`)}>
               <div className="flex items-center gap-4">

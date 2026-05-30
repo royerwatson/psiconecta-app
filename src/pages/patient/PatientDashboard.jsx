@@ -6,7 +6,7 @@ import Card, { StatCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Avatar from '@/components/ui/Avatar'
-import { formatSessionDate, formatPrice, canStartVideo } from '@/lib/utils'
+import { formatSessionDate, formatPrice, canStartVideo, getGreeting } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import MoodTracker from '@/components/patient/MoodTracker'
 import AICheckin from '@/components/patient/AICheckin'
@@ -144,7 +144,7 @@ export default function PatientDashboard() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold text-warm-900">
-            Hola, {profile?.full_name?.split(' ')[0]} 🌟
+            {getGreeting()}, {profile?.full_name?.split(' ')[0]} 🌟
           </h1>
           <p className="text-warm-500 text-sm mt-1">¿Cómo te sientes hoy?</p>
         </div>
@@ -156,6 +156,20 @@ export default function PatientDashboard() {
           </div>
         )}
       </div>
+
+      {/* Banner perfil incompleto */}
+      {profile && !profile.avatar_url && (
+        <div className="bg-primary-50 border border-primary-100 rounded-2xl p-4 flex gap-3 items-center">
+          <span className="text-xl shrink-0">🪴</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-primary-800 text-sm">Personaliza tu perfil</p>
+            <p className="text-xs text-primary-600 mt-0.5">
+              Agregar una foto ayuda a tus terapeutas a reconocerte.
+            </p>
+          </div>
+          <Button size="sm" onClick={() => navigate('/patient/profile')}>Editar</Button>
+        </div>
+      )}
 
       {/* Prompt de reseña post-sesión */}
       {pendingReview && !reviewDismissed && (
