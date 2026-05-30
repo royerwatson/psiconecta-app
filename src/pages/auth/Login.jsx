@@ -126,6 +126,15 @@ export default function Login() {
           y{' '}
           <span className="text-primary-500 cursor-pointer">Política de privacidad</span>
         </p>
+
+        <div className="text-center mt-4">
+          <Link
+            to="/admin/login"
+            className="text-warm-300 hover:text-warm-500 text-xs transition-colors"
+          >
+            Acceso administrativo
+          </Link>
+        </div>
       </div>
     </div>
   )
