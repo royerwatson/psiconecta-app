@@ -37,10 +37,8 @@ export function ClientRoute({ children }) {
 // Ruta solo para administradores
 export function AdminRoute({ children }) {
   const { user, role, initialized } = useAuthStore()
-  const location = useLocation()
 
   if (!initialized) return <LoadingScreen />
-  if (!user) return <Navigate to="/login" state={{ from: location }} replace />
-  if (role !== 'admin') return <Navigate to="/login" replace />
+  if (!user || role !== 'admin') return <Navigate to="/admin/login" replace />
   return children
 }
