@@ -20,7 +20,7 @@ import Card, { StatCard } from '@/components/ui/Card'
 import Badge, { VerificationBadge } from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Avatar from '@/components/ui/Avatar'
-import { formatSessionDate, formatPrice, canStartVideo } from '@/lib/utils'
+import { formatSessionDate, formatPrice, canStartVideo, getGreeting } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 
 export default function TherapistDashboard() {
@@ -114,7 +114,7 @@ export default function TherapistDashboard() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold text-warm-900">
-            Buenos días, {profile?.full_name?.split(' ')[0]} 👋
+            {getGreeting()}, {profile?.full_name?.split(' ')[0]} 👋
           </h1>
           <p className="text-warm-500 text-sm mt-1">
             {new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -138,6 +138,20 @@ export default function TherapistDashboard() {
           <Button size="sm" variant="ghost" onClick={() => navigate('/therapist/profile')}>
             Ver estado
           </Button>
+        </div>
+      )}
+
+      {/* Banner perfil incompleto */}
+      {therapist && !therapist.bio && (
+        <div className="bg-primary-50 border border-primary-100 rounded-2xl p-4 flex gap-3 items-center">
+          <span className="text-xl shrink-0">📝</span>
+          <div className="flex-1 min-w-0">
+            <p className="font-medium text-primary-800 text-sm">Completa tu perfil</p>
+            <p className="text-xs text-primary-600 mt-0.5">
+              Los pacientes eligen a sus terapeutas basándose en tu bio y especialidades.
+            </p>
+          </div>
+          <Button size="sm" onClick={() => navigate('/therapist/profile')}>Completar</Button>
         </div>
       )}
 
@@ -192,7 +206,7 @@ export default function TherapistDashboard() {
             </Button>
           </Card>
         ) : (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 stagger-children">
             {sessions.map((session) => (
               <SessionCard
                 key={session.id}

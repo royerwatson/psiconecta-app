@@ -165,13 +165,17 @@ export default function FindTherapist() {
           <Button size="sm" className="mt-4" onClick={fetchTherapists}>Reintentar</Button>
         </Card>
       ) : filteredTherapists.length === 0 ? (
-        <Card className="text-center py-10">
-          <div className="text-4xl mb-2">🔍</div>
-          <p className="text-warm-600 font-medium">No encontramos terapeutas disponibles</p>
-          <p className="text-warm-400 text-sm mt-1">Prueba con otros filtros</p>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-20 text-center">
+          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4 text-3xl">
+            🔍
+          </div>
+          <p className="font-semibold text-warm-800 mb-1">Sin terapeutas disponibles</p>
+          <p className="text-sm text-warm-400 max-w-xs leading-relaxed">
+            No encontramos terapeutas con esos filtros. Prueba cambiando la especialidad o la fecha.
+          </p>
+        </div>
       ) : (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-3 stagger-children">
           {filteredTherapists.map((t) => (
             <Card key={t.id} hover onClick={() => navigate(`/patient/therapist/${t.user_id}`)}>
               <div className="flex items-start gap-4">

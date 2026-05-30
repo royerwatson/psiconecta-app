@@ -94,6 +94,14 @@ export const canStartVideo = (scheduledAt) => {
   return diffMin <= 15 && diffMin >= -90 // 15 min antes hasta 90 min después
 }
 
+// Saludo dinámico según hora del día
+export const getGreeting = () => {
+  const h = new Date().getHours()
+  if (h >= 5  && h < 12) return 'Buenos días'
+  if (h >= 12 && h < 19) return 'Buenas tardes'
+  return 'Buenas noches'
+}
+
 // Generar ID único simple
 export const generateId = () => Math.random().toString(36).slice(2, 11)
 
