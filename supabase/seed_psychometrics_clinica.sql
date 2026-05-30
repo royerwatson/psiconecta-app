@@ -289,19 +289,19 @@ BEGIN
   SELECT i.id, o.ord, o.lbl, o.val
   FROM items i
   JOIN test_sections s ON s.id = i.section_id AND s.test_id = v_test
-  WHERE i.item_code IN ('ISI_Q1','ISI_Q2','ISI_Q3','ISI_Q5','ISI_Q6','ISI_Q7')
   CROSS JOIN (VALUES
-    (0,'Ninguna',0),(1,'Leve',1),(2,'Moderada',2),(3,'Intensa',3),(4,'Muy intensa',4)) AS o(ord,lbl,val);
+    (0,'Ninguna',0),(1,'Leve',1),(2,'Moderada',2),(3,'Intensa',3),(4,'Muy intensa',4)) AS o(ord,lbl,val)
+  WHERE i.item_code IN ('ISI_Q1','ISI_Q2','ISI_Q3','ISI_Q5','ISI_Q6','ISI_Q7');
 
   -- Q4 escala inversa: Muy satisfecho→Muy insatisfecho
   INSERT INTO response_options (item_id, order_index, label, value)
   SELECT i.id, o.ord, o.lbl, o.val
   FROM items i
   JOIN test_sections s ON s.id = i.section_id AND s.test_id = v_test
-  WHERE i.item_code = 'ISI_Q4'
   CROSS JOIN (VALUES
     (0,'Muy satisfecho/a',0),(1,'Satisfecho/a',1),(2,'Ni satisfecho/a ni insatisfecho/a',2),
-    (3,'Insatisfecho/a',3),(4,'Muy insatisfecho/a',4)) AS o(ord,lbl,val);
+    (3,'Insatisfecho/a',3),(4,'Muy insatisfecho/a',4)) AS o(ord,lbl,val)
+  WHERE i.item_code = 'ISI_Q4';
 
   INSERT INTO scoring_rules (test_id, subscale_name, display_name, formula, item_codes, multiply_by)
   VALUES (v_test,'total','Puntuación Total','sum',

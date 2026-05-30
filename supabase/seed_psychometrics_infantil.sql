@@ -237,12 +237,12 @@ s AS (
 i AS (
   INSERT INTO items (section_id, order_index, text, item_code, item_type, subscale, alert_threshold)
   VALUES
-    ((SELECT id FROM s), 0, '¿Alguna vez has viajado en un AUTO conducido por alguien (incluido tú mismo) que estaba drogado o había consumido alcohol?',        'CRAFFT_C', 'binary', 'total', 1),
-    ((SELECT id FROM s), 1, '¿Alguna vez has usado alcohol o drogas para RELAJARTE, sentirte mejor contigo mismo o encajar?',                                   'CRAFFT_R', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 2, '¿Alguna vez has usado alcohol o drogas cuando estabas SOLO?',                                                                        'CRAFFT_A', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 3, '¿Alguna vez te has OLVIDADO de cosas que hiciste mientras usabas alcohol o drogas?',                                                'CRAFFT_F', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 4, '¿Tu FAMILIA o amigos te han dicho que deberías reducir tu consumo de alcohol o drogas?',                                            'CRAFFT_F2','binary', 'total', NULL),
-    ((SELECT id FROM s), 5, '¿Alguna vez has tenido PROBLEMAS mientras estabas bajo los efectos del alcohol o las drogas?',                                      'CRAFFT_T', 'binary', 'total', NULL)
+    ((SELECT id FROM s), 0, '¿Alguna vez has viajado en un AUTO conducido por alguien (incluido tú mismo) que estaba drogado o había consumido alcohol?',        'CRAFFT_C', 'multiple_choice', 'total', 1),
+    ((SELECT id FROM s), 1, '¿Alguna vez has usado alcohol o drogas para RELAJARTE, sentirte mejor contigo mismo o encajar?',                                   'CRAFFT_R', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 2, '¿Alguna vez has usado alcohol o drogas cuando estabas SOLO?',                                                                        'CRAFFT_A', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 3, '¿Alguna vez te has OLVIDADO de cosas que hiciste mientras usabas alcohol o drogas?',                                                'CRAFFT_F', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 4, '¿Tu FAMILIA o amigos te han dicho que deberías reducir tu consumo de alcohol o drogas?',                                            'CRAFFT_F2','multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 5, '¿Alguna vez has tenido PROBLEMAS mientras estabas bajo los efectos del alcohol o las drogas?',                                      'CRAFFT_T', 'multiple_choice', 'total', NULL)
   RETURNING id, order_index, item_code
 )
 INSERT INTO response_options (item_id, order_index, label, value)
@@ -363,26 +363,26 @@ s AS (
 i AS (
   INSERT INTO items (section_id, order_index, text, item_code, item_type, subscale, alert_threshold)
   VALUES
-    ((SELECT id FROM s), 0,  '¿Si señalas algo al otro lado del cuarto, tu hijo/a lo mira?',                 'MCHAT_Q1',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 1,  '¿Alguna vez has pensado que tu hijo/a podría ser sordo?',                      'MCHAT_Q2',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 2,  '¿Tu hijo/a juega a hacer como si fuera otra cosa? (simula tomar un teléfono)', 'MCHAT_Q3',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 3,  '¿A tu hijo/a le gusta subirse a las cosas?',                                   'MCHAT_Q4',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 4,  '¿Tu hijo/a hace movimientos inusuales con los dedos cerca de sus ojos?',      'MCHAT_Q5',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 5,  '¿Tu hijo/a señala con el dedo para pedir algo?',                               'MCHAT_Q6',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 6,  '¿Tu hijo/a señala con el dedo para mostrarte algo interesante?',              'MCHAT_Q7',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 7,  '¿Tu hijo/a está interesado en otros niños?',                                  'MCHAT_Q8',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 8,  '¿Tu hijo/a te muestra cosas trayéndotelas o levantándolas?',                  'MCHAT_Q9',  'binary', 'total', NULL),
-    ((SELECT id FROM s), 9,  '¿Tu hijo/a te responde cuando lo llamas por su nombre?',                       'MCHAT_Q10', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 10, '¿Cuando sonríes a tu hijo/a, él/ella te sonríe de vuelta?',                   'MCHAT_Q11', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 11, '¿Tu hijo/a te imita? (le haces una expresión y él/ella la copia)',            'MCHAT_Q12', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 12, '¿Tu hijo/a responde cuando escucha su nombre?',                               'MCHAT_Q13', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 13, '¿Cuando le señalas un juguete al otro lado de la habitación, tu hijo lo mira?','MCHAT_Q14','binary', 'total', NULL),
-    ((SELECT id FROM s), 14, '¿Tu hijo/a camina?',                                                           'MCHAT_Q15', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 15, '¿Tu hijo/a mira lo que estás mirando tú?',                                    'MCHAT_Q16', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 16, '¿Tu hijo/a intenta llamar tu atención?',                                      'MCHAT_Q17', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 17, '¿Alguna vez te ha parecido que tu hijo/a no sabe cómo jugar con juguetes?',  'MCHAT_Q18', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 18, '¿Tu hijo/a mira a tu cara para ver cómo reaccionas?',                         'MCHAT_Q19', 'binary', 'total', NULL),
-    ((SELECT id FROM s), 19, '¿A tu hijo/a le gustan las actividades que involucran movimiento?',            'MCHAT_Q20', 'binary', 'total', NULL)
+    ((SELECT id FROM s), 0,  '¿Si señalas algo al otro lado del cuarto, tu hijo/a lo mira?',                 'MCHAT_Q1',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 1,  '¿Alguna vez has pensado que tu hijo/a podría ser sordo?',                      'MCHAT_Q2',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 2,  '¿Tu hijo/a juega a hacer como si fuera otra cosa? (simula tomar un teléfono)', 'MCHAT_Q3',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 3,  '¿A tu hijo/a le gusta subirse a las cosas?',                                   'MCHAT_Q4',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 4,  '¿Tu hijo/a hace movimientos inusuales con los dedos cerca de sus ojos?',      'MCHAT_Q5',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 5,  '¿Tu hijo/a señala con el dedo para pedir algo?',                               'MCHAT_Q6',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 6,  '¿Tu hijo/a señala con el dedo para mostrarte algo interesante?',              'MCHAT_Q7',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 7,  '¿Tu hijo/a está interesado en otros niños?',                                  'MCHAT_Q8',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 8,  '¿Tu hijo/a te muestra cosas trayéndotelas o levantándolas?',                  'MCHAT_Q9',  'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 9,  '¿Tu hijo/a te responde cuando lo llamas por su nombre?',                       'MCHAT_Q10', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 10, '¿Cuando sonríes a tu hijo/a, él/ella te sonríe de vuelta?',                   'MCHAT_Q11', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 11, '¿Tu hijo/a te imita? (le haces una expresión y él/ella la copia)',            'MCHAT_Q12', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 12, '¿Tu hijo/a responde cuando escucha su nombre?',                               'MCHAT_Q13', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 13, '¿Cuando le señalas un juguete al otro lado de la habitación, tu hijo lo mira?','MCHAT_Q14','multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 14, '¿Tu hijo/a camina?',                                                           'MCHAT_Q15', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 15, '¿Tu hijo/a mira lo que estás mirando tú?',                                    'MCHAT_Q16', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 16, '¿Tu hijo/a intenta llamar tu atención?',                                      'MCHAT_Q17', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 17, '¿Alguna vez te ha parecido que tu hijo/a no sabe cómo jugar con juguetes?',  'MCHAT_Q18', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 18, '¿Tu hijo/a mira a tu cara para ver cómo reaccionas?',                         'MCHAT_Q19', 'multiple_choice', 'total', NULL),
+    ((SELECT id FROM s), 19, '¿A tu hijo/a le gustan las actividades que involucran movimiento?',            'MCHAT_Q20', 'multiple_choice', 'total', NULL)
   RETURNING id, order_index, item_code
 )
 INSERT INTO response_options (item_id, order_index, label, value)

@@ -231,6 +231,23 @@ export default function PatientDashboard() {
       {/* Tests psicométricos pendientes */}
       <PendingTestsSection userId={user?.id} />
 
+      {/* Acceso rápido a resultados liberados */}
+      <button
+        onClick={() => navigate('/patient/my-results')}
+        className="w-full flex items-center justify-between bg-white border border-warm-100 rounded-2xl px-4 py-3.5 shadow-sm hover:bg-warm-50 active:scale-[0.99] transition-all"
+      >
+        <div className="flex items-center gap-3">
+          <span className="text-xl">📊</span>
+          <div className="text-left">
+            <p className="text-sm font-semibold text-warm-900">Mis resultados</p>
+            <p className="text-xs text-warm-400 mt-0.5">Ver evaluaciones psicométricas disponibles</p>
+          </div>
+        </div>
+        <svg className="w-4 h-4 text-warm-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </button>
+
       {/* Tareas pendientes */}
       {tasks.length > 0 && (
         <div>

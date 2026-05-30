@@ -25,7 +25,7 @@ WITH t AS (
     'slums',
     'SLUMS — Examen del Estado Mental de Saint Louis',
     'Instrumento de cribado cognitivo de 11 tareas. Detecta Deterioro Cognitivo Leve (MCI) con mayor sensibilidad que el MMSE. Puntuación máxima: 30. Los puntos de corte varían según nivel educativo. Administrado por profesional de salud.',
-    'neuropsico', 'public_domain', 1,
+    'neuropsicologia', 'public_domain', 1,
     'Tariq SH, Tumosa N, Chibnall JT, Perry MH, Morley JE (2006)',
     60, 10, '["clinician"]'::jsonb,
     90, 2.0, ARRAY['clinica','neuropsico']
@@ -97,7 +97,7 @@ WITH t AS (
     'dex',
     'DEX — Cuestionario Disejecutivo (Autoinforme)',
     'Cuestionario de 20 ítems que evalúa la frecuencia de síntomas disejecutivos en la vida cotidiana: inhibición, intención, memoria executiva, planificación, cognición social y regulación emocional.',
-    'neuropsico', 'restricted', 1,
+    'neuropsicologia', 'restricted', 1,
     'Wilson BA, Alderman N, Burgess PW, Emslie H, Evans JJ (1996)',
     16, 7, '["self","informant"]'::jsonb,
     30, 5.0, ARRAY['clinica','neuropsico']
@@ -176,7 +176,7 @@ WITH t AS (
     'tmt-a',
     'TMT-A — Test de Trazado de Sendero (Parte A)',
     'Prueba de velocidad de procesamiento, atención sostenida y función motora. El paciente conecta 25 números del 1 al 25 lo más rápido posible. Se registra el tiempo en segundos. Administrado por evaluador. Normativas por edad.',
-    'neuropsico', 'public_domain', 1,
+    'neuropsicologia', 'public_domain', 1,
     'Reitan RM (1958)',
     18, 5, '["clinician"]'::jsonb,
     90, 10.0, ARRAY['clinica','neuropsico']
@@ -191,19 +191,19 @@ s AS (
 i AS (
   INSERT INTO items (section_id, order_index, text, item_code, item_type, subscale, alert_threshold)
   VALUES
-    ((SELECT id FROM s), 0, 'Tiempo de ejecución en segundos (0 = no completó en 300s)',           'TMTA_Q1', 'open',   'tiempo',  NULL),
+    ((SELECT id FROM s), 0, 'Tiempo de ejecución en segundos (0 = no completó en 300s)',           'TMTA_Q1', 'free_text',   'tiempo',  NULL),
     ((SELECT id FROM s), 1, 'Número de errores cometidos',                                          'TMTA_Q2', 'likert', 'errores', NULL),
-    ((SELECT id FROM s), 2, '¿Completó la tarea? (1=Sí, 0=No)',                                    'TMTA_Q3', 'binary', 'total',   NULL)
+    ((SELECT id FROM s), 2, '¿Completó la tarea? (1=Sí, 0=No)',                                    'TMTA_Q3', 'multiple_choice', 'total',   NULL)
   RETURNING id, order_index, item_code
 )
 INSERT INTO response_options (item_id, order_index, label, value)
 SELECT i.id, o.order_index, o.label, o.value
 FROM i
-WHERE item_code = 'TMTA_Q2'
 CROSS JOIN (VALUES
   (0, '0 errores', 0),(1, '1 error', 1),(2, '2 errores', 2),(3, '3 errores', 3),
   (4, '4 errores', 4),(5, '5+ errores',5)
-) AS o(order_index, label, value);
+) AS o(order_index, label, value)
+WHERE item_code = 'TMTA_Q2';
 
 -- Insertar opciones para ítem binario Q3
 INSERT INTO response_options (item_id, order_index, label, value)
@@ -211,8 +211,8 @@ SELECT i.id, o.order_index, o.label, o.value
 FROM items i
 JOIN test_sections s ON i.section_id = s.id
 JOIN tests t ON s.test_id = t.id
-WHERE t.slug = 'tmt-a' AND i.item_code = 'TMTA_Q3'
-CROSS JOIN (VALUES (0,'No',0),(1,'Sí',1)) AS o(order_index, label, value);
+CROSS JOIN (VALUES (0,'No',0),(1,'Sí',1)) AS o(order_index, label, value)
+WHERE t.slug = 'tmt-a' AND i.item_code = 'TMTA_Q3';
 
 DO $$
 DECLARE
@@ -247,7 +247,7 @@ WITH t AS (
     'tmt-b',
     'TMT-B — Test de Trazado de Sendero (Parte B)',
     'Evalúa flexibilidad cognitiva y función ejecutiva. El paciente conecta alternando números y letras (1-A-2-B-3-C...) lo más rápido posible. La diferencia TMT-B minus TMT-A refleja el costo ejecutivo. Administrado por evaluador.',
-    'neuropsico', 'public_domain', 1,
+    'neuropsicologia', 'public_domain', 1,
     'Reitan RM (1958)',
     18, 5, '["clinician"]'::jsonb,
     90, 15.0, ARRAY['clinica','neuropsico']
@@ -262,26 +262,26 @@ s AS (
 i AS (
   INSERT INTO items (section_id, order_index, text, item_code, item_type, subscale, alert_threshold)
   VALUES
-    ((SELECT id FROM s), 0, 'Tiempo de ejecución en segundos (0 = no completó en 300s)',     'TMTB_Q1', 'open',   'tiempo',  NULL),
+    ((SELECT id FROM s), 0, 'Tiempo de ejecución en segundos (0 = no completó en 300s)',     'TMTB_Q1', 'free_text',   'tiempo',  NULL),
     ((SELECT id FROM s), 1, 'Número de errores cometidos',                                    'TMTB_Q2', 'likert', 'errores', NULL),
-    ((SELECT id FROM s), 2, '¿Completó la tarea? (1=Sí, 0=No)',                              'TMTB_Q3', 'binary', 'total',   NULL)
+    ((SELECT id FROM s), 2, '¿Completó la tarea? (1=Sí, 0=No)',                              'TMTB_Q3', 'multiple_choice', 'total',   NULL)
   RETURNING id, order_index, item_code
 )
 INSERT INTO response_options (item_id, order_index, label, value)
 SELECT i.id, o.order_index, o.label, o.value
 FROM i
-WHERE item_code = 'TMTB_Q2'
 CROSS JOIN (VALUES
   (0,'0 errores',0),(1,'1 error',1),(2,'2 errores',2),(3,'3-5 errores',3),(4,'6+ errores',4)
-) AS o(order_index, label, value);
+) AS o(order_index, label, value)
+WHERE item_code = 'TMTB_Q2';
 
 INSERT INTO response_options (item_id, order_index, label, value)
 SELECT i.id, o.order_index, o.label, o.value
 FROM items i
 JOIN test_sections s ON i.section_id = s.id
 JOIN tests t ON s.test_id = t.id
-WHERE t.slug = 'tmt-b' AND i.item_code = 'TMTB_Q3'
-CROSS JOIN (VALUES (0,'No',0),(1,'Sí',1)) AS o(order_index, label, value);
+CROSS JOIN (VALUES (0,'No',0),(1,'Sí',1)) AS o(order_index, label, value)
+WHERE t.slug = 'tmt-b' AND i.item_code = 'TMTB_Q3';
 
 DO $$
 DECLARE
@@ -313,7 +313,7 @@ WITH t AS (
     'digit-span',
     'Digit Span — Amplitud de Dígitos (Directa e Inversa)',
     'Evalúa memoria de trabajo y span atencional. El evaluador lee secuencias de dígitos y el paciente las repite directamente (forward) e inversamente (backward). La amplitud máxima correcta es el puntaje. Adaptado para administración clínica.',
-    'neuropsico', 'public_domain', 1,
+    'neuropsicologia', 'public_domain', 1,
     'Wechsler D (1939) — Actualizado WAIS-IV (2008)',
     16, 5, '["clinician"]'::jsonb,
     30, 1.0, ARRAY['clinica','neuropsico']
@@ -376,7 +376,7 @@ WITH t AS (
     'fas-fluency',
     'FAS — Prueba de Fluidez Verbal Fonémica',
     'Evalúa fluidez verbal fonémica (función ejecutiva frontal) y recuperación léxica. El paciente dice la mayor cantidad de palabras que empiecen por F, A y S en 60 segundos cada letra. Se excluyen nombres propios, números y variantes de la misma palabra.',
-    'neuropsico', 'public_domain', 1,
+    'neuropsicologia', 'public_domain', 1,
     'Benton AL & Hamsher K (1976)',
     16, 5, '["clinician"]'::jsonb,
     30, 4.0, ARRAY['clinica','neuropsico']
@@ -437,7 +437,7 @@ WITH t AS (
     'sdmt',
     'SDMT — Test de Símbolos y Dígitos',
     'Mide velocidad de procesamiento de información, atención sostenida y función visomotora. El paciente tiene 90 segundos para asociar símbolos a sus dígitos correspondientes usando una clave. Sensible a desmielinización y daño cerebral difuso.',
-    'neuropsico', 'restricted', 1,
+    'neuropsicologia', 'restricted', 1,
     'Smith A (1973)',
     8, 5, '["clinician","self"]'::jsonb,
     30, 5.0, ARRAY['clinica','neuropsico']
@@ -459,22 +459,22 @@ i AS (
 INSERT INTO response_options (item_id, order_index, label, value)
 SELECT i.id, o.order_index, o.label, o.value
 FROM i
-WHERE item_code = 'SDMT_Q1'
 CROSS JOIN (VALUES
   (0,'0-20 respuestas',10),(1,'21-30 respuestas',25),(2,'31-40 respuestas',35),
   (3,'41-50 respuestas',45),(4,'51-60 respuestas',55),(5,'61-70 respuestas',65),
   (6,'71-80 respuestas',75),(7,'81+ respuestas',85)
-) AS o(order_index, label, value);
+) AS o(order_index, label, value)
+WHERE item_code = 'SDMT_Q1';
 
 INSERT INTO response_options (item_id, order_index, label, value)
 SELECT i.id, o.order_index, o.label, o.value
 FROM items i
 JOIN test_sections s ON i.section_id = s.id
 JOIN tests t ON s.test_id = t.id
-WHERE t.slug = 'sdmt' AND i.item_code = 'SDMT_Q2'
 CROSS JOIN (VALUES
   (0,'0 errores',0),(1,'1-2 errores',1),(2,'3-5 errores',3),(3,'6+ errores',6)
-) AS o(order_index, label, value);
+) AS o(order_index, label, value)
+WHERE t.slug = 'sdmt' AND i.item_code = 'SDMT_Q2';
 
 DO $$
 DECLARE

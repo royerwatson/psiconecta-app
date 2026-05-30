@@ -43,7 +43,9 @@ import ChatPage  from '@/pages/shared/ChatPage'
 import VideoCall from '@/pages/shared/VideoCall'
 
 // Tests psicométricos
-import TakeTestPage from '@/pages/patient/TakeTestPage'
+import TakeTestPage              from '@/pages/patient/TakeTestPage'
+import MyResultsPage             from '@/pages/patient/MyResultsPage'
+import PatientResultDetailPage   from '@/pages/patient/PatientResultDetailPage'
 
 // Pagos
 import PaymentSuccess from '@/pages/payment/PaymentSuccess'
@@ -145,6 +147,12 @@ export default function App() {
           } />
           <Route path="/patient/profile" element={
             <ClientRoute><PatientProfile /></ClientRoute>
+          } />
+          <Route path="/patient/my-results" element={
+            <ClientRoute><MyResultsPage /></ClientRoute>
+          } />
+          <Route path="/patient/results/:sessionId" element={
+            <ClientRoute><PatientResultDetailPage /></ClientRoute>
           } />
 
         </Route>
