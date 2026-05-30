@@ -32,6 +32,8 @@ export default function AdminStats() {
   const [specialtyData, setSpecialtyData] = useState([])
   const [topTherapists, setTopTherapists] = useState([])
   const [period, setPeriod]             = useState('8w') // 8w | 12w
+  const [checkinData, setCheckinData]   = useState([])
+  const [engagementStats, setEngagementStats] = useState(null)
 
   useEffect(() => { fetchStats() }, [period])
 
@@ -106,6 +108,48 @@ export default function AdminStats() {
     })).sort((a, b) => b.sessionCount - a.sessionCount || b.rating - a.rating)
 
     setTopTherapists(ranked)
+
+    // ── Check-ins por semana y riesgo ─────────────────────────
+    const { data: checkins } = await supabase
+      .from('ai_checkins')
+      .select('risk_level, created_at')
+      .gte('created_at', since)
+
+    const weeklyCheckins = weekRange.map(weekStart => {
+      const weekEnd = endOfWeek(weekStart, { weekStartsOn: 1 })
+      const label   = format(weekStart, "d MMM", { locale: es })
+      const week    = (checkins ?? []).filter(c =>
+        parseISO(c.created_at) >= weekStart && parseISO(c.created_at) <= weekEnd
+      )
+      return {
+        semana: label,
+        alto:   week.filter(c => c.risk_level === 'high').length,
+        medio:  week.filter(c => c.risk_level === 'medium').length,
+        bajo:   week.filter(c => c.risk_level === 'low').length,
+      }
+    })
+    setCheckinData(weeklyCheckins)
+
+    // ── Engagement: tareas y diarios ─────────────────────────
+    const [
+      { count: totalTasks },
+      { count: completedTasks },
+      { count: journalEntries },
+      { count: highRiskCheckins },
+    ] = await Promise.all([
+      supabase.from('patient_tasks').select('*', { count: 'exact', head: true }),
+      supabase.from('patient_tasks').select('*', { count: 'exact', head: true }).not('completed_at', 'is', null),
+      supabase.from('patient_journal').select('*', { count: 'exact', head: true }),
+      supabase.from('ai_checkins').select('*', { count: 'exact', head: true }).eq('risk_level', 'high'),
+    ])
+
+    setEngagementStats({
+      totalTasks:      totalTasks ?? 0,
+      completedTasks:  completedTasks ?? 0,
+      journalEntries:  journalEntries ?? 0,
+      highRiskCheckins: highRiskCheckins ?? 0,
+      completionRate:  totalTasks ? Math.round(((completedTasks ?? 0) / totalTasks) * 100) : 0,
+    })
 
     // ── Sesiones por especialidad ─────────────────────────────
     const specMap = {}
@@ -274,6 +318,62 @@ export default function AdminStats() {
               )}
             </div>
           </div>
+
+          {/* ── Engagement de pacientes ── */}
+          {engagementStats && (
+            <div className="bg-white rounded-2xl border border-warm-100 p-5">
+              <h2 className="font-semibold text-warm-900 mb-4">🎯 Engagement y bienestar del paciente</h2>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                {[
+                  { icon: '📋', label: 'Tareas totales',    value: engagementStats.totalTasks,      color: 'text-primary-700' },
+                  { icon: '✅', label: 'Tareas completadas', value: engagementStats.completedTasks,   color: 'text-emerald-700' },
+                  { icon: '📓', label: 'Entradas de diario', value: engagementStats.journalEntries,   color: 'text-violet-700' },
+                  { icon: '🔴', label: 'Check-ins riesgo alto', value: engagementStats.highRiskCheckins, color: 'text-red-700' },
+                ].map(m => (
+                  <div key={m.label} className="text-center">
+                    <p className="text-2xl mb-1">{m.icon}</p>
+                    <p className={`text-2xl font-bold ${m.color}`}>{m.value}</p>
+                    <p className="text-xs text-warm-500 mt-0.5">{m.label}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Barra de progreso de tareas */}
+              {engagementStats.totalTasks > 0 && (
+                <div>
+                  <div className="flex justify-between text-xs text-warm-500 mb-1.5">
+                    <span>Tasa de completación de tareas</span>
+                    <span className="font-semibold text-emerald-600">{engagementStats.completionRate}%</span>
+                  </div>
+                  <div className="w-full bg-warm-100 rounded-full h-2.5">
+                    <div
+                      className="bg-emerald-500 h-2.5 rounded-full transition-all"
+                      style={{ width: `${engagementStats.completionRate}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ── Check-ins por riesgo por semana ── */}
+          {checkinData.length > 0 && (
+            <div className="bg-white rounded-2xl border border-warm-100 p-5">
+              <h2 className="font-semibold text-warm-900 mb-4">🤖 Check-ins IA por semana y nivel de riesgo</h2>
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={checkinData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f0f4f8" />
+                  <XAxis dataKey="semana" tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} />
+                  <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                  <Tooltip />
+                  <Legend wrapperStyle={{ fontSize: '12px' }} />
+                  <Bar dataKey="bajo"  name="Sin riesgo"   stackId="a" fill="#10b981" radius={[0,0,0,0]} />
+                  <Bar dataKey="medio" name="Riesgo medio" stackId="a" fill="#f59e0b" radius={[0,0,0,0]} />
+                  <Bar dataKey="alto"  name="Riesgo alto"  stackId="a" fill="#ef4444" radius={[6,6,0,0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
 
           {/* ── Top terapeutas ── */}
           <div className="bg-white rounded-2xl border border-warm-100 p-5">
