@@ -3,6 +3,7 @@ import { useAuthStore } from '@/store/authStore'
 
 const NAV = [
   { to: '/admin/dashboard',   icon: '📊', label: 'Dashboard'  },
+  { to: '/admin/ai-alerts',   icon: '🤖', label: 'Alertas IA' },
   { to: '/admin/therapists',  icon: '🧠', label: 'Terapeutas' },
   { to: '/admin/patients',    icon: '👥', label: 'Pacientes'  },
   { to: '/admin/sessions',    icon: '📅', label: 'Sesiones'   },

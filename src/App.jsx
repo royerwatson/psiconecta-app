@@ -15,6 +15,7 @@ import AdminPatients       from '@/pages/admin/AdminPatients'
 import AdminSessions       from '@/pages/admin/AdminSessions'
 import AdminStats          from '@/pages/admin/AdminStats'
 import AdminGroupSessions  from '@/pages/admin/AdminGroupSessions'
+import AdminAIAlerts       from '@/pages/admin/AdminAIAlerts'
 
 // Auth
 import Login          from '@/pages/auth/Login'
@@ -209,6 +210,7 @@ export default function App() {
         <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard"  element={<AdminDashboard />} />
+          <Route path="ai-alerts"  element={<AdminAIAlerts />} />
           <Route path="therapists" element={<AdminTherapists />} />
           <Route path="patients"   element={<AdminPatients />} />
           <Route path="sessions"   element={<AdminSessions />} />
