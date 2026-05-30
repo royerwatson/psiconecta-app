@@ -1,0 +1,1160 @@
+/**
+ * Biblioteca de ejercicios terapéuticos predefinidos — español
+ * 50 ejercicios en 8 categorías.
+ *
+ * Cada ejercicio:
+ *  id          string — identificador único
+ *  category    string — clave de categoría
+ *  title       string — nombre del ejercicio
+ *  summary     string — descripción breve (max ~120 chars)
+ *  instructions string — pasos detallados para el paciente
+ *  goal        string — objetivo terapéutico
+ *  duration    string — tiempo estimado
+ *  frequency   string — frecuencia sugerida
+ *  difficulty  'básico' | 'intermedio' | 'avanzado'
+ *  tags        string[] — palabras clave para búsqueda
+ */
+
+// ── Categorías ────────────────────────────────────────────────────────────────
+export const CATEGORIES = [
+  { id: 'tcc',         label: 'TCC',                 icon: '🧠', color: 'blue'   },
+  { id: 'dbt',         label: 'DBT',                 icon: '🌊', color: 'teal'   },
+  { id: 'act',         label: 'ACT',                 icon: '🌿', color: 'green'  },
+  { id: 'mindfulness', label: 'Mindfulness',          icon: '🧘', color: 'purple' },
+  { id: 'activacion',  label: 'Activación conductual',icon: '💪', color: 'amber'  },
+  { id: 'emocional',   label: 'Regulación emocional', icon: '😌', color: 'rose'   },
+  { id: 'relajacion',  label: 'Relajación',           icon: '🌬️', color: 'sky'    },
+  { id: 'escritura',   label: 'Escritura reflexiva',  icon: '📔', color: 'orange' },
+]
+
+export const CATEGORY_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]))
+
+// ── Biblioteca ────────────────────────────────────────────────────────────────
+export const LIBRARY = [
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // TCC — Terapia Cognitivo-Conductual
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'tcc-01',
+    category: 'tcc',
+    title: 'Registro de pensamientos ABC',
+    summary: 'Identifica situaciones activadoras, creencias automáticas y consecuencias emocionales.',
+    goal: 'Aumentar la conciencia de la relación entre pensamientos, emociones y comportamiento.',
+    duration: '15 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['pensamientos automáticos', 'reestructuración', 'registro', 'ABC', 'Ellis'],
+    instructions: `Durante el día, cuando notes un cambio emocional significativo, completa este registro:
+
+A — Situación activadora:
+¿Qué pasó exactamente? Describe la situación objetivamente (dónde estabas, qué ocurrió, quién estaba presente).
+
+B — Pensamiento automático:
+¿Qué te pasó por la mente en ese momento? ¿Qué te decías a ti mismo/a?
+Evalúa cuánto crees ese pensamiento (0–100 %).
+
+C — Consecuencias (emociones y conducta):
+¿Qué emoción sentiste? ¿Qué tan intensa fue (0–100)?
+¿Qué hiciste o quisiste hacer?
+
+D — Disputa (pensamiento alternativo):
+¿Qué evidencia tienes a favor y en contra de ese pensamiento?
+¿Cómo lo vería alguien que te quiere?
+¿Existe otra explicación posible?
+
+E — Nuevo resultado:
+Escribe un pensamiento alternativo más equilibrado.
+Evalúa de nuevo la emoción (0–100).
+
+Lleva el registro en papel o en el apartado de notas de la app.`,
+  },
+  {
+    id: 'tcc-02',
+    category: 'tcc',
+    title: 'Cuestionamiento socrático',
+    summary: 'Desafía pensamientos distorsionados con preguntas guiadas basadas en evidencia real.',
+    goal: 'Reducir la credibilidad de pensamientos catastróficos o absolutistas.',
+    duration: '10 min',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['distorsiones cognitivas', 'pensamiento alternativo', 'sócrates', 'preguntas'],
+    instructions: `Cuando identifiques un pensamiento negativo recurrente, hazte estas preguntas por escrito:
+
+1. ¿Cuál es la evidencia a favor de este pensamiento?
+2. ¿Cuál es la evidencia en contra?
+3. ¿Estoy confundiendo un pensamiento con un hecho?
+4. ¿Estoy interpretando las intenciones de otros sin suficiente información?
+5. ¿Estoy sobreestimando la probabilidad de que ocurra algo malo?
+6. Si le ocurriera a un amigo, ¿qué le diría?
+7. ¿Qué es lo peor que podría pasar? ¿Podría sobrevivirlo?
+8. ¿Qué es lo más probable que realmente ocurra?
+9. ¿Cuál sería un pensamiento más útil y realista?
+
+Escribe el pensamiento alternativo y valora cómo te sientes después (0–10).`,
+  },
+  {
+    id: 'tcc-03',
+    category: 'tcc',
+    title: 'Experimento conductual',
+    summary: 'Pon a prueba una creencia negativa diseñando una pequeña experiencia en el mundo real.',
+    goal: 'Generar evidencia directa que contradiga predicciones catastróficas o negativas.',
+    duration: '20 min + acción',
+    frequency: 'Semanal',
+    difficulty: 'intermedio',
+    tags: ['exposición', 'creencias', 'hipótesis', 'comprobación'],
+    instructions: `Un experimento conductual tiene cuatro pasos:
+
+1. Define la creencia a poner a prueba:
+   Ejemplo: "Si hablo en una reunión, todos pensarán que soy incompetente."
+
+2. Haz una predicción concreta y medible:
+   "Al menos 3 personas me mirarán con desaprobación cuando hable."
+
+3. Diseña y realiza el experimento:
+   Decide qué harás, cuándo, dónde y cómo lo observarás.
+   Realiza la acción acordada.
+
+4. Registra los resultados:
+   ¿Qué ocurrió realmente?
+   ¿Tu predicción se cumplió? ¿En qué porcentaje?
+   ¿Qué aprendiste sobre tu creencia?
+
+Empieza con situaciones de baja dificultad y avanza gradualmente hacia las más retadoras.`,
+  },
+  {
+    id: 'tcc-04',
+    category: 'tcc',
+    title: 'Jerarquía de exposición gradual',
+    summary: 'Construye una lista ordenada de situaciones temidas y enfréntelas de menor a mayor dificultad.',
+    goal: 'Reducir la evitación y desensibilizar el miedo mediante la exposición progresiva.',
+    duration: '30 min (preparación) + práctica diaria',
+    frequency: 'Diario',
+    difficulty: 'avanzado',
+    tags: ['ansiedad', 'fobia', 'evitación', 'miedo', 'SUDS', 'exposición'],
+    instructions: `Paso 1 — Identifica la situación/objeto temido y crea tu lista:
+Escribe de 8 a 12 situaciones relacionadas con tu miedo, ordenadas de menor a mayor ansiedad.
+Asigna a cada una una puntuación SUDS (0 = sin ansiedad, 100 = pánico máximo).
+
+Paso 2 — Empieza por el nivel más bajo (SUDS ≤ 30):
+Mantente en la situación hasta que tu ansiedad baje al menos un 50 % de forma natural (sin escapar).
+No uses estrategias de seguridad (rituales, distracción, etc.).
+
+Paso 3 — Repite hasta que ese nivel ya no genere ansiedad significativa.
+Luego pasa al siguiente ítem de la jerarquía.
+
+Paso 4 — Registro diario:
+Anota la situación practicada, el SUDS al inicio y al final, y la duración de la sesión.
+
+Importante: la ansiedad siempre baja si te quedas el tiempo suficiente. No hay peligro real.`,
+  },
+  {
+    id: 'tcc-05',
+    category: 'tcc',
+    title: 'Tarjetas de afrontamiento',
+    summary: 'Crea tarjetas físicas o digitales con respuestas racionales a tus pensamientos más frecuentes.',
+    goal: 'Tener respuestas preparadas para los momentos de mayor malestar.',
+    duration: '15 min (preparación)',
+    frequency: 'Según necesidad',
+    difficulty: 'básico',
+    tags: ['recursos', 'preparación', 'crisis', 'pensamientos', 'afrontamiento'],
+    instructions: `Paso 1 — Identifica tus 3–5 pensamientos automáticos más frecuentes y perturbadores.
+
+Paso 2 — Por cada pensamiento, escribe en una tarjeta o nota:
+• El pensamiento negativo (anverso).
+• Una respuesta racional y compasiva que tú mismo/a hayas construido (reverso).
+  Ejemplo: "No puedo con esto" → "He superado situaciones difíciles antes. Puedo hacer una cosa pequeña ahora mismo."
+
+Paso 3 — Guarda las tarjetas en el celular, bolso o lugar visible.
+
+Paso 4 — Cuando aparezca el pensamiento difícil, saca la tarjeta, léela en voz alta si puedes y actúa según la respuesta racional.
+
+Revisa y actualiza las tarjetas con tu terapeuta regularmente.`,
+  },
+  {
+    id: 'tcc-06',
+    category: 'tcc',
+    title: 'Resolución de problemas en 5 pasos',
+    summary: 'Método estructurado para abordar problemas concretos de forma sistemática.',
+    goal: 'Aumentar la sensación de control y la eficacia en la resolución de dificultades cotidianas.',
+    duration: '20 min',
+    frequency: 'Según necesidad',
+    difficulty: 'básico',
+    tags: ['problemas', 'soluciones', 'toma de decisiones', 'planificación'],
+    instructions: `Usa este método cuando enfrentes un problema concreto:
+
+1. Define el problema con precisión:
+   ¿Qué está pasando exactamente? Escríbelo en una sola frase clara.
+
+2. Genera alternativas sin juzgar:
+   Haz una lluvia de ideas — escribe todas las soluciones posibles, incluso las que parecen tontas.
+
+3. Evalúa cada alternativa:
+   Para cada opción, anota ventajas y desventajas en términos de consecuencias a corto y largo plazo.
+
+4. Elige y planifica:
+   Selecciona la mejor opción. Define qué harás, cuándo, cómo y qué necesitas.
+
+5. Evalúa los resultados:
+   Después de actuar, reflexiona: ¿funcionó? ¿Qué cambiarías? ¿Qué aprendiste?`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // DBT — Terapia Dialéctico-Conductual
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'dbt-01',
+    category: 'dbt',
+    title: 'Habilidad TIPP — Regulación de crisis',
+    summary: 'Usa temperatura, ejercicio intenso, respiración pausada y relajación para bajar la activación fisiológica.',
+    goal: 'Reducir rápidamente la intensidad emocional extrema en momentos de crisis.',
+    duration: '5–15 min',
+    frequency: 'Según necesidad',
+    difficulty: 'básico',
+    tags: ['crisis', 'emergencia', 'fisiología', 'Linehan', 'DBT', 'activación'],
+    instructions: `Usa TIPP cuando la emoción sea tan intensa que no puedas pensar con claridad:
+
+T — Temperatura:
+Sumerge la cara en agua helada durante 30 segundos (o sostén hielo en las manos).
+Esto activa el reflejo de buceo y baja rápidamente la frecuencia cardíaca.
+
+I — Ejercicio Intenso:
+Corre, salta, haz sentadillas durante 5–10 minutos a máxima intensidad.
+El cuerpo metaboliza la adrenalina y el cortisol.
+
+P — Respiración Pausada (Paced Breathing):
+Inhala 4 segundos → exhala lentamente 6–8 segundos.
+Repite 5–10 veces. La exhalación larga activa el sistema parasimpático.
+
+P — Relajación Muscular Progresiva:
+Tensa cada grupo muscular 5 segundos y suéltalo.
+Empieza por los pies y sube hasta el rostro.
+
+Elige una o combínalas según la situación.`,
+  },
+  {
+    id: 'dbt-02',
+    category: 'dbt',
+    title: 'PLEASE — Cuidado básico del cuerpo',
+    summary: 'Checklist de hábitos físicos que reducen la vulnerabilidad emocional a lo largo del tiempo.',
+    goal: 'Reducir la sensibilidad emocional mediante el cuidado consistente del cuerpo.',
+    duration: '5 min (revisión diaria)',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['hábitos', 'vulnerabilidad', 'sueño', 'alimentación', 'ejercicio', 'DBT'],
+    instructions: `PLEASE es un acrónimo de hábitos a revisar cada día:
+
+PL — enfermedades (PLease treat PhysicaL iLLness):
+¿Has tomado tus medicamentos? ¿Atendiste algún síntoma físico pendiente?
+
+E — Equilibrio alimentario:
+¿Has comido de forma regular y nutritiva? Evita el hambre extrema o el exceso.
+
+A — Alcohol y sustancias:
+Evita el consumo de alcohol u otras sustancias que alteren las emociones.
+
+S — Sueño equilibrado:
+¿Has dormido entre 7 y 9 horas? Mantén un horario regular de sueño.
+
+E — Ejercicio:
+¿Has hecho al menos 20–30 minutos de movimiento físico hoy?
+
+Puntúa cada ítem de 0 a 2 (0 = no lo hice, 1 = parcialmente, 2 = sí).
+Suma tu "puntaje de cuidado" diario. Cuanto más alto, menor tu vulnerabilidad emocional.`,
+  },
+  {
+    id: 'dbt-03',
+    category: 'dbt',
+    title: 'DEAR MAN — Comunicación asertiva',
+    summary: 'Guion estructurado para hacer peticiones o decir "no" de forma eficaz y respetuosa.',
+    goal: 'Aumentar la efectividad interpersonal sin sacrificar la relación ni la autoestima.',
+    duration: '15 min (preparación)',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['asertividad', 'comunicación', 'límites', 'peticiones', 'DBT', 'relaciones'],
+    instructions: `Antes de una conversación difícil, prepara tu guion con DEAR MAN:
+
+D — Describe la situación objetivamente:
+"Cuando llegas tarde sin avisar…"
+
+E — Expresa cómo te sientes (sin acusar):
+"Me siento preocupado/a y frustrado/a…"
+
+A — Afirma lo que necesitas / pides:
+"Necesito que me avises si te vas a retrasar más de 15 minutos."
+
+R — Refuerzo (explica el beneficio mutuo):
+"Así podré planificar mejor y estaré más tranquilo/a cuando llegues."
+
+M — Mantente firme (Mindful):
+No te desvíes del tema. Si atacan, regresa al punto central.
+
+A — Aparenta confianza:
+Mantén contacto visual, tono calmado y postura erguida.
+
+N — Negocia si es necesario:
+"¿Qué podríamos hacer para que ambos estemos cómodos?"
+
+Practica tu guion en voz alta antes de la conversación.`,
+  },
+  {
+    id: 'dbt-04',
+    category: 'dbt',
+    title: 'Cadena de análisis conductual',
+    summary: 'Analiza paso a paso cómo llegaste a un comportamiento problemático para encontrar los puntos de intervención.',
+    goal: 'Comprender el patrón que conduce a conductas no deseadas y encontrar alternativas.',
+    duration: '20 min',
+    frequency: 'Después de conducta problemática',
+    difficulty: 'avanzado',
+    tags: ['análisis', 'conducta', 'patrones', 'prevención', 'DBT'],
+    instructions: `Completa este análisis después de una conducta que quieras cambiar:
+
+1. Conducta problema: ¿Qué hiciste exactamente? (sé específico/a, sin juicios)
+
+2. Factor de vulnerabilidad: ¿Cómo estabas antes? (dormido/a, estresado/a, con hambre, solo/a…)
+
+3. Evento desencadenante: ¿Qué ocurrió justo antes de que empezaras a sentirte mal?
+
+4. Cadena de eventos: Describe cronológicamente cada pensamiento, emoción y acción que te llevó a la conducta problemática. Sé minucioso/a: ¿qué pasó entre el desencadenante y la conducta?
+
+5. Consecuencias: ¿Qué ocurrió después? ¿Qué ganaste y qué perdiste?
+
+6. Puntos de intervención: En cada eslabón de la cadena, ¿qué podrías haber hecho diferente? ¿Qué habilidad de DBT podrías haber usado?
+
+7. Plan de prevención: ¿Qué harás diferente la próxima vez?`,
+  },
+  {
+    id: 'dbt-05',
+    category: 'dbt',
+    title: 'Tolerancia al malestar — Distracción ACCEPTS',
+    summary: 'Siete categorías de distracción saludable para tolerar momentos de alta angustia sin empeorar la situación.',
+    goal: 'Sobrevivir situaciones de crisis sin actuar impulsivamente.',
+    duration: '10–30 min',
+    frequency: 'Según necesidad',
+    difficulty: 'básico',
+    tags: ['crisis', 'tolerancia', 'distracción', 'impulso', 'DBT'],
+    instructions: `Cuando la angustia sea muy alta, elige una o varias estrategias de ACCEPTS:
+
+A — Actividades:
+Haz algo que requiera concentración: ejercicio, cocinar, limpiar, pintar.
+
+C — Contribución (Contributing):
+Haz algo por otra persona: envía un mensaje de apoyo, ayuda en casa.
+
+C — Comparaciones:
+Piensa en momentos en que has superado algo igual de difícil. Reconoce tu fortaleza.
+
+E — Emociones contrarias (Emotions):
+Ve una película de comedia, escucha música alegre, lee algo interesante.
+
+P — Pensar en otras cosas (Pushing away):
+Imagina mentalmente poner el problema en una caja y cerrarlo temporalmente.
+
+T — Pensamientos alternativos (Thoughts):
+Cuenta, recita letras de canciones, resuelve un crucigrama.
+
+S — Sensaciones físicas (Sensations):
+Sostén hielo, date una ducha fría/caliente, come algo con sabor intenso.
+
+Elige la estrategia que más se ajuste a la situación y a ti.`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // ACT — Aceptación y Compromiso
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'act-01',
+    category: 'act',
+    title: 'Hojas en el río — Defusión cognitiva',
+    summary: 'Observa tus pensamientos como hojas que flotan en un río sin que te arrastren.',
+    goal: 'Reducir la fusión con pensamientos difíciles creando distancia psicológica.',
+    duration: '10 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['defusión', 'pensamientos', 'metáfora', 'ACT', 'mindfulness'],
+    instructions: `Siéntate cómodamente y cierra los ojos. Sigue estos pasos:
+
+1. Imagina un río tranquilo que fluye frente a ti. El agua es clara y suave.
+
+2. En la superficie del río flotan hojas de otoño.
+
+3. Cuando aparezca un pensamiento, una imagen o un recuerdo, colócalo sobre una de las hojas.
+   No importa si es agradable, desagradable o neutro.
+
+4. Observa cómo la hoja se aleja río abajo con ese pensamiento. No tienes que aferrarte a ella ni rechazarla.
+
+5. Si te "engancha" un pensamiento (te encuentras pensando en él en lugar de observarlo), obsérvalo con curiosidad: "Interesante, me ha enganchado este pensamiento." Y vuelve al río.
+
+6. Continúa durante 10 minutos.
+
+Después, anota: ¿Qué pensamientos aparecieron con más frecuencia? ¿Cuándo te "enganchaste"?`,
+  },
+  {
+    id: 'act-02',
+    category: 'act',
+    title: 'Clarificación de valores personales',
+    summary: 'Identifica qué es verdaderamente importante para ti como guía para tus acciones.',
+    goal: 'Conectar con los valores profundos que orientan una vida con sentido.',
+    duration: '20 min',
+    frequency: 'Mensual',
+    difficulty: 'básico',
+    tags: ['valores', 'sentido', 'propósito', 'ACT', 'brújula'],
+    instructions: `Paso 1 — Reflexión libre (10 min):
+Responde por escrito estas preguntas sin filtro:
+• ¿Qué tipo de persona quieres ser en tu vida diaria?
+• ¿Cómo quieres relacionarte con las personas que más te importan?
+• ¿Qué contribución quieres hacer al mundo o a tu comunidad?
+• Si pudieras vivir sin miedo al juicio ajeno, ¿qué harías diferente?
+
+Paso 2 — Elige tus áreas:
+De las siguientes áreas, puntúa la importancia (1–10) y tu satisfacción actual (1–10):
+Familia · Pareja · Amigos · Trabajo · Salud · Crecimiento personal · Ocio · Comunidad · Espiritualidad
+
+Paso 3 — Define tu valor en cada área:
+Para las 3 áreas con mayor brecha (importancia alta, satisfacción baja), escribe:
+"En el área de ___, quiero ser alguien que ___."
+
+Paso 4 — Acción comprometida:
+¿Qué pequeña acción puedes hacer esta semana que sea coherente con ese valor?`,
+  },
+  {
+    id: 'act-03',
+    category: 'act',
+    title: 'Ejercicio del pasajero del autobús',
+    summary: 'Metáfora para relacionarte de forma flexible con pensamientos y emociones difíciles.',
+    goal: 'Aprender a avanzar hacia los valores aunque los pensamientos "pasajeros" provoquen incomodidad.',
+    duration: '10 min',
+    frequency: 'Semanal',
+    difficulty: 'intermedio',
+    tags: ['metáfora', 'aceptación', 'valores', 'pensamientos', 'ACT'],
+    instructions: `Lee esta metáfora y reflexiona sobre ella por escrito:
+
+Imagina que eres el conductor de un autobús.
+Los pasajeros son tus pensamientos, emociones, recuerdos y sensaciones — algunos agradables, otros muy incómodos o amenazantes.
+
+A veces los pasajeros gritan: "¡Gira aquí!", "¡Detente!", "¡Eres un fracasado!"
+La tentación es obedecer o parar el autobús para negociar con ellos.
+
+Pero tú eres el conductor. Solo tú decides la dirección del autobús: hacia tus valores.
+
+Reflexión escrita:
+1. ¿Quiénes son tus "pasajeros" más ruidosos en este momento? (pensamientos, miedos, críticas internas)
+2. ¿A qué destino (valor) te están impidiendo llegar?
+3. ¿Qué significaría seguir conduciendo aunque los pasajeros griten?
+4. ¿Qué acción concreta puedes hacer esta semana en la dirección de ese valor?`,
+  },
+  {
+    id: 'act-04',
+    category: 'act',
+    title: 'Yo como contexto — El observador',
+    summary: 'Conéctate con la parte de ti que observa pensamientos y emociones sin ser definida por ellos.',
+    goal: 'Reducir la identificación rígida con el contenido mental y ampliar la perspectiva.',
+    duration: '10 min',
+    frequency: 'Semanal',
+    difficulty: 'intermedio',
+    tags: ['self', 'observador', 'identidad', 'distancia', 'ACT'],
+    instructions: `Siéntate cómodamente y cierra los ojos. Sigue la guía:
+
+1. Noto que tengo el pensamiento de que [escribe tu pensamiento].
+   — No eres ese pensamiento. Eres quien lo observa.
+
+2. Noto que siento [emoción] en este momento.
+   — No eres esa emoción. Eres quien la nota.
+
+3. Noto que mi cuerpo siente [sensación].
+   — No eres esa sensación. Eres quien la percibe.
+
+4. Piensa en un recuerdo de hace 10 años. ¿Notas que hay algo en ti que estuvo ahí entonces y sigue aquí ahora, observando? Eso eres tú — el observador constante.
+
+5. Desde ese lugar de observación: ¿Qué ves en tu vida con más claridad ahora?
+
+Escribe al menos 3 frases comenzando con "Noto que…" sobre tu semana.`,
+  },
+  {
+    id: 'act-05',
+    category: 'act',
+    title: 'Acción comprometida — Pequeños pasos',
+    summary: 'Define una acción concreta y manejable alineada con un valor personal para esta semana.',
+    goal: 'Construir momentum hacia una vida con sentido a través de pasos pequeños y consistentes.',
+    duration: '10 min',
+    frequency: 'Semanal',
+    difficulty: 'básico',
+    tags: ['valores', 'acción', 'metas', 'comprometida', 'ACT', 'semana'],
+    instructions: `Responde estas preguntas por escrito:
+
+1. ¿Cuál es el valor que quiero honrar esta semana?
+   Ejemplo: "Ser un padre/madre presente" o "Cuidar mi salud".
+
+2. ¿Qué obstáculo (pensamiento, emoción, situación) podría interponerse?
+   No es un problema — solo es útil anticiparlo.
+
+3. ¿Qué acción concreta haré esta semana?
+   Debe ser:
+   ✓ Específica (qué, cuándo, cómo)
+   ✓ Pequeña y realista (no perfecta, solo posible)
+   ✓ Tuya (no depende de que otros cambien)
+
+   Ejemplo: "El martes a las 7 pm leeré un cuento a mi hijo sin el celular cerca."
+
+4. En una escala del 1 al 10, ¿cuán comprometido/a estás con esta acción?
+   Si es menos de 7, reduce la acción hasta que sea un 8 o más.
+
+Comparte el resultado en tu próxima sesión.`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Mindfulness
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'mind-01',
+    category: 'mindfulness',
+    title: 'Meditación de respiración consciente',
+    summary: 'Practica traer la atención al momento presente usando la respiración como ancla.',
+    goal: 'Desarrollar la capacidad de observar el momento presente sin reactividad.',
+    duration: '10 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['meditación', 'respiración', 'atención', 'presente', 'ancla'],
+    instructions: `Busca un lugar tranquilo. Siéntate con la espalda erguida pero sin rigidez.
+
+1. Cierra los ojos o baja suavemente la mirada.
+
+2. Lleva la atención a tu respiración. No la cambies — solo obsérvala.
+   Nota el aire al entrar por la nariz, el movimiento del pecho o el abdomen, y la salida del aire.
+
+3. Cada vez que la mente se vaya (a pensamientos, planes, recuerdos), simplemente nota que se fue sin juzgarte, y regresa suavemente a la respiración.
+   Esto no es un error — es el ejercicio. Regresar es la habilidad.
+
+4. Continúa durante 10 minutos.
+
+5. Al terminar, abre los ojos despacio y observa cómo te sientes.
+
+Anota: ¿Cuántas veces te fuiste? ¿Fue fácil o difícil regresar? ¿Cómo te sientes ahora comparado con antes?`,
+  },
+  {
+    id: 'mind-02',
+    category: 'mindfulness',
+    title: 'Escaneo corporal (body scan)',
+    summary: 'Recorre mentalmente cada parte del cuerpo para aumentar la conciencia corporal y liberar tensión.',
+    goal: 'Conectar con las sensaciones físicas y reducir la tensión acumulada.',
+    duration: '15–20 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['cuerpo', 'tensión', 'sensaciones', 'relajación', 'mindfulness'],
+    instructions: `Acuéstate o siéntate cómodamente. Cierra los ojos.
+
+1. Comienza llevando la atención a los dedos del pie derecho.
+   ¿Notas alguna sensación? Frío, calor, presión, cosquilleo. No intentes cambiar nada.
+
+2. Sube lentamente la atención: pie, tobillo, pantorrilla, rodilla, muslo derecho.
+   Luego repite con la pierna izquierda.
+
+3. Continúa hacia el abdomen, notando el movimiento con cada respiración.
+
+4. Sigue hacia el pecho, hombros, brazos, manos, dedos.
+
+5. Luego el cuello, mandíbula, mejillas, ojos, frente y cuero cabelludo.
+
+6. Si encuentras tensión en algún lugar, simplemente obsérvala y al exhalar imagina que esa zona se ablanda un poco.
+
+7. Termina notando el cuerpo completo como una unidad.
+
+Al finalizar, escribe dos sensaciones que notaste y cómo te sientes.`,
+  },
+  {
+    id: 'mind-03',
+    category: 'mindfulness',
+    title: 'Técnica STOP',
+    summary: 'Mini-pausa de conciencia plena para reconectar con el momento presente en cualquier situación.',
+    goal: 'Interrumpir el piloto automático y responder en lugar de reaccionar.',
+    duration: '2 min',
+    frequency: 'Diario (3–5 veces)',
+    difficulty: 'básico',
+    tags: ['pausa', 'presente', 'reactividad', 'consciencia', 'STOP'],
+    instructions: `Puedes hacer esto en cualquier momento y lugar — nadie notará que lo estás haciendo:
+
+S — Stop (Para):
+Interrumpe lo que estás haciendo por un momento.
+
+T — Take a breath (Respira):
+Haz una respiración lenta y profunda. Inhala 4 segundos, exhala 6 segundos.
+
+O — Observe (Observa):
+¿Qué está pasando en este momento?
+• En tu cuerpo: ¿hay tensión, cansancio, malestar?
+• En tus emociones: ¿cómo te sientes ahora?
+• En tus pensamientos: ¿qué está ocupando tu mente?
+
+P — Proceed (Continúa):
+Retoma lo que estabas haciendo, pero ahora desde un lugar más consciente.
+
+Meta: practica STOP al menos 3 veces hoy — antes de comer, en un momento de tensión y antes de dormir.`,
+  },
+  {
+    id: 'mind-04',
+    category: 'mindfulness',
+    title: 'Mindfulness en actividades cotidianas',
+    summary: 'Elige una actividad diaria y practícala con plena atención como si fuera la primera vez.',
+    goal: 'Integrar la atención plena en la rutina diaria sin necesidad de tiempo extra.',
+    duration: '10–20 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['rutina', 'presente', 'cotidiano', 'integración', 'mindfulness'],
+    instructions: `Elige UNA de estas actividades para practicar con atención plena hoy:
+• Desayuno / comida / cena
+• Ducha o lavarse los dientes
+• Caminar (aunque sea de la cama a la cocina)
+• Lavar los platos
+• Preparar un café o té
+
+Durante esa actividad:
+1. Apaga el celular o ponlo lejos.
+2. Lleva toda tu atención a los sentidos: ¿qué ves, escuchas, hueles, sientes en la piel, en la boca?
+3. Cada vez que tu mente se vaya a otra cosa, sonríe internamente y vuelve a la actividad.
+4. No hay prisa. Eres como un explorador descubriendo algo ordinario por primera vez.
+
+Anota al final: ¿Qué notaste que normalmente no notas? ¿Cómo te sentiste?`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Activación Conductual
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'act-cond-01',
+    category: 'activacion',
+    title: 'Planificación semanal de actividades',
+    summary: 'Programa actividades placenteras y de logro para cada día de la semana.',
+    goal: 'Romper el ciclo de inactividad-depresión aumentando el refuerzo positivo.',
+    duration: '20 min (planificación)',
+    frequency: 'Semanal',
+    difficulty: 'básico',
+    tags: ['depresión', 'rutina', 'refuerzo', 'agenda', 'activación'],
+    instructions: `La depresión reduce la actividad, y la inactividad aumenta la depresión. Rompemos ese ciclo actuando primero.
+
+Paso 1 — Lista de actividades:
+Haz dos listas:
+• Actividades de placer (lo que antes disfrutabas): caminar, música, cocinar, ver amigos…
+• Actividades de logro (tareas pequeñas que te darán sensación de logro): ordenar un cajón, hacer una llamada, preparar una comida.
+
+Paso 2 — Planifica la semana:
+Asigna al menos 1 actividad de placer y 1 de logro por día. Empieza por las más fáciles.
+
+Paso 3 — Registro:
+Después de cada actividad, anota:
+• ¿La hiciste? (Sí / No)
+• Placer percibido (0–10)
+• Logro percibido (0–10)
+• Estado de ánimo antes y después (0–10)
+
+Paso 4 — Reflexión:
+¿Qué actividades mejoraron más tu estado de ánimo? Programa más de esas.`,
+  },
+  {
+    id: 'act-cond-02',
+    category: 'activacion',
+    title: 'Registro de actividades y estado de ánimo',
+    summary: 'Monitorea durante una semana qué haces y cómo te sientes para identificar patrones.',
+    goal: 'Detectar qué actividades están asociadas a mejor estado de ánimo y cuáles lo empeoran.',
+    duration: '5 min al día',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['monitoreo', 'actividad', 'estado de ánimo', 'patrones', 'depresión'],
+    instructions: `Cada hora (o al menos 4 veces al día) anota en una tabla:
+
+| Hora | ¿Qué hacías? | Estado de ánimo (0–10) |
+
+Instrucciones:
+• 0 = estado de ánimo más bajo posible, 10 = el mejor posible.
+• Sé específico/a con la actividad: "viendo redes sociales" es diferente a "hablando con un amigo".
+• No juzgues — solo registra.
+
+Al final de la semana, revisa:
+• ¿Qué actividades coinciden con los momentos de mejor estado de ánimo?
+• ¿Qué actividades coinciden con los peores momentos?
+• ¿Hay patrones horarios?
+
+Trae la tabla a la próxima sesión para analizarla juntos.`,
+  },
+  {
+    id: 'act-cond-03',
+    category: 'activacion',
+    title: 'Lista de actividades placenteras',
+    summary: 'Construye un banco personal de actividades que generan bienestar para tener siempre a mano.',
+    goal: 'Tener un repertorio amplio de actividades positivas para la planificación conductual.',
+    duration: '15 min',
+    frequency: 'Única vez (actualizar mensualmente)',
+    difficulty: 'básico',
+    tags: ['placer', 'refuerzo', 'bienestar', 'banco', 'recursos'],
+    instructions: `Crea tu banco personal de actividades placenteras en tres categorías:
+
+🟢 Actividades sencillas (5–15 min, sin preparación):
+Escribe al menos 10: escuchar una canción favorita, salir a la calle, preparar un té, llamar a alguien, leer unas páginas, estirar el cuerpo, mirar fotos bonitas…
+
+🟡 Actividades medianas (30 min – 2h, algo de planificación):
+Escribe al menos 8: ir al cine, cocinar algo especial, pasear en un parque, ver una serie, practicar un hobby, visitar a alguien…
+
+🔴 Actividades especiales (más de 2h, planificación mayor):
+Escribe al menos 5: un viaje de fin de semana, un concierto, una clase nueva, un día en la naturaleza…
+
+Guarda esta lista en un lugar visible.
+Cuando estés con bajo estado de ánimo, elige siempre de la categoría verde primero.`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Regulación Emocional
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'emoc-01',
+    category: 'emocional',
+    title: 'Diario emocional',
+    summary: 'Registra tus emociones diarias con contexto para aumentar la inteligencia emocional.',
+    goal: 'Ampliar el vocabulario emocional y la conciencia de los propios estados internos.',
+    duration: '10 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['emociones', 'registro', 'autoconciencia', 'vocabulario', 'diario'],
+    instructions: `Cada noche, antes de dormir, responde estas preguntas por escrito:
+
+1. ¿Cuál fue la emoción más intensa que sentí hoy?
+   Nómbrala con precisión (no solo "bien" o "mal"). Usa: ansiedad, orgullo, vergüenza, gratitud, tristeza, enojo, ternura, frustración, alivio, soledad…
+
+2. ¿Qué la desencadenó? (situación, persona, pensamiento)
+
+3. ¿Dónde la sentí en el cuerpo? (pecho oprimido, nudo en la garganta, tensión en los hombros…)
+
+4. ¿Cómo reaccioné? (¿fue útil esa reacción?)
+
+5. ¿Qué necesitaba yo en ese momento?
+
+6. ¿Qué emoción quisiera sentir más seguido? ¿Qué podría favorecerla?
+
+Revisa las entradas semanalmente: ¿hay patrones? ¿Qué desencadenantes se repiten?`,
+  },
+  {
+    id: 'emoc-02',
+    category: 'emocional',
+    title: 'Técnica de los opuestos (Opposite Action)',
+    summary: 'Actúa de forma opuesta a lo que la emoción te impulsa a hacer cuando esa acción no es útil.',
+    goal: 'Cambiar la intensidad emocional a través de la acción contraria a la urgencia del impulso.',
+    duration: '10–20 min',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['emoción', 'impulso', 'acción opuesta', 'DBT', 'regulación'],
+    instructions: `Usa esta técnica cuando la emoción sea intensa pero actuar según ella sea perjudicial:
+
+Paso 1 — Identifica la emoción y su acción impulsiva:
+• Miedo → evitar / huir
+• Tristeza → aislarse, no hacer nada
+• Enojo → atacar, distanciarse
+• Vergüenza → esconderse
+• Ansiedad → buscar reaseguramiento
+
+Paso 2 — Evalúa: ¿Es útil actuar según ese impulso en esta situación?
+Si la respuesta es NO, aplica la acción opuesta.
+
+Paso 3 — Elige y haz la acción opuesta completamente:
+• Miedo → acércate suavemente a lo temido
+• Tristeza → haz una actividad activa, contacta con alguien
+• Enojo → haz algo amable por la persona; aléjate y cuida el cuerpo
+• Vergüenza → comparte lo que te avergüenza con alguien de confianza
+
+Paso 4 — Evalúa: ¿Cómo cambió la intensidad emocional (0–10)?`,
+  },
+  {
+    id: 'emoc-03',
+    category: 'emocional',
+    title: 'Registro de intensidad emocional',
+    summary: 'Monitorea la intensidad de emociones difíciles a lo largo del día para identificar picos y factores.',
+    goal: 'Aumentar la conciencia emocional y detectar desencadenantes.',
+    duration: '2 min (varias veces al día)',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['intensidad', 'emociones', 'monitoreo', 'regulación', 'picos'],
+    instructions: `3 veces al día (mañana, tarde, noche) completa esta evaluación rápida:
+
+Hora: ___
+Emoción principal: ___
+Intensidad (0–10): ___
+¿Qué la provocó? (una frase): ___
+¿Qué hice? (una frase): ___
+
+Al final del día:
+• ¿En qué momento del día la intensidad fue mayor?
+• ¿Qué situaciones o pensamientos la dispararon?
+• ¿Qué estrategias usaste? ¿Cuáles funcionaron mejor?
+
+Al final de la semana, trae el registro a la sesión para analizarlo juntos y diseñar estrategias específicas para los picos más frecuentes.`,
+  },
+  {
+    id: 'emoc-04',
+    category: 'emocional',
+    title: 'Autocompasión en momentos difíciles',
+    summary: 'Aplícate la misma amabilidad y comprensión que le darías a un buen amigo que está sufriendo.',
+    goal: 'Reducir la autocrítica y cultivar una relación más compasiva con uno mismo.',
+    duration: '10 min',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['autocompasión', 'Neff', 'crítica interna', 'amabilidad', 'humanidad común'],
+    instructions: `Cuando estés pasando un momento difícil, practica estos tres pasos (Kristin Neff):
+
+1. Mindfulness — reconoce el sufrimiento sin exagerarlo ni minimizarlo:
+   Escribe o piensa: "Esto es un momento de sufrimiento. Estoy luchando ahora mismo."
+
+2. Humanidad común — recuerda que no estás solo/a:
+   "El sufrimiento y las dificultades son parte de la vida humana. Otras personas sienten esto también."
+
+3. Amabilidad hacia uno mismo — trátate como tratarías a un buen amigo:
+   Pon una mano en el corazón y pregúntate:
+   "¿Qué necesito escuchar ahora mismo?"
+   "¿Qué le diría a un amigo que estuviera pasando por esto?"
+   Escríbete ese mensaje.
+
+Al finalizar, lee lo que escribiste en voz alta. Nota cómo te sientes.`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Relajación y Respiración
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'relax-01',
+    category: 'relajacion',
+    title: 'Respiración diafragmática 4-7-8',
+    summary: 'Técnica de respiración que activa el sistema nervioso parasimpático para reducir ansiedad.',
+    goal: 'Calmar el sistema nervioso de forma rápida en situaciones de estrés o ansiedad.',
+    duration: '5 min',
+    frequency: 'Diario (2–3 veces)',
+    frequency_alt: 'Según necesidad',
+    difficulty: 'básico',
+    tags: ['respiración', 'ansiedad', 'relajación', 'nervioso', 'parasimpático'],
+    instructions: `Puedes hacerlo sentado, de pie o acostado:
+
+1. Exhala completamente por la boca haciendo un sonido suave.
+
+2. Cierra la boca e inhala silenciosamente por la nariz contando mentalmente hasta 4.
+
+3. Retén el aire contando hasta 7.
+
+4. Exhala completamente por la boca (puedes hacer un pequeño sonido) contando hasta 8.
+
+Esto es un ciclo. Repite 4 ciclos al principio (puedes aumentar a 8 con la práctica).
+
+Importante:
+• La exhalación siempre es el doble (o más) que la inhalación.
+• Si te mareas, vuelve a respirar normalmente. Es normal al principio.
+• Practica en momentos de calma antes de usarla en momentos de crisis.
+
+Usa esta técnica antes de dormir, al despertar, o cuando sientas ansiedad.`,
+  },
+  {
+    id: 'relax-02',
+    category: 'relajacion',
+    title: 'Respiración cuadrada (box breathing)',
+    summary: 'Técnica usada por equipos de fuerzas especiales para regular el estrés en situaciones de alta presión.',
+    goal: 'Estabilizar el sistema nervioso y mejorar la concentración bajo presión.',
+    duration: '5 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['respiración', 'cuadrada', 'concentración', 'estrés', 'Navy SEAL'],
+    instructions: `La respiración cuadrada tiene 4 fases iguales de 4 segundos cada una:
+
+Lado 1 — Inhala:
+Respira lentamente por la nariz durante 4 segundos.
+
+Lado 2 — Retén:
+Mantén el aire 4 segundos sin tensión.
+
+Lado 3 — Exhala:
+Suelta el aire lentamente por la boca durante 4 segundos.
+
+Lado 4 — Pausa:
+Mantén los pulmones vacíos durante 4 segundos.
+
+Repite el cuadrado 4–6 veces.
+
+Visualización opcional: imagina que estás dibujando un cuadrado con la mente, un lado por fase.
+
+Con la práctica, puedes aumentar a 5 o 6 segundos por fase.
+Ideal antes de situaciones estresantes: exámenes, reuniones importantes, conversaciones difíciles.`,
+  },
+  {
+    id: 'relax-03',
+    category: 'relajacion',
+    title: 'Relajación muscular progresiva (Jacobson)',
+    summary: 'Tensa y suelta grupos musculares de forma sistemática para liberar tensión física.',
+    goal: 'Reducir la tensión muscular y el estado de alerta fisiológico asociados a la ansiedad.',
+    duration: '20 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['músculos', 'tensión', 'Jacobson', 'relajación', 'cuerpo'],
+    instructions: `Acuéstate o siéntate cómodamente. Sigue este orden de grupos musculares:
+
+Para cada grupo:
+• Tensa el músculo con fuerza (sin dolor) durante 5 segundos.
+• Suelta de repente y nota la diferencia durante 15–20 segundos.
+• Respira profundo antes de pasar al siguiente.
+
+Grupos musculares (de abajo hacia arriba):
+1. Pies: dobla los dedos hacia dentro
+2. Pantorrillas: apunta los pies hacia arriba
+3. Muslos: aprieta los músculos del muslo
+4. Abdomen: tensa el estómago
+5. Manos: cierra el puño
+6. Antebrazos: dobla la muñeca
+7. Bíceps: dobla el brazo
+8. Hombros: súbelos hacia las orejas
+9. Cuello: presiona la cabeza hacia atrás suavemente
+10. Cara: frunce toda la cara
+
+Al terminar, permanece en reposo 2–3 minutos y observa cómo se siente el cuerpo.`,
+  },
+  {
+    id: 'relax-04',
+    category: 'relajacion',
+    title: 'Grounding 5-4-3-2-1',
+    summary: 'Técnica de anclaje sensorial para salir de la disociación o los ataques de pánico.',
+    goal: 'Reconectar con el momento presente usando los 5 sentidos en momentos de disociación o crisis.',
+    duration: '5 min',
+    frequency: 'Según necesidad',
+    difficulty: 'básico',
+    tags: ['grounding', 'disociación', 'pánico', 'sentidos', 'presente', 'anclaje'],
+    instructions: `Cuando sientas que te estás "despegando" de la realidad o estás en pánico:
+
+5 — Nombra 5 cosas que puedes VER ahora mismo:
+Mira a tu alrededor y descríbelas en detalle: color, forma, tamaño.
+
+4 — Nombra 4 cosas que puedes TOCAR:
+Toca tu ropa, la silla, una superficie. Describe la textura, la temperatura.
+
+3 — Nombra 3 cosas que puedes ESCUCHAR:
+Presta atención a los sonidos del ambiente: cercanos, lejanos, suaves, fuertes.
+
+2 — Nombra 2 cosas que puedes OLER (o que te gustan oler):
+Si no hueles nada, piensa en un olor favorito.
+
+1 — Nombra 1 cosa que puedes SABOREAR:
+Un sabor presente o un favorito que recuerdes.
+
+Respira profundamente entre cada sentido.
+Puedes repetirlo hasta que sientas los pies en el suelo.`,
+  },
+  {
+    id: 'relax-05',
+    category: 'relajacion',
+    title: 'Visualización del lugar seguro',
+    summary: 'Crea mentalmente un lugar de calma y refugio al que puedas acudir cuando necesites serenidad.',
+    goal: 'Desarrollar un recurso interno de calma accesible en cualquier momento.',
+    duration: '10 min',
+    frequency: 'Semanal',
+    difficulty: 'básico',
+    tags: ['visualización', 'refugio', 'calma', 'imaginación', 'seguridad'],
+    instructions: `Siéntate o acuéstate cómodamente. Cierra los ojos y respira profundamente 3 veces.
+
+1. Imagina un lugar donde te sientes completamente seguro/a y en paz.
+   Puede ser real (un lugar que conoces) o imaginario.
+
+2. Explora ese lugar con todos los sentidos:
+   • ¿Qué ves? (paisaje, luz, colores)
+   • ¿Qué escuchas? (silencio, agua, viento, música)
+   • ¿Qué sientes en la piel? (temperatura, brisa, textura)
+   • ¿Qué hueles?
+
+3. Nota cómo se siente tu cuerpo en ese lugar. Deja que la calma entre en cada respiración.
+
+4. Permanece ahí 5–8 minutos. Si la mente se va, vuelve suavemente al lugar.
+
+5. Antes de abrir los ojos, crea una "señal de acceso": una palabra, imagen o gesto que te lleve de vuelta a ese lugar cuando lo necesites.
+
+Practica regularmente para que sea un recurso disponible en momentos difíciles.`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Escritura Reflexiva
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'escr-01',
+    category: 'escritura',
+    title: 'Carta a mi yo futuro',
+    summary: 'Escríbete una carta desde el futuro imaginando que ya has superado la dificultad actual.',
+    goal: 'Activar la perspectiva de crecimiento y fortalecer la esperanza orientada al futuro.',
+    duration: '20 min',
+    frequency: 'Mensual',
+    difficulty: 'básico',
+    tags: ['esperanza', 'futuro', 'narrativa', 'perspectiva', 'escritura'],
+    instructions: `Imagina que han pasado 2 años y has superado los desafíos actuales. Eres esa versión futura de ti mismo/a.
+
+Escríbete una carta desde ese lugar, dirigida a tu yo de hoy. Incluye:
+
+1. ¿Cómo te encuentras ahora (en el futuro)? ¿Qué ha cambiado?
+
+2. ¿Qué fue lo más difícil del proceso? ¿Qué te ayudó a superarlo?
+
+3. ¿Qué le quieres decir a tu yo de hoy que lo está pasando mal?
+
+4. ¿Qué aprendiste sobre ti mismo/a en ese proceso?
+
+5. ¿Qué quieres que tu yo actual sepa o no olvide?
+
+Escribe al menos una página completa. No te corrijas — deja fluir.
+
+Al terminar, léela en voz alta y observa cómo te sientes.`,
+  },
+  {
+    id: 'escr-02',
+    category: 'escritura',
+    title: 'Diario de gratitud',
+    summary: 'Registra tres cosas por las que te sientes agradecido/a cada día, con los motivos detrás.',
+    goal: 'Entrenar la atención hacia lo positivo y aumentar el bienestar subjetivo.',
+    duration: '5–10 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['gratitud', 'bienestar', 'positivo', 'diario', 'Emmons'],
+    instructions: `Cada noche, antes de dormir, escribe:
+
+3 cosas por las que me siento agradecido/a hoy:
+
+1. ___ → ¿Por qué me importa esto? ¿Cómo contribuyó a mi bienestar?
+2. ___ → ¿Por qué me importa esto?
+3. ___ → ¿Por qué me importa esto?
+
+Reglas para hacerlo efectivo:
+• Busca especificidad: no "mi familia" sino "la llamada de mi hermana esta tarde".
+• Varía las cosas que escribes — no repitas las mismas cada día.
+• Incluye pequeñas cosas: una comida rica, una buena conversación, el sol por la ventana.
+• Algunos días puede parecer difícil. Eso también tiene valor — busca con más atención.
+
+Práctica opcional: antes de escribir, siéntate un momento y siente genuinamente la gratitud en el cuerpo.`,
+  },
+  {
+    id: 'escr-03',
+    category: 'escritura',
+    title: 'Carta de autocompasión',
+    summary: 'Escríbete una carta compasiva sobre una situación por la que te criticas o juzgas.',
+    goal: 'Reducir la autocrítica y cultivar la comprensión hacia uno mismo como se haría con un amigo.',
+    duration: '20 min',
+    frequency: 'Semanal',
+    difficulty: 'intermedio',
+    tags: ['autocompasión', 'autocrítica', 'carta', 'Neff', 'amabilidad'],
+    instructions: `Elige una situación por la que te sientes mal contigo mismo/a (algo que hiciste o no hiciste, una característica que no te gusta, una situación dolorosa).
+
+Escribe una carta desde el punto de vista de un amigo/a imaginario que:
+• Te quiere incondicionalmente
+• Es sabio/a y comprensivo/a
+• No te juzga
+
+En la carta, ese amigo debe:
+
+1. Reconocer tu dolor y sufrimiento sin minimizarlo.
+   "Entiendo que esto ha sido muy difícil para ti…"
+
+2. Recordarte que sufrir y cometer errores es parte de ser humano.
+   "Nadie es perfecto y todos pasamos por momentos así…"
+
+3. Ofrecerte amabilidad y comprensión, no consejos.
+   "Lo que necesitas ahora es…"
+
+4. Si hay algo que cambiar, mencionarlo con gentileza, no con juicio.
+
+Al terminar, léela en voz alta. ¿Cómo se siente recibirla?`,
+  },
+  {
+    id: 'escr-04',
+    category: 'escritura',
+    title: 'Diario de fortalezas',
+    summary: 'Registra cada día situaciones en las que usaste una fortaleza personal.',
+    goal: 'Aumentar el autoconocimiento de fortalezas y su uso activo en la vida diaria.',
+    duration: '10 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['fortalezas', 'virtudes', 'VIA', 'autoconocimiento', 'recursos'],
+    instructions: `Durante 7 días, antes de dormir, completa este registro:
+
+¿Qué fortaleza usé hoy?
+(Ejemplos: creatividad, curiosidad, valentía, perseverancia, amabilidad, liderazgo, humor, gratitud, esperanza, honestidad, prudencia…)
+
+Fortaleza: ___
+Situación donde la usé: ___
+¿Cómo lo noté yo? ___
+¿Lo notó alguien más? ___
+¿Cómo me sentí después de usarla? ___
+
+¿Cómo podría usar esta misma fortaleza mañana?
+Situación: ___ · Plan concreto: ___
+
+Al terminar la semana: ¿Cuál fue tu fortaleza más frecuente? ¿Cuál te gustaría desarrollar más?
+
+Trae el registro a la próxima sesión.`,
+  },
+  {
+    id: 'escr-05',
+    category: 'escritura',
+    title: 'Escritura expresiva de Pennebaker',
+    summary: 'Escribe libremente sobre una experiencia emocional difícil durante 4 días consecutivos.',
+    goal: 'Procesar experiencias traumáticas o estresantes mediante la escritura libre y sin censura.',
+    duration: '20 min',
+    frequency: '4 días consecutivos',
+    difficulty: 'avanzado',
+    tags: ['Pennebaker', 'trauma', 'expresión', 'procesamiento', 'escritura libre'],
+    instructions: `Este ejercicio está basado en la investigación de James Pennebaker (Universidad de Texas).
+
+Durante 4 días consecutivos, escribe durante 20 minutos ininterrumpidos sobre:
+Una experiencia emocionalmente significativa, dolorosa o que todavía te afecte.
+
+Instrucciones clave:
+• Escribe sin parar — si te quedas sin ideas, repite la última frase hasta que lleguen más.
+• No te corrijas, no te preocupes por la ortografía o el estilo.
+• Escribe sobre lo que sentiste y sientes, no solo lo que pasó (pensamientos y emociones).
+• Puedes escribir sobre el mismo evento o diferentes cada día.
+• Lo que escribas es completamente privado.
+
+Puede ser incómodo al principio. Esto es normal.
+
+Importante: si sientes que el material es muy intenso, habla con tu terapeuta antes de continuar.
+
+Al finalizar los 4 días, escribe una reflexión: ¿Qué aprendiste? ¿Cómo te sientes ahora comparado con el día 1?`,
+  },
+  {
+    id: 'escr-06',
+    category: 'escritura',
+    title: 'Carta al problema',
+    summary: 'Escríbele directamente al problema como si fuera una entidad separada de ti.',
+    goal: 'Externalizar el problema para verlo con más distancia y recuperar sensación de agencia.',
+    duration: '15 min',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['narrativa', 'externalización', 'White', 'agencia', 'escritura'],
+    instructions: `Esta técnica viene de la terapia narrativa (White & Epston).
+
+Paso 1 — Pon nombre al problema:
+¿Cómo llamarías al problema si fuera una entidad?
+Ejemplos: "La Tristeza gris", "El Miedo controlador", "La Autocrítica implacable".
+
+Paso 2 — Escríbele una carta directamente:
+Empieza con: "Querida/o ___,"
+
+En la carta puedes decirle:
+• Cuánto tiempo llevas aguantándolo/a
+• Cómo ha afectado tu vida, tus relaciones, tus decisiones
+• Qué has aprendido de él/ella
+• Qué ya no estás dispuesto/a a tolerar
+• Qué tipo de relación quieres tener de ahora en adelante
+
+Paso 3 — Escribe la respuesta del problema (si quieres):
+¿Qué te diría el problema a ti?
+
+Paso 4 — Reflexión:
+¿Qué descubriste al verlo como algo separado de ti?`,
+  },
+]
+
+// ── Función de búsqueda ───────────────────────────────────────────────────────
+export function searchLibrary(query) {
+  const q = query.toLowerCase().trim()
+  if (!q) return LIBRARY
+  return LIBRARY.filter(ex =>
+    ex.title.toLowerCase().includes(q) ||
+    ex.summary.toLowerCase().includes(q) ||
+    ex.goal.toLowerCase().includes(q) ||
+    ex.tags.some(t => t.toLowerCase().includes(q)) ||
+    ex.category.toLowerCase().includes(q)
+  )
+}
