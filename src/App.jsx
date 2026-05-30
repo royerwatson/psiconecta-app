@@ -16,6 +16,9 @@ import AdminSessions       from '@/pages/admin/AdminSessions'
 import AdminStats          from '@/pages/admin/AdminStats'
 import AdminGroupSessions  from '@/pages/admin/AdminGroupSessions'
 import AdminAIAlerts       from '@/pages/admin/AdminAIAlerts'
+import AdminFinancial      from '@/pages/admin/AdminFinancial'
+import AdminActivityLog    from '@/pages/admin/AdminActivityLog'
+import AdminReviews        from '@/pages/admin/AdminReviews'
 
 // Auth
 import Login          from '@/pages/auth/Login'
@@ -220,6 +223,9 @@ export default function App() {
           <Route path="sessions"   element={<AdminSessions />} />
           <Route path="groups"     element={<AdminGroupSessions />} />
           <Route path="stats"      element={<AdminStats />} />
+          <Route path="financial"  element={<AdminFinancial />} />
+          <Route path="activity"   element={<AdminActivityLog />} />
+          <Route path="reviews"    element={<AdminReviews />} />
         </Route>
 
         {/* Redireccionamiento raíz */}
