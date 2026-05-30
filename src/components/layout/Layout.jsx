@@ -30,6 +30,7 @@ const patientNav = [
   { to: '/patient/find',         icon: '🔍', label: 'Terapeutas' },
   { to: '/patient/appointments', icon: '📅', label: 'Mis Citas'  },
   { to: '/patient/tasks',        icon: '📋', label: 'Mis Tareas' },
+  { to: '/patient/journal',      icon: '📓', label: 'Diario'     },
   { to: '/patient/chat',         icon: '💬', label: 'Mensajes'   },
   { to: '/patient/profile',      icon: '⚙️', label: 'Perfil'     },
 ]
