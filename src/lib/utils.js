@@ -91,7 +91,13 @@ export const canStartVideo = (scheduledAt) => {
   const now = new Date()
   const diffMs = sessionTime - now
   const diffMin = diffMs / 1000 / 60
-  return diffMin <= 15 && diffMin >= -90 // 15 min antes hasta 90 min después
+  return diffMin <= 30 && diffMin >= -90 // 30 min antes hasta 90 min después
+}
+
+// Minutos restantes hasta el inicio de sesión (negativo = ya pasó)
+export const minutesUntilSession = (scheduledAt) => {
+  const sessionTime = typeof scheduledAt === 'string' ? parseISO(scheduledAt) : scheduledAt
+  return Math.round((sessionTime - new Date()) / 1000 / 60)
 }
 
 // Saludo dinámico según hora del día

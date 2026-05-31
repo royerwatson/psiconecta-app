@@ -6,7 +6,7 @@ import Card, { StatCard } from '@/components/ui/Card'
 import Badge from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Avatar from '@/components/ui/Avatar'
-import { formatSessionDate, formatPrice, canStartVideo, getGreeting } from '@/lib/utils'
+import { formatSessionDate, formatPrice, canStartVideo, minutesUntilSession, getGreeting } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import MoodTracker from '@/components/patient/MoodTracker'
 import AICheckin from '@/components/patient/AICheckin'
@@ -14,7 +14,7 @@ import PendingTestsSection from '@/components/psychometrics/PendingTestsSection'
 import StarRating from '@/components/ui/StarRating'
 import { Textarea } from '@/components/ui/Input'
 import toast from 'react-hot-toast'
-import { Play, ChevronRight, Flame, Zap, Sparkles, ClipboardList, Calendar, MessageCircle, Search } from 'lucide-react'
+import { Play, ChevronRight, Flame, Zap, Sparkles, ClipboardList, Calendar, MessageCircle, Search, Clock } from 'lucide-react'
 
 /**
  * Dashboard principal del paciente.
@@ -42,11 +42,19 @@ export default function PatientDashboard() {
   const [reviewForm, setReviewForm] = useState({ rating: 0, comment: '' })
   const [submittingReview, setSubmittingReview] = useState(false)
   const [reviewDismissed, setReviewDismissed] = useState(false)
+  const [, forceUpdate] = useState(0)
   const navigate = useNavigate()
 
   useEffect(() => {
     if (user) fetchData()
   }, [user])
+
+  // Refresca el countdown cada 30 segundos para que el botón de unirse
+  // aparezca automáticamente sin tener que recargar la página
+  useEffect(() => {
+    const timer = setInterval(() => forceUpdate(n => n + 1), 30_000)
+    return () => clearInterval(timer)
+  }, [])
 
   const calcStreak = (logs) => {
     if (!logs || logs.length === 0) return 0
@@ -252,11 +260,24 @@ export default function PatientDashboard() {
             {canStartVideo(nextSession.scheduled_at) ? (
               <button
                 onClick={() => navigate(`/video-call/${nextSession.id}`)}
-                className="shrink-0 flex items-center justify-center w-12 h-12 rounded-2xl bg-white hover:bg-white/90 active:scale-95 transition-all shadow-lg"
+                className="shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white hover:bg-white/90 active:scale-95 transition-all shadow-lg"
                 title="Unirse a la sesión"
               >
-                <Play size={20} strokeWidth={0} fill="#4338ca" />
+                <Play size={16} strokeWidth={0} fill="#4338ca" />
+                <span className="text-xs font-bold text-primary-700">Unirse</span>
               </button>
+            ) : minutesUntilSession(nextSession.scheduled_at) > 0 ? (
+              <div className="shrink-0 flex flex-col items-center gap-0.5">
+                <div className="flex items-center gap-1 px-3 py-2 rounded-xl bg-white/15 text-white/90">
+                  <Clock size={13} />
+                  <span className="text-xs font-bold tabular-nums">
+                    {minutesUntilSession(nextSession.scheduled_at) < 60
+                      ? `${minutesUntilSession(nextSession.scheduled_at)} min`
+                      : `${Math.floor(minutesUntilSession(nextSession.scheduled_at) / 60)}h`}
+                  </span>
+                </div>
+                <span className="text-[10px] text-white/50">para iniciar</span>
+              </div>
             ) : (
               <button
                 onClick={() => navigate('/patient/appointments')}
