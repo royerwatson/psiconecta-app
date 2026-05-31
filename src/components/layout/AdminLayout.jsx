@@ -10,6 +10,7 @@ const NAV = [
   { to: '/admin/groups',      icon: '🫂', label: 'Grupales'    },
   { to: '/admin/stats',       icon: '📈', label: 'Estadísticas'},
   { to: '/admin/financial',   icon: '💰', label: 'Finanzas'    },
+  { to: '/admin/payouts',     icon: '💸', label: 'Pagos'       },
   { to: '/admin/activity',    icon: '📋', label: 'Actividad'   },
   { to: '/admin/reviews',     icon: '⭐', label: 'Reseñas'     },
 ]
