@@ -1,21 +1,26 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import { Skeleton } from '@/components/ui/Spinner'
+import {
+  Calendar, CheckCircle2, XCircle, GraduationCap, Ban,
+  User, Stethoscope, Star, Bot, ClipboardList, Pin, RefreshCw, Inbox,
+} from 'lucide-react'
 
 // ─── Config de eventos ────────────────────────────────────────────────────────
 
 const EVENT_TYPES = {
-  session_scheduled:  { icon: '📅', color: 'bg-blue-100 text-blue-700',      label: 'Sesión programada'   },
-  session_completed:  { icon: '✅', color: 'bg-emerald-100 text-emerald-700', label: 'Sesión completada'   },
-  session_cancelled:  { icon: '❌', color: 'bg-red-100 text-red-600',         label: 'Sesión cancelada'    },
-  therapist_verified: { icon: '🎓', color: 'bg-violet-100 text-violet-700',   label: 'Terapeuta verificado'},
-  therapist_rejected: { icon: '🚫', color: 'bg-orange-100 text-orange-700',   label: 'Terapeuta rechazado' },
-  new_patient:        { icon: '🙋', color: 'bg-teal-100 text-teal-700',       label: 'Nuevo paciente'      },
-  new_therapist:      { icon: '🧑‍⚕️', color: 'bg-indigo-100 text-indigo-700', label: 'Nuevo terapeuta'     },
-  review_posted:      { icon: '⭐', color: 'bg-amber-100 text-amber-700',      label: 'Reseña publicada'    },
-  checkin_alert:      { icon: '🤖', color: 'bg-red-100 text-red-600',         label: 'Alerta IA'           },
-  task_created:       { icon: '📋', color: 'bg-warm-100 text-warm-600',       label: 'Tarea creada'        },
+  session_scheduled:  { Icon: Calendar,       color: 'bg-blue-100 text-blue-700',      label: 'Sesión programada'    },
+  session_completed:  { Icon: CheckCircle2,   color: 'bg-emerald-100 text-emerald-700', label: 'Sesión completada'   },
+  session_cancelled:  { Icon: XCircle,        color: 'bg-red-100 text-red-600',         label: 'Sesión cancelada'    },
+  therapist_verified: { Icon: GraduationCap,  color: 'bg-violet-100 text-violet-700',   label: 'Terapeuta verificado'},
+  therapist_rejected: { Icon: Ban,            color: 'bg-orange-100 text-orange-700',   label: 'Terapeuta rechazado' },
+  new_patient:        { Icon: User,           color: 'bg-teal-100 text-teal-700',       label: 'Nuevo paciente'      },
+  new_therapist:      { Icon: Stethoscope,    color: 'bg-indigo-100 text-indigo-700',   label: 'Nuevo terapeuta'     },
+  review_posted:      { Icon: Star,           color: 'bg-amber-100 text-amber-700',     label: 'Reseña publicada'    },
+  checkin_alert:      { Icon: Bot,            color: 'bg-red-100 text-red-600',         label: 'Alerta IA'           },
+  task_created:       { Icon: ClipboardList,  color: 'bg-warm-100 text-warm-600',       label: 'Tarea creada'        },
 }
+const DEFAULT_EVENT = { Icon: Pin, color: 'bg-warm-100 text-warm-600' }
 
 const ALL_TYPES = Object.keys(EVENT_TYPES)
 
@@ -92,7 +97,7 @@ async function buildActivityFeed(days) {
       id: `rev-${r.id}`,
       type: 'review_posted',
       ts: r.created_at,
-      description: `${r.rating}★ para ${r.therapist?.full_name ?? 'Terapeuta'}`,
+      description: `${r.rating}/5 estrellas para ${r.therapist?.full_name ?? 'Terapeuta'}`,
     })
   })
 
@@ -244,7 +249,7 @@ export default function AdminActivityLog() {
         <button onClick={load}
           className="px-3 py-2 rounded-xl text-sm border border-warm-200 bg-white text-warm-600 hover:bg-warm-50 transition-colors"
           title="Actualizar">
-          🔄
+          <RefreshCw size={14} />
         </button>
       </div>
 
@@ -260,7 +265,8 @@ export default function AdminActivityLog() {
                 className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition-all border ${
                   typeFilter === t ? 'border-primary-400 ring-1 ring-primary-400' : 'border-transparent'
                 } ${cfg.color}`}>
-                {cfg.icon} {cfg.label} <span className="opacity-70">({count})</span>
+                {(() => { const BIcon = cfg.Icon; return <BIcon size={12} strokeWidth={1.8} /> })()}
+                {cfg.label} <span className="opacity-70">({count})</span>
               </button>
             )
           })}
@@ -274,7 +280,7 @@ export default function AdminActivityLog() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-warm-400">
-          <div className="text-4xl mb-2">📭</div>
+          <Inbox size={40} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
           <p>No hay eventos que coincidan con los filtros</p>
         </div>
       ) : (
@@ -293,12 +299,12 @@ export default function AdminActivityLog() {
               {/* Eventos del día */}
               <div className="flex flex-col gap-1">
                 {dayEvents.map(ev => {
-                  const cfg = EVENT_TYPES[ev.type] ?? { icon: '📌', color: 'bg-warm-100 text-warm-600', label: ev.type }
+                  const cfg = EVENT_TYPES[ev.type] ?? { color: 'bg-warm-100 text-warm-600', label: ev.type }
                   return (
                     <div key={ev.id}
                       className="bg-white border border-warm-100 rounded-xl px-4 py-3 flex items-start gap-3 hover:border-warm-200 transition-colors">
-                      <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-sm ${cfg.color}`}>
-                        {cfg.icon}
+                      <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${cfg.color}`}>
+                        {(() => { const EIcon = cfg.Icon ?? DEFAULT_EVENT.Icon; return <EIcon size={15} strokeWidth={1.8} /> })()}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-semibold text-warm-500 uppercase tracking-wide mb-0.5">

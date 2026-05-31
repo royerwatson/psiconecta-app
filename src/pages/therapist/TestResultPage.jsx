@@ -6,6 +6,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import { formatDateTime } from '@/lib/utils'
 import toast from 'react-hot-toast'
+import { CheckCircle2, Calendar, Check, Clock, AlertTriangle } from 'lucide-react'
 
 // ─── Helpers visuales ────────────────────────────────────────────────────────
 
@@ -237,7 +238,7 @@ export default function TestResultPage() {
       {unacknowledged.length > 0 && (
         <div className="bg-red-50 border-2 border-red-300 rounded-2xl p-5">
           <div className="flex items-center gap-3 mb-3">
-            <span className="text-2xl">🔴</span>
+            <span className="w-5 h-5 rounded-full bg-red-500 inline-block flex-shrink-0" />
             <div>
               <p className="font-bold text-red-900 text-base">Alerta clínica — Acción requerida</p>
               <p className="text-xs text-red-600 mt-0.5">Las alertas deben ser reconocidas y documentadas</p>
@@ -262,7 +263,7 @@ export default function TestResultPage() {
       {/* Alertas reconocidas */}
       {riskAlerts.filter(a => a.is_acknowledged).map(alert => (
         <div key={alert.id} className="bg-warm-50 border border-warm-200 rounded-xl p-3 flex items-center gap-2 text-xs text-warm-500">
-          <span>✅</span>
+          <CheckCircle2 size={15} strokeWidth={1.8} className="text-emerald-500 shrink-0" />
           <span><strong>Alerta resuelta:</strong> {alert.description}</span>
           {alert.action_taken && <span>· Acción: "{alert.action_taken}"</span>}
         </div>
@@ -283,10 +284,10 @@ export default function TestResultPage() {
           </div>
         </div>
         <div className="flex items-center gap-4 mt-4 pt-4 border-t border-warm-100 flex-wrap">
-          <span className="text-xs text-warm-400">📅 Completado: {formatDateTime(session?.completed_at)}</span>
+          <span className="text-xs text-warm-400 flex items-center gap-1"><Calendar size={11} strokeWidth={1.8} className="inline" /> Completado: {formatDateTime(session?.completed_at)}</span>
           {allReleased
-            ? <span className="text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-700 font-medium">✓ Resultado liberado</span>
-            : <span className="text-xs px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 font-medium">⏳ Sin liberar al paciente</span>
+            ? <span className="text-xs px-2.5 py-1 rounded-full bg-green-100 text-green-700 font-medium flex items-center gap-1"><Check size={11} strokeWidth={1.8} /> Resultado liberado</span>
+            : <span className="text-xs px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 font-medium flex items-center gap-1"><Clock size={11} strokeWidth={1.8} /> Sin liberar al paciente</span>
           }
         </div>
       </Card>
@@ -294,9 +295,9 @@ export default function TestResultPage() {
       {/* ── TABS ── */}
       <div className="flex gap-1 bg-warm-100 p-1 rounded-2xl">
         {[
-          { id: 'scores',  label: '📊 Scores'    },
-          { id: 'items',   label: '📝 Respuestas' },
-          { id: 'opinion', label: '💬 Mi opinión' },
+          { id: 'scores',  label: 'Scores'    },
+          { id: 'items',   label: 'Respuestas' },
+          { id: 'opinion', label: 'Mi opinión' },
         ].map(t => (
           <button key={t.id} onClick={() => setActiveTab(t.id)}
             className={`flex-1 text-sm font-medium py-2.5 rounded-xl transition-all ${
@@ -414,7 +415,7 @@ export default function TestResultPage() {
                       }`}>
                         {selOpt?.label ?? `Valor: ${r.response_value}`}
                       </span>
-                      {isAlert && <span className="text-xs text-red-500">⚠️ Ítem elevado</span>}
+                      {isAlert && <span className="text-xs text-red-500 flex items-center gap-0.5"><AlertTriangle size={10} strokeWidth={1.8} className="inline" /> Ítem elevado</span>}
                       {item?.subscale && (
                         <span className="text-xs text-warm-400">{item.subscale}</span>
                       )}
@@ -481,11 +482,11 @@ export default function TestResultPage() {
               disabled={releasing}
               className="w-full py-3 rounded-xl bg-primary-500 text-white font-semibold text-sm hover:bg-primary-600 disabled:opacity-60 transition-colors"
             >
-              {releasing ? 'Liberando…' : '🔓 Liberar resultado al paciente'}
+              {releasing ? 'Liberando…' : 'Liberar resultado al paciente'}
             </button>
           ) : (
             <div className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-semibold text-sm text-center">
-              ✓ Resultado ya liberado al paciente
+              Resultado ya liberado al paciente
             </div>
           )}
 

@@ -17,21 +17,22 @@ import Avatar from '@/components/ui/Avatar'
 import Button from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { Brain, Waves, Leaf, Focus, Zap, Heart, Wind, PenLine, ClipboardList, RefreshCw, AlertTriangle, Calendar, CheckCircle2 } from 'lucide-react'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
 const CATEGORY_STYLE = {
-  'TCC':                    { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-100',   icon: '🧠' },
-  'DBT':                    { bg: 'bg-teal-50',    text: 'text-teal-700',    border: 'border-teal-100',   icon: '🌊' },
-  'ACT':                    { bg: 'bg-green-50',   text: 'text-green-700',   border: 'border-green-100',  icon: '🌿' },
-  'Mindfulness':            { bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-100', icon: '🧘' },
-  'Activación Conductual':  { bg: 'bg-orange-50',  text: 'text-orange-700',  border: 'border-orange-100', icon: '⚡' },
-  'Regulación Emocional':   { bg: 'bg-pink-50',    text: 'text-pink-700',    border: 'border-pink-100',   icon: '💜' },
-  'Relajación':             { bg: 'bg-cyan-50',    text: 'text-cyan-700',    border: 'border-cyan-100',   icon: '🌬️' },
-  'Escritura Reflexiva':    { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-100',  icon: '✍️' },
+  'TCC':                    { bg: 'bg-blue-50',    text: 'text-blue-700',    border: 'border-blue-100',   Icon: Brain   },
+  'DBT':                    { bg: 'bg-teal-50',    text: 'text-teal-700',    border: 'border-teal-100',   Icon: Waves   },
+  'ACT':                    { bg: 'bg-green-50',   text: 'text-green-700',   border: 'border-green-100',  Icon: Leaf    },
+  'Mindfulness':            { bg: 'bg-purple-50',  text: 'text-purple-700',  border: 'border-purple-100', Icon: Focus   },
+  'Activación Conductual':  { bg: 'bg-orange-50',  text: 'text-orange-700',  border: 'border-orange-100', Icon: Zap     },
+  'Regulación Emocional':   { bg: 'bg-pink-50',    text: 'text-pink-700',    border: 'border-pink-100',   Icon: Heart   },
+  'Relajación':             { bg: 'bg-cyan-50',    text: 'text-cyan-700',    border: 'border-cyan-100',   Icon: Wind    },
+  'Escritura Reflexiva':    { bg: 'bg-amber-50',   text: 'text-amber-700',   border: 'border-amber-100',  Icon: PenLine },
 }
 
-const DEFAULT_CAT = { bg: 'bg-warm-50', text: 'text-warm-600', border: 'border-warm-100', icon: '📋' }
+const DEFAULT_CAT = { bg: 'bg-warm-50', text: 'text-warm-600', border: 'border-warm-100', Icon: ClipboardList }
 
 function getCatStyle(cat) { return CATEGORY_STYLE[cat] ?? DEFAULT_CAT }
 
@@ -95,14 +96,14 @@ function TaskCard({ task, onComplete, onSaveNote, expanded, onToggle }) {
           <div className="flex flex-wrap items-center gap-2 mb-1">
             {/* Categoría */}
             {task.category && (
-              <span className={cn('text-xs font-medium px-2 py-0.5 rounded-full border', cat.bg, cat.text, cat.border)}>
-                {cat.icon} {task.category}
+              <span className={cn('inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full border', cat.bg, cat.text, cat.border)}>
+                <cat.Icon size={11} strokeWidth={1.8} className="inline" /> {task.category}
               </span>
             )}
             {/* Frecuencia */}
             {task.frequency && (
-              <span className="text-xs text-warm-400 bg-warm-50 border border-warm-100 px-2 py-0.5 rounded-full">
-                🔁 {task.frequency}
+              <span className="inline-flex items-center gap-1 text-xs text-warm-400 bg-warm-50 border border-warm-100 px-2 py-0.5 rounded-full">
+                <RefreshCw size={11} strokeWidth={1.8} /> {task.frequency}
               </span>
             )}
             {/* Fecha límite */}
@@ -115,8 +116,13 @@ function TaskCard({ task, onComplete, onSaveNote, expanded, onToggle }) {
                     ? 'bg-warm-50 text-warm-400 border-warm-100'
                     : 'bg-warm-50 text-warm-500 border-warm-100'
               )}>
-                {over && !task.completed_at ? '⚠️ ' : '📅 '}
-                {formatDate(task.due_date)}
+                <span className="inline-flex items-center gap-1">
+                  {over && !task.completed_at
+                    ? <AlertTriangle size={11} strokeWidth={1.8} className="inline" />
+                    : <Calendar size={11} strokeWidth={1.8} className="inline" />
+                  }
+                  {formatDate(task.due_date)}
+                </span>
               </span>
             )}
           </div>
@@ -157,7 +163,7 @@ function TaskCard({ task, onComplete, onSaveNote, expanded, onToggle }) {
           {/* Instrucciones */}
           {task.instructions && (
             <div className="bg-primary-50 border border-primary-100 rounded-xl p-3.5">
-              <p className="text-xs font-semibold text-primary-700 mb-1.5">📋 Instrucciones</p>
+              <p className="inline-flex items-center gap-1 text-xs font-semibold text-primary-700 mb-1.5"><ClipboardList size={12} strokeWidth={1.8} /> Instrucciones</p>
               <p className="text-sm text-primary-800 leading-relaxed whitespace-pre-line">{task.instructions}</p>
             </div>
           )}
@@ -165,14 +171,14 @@ function TaskCard({ task, onComplete, onSaveNote, expanded, onToggle }) {
           {/* Notas del terapeuta */}
           {task.notes && (
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-3.5">
-              <p className="text-xs font-semibold text-amber-700 mb-1">💬 Nota del terapeuta</p>
+              <p className="text-xs font-semibold text-amber-700 mb-1">Nota del terapeuta</p>
               <p className="text-sm text-amber-800 leading-relaxed">{task.notes}</p>
             </div>
           )}
 
           {/* Notas personales del paciente */}
           <div>
-            <p className="text-xs font-semibold text-warm-600 mb-1.5">✏️ Mis notas personales</p>
+            <p className="text-xs font-semibold text-warm-600 mb-1.5">Mis notas personales</p>
             <textarea
               value={note}
               onChange={e => setNote(e.target.value)}
@@ -201,7 +207,7 @@ function TaskCard({ task, onComplete, onSaveNote, expanded, onToggle }) {
               loading={completing}
               className="w-full"
             >
-              ✅ Marcar como completada
+              Marcar como completada
             </Button>
           ) : (
             <div className="flex items-center gap-2 text-success text-sm font-medium">
@@ -264,7 +270,7 @@ export default function MyTasksPage() {
       setTasks(prev => prev.map(t =>
         t.id === taskId ? { ...t, status: 'completed', completed_at: now } : t
       ))
-      toast.success('¡Tarea completada! 🎉')
+      toast.success('¡Tarea completada!')
     }
   }
 
@@ -346,9 +352,12 @@ export default function MyTasksPage() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-warm-400">
-          <p className="text-5xl mb-3">
-            {filter === 'completed' ? '🎉' : '📋'}
-          </p>
+          <div className="mb-3 flex justify-center">
+            {filter === 'completed'
+              ? <CheckCircle2 size={48} strokeWidth={1.8} className="text-warm-300" />
+              : <ClipboardList size={48} strokeWidth={1.8} className="text-warm-300" />
+            }
+          </div>
           <p className="font-medium text-warm-600">
             {filter === 'pending'
               ? '¡No tienes tareas pendientes!'

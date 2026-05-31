@@ -12,6 +12,7 @@ import { formatDate, formatDateTime, formatPrice } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 import PatientTestsTab from '@/components/psychometrics/PatientTestsTab'
+import { MessageCircle, Lock, Calendar, ClipboardList, CheckCircle2, Bot, FlaskConical, AlertTriangle, Eye, Unlock, AlertCircle, Check } from 'lucide-react'
 
 export default function PatientDetail() {
   const { patientId } = useParams()
@@ -130,7 +131,7 @@ export default function PatientDetail() {
       .update({ is_released: next, released_notes: next ? releasedNotes : null })
       .eq('id', histId)
     if (error) { toast.error('No se pudo actualizar'); return }
-    toast.success(next ? 'Notas compartidas con el paciente ✅' : 'Notas retiradas del paciente')
+    toast.success(next ? 'Notas compartidas con el paciente' : 'Notas retiradas del paciente')
     fetchAll()
   }
 
@@ -140,11 +141,11 @@ export default function PatientDetail() {
   const unreadCheckins = checkins.filter(c => c.risk_level === 'high' && !c.notified).length
 
   const TABS = [
-    { id: 'history',  label: '📋 Historial clínico', count: history.length   },
-    { id: 'tasks',    label: '✅ Tareas',             count: tasks.length     },
-    { id: 'sessions', label: '📅 Sesiones',           count: sessions.length  },
-    { id: 'checkins', label: '🤖 Check-ins',          count: unreadCheckins, alert: unreadCheckins > 0 },
-    { id: 'tests',    label: '🧪 Tests',              count: 0                },
+    { id: 'history',  label: 'Historial clínico', count: history.length   },
+    { id: 'tasks',    label: 'Tareas',             count: tasks.length     },
+    { id: 'sessions', label: 'Sesiones',           count: sessions.length  },
+    { id: 'checkins', label: 'Check-ins',          count: unreadCheckins, alert: unreadCheckins > 0 },
+    { id: 'tests',    label: 'Tests',              count: 0                },
   ]
 
   return (
@@ -165,8 +166,8 @@ export default function PatientDetail() {
               <Badge variant="neutral">{history.length} notas clínicas</Badge>
             </div>
           </div>
-          <Button size="sm" variant="calm" onClick={() => navigate(`/therapist/chat?patient=${patientId}`)}>
-            💬 Mensaje
+          <Button size="sm" variant="calm" onClick={() => navigate(`/therapist/chat?patient=${patientId}`)} className="flex items-center gap-1.5">
+            <MessageCircle size={14} strokeWidth={1.8} /> Mensaje
           </Button>
         </div>
       </Card>
@@ -192,7 +193,7 @@ export default function PatientDetail() {
         <div className="flex flex-col gap-4">
           {!hasAccess ? (
             <Card className="text-center py-10">
-              <div className="text-4xl mb-3">🔒</div>
+              <div className="flex justify-center mb-3"><Lock size={40} strokeWidth={1.8} className="text-warm-300" /></div>
               <p className="font-semibold text-warm-800 mb-1">Acceso restringido</p>
               <p className="text-sm text-warm-500 max-w-xs mx-auto">
                 El historial clínico de este paciente solo es visible cuando el paciente ha agendado una sesión contigo.
@@ -219,8 +220,8 @@ export default function PatientDetail() {
                     Riesgo {h.risk_level}
                   </Badge>
                   {h.is_released && (
-                    <span className="text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">
-                      👁 Visible al paciente
+                    <span className="inline-flex items-center gap-1 text-xs bg-green-50 text-green-700 border border-green-200 px-2 py-0.5 rounded-full">
+                      <Eye size={11} strokeWidth={1.8} /> Visible al paciente
                     </span>
                   )}
                 </div>
@@ -252,7 +253,7 @@ export default function PatientDetail() {
                         setReleasingId(null)
                       }}
                     >
-                      {h.is_released ? 'Retirar del paciente' : '✅ Compartir con paciente'}
+                      {h.is_released ? 'Retirar del paciente' : 'Compartir con paciente'}
                     </Button>
                   </div>
                 </div>
@@ -269,7 +270,10 @@ export default function PatientDetail() {
                         : 'text-primary-500 hover:text-primary-700'
                     }`}
                   >
-                    {h.is_released ? '👁 Ocultar al paciente' : '🔓 Compartir resumen con el paciente'}
+                    {h.is_released
+                      ? <span className="inline-flex items-center gap-1"><Eye size={12} strokeWidth={1.8} /> Ocultar al paciente</span>
+                      : <span className="inline-flex items-center gap-1"><Unlock size={12} strokeWidth={1.8} /> Compartir resumen con el paciente</span>
+                    }
                   </button>
                 </div>
               )}
@@ -294,14 +298,14 @@ export default function PatientDetail() {
                 className={`mt-0.5 w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 transition-colors ${
                   task.completed ? 'bg-success border-success text-white' : 'border-warm-300 hover:border-primary-400'
                 }`}>
-                {task.completed && <span className="text-xs">✓</span>}
+                {task.completed && <Check size={11} strokeWidth={2.5} />}
               </button>
               <div className="flex-1">
                 <p className={`font-medium text-sm ${task.completed ? 'line-through text-warm-400' : 'text-warm-800'}`}>
                   {task.title}
                 </p>
                 {task.description && <p className="text-xs text-warm-500 mt-0.5">{task.description}</p>}
-                {task.due_date && <p className="text-xs text-warm-400 mt-1">📅 Hasta el {formatDate(task.due_date)}</p>}
+                {task.due_date && <p className="text-xs text-warm-400 mt-1 flex items-center gap-1"><Calendar size={11} strokeWidth={1.8} /> Hasta el {formatDate(task.due_date)}</p>}
               </div>
               <Badge variant={task.completed ? 'success' : 'neutral'}>
                 {task.completed ? 'Completada' : 'Pendiente'}
@@ -333,7 +337,7 @@ export default function PatientDetail() {
         <div className="flex flex-col gap-3">
           {checkins.length === 0 ? (
             <Card className="text-center py-8">
-              <p className="text-3xl mb-2">🤖</p>
+              <div className="flex justify-center mb-2"><Bot size={32} strokeWidth={1.8} className="text-warm-300" /></div>
               <p className="text-warm-500 text-sm">Este paciente aún no ha completado check-ins diarios</p>
             </Card>
           ) : checkins.map((c) => {
@@ -349,11 +353,11 @@ export default function PatientDetail() {
                       isMedium ? 'bg-amber-100 text-amber-700 border border-amber-200' :
                                  'bg-green-100 text-green-700 border border-green-200'
                     }`}>
-                      {isHigh ? '🔴 Riesgo alto' : isMedium ? '🟡 Riesgo medio' : '🟢 Sin riesgo'}
+                      {isHigh ? 'Riesgo alto' : isMedium ? 'Riesgo medio' : 'Sin riesgo'}
                     </span>
                     {unread && (
-                      <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-semibold">
-                        ⚠️ Sin revisar
+                      <span className="inline-flex items-center gap-1 text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-semibold">
+                        <AlertCircle size={11} strokeWidth={1.8} /> Sin revisar
                       </span>
                     )}
                   </div>
@@ -384,7 +388,7 @@ export default function PatientDetail() {
                       variant="secondary"
                       onClick={() => markCheckinReviewed(c.id)}
                     >
-                      ✅ Marcar como revisado
+                      Marcar como revisado
                     </Button>
                   </div>
                 )}
@@ -415,9 +419,9 @@ export default function PatientDetail() {
             placeholder="Observaciones y avances de la sesión..." rows={4} />
           <Select label="Nivel de riesgo" value={historyForm.risk_level}
             onChange={(e) => setHistoryForm(f => ({ ...f, risk_level: e.target.value }))}>
-            <option value="low">🟢 Bajo</option>
-            <option value="medium">🟡 Medio</option>
-            <option value="high">🔴 Alto</option>
+            <option value="low">Bajo</option>
+            <option value="medium">Medio</option>
+            <option value="high">Alto</option>
           </Select>
           <Button onClick={saveHistory} fullWidth>Guardar nota clínica</Button>
         </div>

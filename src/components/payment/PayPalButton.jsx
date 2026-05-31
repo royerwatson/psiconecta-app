@@ -146,7 +146,7 @@ export default function PayPalButton({
   if (sdkError) {
     return (
       <div className="text-center py-4 text-red-500 text-sm">
-        ⚠️ No se pudo cargar PayPal. Verifica tu conexión e intenta de nuevo.
+        No se pudo cargar PayPal. Verifica tu conexión e intenta de nuevo.
       </div>
     )
   }

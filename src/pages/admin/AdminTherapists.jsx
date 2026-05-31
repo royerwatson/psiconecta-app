@@ -7,6 +7,7 @@ import { VerificationBadge } from '@/components/ui/Badge'
 import { Skeleton } from '@/components/ui/Spinner'
 import Modal from '@/components/ui/Modal'
 import toast from 'react-hot-toast'
+import { Search, DollarSign, Calendar, Wallet, CheckCircle2, XCircle, FileText, Image, File } from 'lucide-react'
 
 export default function AdminTherapists() {
   const [therapists, setTherapists] = useState([])
@@ -62,7 +63,7 @@ export default function AdminTherapists() {
       body: JSON.stringify({ userId: t.user_id, activate: newState }),
     })
     if (!res.ok) { toast.error('Error al cambiar estado'); setToggling(null); return }
-    toast.success(newState ? '✅ Cuenta reactivada' : '🚫 Cuenta desactivada')
+    toast.success(newState ? 'Cuenta reactivada' : 'Cuenta desactivada')
     setToggling(null)
     fetchTherapists()
   }
@@ -99,8 +100,8 @@ export default function AdminTherapists() {
     if (error) { toast.error('Error actualizando estado'); setActing(false); return }
 
     toast.success(
-      status === 'verified' ? '✅ Terapeuta verificado' :
-      status === 'rejected' ? '❌ Terapeuta rechazado' : 'Estado actualizado'
+      status === 'verified' ? 'Terapeuta verificado' :
+      status === 'rejected' ? 'Terapeuta rechazado' : 'Estado actualizado'
     )
     setSelected(null)
     setActing(false)
@@ -129,9 +130,9 @@ export default function AdminTherapists() {
       <div className="flex gap-2 flex-wrap">
         {[
           { id: 'all',      label: 'Todos' },
-          { id: 'pending',  label: '⏳ Pendientes' },
-          { id: 'verified', label: '✅ Verificados' },
-          { id: 'rejected', label: '❌ Rechazados' },
+          { id: 'pending',  label: 'Pendientes' },
+          { id: 'verified', label: 'Verificados' },
+          { id: 'rejected', label: 'Rechazados' },
         ].map(f => (
           <button key={f.id} onClick={() => setFilter(f.id)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all border ${
@@ -148,7 +149,7 @@ export default function AdminTherapists() {
         <div className="flex flex-col gap-3">{[1,2,3].map(i => <Skeleton key={i} className="h-24" />)}</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12 text-warm-400">
-          <div className="text-4xl mb-2">🔍</div>
+          <Search size={40} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
           <p>No hay terapeutas en esta categoría</p>
         </div>
       ) : (
@@ -183,9 +184,9 @@ export default function AdminTherapists() {
                     </div>
                   </div>
                   <div className="flex gap-4 mt-2 text-xs text-warm-400">
-                    <span>💵 {formatPrice(t.price_per_session)}/sesión</span>
-                    <span>📅 {t.totalSessions} sesiones</span>
-                    <span>💰 {formatPrice(t.totalRevenue)} generados</span>
+                    <span className="flex items-center gap-1"><DollarSign size={11} /> {formatPrice(t.price_per_session)}/sesión</span>
+                    <span className="flex items-center gap-1"><Calendar size={11} /> {t.totalSessions} sesiones</span>
+                    <span className="flex items-center gap-1"><Wallet size={11} /> {formatPrice(t.totalRevenue)} generados</span>
                   </div>
                   {t.license_number && (
                     <p className="text-xs text-warm-400 mt-1">Licencia: {t.license_number}</p>
@@ -199,10 +200,10 @@ export default function AdminTherapists() {
                     Ver detalles
                   </Button>
                   <Button size="sm" onClick={() => updateStatus(t.id, t.user_id, 'verified')} fullWidth>
-                    ✅ Verificar
+                    <CheckCircle2 size={13} className="mr-1" strokeWidth={1.8} />Verificar
                   </Button>
                   <Button size="sm" variant="outline" onClick={() => updateStatus(t.id, t.user_id, 'rejected')} fullWidth>
-                    ❌ Rechazar
+                    <XCircle size={13} className="mr-1" strokeWidth={1.8} />Rechazar
                   </Button>
                 </div>
               )}
@@ -219,7 +220,7 @@ export default function AdminTherapists() {
               {t.verification_status === 'rejected' && (
                 <div className="flex gap-2 mt-3 pt-3 border-t border-warm-100">
                   <Button size="sm" onClick={() => updateStatus(t.id, t.user_id, 'verified')} fullWidth>
-                    ✅ Verificar ahora
+                    <CheckCircle2 size={13} className="mr-1" strokeWidth={1.8} />Verificar ahora
                   </Button>
                 </div>
               )}
@@ -263,8 +264,8 @@ export default function AdminTherapists() {
 
             {/* Documentos de credenciales */}
             <div>
-              <p className="text-xs text-warm-400 font-semibold uppercase tracking-wider mb-2">
-                📄 Documentos subidos
+              <p className="text-xs text-warm-400 font-semibold uppercase tracking-wider mb-2 flex items-center gap-1">
+                <FileText size={12} />Documentos subidos
               </p>
               {loadingCreds ? (
                 <div className="bg-warm-50 rounded-xl p-4 text-center text-sm text-warm-400 animate-pulse">
@@ -281,7 +282,9 @@ export default function AdminTherapists() {
                     const isPDF   = /\.pdf$/i.test(doc.document_url)
                     return (
                       <div key={doc.id} className="bg-warm-50 rounded-xl p-3 flex items-center gap-3">
-                        <span className="text-2xl shrink-0">{isPDF ? '📋' : isImage ? '🖼️' : '📄'}</span>
+                        <span className="w-9 h-9 rounded-xl bg-warm-100 flex items-center justify-center shrink-0">
+                          {isPDF ? <FileText size={16} className="text-warm-500" /> : isImage ? <Image size={16} className="text-warm-500" /> : <File size={16} className="text-warm-500" />}
+                        </span>
                         <div className="flex-1 min-w-0">
                           <p className="text-xs font-medium text-warm-700 truncate">
                             Documento {i + 1}
@@ -310,11 +313,11 @@ export default function AdminTherapists() {
             <div className="flex gap-2">
               <Button fullWidth loading={acting}
                 onClick={() => updateStatus(selected.id, selected.user_id, 'verified')}>
-                ✅ Verificar
+                <CheckCircle2 size={13} strokeWidth={1.8} className="mr-1.5" />Verificar
               </Button>
               <Button fullWidth variant="outline" loading={acting}
                 onClick={() => updateStatus(selected.id, selected.user_id, 'rejected')}>
-                ❌ Rechazar
+                <XCircle size={13} strokeWidth={1.8} className="mr-1.5" />Rechazar
               </Button>
             </div>
           </div>

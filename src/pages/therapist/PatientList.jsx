@@ -9,6 +9,7 @@ import Badge from '@/components/ui/Badge'
 import Input from '@/components/ui/Input'
 import { formatDate, truncate } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
+import { Search, Users, Calendar } from 'lucide-react'
 
 export default function PatientList() {
   const { user } = useAuthStore()
@@ -104,8 +105,8 @@ export default function PatientList() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4 text-3xl">
-            {search ? '🔍' : '👥'}
+          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4">
+            {search ? <Search size={28} strokeWidth={1.8} className="text-primary-400" /> : <Users size={28} strokeWidth={1.8} className="text-primary-400" />}
           </div>
           <p className="font-semibold text-warm-800 mb-1">
             {search ? 'Sin resultados' : 'Aún no tienes pacientes'}
@@ -134,8 +135,8 @@ export default function PatientList() {
                 <div className="flex-1 min-w-0">
                   <p className="font-semibold text-warm-900">{patient.full_name}</p>
                   {nextSession ? (
-                    <p className="text-xs text-primary-600 font-medium mt-0.5">
-                      📅 Próxima cita: {formatDate(nextSession)}
+                    <p className="text-xs text-primary-600 font-medium mt-0.5 flex items-center gap-1">
+                      <Calendar size={11} strokeWidth={1.8} /> Próxima cita: {formatDate(nextSession)}
                     </p>
                   ) : (
                     <p className="text-xs text-warm-400 mt-0.5">

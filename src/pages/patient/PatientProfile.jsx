@@ -8,6 +8,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
 import toast from 'react-hot-toast'
+import { Bell, Lock, ClipboardList, Pencil, Hand } from 'lucide-react'
 
 // ── Toggle UI ──────────────────────────────────────────────────────
 function Toggle({ checked, onChange }) {
@@ -100,9 +101,9 @@ export default function PatientProfile() {
   }
 
   const SETTINGS = [
-    { icon: '🔔', label: 'Notificaciones',       action: () => setNotifModal(true) },
-    { icon: '🔒', label: 'Cambiar contraseña',   action: () => navigate('/forgot-password') },
-    { icon: '📋', label: 'Política de privacidad', action: () => setPrivModal(true) },
+    { Icon: Bell,          label: 'Notificaciones',       action: () => setNotifModal(true) },
+    { Icon: Lock,          label: 'Cambiar contraseña',   action: () => navigate('/forgot-password') },
+    { Icon: ClipboardList, label: 'Política de privacidad', action: () => setPrivModal(true) },
   ]
 
   return (
@@ -128,7 +129,7 @@ export default function PatientProfile() {
                 <h2 className="font-serif text-xl font-bold text-warm-900">{profile?.full_name}</h2>
                 <p className="text-warm-500 text-sm mt-0.5">{profile?.email}</p>
               </div>
-              <Button size="sm" variant="secondary" onClick={() => setEditing(true)}>✏️ Editar nombre</Button>
+              <Button size="sm" variant="secondary" onClick={() => setEditing(true)}><Pencil size={14} strokeWidth={1.8} className="inline mr-1" />Editar nombre</Button>
             </>
           )}
         </div>
@@ -138,11 +139,11 @@ export default function PatientProfile() {
       <Card>
         <CardHeader><CardTitle>Configuración</CardTitle></CardHeader>
         <div className="flex flex-col">
-          {SETTINGS.map(({ icon, label, action }) => (
+          {SETTINGS.map(({ Icon, label, action }) => (
             <button key={label} onClick={action}
               className="flex items-center justify-between py-3 border-b border-warm-100 last:border-0 hover:bg-warm-50 px-1 rounded-lg transition-colors">
               <div className="flex items-center gap-3">
-                <span>{icon}</span>
+                <Icon size={17} strokeWidth={1.8} className="text-warm-500" />
                 <span className="text-sm font-medium text-warm-800">{label}</span>
               </div>
               <span className="text-warm-300">›</span>
@@ -158,7 +159,7 @@ export default function PatientProfile() {
       {/* ── Modal confirmación de salida ── */}
       <Modal isOpen={showLogout} onClose={() => setShowLogout(false)} title="">
         <div className="flex flex-col items-center gap-4 py-2">
-          <span className="text-5xl">👋</span>
+          <Hand size={48} strokeWidth={1.5} className="text-warm-400" />
           <div className="text-center">
             <p className="font-serif text-lg font-semibold text-warm-900">¿Cerrar sesión?</p>
             <p className="text-sm text-warm-500 mt-1">Puedes volver cuando quieras.</p>
@@ -171,7 +172,7 @@ export default function PatientProfile() {
       </Modal>
 
       {/* ── Modal notificaciones ── */}
-      <Modal isOpen={notifModal} onClose={() => setNotifModal(false)} title="🔔 Notificaciones">
+      <Modal isOpen={notifModal} onClose={() => setNotifModal(false)} title="Notificaciones">
         {loadingPrefs ? (
           <div className="text-center py-6 text-warm-400 text-sm">Cargando preferencias...</div>
         ) : (
@@ -201,7 +202,7 @@ export default function PatientProfile() {
       </Modal>
 
       {/* ── Modal política de privacidad ── */}
-      <Modal isOpen={privModal} onClose={() => setPrivModal(false)} title="📋 Política de privacidad">
+      <Modal isOpen={privModal} onClose={() => setPrivModal(false)} title="Política de privacidad">
         <div className="flex flex-col gap-4 text-sm text-warm-700 max-h-[60vh] overflow-y-auto pr-1">
           <p className="font-semibold text-warm-900">Última actualización: enero 2026</p>
 

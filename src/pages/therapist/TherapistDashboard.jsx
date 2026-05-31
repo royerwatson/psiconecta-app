@@ -1,16 +1,5 @@
 /**
  * Dashboard principal del terapeuta.
- *
- * Carga en paralelo:
- *   - Próximas sesiones (scheduled | in_progress, hasta 5 resultados)
- *   - Conteo de sesiones para hoy
- *   - Número total de pacientes atendidos
- *   - Alertas de IA: check-ins de riesgo alto no notificados (máx. 3)
- *
- * Notas de arquitectura:
- *   - `profile.therapist_profiles` es un ARRAY (relación 1-a-muchos desde profiles).
- *     Usar siempre `profile.therapist_profiles?.[0]` para los datos del terapeuta.
- *   - `SessionCard` es un sub-componente interno para la fila de cada sesión.
  */
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -22,6 +11,18 @@ import Button from '@/components/ui/Button'
 import Avatar from '@/components/ui/Avatar'
 import { formatSessionDate, formatPrice, canStartVideo, getGreeting } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
+import {
+  Calendar, Users, DollarSign, Bot, MessageCircle,
+  Clock, Star, Video, ClipboardList, Pencil, AlertTriangle,
+  ChevronDown, ChevronUp,
+} from 'lucide-react'
+
+const QUICK_LINKS = [
+  { Icon: Users,         label: 'Mis pacientes',     to: '/therapist/patients'  },
+  { Icon: ClipboardList, label: 'Historial clínico',  to: '/therapist/patients'  },
+  { Icon: Calendar,      label: 'Mi agenda',          to: '/therapist/schedule'  },
+  { Icon: Star,          label: 'Mis reseñas',        to: '/therapist/profile'   },
+]
 
 export default function TherapistDashboard() {
   const { profile, user } = useAuthStore()
@@ -42,20 +43,15 @@ export default function TherapistDashboard() {
     try {
       const today = new Date().toISOString().split('T')[0]
 
-      // Próximas sesiones
       const { data: sessionsData } = await supabase
         .from('sessions')
-        .select(`
-          *,
-          patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url)
-        `)
+        .select(`*, patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url)`)
         .eq('therapist_id', user.id)
         .in('status', ['scheduled', 'in_progress'])
         .gte('scheduled_at', new Date(Date.now() - 90 * 60 * 1000).toISOString())
         .order('scheduled_at', { ascending: true })
         .limit(5)
 
-      // Estadísticas
       const { count: todayCount } = await supabase
         .from('sessions')
         .select('id', { count: 'exact' })
@@ -70,7 +66,6 @@ export default function TherapistDashboard() {
         .eq('therapist_id', user.id)
         .eq('status', 'completed')
 
-      // Alertas de IA (check-ins de riesgo alto y medio)
       const { data: alertsData } = await supabase
         .from('ai_checkins')
         .select('*, patient:profiles!ai_checkins_patient_id_fkey(id, full_name, avatar_url)')
@@ -95,13 +90,12 @@ export default function TherapistDashboard() {
     }
   }
 
-  // therapist_profiles viene como array (relación 1-a-muchos desde profiles)
   const therapist = profile?.therapist_profiles?.[0]
 
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
-        <span className="text-5xl">⚠️</span>
+        <AlertTriangle size={48} className="text-amber-400" />
         <p className="font-medium text-warm-800">{error}</p>
         <Button onClick={fetchData} size="sm">Reintentar</Button>
       </div>
@@ -114,7 +108,7 @@ export default function TherapistDashboard() {
       <div className="flex items-start justify-between">
         <div>
           <h1 className="font-serif text-2xl font-bold text-warm-900">
-            {getGreeting()}, {profile?.full_name?.split(' ')[0]} 👋
+            {getGreeting()}, {profile?.full_name?.split(' ')[0]}
           </h1>
           <p className="text-warm-500 text-sm mt-1">
             {new Date().toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' })}
@@ -128,7 +122,7 @@ export default function TherapistDashboard() {
       {/* Alerta verificación pendiente */}
       {therapist?.verification_status === 'pending' && (
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex gap-3 items-start">
-          <span className="text-xl">⏳</span>
+          <Clock size={20} className="text-amber-500 shrink-0 mt-0.5" />
           <div className="flex-1">
             <p className="font-medium text-amber-800 text-sm">Verificación en proceso</p>
             <p className="text-xs text-amber-600 mt-0.5">
@@ -144,7 +138,7 @@ export default function TherapistDashboard() {
       {/* Banner perfil incompleto */}
       {therapist && !therapist.bio && (
         <div className="bg-primary-50 border border-primary-100 rounded-2xl p-4 flex gap-3 items-center">
-          <span className="text-xl shrink-0">📝</span>
+          <Pencil size={18} className="text-primary-500 shrink-0" />
           <div className="flex-1 min-w-0">
             <p className="font-medium text-primary-800 text-sm">Completa tu perfil</p>
             <p className="text-xs text-primary-600 mt-0.5">
@@ -159,8 +153,8 @@ export default function TherapistDashboard() {
       {alerts.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h2 className="font-serif text-lg font-semibold text-warm-900">
-              🤖 Check-ins de bienestar
+            <h2 className="flex items-center gap-2 font-serif text-lg font-semibold text-warm-900">
+              <Bot size={18} className="text-warm-500" /> Check-ins de bienestar
             </h2>
             <span className="text-xs text-warm-400">Últimas respuestas de tus pacientes</span>
           </div>
@@ -175,11 +169,8 @@ export default function TherapistDashboard() {
             return (
               <div key={alert.id}
                 className={`rounded-2xl border ${
-                  isHigh
-                    ? 'bg-red-50 border-red-200'
-                    : 'bg-amber-50 border-amber-200'
+                  isHigh ? 'bg-red-50 border-red-200' : 'bg-amber-50 border-amber-200'
                 }`}>
-                {/* Cabecera */}
                 <div className="p-4">
                   <div className="flex items-start gap-3">
                     <Avatar name={alert.patient?.full_name ?? ''} size="md" />
@@ -193,35 +184,35 @@ export default function TherapistDashboard() {
                             {new Date(alert.created_at).toLocaleTimeString('es-DO', { timeStyle: 'short' })}
                           </p>
                         </div>
-                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 ${
-                          isHigh
-                            ? 'bg-red-100 text-red-700'
-                            : 'bg-amber-100 text-amber-700'
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full shrink-0 flex items-center gap-1 ${
+                          isHigh ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
                         }`}>
-                          {isHigh ? '🔴 Riesgo alto' : '🟡 Riesgo medio'}
+                          <span className={`w-1.5 h-1.5 rounded-full ${isHigh ? 'bg-red-500' : 'bg-amber-500'}`} />
+                          {isHigh ? 'Riesgo alto' : 'Riesgo medio'}
                         </span>
                       </div>
 
-                      {/* Mensaje IA */}
                       {alert.ai_message && (
-                        <p className={`text-sm mt-2 leading-relaxed ${isHigh ? 'text-red-800' : 'text-amber-800'}`}>
-                          💬 {alert.ai_message}
+                        <p className={`text-sm mt-2 leading-relaxed flex items-start gap-1.5 ${isHigh ? 'text-red-800' : 'text-amber-800'}`}>
+                          <MessageCircle size={14} className="shrink-0 mt-0.5" />
+                          {alert.ai_message}
                         </p>
                       )}
                     </div>
                   </div>
 
-                  {/* Acciones */}
                   <div className="flex gap-2 mt-3 pt-3 border-t border-current/10">
                     <button
                       onClick={() => setExpandedAlert(isExp ? null : alert.id)}
-                      className={`flex-1 text-xs font-medium py-2 rounded-xl border transition-colors ${
+                      className={`flex-1 text-xs font-medium py-2 rounded-xl border transition-colors flex items-center justify-center gap-1 ${
                         isHigh
                           ? 'border-red-200 text-red-700 hover:bg-red-100'
                           : 'border-amber-200 text-amber-700 hover:bg-amber-100'
                       }`}
                     >
-                      {isExp ? '▲ Ocultar respuestas' : `▼ Ver ${qa.length} respuestas`}
+                      {isExp
+                        ? <><ChevronUp size={13} /> Ocultar respuestas</>
+                        : <><ChevronDown size={13} /> Ver {qa.length} respuestas</>}
                     </button>
                     <Button
                       size="sm"
@@ -233,7 +224,6 @@ export default function TherapistDashboard() {
                   </div>
                 </div>
 
-                {/* Respuestas expandidas */}
                 {isExp && qa.length > 0 && (
                   <div className={`border-t px-4 pb-4 pt-3 ${isHigh ? 'border-red-200 bg-red-50/50' : 'border-amber-200 bg-amber-50/50'}`}>
                     <p className="text-xs font-semibold opacity-60 uppercase tracking-wider mb-3">
@@ -257,10 +247,10 @@ export default function TherapistDashboard() {
 
       {/* Estadísticas */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <StatCard title="Hoy" value={stats.today} subtitle="sesiones programadas" icon="📅" color="primary" />
-        <StatCard title="Esta semana" value={stats.week} subtitle="próximas citas" icon="📆" color="calm" />
-        <StatCard title="Pacientes" value={stats.patients} subtitle="atendidos en total" icon="👥" color="success" />
-        <StatCard title="Ingresos" value={formatPrice(stats.earnings)} subtitle="sesiones próximas" icon="💰" color="warning" />
+        <StatCard title="Hoy"         value={stats.today}              subtitle="sesiones programadas" icon={<Calendar size={18} />}  color="primary" />
+        <StatCard title="Esta semana" value={stats.week}               subtitle="próximas citas"        icon={<Clock size={18} />}     color="calm"    />
+        <StatCard title="Pacientes"   value={stats.patients}           subtitle="atendidos en total"    icon={<Users size={18} />}     color="success" />
+        <StatCard title="Ingresos"    value={formatPrice(stats.earnings)} subtitle="sesiones próximas" icon={<DollarSign size={18} />} color="warning" />
       </div>
 
       {/* Próximas sesiones */}
@@ -278,7 +268,7 @@ export default function TherapistDashboard() {
           </div>
         ) : sessions.length === 0 ? (
           <Card className="text-center py-10">
-            <div className="text-4xl mb-2">📅</div>
+            <Calendar size={40} className="text-warm-200 mx-auto mb-2" />
             <p className="text-warm-600 font-medium">No tienes sesiones programadas</p>
             <p className="text-warm-400 text-sm mt-1">Actualiza tu disponibilidad para recibir citas</p>
             <Button size="sm" className="mt-4" onClick={() => navigate('/therapist/schedule')}>
@@ -286,7 +276,7 @@ export default function TherapistDashboard() {
             </Button>
           </Card>
         ) : (
-          <div className="flex flex-col gap-3 stagger-children">
+          <div className="flex flex-col gap-3 stagger">
             {sessions.map((session) => (
               <SessionCard
                 key={session.id}
@@ -303,15 +293,10 @@ export default function TherapistDashboard() {
       <div>
         <h2 className="font-serif text-lg font-semibold text-warm-900 mb-3">Accesos rápidos</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          {[
-            { icon: '👥', label: 'Mis pacientes', to: '/therapist/patients' },
-            { icon: '📋', label: 'Historial clínico', to: '/therapist/patients' },
-            { icon: '📅', label: 'Mi agenda', to: '/therapist/schedule' },
-            { icon: '⭐', label: 'Mis reseñas', to: '/therapist/profile' },
-          ].map(({ icon, label, to }) => (
+          {QUICK_LINKS.map(({ Icon, label, to }) => (
             <Card key={label} hover padding className="flex flex-col items-center gap-2 py-5 text-center"
               onClick={() => navigate(to)}>
-              <span className="text-2xl">{icon}</span>
+              <Icon size={22} className="text-primary-500" strokeWidth={1.8} />
               <span className="text-sm font-medium text-warm-700">{label}</span>
             </Card>
           ))}
@@ -338,8 +323,9 @@ function SessionCard({ session, onStart, onView }) {
       </div>
       <div className="flex flex-col gap-2 shrink-0">
         {canVideo && (
-          <Button size="sm" variant="calm" onClick={onStart}>
-            📹 Iniciar
+          <Button size="sm" variant="calm" onClick={onStart}
+            className="flex items-center gap-1.5">
+            <Video size={14} /> Iniciar
           </Button>
         )}
         <Button size="sm" variant="secondary" onClick={onView}>

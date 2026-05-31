@@ -14,6 +14,7 @@ import { useAuthStore } from '@/store/authStore'
 import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
 import toast from 'react-hot-toast'
+import { DollarSign, Zap, AlertTriangle, Search, Calendar } from 'lucide-react'
 
 const SPECIALTIES = [
   'Todas', 'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
@@ -116,7 +117,7 @@ export default function FindTherapist() {
                 ? 'bg-primary-100 border-primary-300 text-primary-700'
                 : 'bg-white border-warm-200 text-warm-600 hover:border-warm-300'
             }`}>
-            💰 Precio
+            <DollarSign size={14} strokeWidth={1.8} className="mr-1" />Precio
           </button>
           <button onClick={() => setIsUrgent(!isUrgent)}
             className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
@@ -124,7 +125,7 @@ export default function FindTherapist() {
                 ? 'bg-orange-100 border-orange-300 text-orange-700'
                 : 'bg-white border-warm-200 text-warm-600 hover:border-warm-300'
             }`}>
-            ⚡ Urgente
+            <Zap size={14} strokeWidth={1.8} className="mr-1" />Urgente
           </button>
         </div>
 
@@ -148,7 +149,7 @@ export default function FindTherapist() {
 
       {isUrgent && (
         <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4">
-          <p className="text-sm font-medium text-orange-800">⚡ Modo cita urgente (&lt;24 horas)</p>
+          <p className="text-sm font-medium text-orange-800 flex items-center gap-1.5"><Zap size={14} strokeWidth={1.8} />Modo cita urgente (&lt;24 horas)</p>
           <p className="text-xs text-orange-600 mt-1">
             Se muestran terapeutas con disponibilidad inmediata. Se aplica un cargo adicional del 30% por urgencia.
           </p>
@@ -160,14 +161,14 @@ export default function FindTherapist() {
         <div className="flex flex-col gap-3">{[1,2,3].map((i) => <Skeleton key={i} className="h-32" />)}</div>
       ) : fetchError ? (
         <Card className="text-center py-10">
-          <div className="text-4xl mb-2">⚠️</div>
+          <AlertTriangle size={40} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
           <p className="text-warm-600 font-medium">{fetchError}</p>
           <Button size="sm" className="mt-4" onClick={fetchTherapists}>Reintentar</Button>
         </Card>
       ) : filteredTherapists.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4 text-3xl">
-            🔍
+          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4">
+            <Search size={28} strokeWidth={1.5} className="text-primary-400" />
           </div>
           <p className="font-semibold text-warm-800 mb-1">Sin terapeutas disponibles</p>
           <p className="text-sm text-warm-400 max-w-xs leading-relaxed">
@@ -243,7 +244,7 @@ export default function FindTherapist() {
                   return (
                     <div className={`rounded-xl p-3 text-sm ${urgent ? 'bg-orange-50 border border-orange-200' : 'bg-primary-50 border border-primary-100'}`}>
                       <p className={`font-medium ${urgent ? 'text-orange-800' : 'text-primary-800'}`}>
-                        {urgent ? '⚡ Cita urgente' : '📅 Cita estándar'}
+                        {urgent ? <><Zap size={13} strokeWidth={1.8} className="inline mr-1" />Cita urgente</> : <><Calendar size={13} strokeWidth={1.8} className="inline mr-1" />Cita estándar</>}
                       </p>
                       <p className={`text-xs mt-0.5 ${urgent ? 'text-orange-600' : 'text-primary-600'}`}>
                         Total: <strong>{formatPrice(price)} USD</strong>
@@ -296,7 +297,7 @@ export default function FindTherapist() {
                     </div>
                     {urgent && (
                       <div className="flex justify-between text-orange-600 mt-1">
-                        <span>⚡ Cargo urgente (30%)</span>
+                        <span className="flex items-center gap-1"><Zap size={12} strokeWidth={1.8} />Cargo urgente (30%)</span>
                         <span className="font-medium">incluido</span>
                       </div>
                     )}

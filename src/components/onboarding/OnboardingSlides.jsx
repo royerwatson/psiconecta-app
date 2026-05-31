@@ -1,29 +1,30 @@
 import { useState, useEffect } from 'react'
 import { useAuthStore } from '@/store/authStore'
 import Button from '@/components/ui/Button'
+import { Smile, Search, Calendar, Heart, Brain, ClipboardList, FileText, CheckCircle2 } from 'lucide-react'
 
 // ── Slides por rol ────────────────────────────────────────────────
 const PATIENT_SLIDES = [
   {
-    emoji: '👋',
+    Icon:  Smile,
     title: '¡Bienvenido/a a Psiconecta!',
     body:  'Tu espacio seguro para el bienestar mental. Estamos aquí para acompañarte en cada paso de tu proceso terapéutico.',
     color: 'from-primary-600 to-calm-600',
   },
   {
-    emoji: '🔍',
+    Icon:  Search,
     title: 'Encuentra a tu terapeuta ideal',
     body:  'Explora perfiles de terapeutas verificados, filtra por especialidad y agenda tu primera sesión en minutos.',
     color: 'from-calm-600 to-primary-500',
   },
   {
-    emoji: '📅',
+    Icon:  Calendar,
     title: 'Gestiona tus citas fácilmente',
     body:  'Visualiza tus próximas sesiones, cambia de terapeuta hasta 48h antes, y únete a la videollamada con un toque.',
     color: 'from-primary-500 to-primary-700',
   },
   {
-    emoji: '💙',
+    Icon:  Heart,
     title: 'Cuida tu bienestar cada día',
     body:  'Registra tu estado de ánimo, completa el check-in diario con IA y accede a tu historial de progreso cuando quieras.',
     color: 'from-primary-700 to-calm-700',
@@ -32,25 +33,25 @@ const PATIENT_SLIDES = [
 
 const THERAPIST_SLIDES = [
   {
-    emoji: '🧠',
+    Icon:  Brain,
     title: '¡Bienvenido/a a Psiconecta!',
     body:  'La plataforma que conecta a los mejores terapeutas con quienes más los necesitan. Nos alegra que formes parte del equipo.',
     color: 'from-primary-600 to-calm-600',
   },
   {
-    emoji: '📋',
+    Icon:  ClipboardList,
     title: 'Tu agenda, en control',
     body:  'Configura tu disponibilidad horaria, visualiza tus próximas sesiones y gestiona tus pacientes desde un solo lugar.',
     color: 'from-calm-600 to-primary-500',
   },
   {
-    emoji: '📝',
+    Icon:  FileText,
     title: 'Historial clínico integrado',
     body:  'Escribe notas durante y después de cada sesión. Cualquier colega puede dar seguimiento al caso si es necesario.',
     color: 'from-primary-500 to-primary-700',
   },
   {
-    emoji: '✅',
+    Icon:  CheckCircle2,
     title: 'Completa tu verificación',
     body:  'Sube tus credenciales profesionales para que tu perfil sea visible a los pacientes. El proceso toma 24–48 horas.',
     color: 'from-primary-700 to-calm-700',
@@ -106,7 +107,9 @@ export default function OnboardingSlides() {
       <div className="relative w-full max-w-sm mx-4 mb-4 sm:mb-0 bg-white rounded-3xl shadow-2xl overflow-hidden">
         {/* Slide header con gradiente */}
         <div className={`bg-gradient-to-br ${slide.color} px-8 pt-10 pb-14 text-center`}>
-          <div className="text-6xl mb-4 drop-shadow">{slide.emoji}</div>
+          <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-4">
+            {(() => { const SlideIcon = slide.Icon; return <SlideIcon size={36} strokeWidth={1.8} className="text-white" /> })()}
+          </div>
           <h2 className="font-serif text-2xl font-bold text-white leading-tight">
             {slide.title}
           </h2>
@@ -136,7 +139,7 @@ export default function OnboardingSlides() {
               </Button>
             )}
             <Button onClick={next} className="flex-1">
-              {isLast ? '¡Comenzar! 🚀' : 'Siguiente →'}
+              {isLast ? '¡Comenzar!' : 'Siguiente →'}
             </Button>
           </div>
 

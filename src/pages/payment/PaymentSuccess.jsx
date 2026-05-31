@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import Button from '@/components/ui/Button'
 import toast from 'react-hot-toast'
+import { Loader2 } from 'lucide-react'
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams()
@@ -56,7 +57,7 @@ export default function PaymentSuccess() {
 
         {status === 'verifying' && (
           <div className="bg-white rounded-3xl shadow-float p-10 text-center">
-            <div className="text-5xl mb-4 animate-pulse">⏳</div>
+            <Loader2 size={44} strokeWidth={1.8} className="mx-auto mb-4 animate-spin text-primary-400" />
             <h2 className="font-serif text-xl font-bold text-warm-900 mb-2">
               Confirmando tu pago...
             </h2>

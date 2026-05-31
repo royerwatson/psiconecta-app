@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { formatDateTime } from '@/lib/utils'
+import { Lock, Calendar, Lightbulb } from 'lucide-react'
 
 // ─── Helpers visuales ────────────────────────────────────────────────────────
 
@@ -201,7 +202,7 @@ export default function PatientResultDetailPage() {
 
   if (!session || results.length === 0) return (
     <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-6">
-      <div className="text-4xl mb-3">🔒</div>
+      <Lock size={40} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
       <p className="font-semibold text-warm-700">Resultado no disponible</p>
       <p className="text-sm text-warm-400 mt-1">Tu terapeuta aún no ha liberado este resultado.</p>
       <button
@@ -229,13 +230,13 @@ export default function PatientResultDetailPage() {
 
         {/* Header */}
         <h1 className="font-serif text-xl font-bold text-warm-900">{test?.name}</h1>
-        <p className="text-sm text-warm-400 mt-1">📅 {formatDateTime(session.completed_at)}</p>
+        <p className="text-sm text-warm-400 mt-1 flex items-center gap-1.5"><Calendar size={13} strokeWidth={1.8} className="shrink-0" />{formatDateTime(session.completed_at)}</p>
       </div>
 
       {/* Nota informativa */}
       <div className="bg-primary-50 border border-primary-100 rounded-2xl px-4 py-3">
         <p className="text-xs text-primary-700 leading-relaxed">
-          💡 Estos resultados son una herramienta de apoyo. Tu terapeuta los revisará contigo
+          <Lightbulb size={13} strokeWidth={1.8} className="inline mr-1 shrink-0" />Estos resultados son una herramienta de apoyo. Tu terapeuta los revisará contigo
           y te ayudará a interpretarlos en el contexto de tu proceso terapéutico.
         </p>
       </div>

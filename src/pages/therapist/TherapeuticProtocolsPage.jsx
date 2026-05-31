@@ -7,6 +7,14 @@
 import { useState, useMemo } from 'react'
 import { PROTOCOLS, MODALITIES, MODALITY_MAP, MOD_COLOR, searchProtocols } from '@/data/therapeuticProtocols'
 import { cn } from '@/lib/utils'
+import { Timer, CheckCircle2, AlertTriangle, ClipboardList, Lightbulb, BookOpen, Search, Brain, Waves, Leaf, Eye } from 'lucide-react'
+
+// ── Mapa de iconos de modalidad ───────────────────────────────────────────────
+const MOD_ICON_MAP = { Brain, Waves, Leaf, Eye }
+function ModalityIcon({ name, ...props }) {
+  const Icon = MOD_ICON_MAP[name]
+  return Icon ? <Icon {...props} /> : null
+}
 
 // ─── Helpers de color ────────────────────────────────────────────────────────
 
@@ -83,7 +91,7 @@ function ProtocolCard({ protocol, isOpen, onToggle }) {
       >
         {/* Ícono de modalidad */}
         <div className="shrink-0 mt-0.5">
-          <span className="text-2xl">{MODALITY_MAP[mod]?.icon ?? '📋'}</span>
+          <ModalityIcon name={MODALITY_MAP[mod]?.icon} size={22} strokeWidth={1.5} className="text-warm-600" />
         </div>
 
         <div className="flex-1 min-w-0">
@@ -98,7 +106,7 @@ function ProtocolCard({ protocol, isOpen, onToggle }) {
             )}
             {protocol.sessions && (
               <span className="text-xs text-warm-400 bg-warm-50 border border-warm-100 px-2 py-0.5 rounded-full">
-                ⏱ {protocol.sessions}
+                <Timer size={11} strokeWidth={1.8} className="inline mr-0.5" />{protocol.sessions}
               </span>
             )}
           </div>
@@ -128,7 +136,7 @@ function ProtocolCard({ protocol, isOpen, onToggle }) {
           <div className="grid sm:grid-cols-2 gap-3">
             {protocol.indications && protocol.indications.length > 0 && (
               <div className="bg-green-50 border border-green-100 rounded-xl p-3.5">
-                <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-2">✅ Indicado para</p>
+                <p className="text-xs font-semibold text-green-700 uppercase tracking-wide mb-2 flex items-center gap-1"><CheckCircle2 size={11} strokeWidth={1.8} /> Indicado para</p>
                 <ul className="flex flex-col gap-1">
                   {protocol.indications.map((ind, i) => (
                     <li key={i} className="text-xs text-green-800 flex items-start gap-1.5">
@@ -141,7 +149,7 @@ function ProtocolCard({ protocol, isOpen, onToggle }) {
             )}
             {protocol.contraindications && protocol.contraindications.length > 0 && (
               <div className="bg-red-50 border border-red-100 rounded-xl p-3.5">
-                <p className="text-xs font-semibold text-red-700 uppercase tracking-wide mb-2">⚠️ Precaución en</p>
+                <p className="text-xs font-semibold text-red-700 uppercase tracking-wide mb-2 flex items-center gap-1"><AlertTriangle size={11} strokeWidth={1.8} /> Precaución en</p>
                 <ul className="flex flex-col gap-1">
                   {protocol.contraindications.map((c, i) => (
                     <li key={i} className="text-xs text-red-800 flex items-start gap-1.5">
@@ -157,8 +165,8 @@ function ProtocolCard({ protocol, isOpen, onToggle }) {
           {/* Pasos */}
           {protocol.steps && protocol.steps.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-warm-500 uppercase tracking-wide mb-3">
-                📋 Protocolo paso a paso
+              <p className="text-xs font-semibold text-warm-500 uppercase tracking-wide mb-3 flex items-center gap-1">
+                <ClipboardList size={13} strokeWidth={1.8} /> Protocolo paso a paso
               </p>
               <div className="flex flex-col gap-2">
                 {protocol.steps.map((step, i) => (
@@ -171,7 +179,7 @@ function ProtocolCard({ protocol, isOpen, onToggle }) {
           {/* Tips clínicos */}
           {protocol.tips && protocol.tips.length > 0 && (
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
-              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2">💡 Tips clínicos</p>
+              <p className="text-xs font-semibold text-amber-700 uppercase tracking-wide mb-2 flex items-center gap-1"><Lightbulb size={12} strokeWidth={1.8} /> Tips clínicos</p>
               <ul className="flex flex-col gap-1.5">
                 {protocol.tips.map((tip, i) => (
                   <li key={i} className="text-xs text-amber-800 flex items-start gap-2">
@@ -186,7 +194,7 @@ function ProtocolCard({ protocol, isOpen, onToggle }) {
           {/* Referencia */}
           {protocol.reference && (
             <div className="flex items-start gap-2 pt-1 border-t border-warm-100">
-              <span className="text-warm-300 text-sm shrink-0">📖</span>
+              <BookOpen size={15} strokeWidth={1.8} className="text-warm-300 shrink-0" />
               <p className="text-xs text-warm-400 italic">{protocol.reference}</p>
             </div>
           )}
@@ -243,7 +251,7 @@ export default function TherapeuticProtocolsPage() {
 
       {/* ── Búsqueda ── */}
       <div className="relative mb-4">
-        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-300 pointer-events-none">🔍</span>
+        <Search size={15} strokeWidth={1.8} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-300 pointer-events-none" />
         <input
           value={query}
           onChange={e => setQuery(e.target.value)}
@@ -284,7 +292,7 @@ export default function TherapeuticProtocolsPage() {
                 : 'bg-white border border-warm-200 text-warm-600 hover:border-warm-300'
             )}
           >
-            {mod.icon} {mod.label} ({PROTOCOLS.filter(p => p.modality === mod.id).length})
+            <ModalityIcon name={mod.icon} size={13} strokeWidth={1.8} className="inline mr-1" />{mod.label} ({PROTOCOLS.filter(p => p.modality === mod.id).length})
           </button>
         ))}
       </div>
@@ -311,7 +319,7 @@ export default function TherapeuticProtocolsPage() {
       {/* ── Sin resultados ── */}
       {filtered.length === 0 && (
         <div className="text-center py-16 text-warm-400">
-          <p className="text-4xl mb-3">🔍</p>
+          <Search size={40} strokeWidth={1.5} className="text-warm-300 mb-3 mx-auto" />
           <p className="font-medium">Sin resultados para "{query}"</p>
           <p className="text-sm mt-1 text-warm-300">Prueba con otro término o modalidad</p>
         </div>
@@ -341,7 +349,7 @@ export default function TherapeuticProtocolsPage() {
               <div key={mod.id}>
                 {/* Separador de modalidad */}
                 <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">{mod.icon}</span>
+                  <ModalityIcon name={mod.icon} size={22} strokeWidth={1.5} className="text-warm-600" />
                   <div>
                     <h2 className="font-serif font-bold text-warm-800 text-lg">{mod.label}</h2>
                     <p className="text-xs text-warm-400">{mod.description}</p>

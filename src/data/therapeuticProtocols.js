@@ -13,7 +13,7 @@ export const MODALITIES = [
     id: 'tcc',
     name: 'TCC',
     fullName: 'Terapia Cognitivo-Conductual',
-    icon: '🧠',
+    icon: 'Brain',
     color: 'blue',
     tagline: 'Basada en evidencia · Estructurada · Orientada al problema',
     description:
@@ -23,7 +23,7 @@ export const MODALITIES = [
     id: 'dbt',
     name: 'DBT',
     fullName: 'Terapia Dialéctico-Conductual',
-    icon: '🌊',
+    icon: 'Waves',
     color: 'teal',
     tagline: 'Linehan · Biosocial · Habilidades + Validación',
     description:
@@ -33,7 +33,7 @@ export const MODALITIES = [
     id: 'act',
     name: 'ACT',
     fullName: 'Terapia de Aceptación y Compromiso',
-    icon: '🌿',
+    icon: 'Leaf',
     color: 'green',
     tagline: 'Hayes · Hexaflex · Flexibilidad psicológica',
     description:
@@ -43,7 +43,7 @@ export const MODALITIES = [
     id: 'emdr',
     name: 'EMDR',
     fullName: 'Desensibilización y Reprocesamiento por Movimientos Oculares',
-    icon: '👁️',
+    icon: 'Eye',
     color: 'purple',
     tagline: 'Shapiro · 8 fases · Requiere certificación',
     description:

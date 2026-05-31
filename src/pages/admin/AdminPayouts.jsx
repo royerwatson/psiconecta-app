@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { CheckCircle2, Clock, ClipboardList, Landmark, User, CreditCard, Hash, AlertCircle, Calendar, Wallet, Send } from 'lucide-react'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -20,9 +21,9 @@ const STATUS_CONFIG = {
 }
 
 const METHOD_LABEL = {
-  bank_transfer: '🏦 Transferencia bancaria',
-  paypal:        '💙 PayPal',
-  manual:        '✏️ Manual',
+  bank_transfer: 'Transferencia bancaria',
+  paypal:        'PayPal',
+  manual:        'Manual',
 }
 
 // ─── Componente ──────────────────────────────────────────────────────────────
@@ -119,7 +120,7 @@ export default function AdminPayouts() {
         toast.success('Payout creado — realiza la transferencia y confirma')
         setConfirmModal({ payoutId: json.payoutId, therapistName: selected.therapist_name })
       } else {
-        toast.success('✅ Pago enviado vía PayPal')
+        toast.success('Pago enviado vía PayPal')
       }
       setSelected(null)
       fetchPending()
@@ -153,7 +154,7 @@ export default function AdminPayouts() {
       )
       const json = await res.json()
       if (!res.ok) throw new Error(json.error ?? 'Error confirmando')
-      toast.success('✅ Transferencia confirmada')
+      toast.success('Transferencia confirmada')
       setConfirmModal(null)
       fetchPending()
       fetchHistory()
@@ -184,7 +185,7 @@ export default function AdminPayouts() {
       )
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
-      toast.success('✅ Payout confirmado')
+      toast.success('Payout confirmado')
       fetchHistory()
     } catch (err) {
       toast.error(err.message)
@@ -217,8 +218,8 @@ export default function AdminPayouts() {
       {/* Tabs */}
       <div className="flex gap-1 bg-warm-100 p-1 rounded-xl w-fit">
         {[
-          { id: 'pending', label: '⏳ Pendientes' },
-          { id: 'history', label: '📋 Historial'  },
+          { id: 'pending', label: 'Pendientes' },
+          { id: 'history', label: 'Historial'  },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -238,7 +239,7 @@ export default function AdminPayouts() {
             </div>
           ) : earnings.length === 0 ? (
             <div className="text-center py-16 text-warm-400">
-              <div className="text-4xl mb-2">✅</div>
+              <CheckCircle2 size={40} strokeWidth={1.5} className="mx-auto mb-3 text-emerald-400" />
               <p className="font-medium text-warm-600">Todo al día</p>
               <p className="text-sm mt-1">No hay pagos pendientes por procesar</p>
             </div>
@@ -261,28 +262,28 @@ export default function AdminPayouts() {
                       {/* Datos bancarios */}
                       {e.payment_method === 'bank_transfer' && (
                         <div className="mt-2 bg-warm-50 rounded-xl p-2.5 text-xs text-warm-600 space-y-0.5">
-                          {e.bank_name           && <p>🏦 <strong>{e.bank_name}</strong></p>}
-                          {e.bank_account_name   && <p>👤 {e.bank_account_name}</p>}
-                          {e.bank_account_number && <p>💳 {e.bank_account_number}</p>}
-                          {e.bank_routing        && <p>🔢 {e.bank_routing}</p>}
+                          {e.bank_name           && <p className="flex items-center gap-1.5"><Landmark size={12} className="shrink-0" /> <strong>{e.bank_name}</strong></p>}
+                          {e.bank_account_name   && <p className="flex items-center gap-1.5"><User size={12} className="shrink-0" /> {e.bank_account_name}</p>}
+                          {e.bank_account_number && <p className="flex items-center gap-1.5"><CreditCard size={12} className="shrink-0" /> {e.bank_account_number}</p>}
+                          {e.bank_routing        && <p className="flex items-center gap-1.5"><Hash size={12} className="shrink-0" /> {e.bank_routing}</p>}
                           {!e.bank_name && !e.bank_account_number && (
-                            <p className="text-red-400">⚠️ El terapeuta no ha ingresado datos bancarios</p>
+                            <p className="text-red-400 flex items-center gap-1.5"><AlertCircle size={12} className="shrink-0" /> El terapeuta no ha ingresado datos bancarios</p>
                           )}
                         </div>
                       )}
                       {e.payment_method === 'paypal' && e.paypal_email && (
                         <div className="mt-2 bg-blue-50 rounded-xl p-2.5 text-xs text-blue-700">
-                          💙 PayPal: <strong>{e.paypal_email}</strong>
+                          PayPal: <strong>{e.paypal_email}</strong>
                         </div>
                       )}
 
                       {/* Estadísticas */}
                       <div className="flex flex-wrap gap-3 mt-3 text-xs text-warm-400">
-                        <span>📅 {e.sessions_count} sesiones</span>
-                        <span>💰 Total ganado: {formatPrice(e.total_earned)}</span>
-                        <span>✅ Ya pagado: {formatPrice(e.total_paid)}</span>
-                        <span className="text-amber-600 font-semibold">
-                          ⏳ Pendiente: {formatPrice(e.pending_amount)}
+                        <span className="flex items-center gap-1"><Calendar size={11} /> {e.sessions_count} sesiones</span>
+                        <span className="flex items-center gap-1"><Wallet size={11} /> Total: {formatPrice(e.total_earned)}</span>
+                        <span className="flex items-center gap-1"><CheckCircle2 size={11} /> Pagado: {formatPrice(e.total_paid)}</span>
+                        <span className="text-amber-600 font-semibold flex items-center gap-1">
+                          <Clock size={11} /> Pendiente: {formatPrice(e.pending_amount)}
                         </span>
                       </div>
                       {e.earliest_session && (
@@ -302,7 +303,7 @@ export default function AdminPayouts() {
                         !e.bank_account_number
                       }
                     >
-                      💸 Procesar pago · {formatPrice(e.pending_amount)}
+                      <Send size={13} className="mr-1.5" strokeWidth={1.8} />Procesar pago · {formatPrice(e.pending_amount)}
                     </Button>
                   </div>
                 </div>
@@ -321,7 +322,7 @@ export default function AdminPayouts() {
             </div>
           ) : history.length === 0 ? (
             <div className="text-center py-16 text-warm-400">
-              <div className="text-4xl mb-2">📋</div>
+              <ClipboardList size={40} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
               <p>No hay pagos registrados aún</p>
             </div>
           ) : (
@@ -357,7 +358,7 @@ export default function AdminPayouts() {
                           )}
                         </div>
                         {p.error_message && (
-                          <p className="text-xs text-red-500 mt-1">⚠️ {p.error_message}</p>
+                          <p className="text-xs text-red-500 mt-1 flex items-center gap-1"><AlertCircle size={11} /> {p.error_message}</p>
                         )}
                         {p.note && (
                           <p className="text-xs text-warm-400 mt-0.5 italic">{p.note}</p>
@@ -369,7 +370,7 @@ export default function AdminPayouts() {
                     {p.status === 'processing' && p.payment_method !== 'paypal' && (
                       <div className="mt-3 pt-3 border-t border-warm-50">
                         <Button size="sm" fullWidth onClick={() => quickConfirm(p)} loading={processing}>
-                          ✅ Marcar como pagado
+                          <CheckCircle2 size={13} className="mr-1" strokeWidth={1.8} />Marcar como pagado
                         </Button>
                       </div>
                     )}
@@ -412,7 +413,7 @@ export default function AdminPayouts() {
             {selected.payment_method === 'bank_transfer' && (
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-sm text-blue-800 space-y-1">
                 <p className="font-semibold text-xs text-blue-500 uppercase tracking-wide mb-1">
-                  🏦 Destino de la transferencia
+                  <Landmark size={12} className="inline mr-1" />Destino de la transferencia
                 </p>
                 {selected.bank_name           && <p>Banco: <strong>{selected.bank_name}</strong></p>}
                 {selected.bank_account_name   && <p>Titular: <strong>{selected.bank_account_name}</strong></p>}
@@ -423,7 +424,7 @@ export default function AdminPayouts() {
             {selected.payment_method === 'paypal' && selected.paypal_email && (
               <div className="bg-blue-50 border border-blue-100 rounded-xl p-3 text-sm text-blue-800">
                 <p className="font-semibold text-xs text-blue-500 uppercase tracking-wide mb-1">
-                  💙 PayPal destino
+                  PayPal destino
                 </p>
                 <p className="font-bold">{selected.paypal_email}</p>
                 <p className="text-xs text-blue-400 mt-0.5">
@@ -481,8 +482,8 @@ export default function AdminPayouts() {
               </Button>
               <Button fullWidth loading={processing} onClick={initiatePayout}>
                 {selected.payment_method === 'paypal'
-                  ? '💙 Enviar vía PayPal'
-                  : '🏦 Registrar transferencia'}
+                  ? 'Enviar vía PayPal'
+                  : 'Registrar transferencia'}
               </Button>
             </div>
           </div>
@@ -498,7 +499,7 @@ export default function AdminPayouts() {
         {confirmModal && (
           <div className="flex flex-col gap-4">
             <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 text-center">
-              <span className="text-3xl">🏦</span>
+              <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center mx-auto mb-1"><Landmark size={22} className="text-emerald-600" strokeWidth={1.8} /></div>
               <p className="font-semibold text-warm-900 mt-2">
                 Pago a {confirmModal.therapistName} registrado
               </p>
@@ -527,7 +528,7 @@ export default function AdminPayouts() {
               </Button>
               <Button fullWidth loading={processing}
                 onClick={() => confirmPayout(confirmModal.payoutId)}>
-                ✅ Confirmar pagado
+                <CheckCircle2 size={13} className="mr-1" strokeWidth={1.8} />Confirmar pagado
               </Button>
             </div>
           </div>

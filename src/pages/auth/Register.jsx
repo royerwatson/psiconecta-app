@@ -5,6 +5,7 @@ import Button from '@/components/ui/Button'
 import Input, { Select } from '@/components/ui/Input'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
+import { Zap, User, Stethoscope, ChevronRight, FileCheck } from 'lucide-react'
 
 const SPECIALTIES = [
   'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
@@ -71,7 +72,9 @@ export default function Register() {
       <div className="w-full max-w-md animate-fade-in">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="text-4xl mb-3">🧠</div>
+          <div className="w-12 h-12 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-calm">
+              <Zap size={24} className="text-white" strokeWidth={2} />
+            </div>
           <h1 className="font-serif text-2xl font-bold text-primary-800">
             Psico<span className="text-calm-500">necta</span>
           </h1>
@@ -101,13 +104,13 @@ export default function Register() {
               <p className="text-sm text-warm-500 mb-6">Elige tu rol para personalizar tu experiencia</p>
               <div className="flex flex-col gap-3">
                 <RoleCard
-                  icon="🙋"
+                  Icon={User}
                   title="Soy paciente"
                   desc="Busco apoyo psicológico profesional"
                   onClick={() => handleRoleSelect('client')}
                 />
                 <RoleCard
-                  icon="🧑‍⚕️"
+                  Icon={Stethoscope}
                   title="Soy terapeuta"
                   desc="Quiero ofrecer mis servicios profesionales"
                   onClick={() => handleRoleSelect('therapist')}
@@ -172,7 +175,9 @@ export default function Register() {
                 hint="Tu número de licencia o cédula oficial" />
 
               <div className="bg-primary-50 rounded-xl p-4 border border-primary-100">
-                <p className="text-xs text-primary-700 font-medium mb-1">📄 Verificación de documentos</p>
+                <p className="text-xs text-primary-700 font-medium mb-1 flex items-center gap-1">
+                    <FileCheck size={13} /> Verificación de documentos
+                  </p>
                 <p className="text-xs text-primary-600">
                   En el siguiente paso podrás subir tus documentos de credencial para verificación.
                   Tu perfil estará activo una vez que validemos tus datos (24-48 hrs).
@@ -202,23 +207,21 @@ export default function Register() {
   )
 }
 
-function RoleCard({ icon, title, desc, onClick }) {
+function RoleCard({ Icon, title, desc, onClick }) {
   return (
     <button
       type="button"
       onClick={onClick}
       className="w-full text-left flex items-center gap-4 p-4 rounded-2xl border-2 border-warm-100 hover:border-primary-300 hover:bg-primary-50 transition-all group"
     >
-      <div className="text-3xl w-12 h-12 flex items-center justify-center bg-primary-50 rounded-xl group-hover:bg-primary-100 transition-colors">
-        {icon}
+      <div className="w-12 h-12 flex items-center justify-center bg-primary-50 rounded-xl group-hover:bg-primary-100 transition-colors text-primary-600">
+        <Icon size={24} strokeWidth={1.8} />
       </div>
       <div className="flex-1">
         <p className="font-semibold text-warm-900">{title}</p>
         <p className="text-sm text-warm-500">{desc}</p>
       </div>
-      <svg className="h-5 w-5 text-warm-300 group-hover:text-primary-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-      </svg>
+      <ChevronRight size={18} className="text-warm-300 group-hover:text-primary-400 transition-colors" />
     </button>
   )
 }

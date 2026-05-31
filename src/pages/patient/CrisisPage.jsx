@@ -16,19 +16,20 @@ import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
+import { AlertTriangle, Phone, MessageCircle, ClipboardList, CheckCircle2, Wind, Heart } from 'lucide-react'
 
 // ─── Líneas de crisis ─────────────────────────────────────────────────────────
 
 const CRISIS_LINES = [
-  { country: 'México',        flag: '🇲🇽', name: 'SAPTEL',                    number: '55 5259-8121',  available: '24/7' },
-  { country: 'Colombia',      flag: '🇨🇴', name: 'Línea 106',                  number: '106',           available: '24/7' },
-  { country: 'Argentina',     flag: '🇦🇷', name: 'Centro de Asistencia',       number: '135',           available: '24/7' },
-  { country: 'España',        flag: '🇪🇸', name: 'Teléfono Esperanza',         number: '717 003 717',   available: '24/7' },
-  { country: 'Venezuela',     flag: '🇻🇪', name: 'CEDHA',                      number: '0800-CEDHA00',  available: 'L-V' },
-  { country: 'Chile',         flag: '🇨🇱', name: 'Salud Responde',             number: '600 360 7777',  available: '24/7' },
-  { country: 'Perú',          flag: '🇵🇪', name: 'Línea 113',                  number: '113',           available: '24/7' },
-  { country: 'Ecuador',       flag: '🇪🇨', name: 'Línea 171',                  number: '171',           available: '24/7' },
-  { country: 'Internacional', flag: '🌐', name: 'Crisis Text Line (en inglés)', number: 'Text HOME → 741741', available: '24/7' },
+  { country: 'México',        name: 'SAPTEL',                    number: '55 5259-8121',  available: '24/7' },
+  { country: 'Colombia',      name: 'Línea 106',                  number: '106',           available: '24/7' },
+  { country: 'Argentina',     name: 'Centro de Asistencia',       number: '135',           available: '24/7' },
+  { country: 'España',        name: 'Teléfono Esperanza',         number: '717 003 717',   available: '24/7' },
+  { country: 'Venezuela',     name: 'CEDHA',                      number: '0800-CEDHA00',  available: 'L-V' },
+  { country: 'Chile',         name: 'Salud Responde',             number: '600 360 7777',  available: '24/7' },
+  { country: 'Perú',          name: 'Línea 113',                  number: '113',           available: '24/7' },
+  { country: 'Ecuador',       name: 'Línea 171',                  number: '171',           available: '24/7' },
+  { country: 'Internacional', name: 'Crisis Text Line (en inglés)', number: 'Text HOME → 741741', available: '24/7' },
 ]
 
 // ─── Respiración 4-7-8 ───────────────────────────────────────────────────────
@@ -126,7 +127,7 @@ function BreathingExercise() {
               </span>
             </>
           ) : (
-            <span className="text-primary-400 text-3xl">🌬️</span>
+            <Wind size={32} strokeWidth={1.8} className="text-primary-400" />
           )}
         </div>
       </div>
@@ -151,8 +152,8 @@ function BreathingExercise() {
       )}
 
       {cycles >= 4 && !active && (
-        <p className="text-sm text-success font-medium text-center">
-          ✅ ¡Bien hecho! Tu sistema nervioso está más regulado ahora.
+        <p className="text-sm text-success font-medium text-center flex items-center justify-center gap-1.5">
+          <CheckCircle2 size={16} strokeWidth={1.8} /> ¡Bien hecho! Tu sistema nervioso está más regulado ahora.
         </p>
       )}
     </div>
@@ -163,23 +164,23 @@ function BreathingExercise() {
 
 function SafetyPlanSection({ plan }) {
   const sections = [
-    { key: 'warning_signs',   icon: '⚠️', label: 'Mis señales de alerta',           type: 'list'    },
-    { key: 'internal_coping', icon: '🧘', label: 'Lo que puedo hacer solo/a',        type: 'list'    },
-    { key: 'social_contacts', icon: '👥', label: 'Personas a quienes llamar',        type: 'contact' },
-    { key: 'support_people',  icon: '🤝', label: 'Profesionales de apoyo',           type: 'contact' },
-    { key: 'safe_environment',icon: '🏠', label: 'Cómo hacer mi entorno más seguro', type: 'list'    },
-    { key: 'reasons_to_live', icon: '💙', label: 'Mis razones para seguir',          type: 'list'    },
+    { key: 'warning_signs',   label: 'Mis señales de alerta',           type: 'list'    },
+    { key: 'internal_coping', label: 'Lo que puedo hacer solo/a',        type: 'list'    },
+    { key: 'social_contacts', label: 'Personas a quienes llamar',        type: 'contact' },
+    { key: 'support_people',  label: 'Profesionales de apoyo',           type: 'contact' },
+    { key: 'safe_environment',label: 'Cómo hacer mi entorno más seguro', type: 'list'    },
+    { key: 'reasons_to_live', label: 'Mis razones para seguir',          type: 'list'    },
   ]
 
   return (
     <div className="flex flex-col gap-4">
-      {sections.map(({ key, icon, label, type }) => {
+      {sections.map(({ key, label, type }) => {
         const value = plan[key]
         if (!value || (Array.isArray(value) && value.length === 0)) return null
 
         return (
           <div key={key} className="bg-white rounded-2xl border border-warm-100 p-4 shadow-card">
-            <p className="text-sm font-semibold text-warm-800 mb-2">{icon} {label}</p>
+            <p className="text-sm font-semibold text-warm-800 mb-2">{label}</p>
             {type === 'list' && Array.isArray(value) && (
               <ul className="flex flex-col gap-1.5">
                 {value.filter(Boolean).map((item, i) => (
@@ -203,7 +204,7 @@ function SafetyPlanSection({ plan }) {
                         href={`tel:${c.phone.replace(/\s/g, '')}`}
                         className="flex items-center gap-1.5 bg-primary-600 text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:bg-primary-700 transition-colors"
                       >
-                        📞 {c.phone}
+                        <Phone size={13} strokeWidth={1.8} /> {c.phone}
                       </a>
                     )}
                   </li>
@@ -242,9 +243,9 @@ export default function CrisisPage() {
   }
 
   const TABS = [
-    { id: 'breathe', label: '🌬️ Respirar',       show: true       },
-    { id: 'plan',    label: '📋 Mi plan',          show: !!plan     },
-    { id: 'lines',   label: '📞 Líneas de ayuda',  show: true       },
+    { id: 'breathe', label: 'Respirar',       show: true       },
+    { id: 'plan',    label: 'Mi plan',          show: !!plan     },
+    { id: 'lines',   label: 'Líneas de ayuda',  show: true       },
   ].filter(t => t.show)
 
   return (
@@ -252,7 +253,7 @@ export default function CrisisPage() {
 
       {/* Banner de anclaje */}
       <div className="bg-gradient-to-br from-calm-500 to-primary-600 rounded-2xl p-6 mb-6 text-white text-center shadow-float">
-        <p className="text-3xl mb-2">💙</p>
+        <Heart size={32} strokeWidth={1.8} className="text-white mx-auto mb-2" fill="currentColor" />
         <h1 className="font-serif text-2xl font-bold mb-1">Estás a salvo</h1>
         <p className="text-white/80 text-sm leading-relaxed">
           Estás dando el paso más importante: pedir ayuda.<br />
@@ -265,7 +266,7 @@ export default function CrisisPage() {
         onClick={() => navigate('/patient/chat')}
         className="w-full flex items-center gap-4 bg-white border-2 border-primary-200 rounded-2xl px-5 py-4 mb-6 hover:border-primary-400 hover:bg-primary-50 transition-all shadow-card"
       >
-        <span className="text-3xl shrink-0">💬</span>
+        <MessageCircle size={32} strokeWidth={1.8} className="text-primary-400 shrink-0" />
         <div className="flex-1 text-left">
           <p className="font-semibold text-warm-900 text-sm">Escríbele a tu terapeuta ahora</p>
           <p className="text-xs text-warm-500 mt-0.5">
@@ -312,13 +313,12 @@ export default function CrisisPage() {
             </p>
             <div className="grid grid-cols-2 gap-2">
               {[
-                { icon: '🧊', title: 'Técnica 5-4-3-2-1', desc: '5 cosas que ves, 4 que tocas, 3 que escuchas, 2 que hueles, 1 que saboreas' },
-                { icon: '💧', title: 'Agua fría', desc: 'Pon tus muñecas bajo agua fría por 30 segundos para activar el reflejo de buceo' },
-                { icon: '🦋', title: 'Abrazo mariposa', desc: 'Cruza los brazos sobre el pecho y alterna golpecitos suaves izquierda-derecha' },
-                { icon: '🙏', title: 'TIPP (DBT)', desc: 'Temperatura fría · Ejercicio intenso corto · Respiración pausada · Relajación progresiva' },
+                { title: 'Técnica 5-4-3-2-1', desc: '5 cosas que ves, 4 que tocas, 3 que escuchas, 2 que hueles, 1 que saboreas' },
+                { title: 'Agua fría', desc: 'Pon tus muñecas bajo agua fría por 30 segundos para activar el reflejo de buceo' },
+                { title: 'Abrazo mariposa', desc: 'Cruza los brazos sobre el pecho y alterna golpecitos suaves izquierda-derecha' },
+                { title: 'TIPP (DBT)', desc: 'Temperatura fría · Ejercicio intenso corto · Respiración pausada · Relajación progresiva' },
               ].map((tip, i) => (
                 <div key={i} className="bg-warm-50 border border-warm-100 rounded-xl p-3">
-                  <p className="text-base mb-1">{tip.icon}</p>
                   <p className="text-xs font-semibold text-warm-800">{tip.title}</p>
                   <p className="text-xs text-warm-500 mt-0.5 leading-relaxed">{tip.desc}</p>
                 </div>
@@ -333,21 +333,21 @@ export default function CrisisPage() {
         <div className="animate-fade-in">
           {loading ? (
             <div className="bg-white rounded-2xl border border-warm-100 p-8 text-center text-warm-400">
-              <p className="text-3xl mb-2">⏳</p>
+              <p className="flex justify-center mb-2"><div className="w-8 h-8 border-4 border-primary-200 border-t-primary-500 rounded-full animate-spin" /></p>
               <p className="text-sm">Cargando tu plan…</p>
             </div>
           ) : plan ? (
             <>
               <div className="bg-primary-50 border border-primary-100 rounded-xl p-3 mb-4 text-center">
-                <p className="text-xs text-primary-700 font-medium">
-                  📋 Plan elaborado con tu terapeuta · Sigue los pasos en orden
+                <p className="text-xs text-primary-700 font-medium flex items-center justify-center gap-1.5">
+                  <ClipboardList size={13} strokeWidth={1.8} /> Plan elaborado con tu terapeuta · Sigue los pasos en orden
                 </p>
               </div>
               <SafetyPlanSection plan={plan} />
             </>
           ) : (
             <div className="bg-white rounded-2xl border border-warm-100 p-8 text-center shadow-card">
-              <p className="text-4xl mb-3">📋</p>
+              <div className="flex justify-center mb-3"><ClipboardList size={40} strokeWidth={1.8} className="text-warm-300" /></div>
               <p className="font-semibold text-warm-800 mb-1">Aún no tienes un plan de seguridad</p>
               <p className="text-sm text-warm-500 mb-4">
                 Pídele a tu terapeuta que creen uno juntos. Es una herramienta muy valiosa para momentos difíciles.
@@ -364,8 +364,8 @@ export default function CrisisPage() {
       {section === 'lines' && (
         <div className="flex flex-col gap-3 animate-fade-in">
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 text-center">
-            <p className="text-xs text-amber-700 font-medium">
-              ⚠️ Si estás en peligro inmediato llama al número de emergencias de tu país (911, 112, 119…)
+            <p className="text-xs text-amber-700 font-medium flex items-center justify-center gap-1.5">
+              <AlertTriangle size={14} strokeWidth={1.8} /> Si estás en peligro inmediato llama al número de emergencias de tu país (911, 112, 119…)
             </p>
           </div>
 
@@ -374,16 +374,16 @@ export default function CrisisPage() {
               key={i}
               className="bg-white rounded-2xl border border-warm-100 shadow-card px-4 py-4 flex items-center gap-3"
             >
-              <span className="text-2xl shrink-0">{line.flag}</span>
+              <span className="text-xs font-semibold text-warm-500 bg-warm-100 rounded-lg px-2 py-1 shrink-0">{line.country}</span>
               <div className="flex-1 min-w-0">
                 <p className="font-semibold text-warm-800 text-sm">{line.name}</p>
-                <p className="text-xs text-warm-400">{line.country} · {line.available}</p>
+                <p className="text-xs text-warm-400">{line.available}</p>
               </div>
               <a
                 href={`tel:${line.number.replace(/[\s\-()]/g, '')}`}
                 className="shrink-0 flex items-center gap-1.5 bg-primary-600 hover:bg-primary-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition-colors"
               >
-                📞 {line.number}
+                <Phone size={13} strokeWidth={1.8} /> {line.number}
               </a>
             </div>
           ))}
@@ -399,7 +399,7 @@ export default function CrisisPage() {
       <div className="mt-8 text-center">
         <p className="text-xs text-warm-400 leading-relaxed">
           Recuerda: los momentos de crisis son temporales.<br />
-          No tienes que atravesar esto solo/a. 💙
+          No tienes que atravesar esto solo/a.
         </p>
       </div>
     </div>

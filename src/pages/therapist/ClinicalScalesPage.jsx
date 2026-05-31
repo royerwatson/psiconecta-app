@@ -10,6 +10,13 @@ import { useAuthStore } from '@/store/authStore'
 import Avatar from '@/components/ui/Avatar'
 import toast from 'react-hot-toast'
 import { cn } from '@/lib/utils'
+import { Frown, HeartPulse, Droplets, Brain, Timer, BarChart2, Lightbulb, Check, X, Search } from 'lucide-react'
+
+const SCALE_ICON_MAP = { Frown, HeartPulse, Droplets, Brain }
+function ScaleIcon({ name, size = 22, className = '' }) {
+  const Icon = SCALE_ICON_MAP[name] ?? Brain
+  return <Icon size={size} strokeWidth={1.8} className={className} />
+}
 
 // ── Estilos por tema ──────────────────────────────────────────────────────────
 const THEME = {
@@ -36,7 +43,9 @@ function ScaleCard({ scale, onClick }) {
       className="w-full text-left bg-white border border-warm-100 rounded-2xl p-4 hover:border-warm-300 hover:shadow-sm transition-all group"
     >
       <div className="flex items-start gap-3">
-        <span className="text-2xl mt-0.5">{scale.icon}</span>
+        <div className="w-9 h-9 rounded-xl bg-warm-50 flex items-center justify-center shrink-0 mt-0.5">
+            <ScaleIcon name={scale.icon} size={18} className="text-warm-600" />
+          </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-warm-900 text-sm">{scale.name}</span>
@@ -46,8 +55,8 @@ function ScaleCard({ scale, onClick }) {
           </div>
           <p className="text-xs text-warm-500 mt-1 leading-relaxed">{scale.description}</p>
           <div className="flex items-center gap-3 mt-2">
-            <span className="text-[10px] text-warm-400">⏱ {scale.duration}</span>
-            <span className="text-[10px] text-warm-400">📊 Máx. {scale.maxScore} pts</span>
+            <span className="text-[10px] text-warm-400 flex items-center gap-0.5"><Timer size={10} strokeWidth={1.8} /> {scale.duration}</span>
+            <span className="text-[10px] text-warm-400 flex items-center gap-0.5"><BarChart2 size={10} strokeWidth={1.8} /> Máx. {scale.maxScore} pts</span>
             <span className="text-[10px] text-warm-400">{scale.questions.length} ítems</span>
           </div>
         </div>
@@ -154,7 +163,7 @@ function ResultPanel({ scale, score, answers, onReset, onSave }) {
                 <div className={cn('w-5 h-5 rounded-full flex items-center justify-center shrink-0 text-xs font-bold',
                   cl.met ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'
                 )}>
-                  {cl.met ? '✗' : '✓'}
+                  {cl.met ? <X size={11} strokeWidth={2.5} /> : <Check size={11} strokeWidth={2.5} />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-medium text-warm-800">{cl.name}</p>
@@ -175,7 +184,7 @@ function ResultPanel({ scale, score, answers, onReset, onSave }) {
       {/* Nota clínica */}
       {scale.clinicalNote && (
         <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
-          <p className="text-xs font-bold text-amber-700 mb-1">💡 Nota clínica</p>
+          <p className="text-xs font-bold text-amber-700 mb-1 flex items-center gap-1"><Lightbulb size={12} strokeWidth={1.8} />Nota clínica</p>
           <p className="text-xs text-amber-800 leading-relaxed">{scale.clinicalNote}</p>
         </div>
       )}
@@ -311,7 +320,7 @@ function SaveModal({ scale, score, answers, therapistId, onClose, onSaved }) {
               >
                 <Avatar name={p.full_name} size="xs" />
                 <span className="text-sm font-medium text-warm-800">{p.full_name}</span>
-                {selected === p.id && <span className="ml-auto text-primary-600 text-xs">✓</span>}
+                {selected === p.id && <Check size={13} strokeWidth={2} className="ml-auto text-primary-600" />}
               </button>
             ))}
           </div>
@@ -390,8 +399,9 @@ export default function ClinicalScalesPage() {
           </p>
         </div>
 
-        <div className="bg-primary-50 border border-primary-100 rounded-xl px-4 py-3 text-xs text-primary-700 leading-relaxed">
-          💡 Estas escalas son auxiliares del juicio clínico y no sustituyen la evaluación diagnóstica formal.
+        <div className="bg-primary-50 border border-primary-100 rounded-xl px-4 py-3 text-xs text-primary-700 leading-relaxed flex items-start gap-2">
+          <Lightbulb size={14} strokeWidth={1.8} className="shrink-0 mt-0.5" />
+          Estas escalas son auxiliares del juicio clínico y no sustituyen la evaluación diagnóstica formal.
           Los resultados se pueden guardar en el historial del paciente.
         </div>
 

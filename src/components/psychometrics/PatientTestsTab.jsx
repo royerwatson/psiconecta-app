@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import Button from '@/components/ui/Button'
 import AssignTestModal from './AssignTestModal'
 import { formatDateTime } from '@/lib/utils'
+import { ClipboardList, Clock, Pencil } from 'lucide-react'
 
 const STATUS_CONFIG = {
   pending:     { label: 'Pendiente',    color: 'bg-amber-100 text-amber-700' },
@@ -141,7 +142,7 @@ export default function PatientTestsTab({ therapistId, patientId }) {
       {/* Lista de asignaciones */}
       {assignments.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <div className="text-4xl mb-3">📋</div>
+          <ClipboardList size={40} strokeWidth={1.5} className="mb-3 text-warm-300" />
           <p className="text-sm font-medium text-warm-700">Aún no has asignado tests a este paciente</p>
           <p className="text-xs text-warm-400 mt-1 mb-4">Los tests ayudan a medir y seguir el progreso clínico</p>
           <Button size="sm" onClick={() => setShowAssign(true)}>Asignar primer test</Button>
@@ -200,7 +201,7 @@ export default function PatientTestsTab({ therapistId, patientId }) {
                     {/* Sin sesión todavía */}
                     {!session && (
                       <div className="flex items-center gap-2 text-sm text-warm-500">
-                        <span className="text-lg">⏳</span>
+                        <Clock size={15} strokeWidth={1.8} className="text-warm-400" />
                         El paciente aún no ha iniciado este test
                       </div>
                     )}
@@ -208,7 +209,7 @@ export default function PatientTestsTab({ therapistId, patientId }) {
                     {/* Sesión en progreso */}
                     {session && session.status === 'in_progress' && (
                       <div className="flex items-center gap-2 text-sm text-blue-600">
-                        <span className="text-lg">✏️</span>
+                        <Pencil size={15} strokeWidth={1.8} className="text-blue-500" />
                         El paciente está completando este test ahora
                       </div>
                     )}
@@ -267,7 +268,7 @@ export default function PatientTestsTab({ therapistId, patientId }) {
                               </button>
                               {allReleased && (
                                 <span className="text-xs px-3 py-1.5 rounded-lg bg-green-100 text-green-700 font-medium">
-                                  ✓ Resultado liberado
+                                  Resultado liberado
                                 </span>
                               )}
                             </div>

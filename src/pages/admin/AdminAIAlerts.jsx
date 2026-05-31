@@ -3,11 +3,12 @@ import { supabase } from '@/lib/supabase'
 import Avatar from '@/components/ui/Avatar'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { Bell, AlertCircle, AlertTriangle, CheckCircle2, Bot, Zap, Check } from 'lucide-react'
 
 const RISK_CONFIG = {
-  high:   { label: 'Riesgo alto',  color: 'bg-red-50 border-red-200 text-red-800',     badge: 'bg-red-100 text-red-700',    dot: 'bg-red-500',    icon: '🔴' },
-  medium: { label: 'Riesgo medio', color: 'bg-amber-50 border-amber-200 text-amber-800', badge: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500',  icon: '🟡' },
-  low:    { label: 'Sin riesgo',   color: 'bg-green-50 border-green-200 text-green-800', badge: 'bg-green-100 text-green-700', dot: 'bg-green-500',  icon: '🟢' },
+  high:   { label: 'Riesgo alto',  color: 'bg-red-50 border-red-200 text-red-800',       badge: 'bg-red-100 text-red-700',    dot: 'bg-red-500'    },
+  medium: { label: 'Riesgo medio', color: 'bg-amber-50 border-amber-200 text-amber-800',  badge: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500'  },
+  low:    { label: 'Sin riesgo',   color: 'bg-green-50 border-green-200 text-green-800',  badge: 'bg-green-100 text-green-700', dot: 'bg-green-500'  },
 }
 
 export default function AdminAIAlerts() {
@@ -54,7 +55,7 @@ export default function AdminAIAlerts() {
     if (error) {
       toast.error('Error al marcar como revisado')
     } else {
-      toast.success('✅ Marcado como revisado')
+      toast.success('Marcado como revisado')
       setAlerts(prev => prev.map(a => a.id === id ? { ...a, notified: true } : a))
       setCounts(prev => ({ ...prev, unreviewed: Math.max(0, prev.unreviewed - 1) }))
     }
@@ -72,7 +73,7 @@ export default function AdminAIAlerts() {
     if (error) {
       toast.error('Error al marcar todas')
     } else {
-      toast.success(`✅ ${ids.length} alertas marcadas como revisadas`)
+      toast.success(`${ids.length} alertas marcadas como revisadas`)
       setAlerts(prev => prev.map(a => ids.includes(a.id) ? { ...a, notified: true } : a))
       setCounts(prev => ({ ...prev, unreviewed: 0 }))
     }
@@ -108,7 +109,7 @@ export default function AdminAIAlerts() {
             onClick={markAllReviewed}
             className="px-4 py-2 rounded-xl bg-primary-600 text-white text-sm font-medium hover:bg-primary-700 transition-colors"
           >
-            ✓ Marcar todas revisadas ({counts.unreviewed})
+            <Check size={13} className="inline mr-1" />Marcar todas revisadas ({counts.unreviewed})
           </button>
         )}
       </div>
@@ -117,13 +118,13 @@ export default function AdminAIAlerts() {
       {!loading && (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Sin revisar',    value: counts.unreviewed, icon: '🔔', color: 'bg-orange-50 border-orange-100 text-orange-700' },
-            { label: 'Riesgo alto',    value: counts.high,       icon: '🔴', color: 'bg-red-50 border-red-100 text-red-700' },
-            { label: 'Riesgo medio',   value: counts.medium,     icon: '🟡', color: 'bg-amber-50 border-amber-100 text-amber-700' },
-            { label: 'Total check-ins', value: counts.total,      icon: '🤖', color: 'bg-primary-50 border-primary-100 text-primary-700' },
+            { label: 'Sin revisar',     value: counts.unreviewed, Icon: Bell,          color: 'bg-orange-50 border-orange-100 text-orange-700'   },
+            { label: 'Riesgo alto',     value: counts.high,       Icon: AlertCircle,   color: 'bg-red-50 border-red-100 text-red-700'             },
+            { label: 'Riesgo medio',    value: counts.medium,     Icon: AlertTriangle, color: 'bg-amber-50 border-amber-100 text-amber-700'       },
+            { label: 'Total check-ins', value: counts.total,      Icon: Bot,           color: 'bg-primary-50 border-primary-100 text-primary-700' },
           ].map(m => (
             <div key={m.label} className={`rounded-2xl border p-4 ${m.color}`}>
-              <p className="text-xl mb-1">{m.icon}</p>
+              <m.Icon size={18} strokeWidth={1.8} className="mb-1 opacity-80" />
               <p className="text-2xl font-bold">{m.value}</p>
               <p className="text-xs font-medium mt-0.5 opacity-80">{m.label}</p>
             </div>
@@ -134,10 +135,10 @@ export default function AdminAIAlerts() {
       {/* Filtros */}
       <div className="flex gap-2 flex-wrap">
         {[
-          { id: 'unreviewed', label: `⚡ Sin revisar (${counts.unreviewed})` },
-          { id: 'high',       label: `🔴 Riesgo alto (${counts.high})` },
-          { id: 'medium',     label: `🟡 Riesgo medio (${counts.medium})` },
-          { id: 'all',        label: `Todos (${counts.total})` },
+          { id: 'unreviewed', label: `Sin revisar (${counts.unreviewed})`  },
+          { id: 'high',       label: `Riesgo alto (${counts.high})`     },
+          { id: 'medium',     label: `Riesgo medio (${counts.medium})`  },
+          { id: 'all',        label: `Todos (${counts.total})`           },
         ].map(f => (
           <button key={f.id} onClick={() => setFilter(f.id)}
             className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
@@ -156,7 +157,7 @@ export default function AdminAIAlerts() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-warm-400">
-          <div className="text-5xl mb-3">✅</div>
+          <CheckCircle2 size={48} className="text-green-300 mx-auto mb-3" />
           <p className="font-medium text-warm-600">No hay alertas pendientes</p>
           <p className="text-sm mt-1">Todos los check-ins han sido revisados</p>
         </div>
@@ -184,11 +185,11 @@ export default function AdminAIAlerts() {
                           )}
                         </div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${rc.badge}`}>
-                            {rc.icon} {rc.label}
+                          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1 ${rc.badge}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${rc.dot}`} />{rc.label}
                           </span>
                           {alert.notified
-                            ? <span className="text-xs text-warm-400 font-medium">✓ Revisado</span>
+                            ? <span className="text-xs text-warm-400 font-medium flex items-center gap-1"><Check size={11} /> Revisado</span>
                             : <span className="text-xs font-bold text-orange-600 animate-pulse">• Nuevo</span>
                           }
                         </div>
@@ -211,7 +212,7 @@ export default function AdminAIAlerts() {
                       onClick={() => setExpanded(isExp ? null : alert.id)}
                       className="flex-1 text-sm font-medium py-2 rounded-xl border border-current/20 hover:bg-white/30 transition-colors"
                     >
-                      {isExp ? '▲ Ocultar respuestas' : '▼ Ver respuestas del paciente'}
+                      {isExp ? 'Ocultar respuestas' : 'Ver respuestas del paciente'}
                     </button>
                     {!alert.notified && (
                       <button
@@ -219,7 +220,7 @@ export default function AdminAIAlerts() {
                         disabled={marking === alert.id}
                         className="px-4 py-2 rounded-xl bg-white/40 hover:bg-white/60 transition-colors text-sm font-semibold border border-current/20 disabled:opacity-50"
                       >
-                        {marking === alert.id ? '...' : '✓ Revisado'}
+                        {marking === alert.id ? '...' : <span className="flex items-center gap-1"><Check size={12} /> Revisado</span>}
                       </button>
                     )}
                   </div>

@@ -5,6 +5,7 @@
 import { useState, useMemo } from 'react'
 import { DSM5TR, searchDSM } from '@/data/dsm5tr'
 import Input from '@/components/ui/Input'
+import { Lightbulb, AlertTriangle, Search } from 'lucide-react'
 
 // ── Colores por capítulo ──────────────────────────────────────────────────────
 const CHAPTER_COLORS = [
@@ -112,7 +113,7 @@ function DiagnosisCard({ diagnosis, chapterId, defaultOpen = false }) {
           {/* Notas clínicas */}
           {diagnosis.notes && (
             <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3">
-              <p className="text-xs font-bold text-amber-700 mb-1">💡 Nota clínica</p>
+              <p className="text-xs font-bold text-amber-700 mb-1 flex items-center gap-1"><Lightbulb className="inline" size={12} strokeWidth={1.8} /> Nota clínica</p>
               <p className="text-sm text-amber-800 leading-relaxed">{diagnosis.notes}</p>
             </div>
           )}
@@ -166,8 +167,9 @@ export default function DSMReferencePage() {
             <p className="text-[10px] text-primary-500 font-medium">diagnósticos</p>
           </div>
         </div>
-        <div className="mt-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 text-xs text-amber-700 leading-relaxed">
-          ⚠️ Referencia clínica resumida. Los criterios están parafraseados con fines educativos. Consulta el manual oficial (APA, 2022) para uso diagnóstico formal.
+        <div className="mt-3 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 text-xs text-amber-700 leading-relaxed flex items-start gap-1.5">
+          <AlertTriangle className="shrink-0 mt-0.5" size={12} strokeWidth={1.8} />
+          <span>Referencia clínica resumida. Los criterios están parafraseados con fines educativos. Consulta el manual oficial (APA, 2022) para uso diagnóstico formal.</span>
         </div>
       </div>
 
@@ -211,7 +213,7 @@ export default function DSMReferencePage() {
         <div className="flex flex-col gap-2">
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center py-16 text-center">
-              <span className="text-4xl mb-3">🔍</span>
+              <Search className="text-warm-300 mb-3" size={40} strokeWidth={1.8} />
               <p className="font-semibold text-warm-700">Sin resultados para "{search}"</p>
               <button
                 onClick={() => { setSearch(''); setFilterChapter('all') }}

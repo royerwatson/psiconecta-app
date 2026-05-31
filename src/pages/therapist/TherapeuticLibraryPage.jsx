@@ -10,6 +10,16 @@ import Avatar from '@/components/ui/Avatar'
 import Input from '@/components/ui/Input'
 import toast from 'react-hot-toast'
 import { cn } from '@/lib/utils'
+import { Timer, RefreshCw, Check, Search, Brain, Waves, Leaf, Focus2, Dumbbell, Smile, Wind, BookOpen } from 'lucide-react'
+
+// ── Mapa de iconos de categoría ───────────────────────────────────────────────
+const CAT_ICON_MAP = {
+  Brain, Waves, Leaf, Focus2, Dumbbell, Smile, Wind, BookOpen
+}
+function CatIcon({ name, ...props }) {
+  const Icon = CAT_ICON_MAP[name]
+  return Icon ? <Icon {...props} /> : null
+}
 
 // ── Paleta de colores de categoría ───────────────────────────────────────────
 const CAT_STYLE = {
@@ -53,8 +63,8 @@ function ExerciseCard({ exercise, isSelected, onClick }) {
       )}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
-        <span className={cn('text-[10px] px-2 py-0.5 rounded-full border font-medium shrink-0', cs.pill)}>
-          {cat?.icon} {cat?.label}
+        <span className={cn('text-[10px] px-2 py-0.5 rounded-full border font-medium shrink-0 flex items-center gap-0.5', cs.pill)}>
+          <CatIcon name={cat?.icon} size={10} strokeWidth={1.8} /> {cat?.label}
         </span>
         <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium shrink-0', DIFFICULTY_STYLE[exercise.difficulty])}>
           {exercise.difficulty}
@@ -63,8 +73,8 @@ function ExerciseCard({ exercise, isSelected, onClick }) {
       <h3 className="font-semibold text-sm text-warm-900 leading-snug mb-1">{exercise.title}</h3>
       <p className="text-xs text-warm-500 leading-relaxed line-clamp-2">{exercise.summary}</p>
       <div className="flex items-center gap-3 mt-2">
-        <span className="text-[10px] text-warm-400">⏱ {exercise.duration}</span>
-        <span className="text-[10px] text-warm-400">🔄 {exercise.frequency}</span>
+        <span className="text-[10px] text-warm-400 flex items-center gap-0.5"><Timer size={10} strokeWidth={1.8} /> {exercise.duration}</span>
+        <span className="text-[10px] text-warm-400 flex items-center gap-0.5"><RefreshCw size={10} strokeWidth={1.8} /> {exercise.frequency}</span>
       </div>
     </button>
   )
@@ -80,8 +90,8 @@ function ExerciseDetail({ exercise, onAssign, onClose }) {
       <div className="flex items-start gap-3 p-5 border-b border-warm-100">
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap gap-2 mb-2">
-            <span className={cn('text-[10px] px-2 py-0.5 rounded-full border font-medium', cs.pill)}>
-              {cat?.icon} {cat?.label}
+            <span className={cn('text-[10px] px-2 py-0.5 rounded-full border font-medium flex items-center gap-0.5', cs.pill)}>
+              <CatIcon name={cat?.icon} size={10} strokeWidth={1.8} /> {cat?.label}
             </span>
             <span className={cn('text-[10px] px-2 py-0.5 rounded-full font-medium', DIFFICULTY_STYLE[exercise.difficulty])}>
               {exercise.difficulty}
@@ -258,7 +268,7 @@ function AssignModal({ exercise, therapistId, onClose, onAssigned }) {
                   >
                     <Avatar name={p.full_name} size="xs" />
                     <span className="text-sm font-medium text-warm-800 flex-1">{p.full_name}</span>
-                    {selected === p.id && <span className="text-primary-600 text-xs font-bold">✓</span>}
+                    {selected === p.id && <Check size={13} strokeWidth={1.8} className="text-primary-600" />}
                   </button>
                 ))}
               </div>
@@ -400,7 +410,7 @@ export default function TherapeuticLibraryPage() {
                 isActive ? 'bg-primary-600 text-white shadow-sm' : 'bg-warm-100 text-warm-600 hover:bg-warm-200',
               )}
             >
-              {cat.icon} {cat.label} · {totalByCategory[cat.id]}
+              <CatIcon name={cat.icon} size={11} strokeWidth={1.8} className="inline mr-0.5" /> {cat.label} · {totalByCategory[cat.id]}
             </button>
           )
         })}
@@ -413,7 +423,7 @@ export default function TherapeuticLibraryPage() {
         <div className={cn('flex-1 min-w-0', showDetail && 'hidden lg:block')}>
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center py-16 text-center">
-              <span className="text-4xl mb-3">🔍</span>
+              <Search size={40} strokeWidth={1.5} className="text-warm-300 mb-3 mx-auto" />
               <p className="font-semibold text-warm-700">Sin resultados para "{search}"</p>
               <button
                 onClick={() => { setSearch(''); setActiveCategory('all') }}

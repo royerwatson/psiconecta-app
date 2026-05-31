@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { CheckCircle2, Clock, XCircle, Star } from 'lucide-react'
 
 const variants = {
   primary:  'bg-primary-100 text-primary-700',
@@ -38,19 +39,19 @@ export default function Badge({ children, variant = 'primary', dot = false, clas
 // Badge de verificación de terapeuta
 export function VerificationBadge({ status }) {
   const map = {
-    verified: { label: '✓ Verificado',  variant: 'verified' },
-    pending:  { label: '⏳ En revisión', variant: 'pending'  },
-    rejected: { label: '✗ Rechazado',   variant: 'rejected' },
+    verified: { label: 'Verificado',  variant: 'verified', Icon: CheckCircle2 },
+    pending:  { label: 'En revisión', variant: 'pending',  Icon: Clock        },
+    rejected: { label: 'Rechazado',   variant: 'rejected', Icon: XCircle      },
   }
   const b = map[status] ?? map.pending
-  return <Badge variant={b.variant} dot>{b.label}</Badge>
+  return <Badge variant={b.variant}><b.Icon size={11} strokeWidth={1.8} />{b.label}</Badge>
 }
 
 // Badge de estrellas
 export function RatingBadge({ rating }) {
   return (
     <Badge variant="warning" className="gap-1">
-      <span>⭐</span>
+      <Star size={11} className="fill-amber-400 text-amber-400" strokeWidth={0} />
       <span>{Number(rating).toFixed(1)}</span>
     </Badge>
   )
