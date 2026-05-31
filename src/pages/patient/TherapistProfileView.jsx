@@ -13,6 +13,7 @@ import StarRating from '@/components/ui/StarRating'
 import { formatDate, formatPrice, formatRelative } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { Star, MessageCircle, Calendar, Search, Zap } from 'lucide-react'
 
 /** Barra de distribución de estrellas (5→1) */
 function RatingBar({ star, count, total }) {
@@ -20,7 +21,7 @@ function RatingBar({ star, count, total }) {
   return (
     <div className="flex items-center gap-2 text-xs">
       <span className="text-warm-500 w-3">{star}</span>
-      <span className="text-amber-400 text-[11px]">★</span>
+      <Star size={11} strokeWidth={1.8} className="text-amber-400" fill="currentColor" />
       <div className="flex-1 h-1.5 bg-warm-100 rounded-full overflow-hidden">
         <div
           className="h-full bg-amber-400 rounded-full transition-all duration-500"
@@ -90,7 +91,7 @@ export default function TherapistProfileView() {
       setBooking(false)
       return
     }
-    toast.success('✅ Cita agendada exitosamente')
+    toast.success('Cita agendada exitosamente')
     setShowBook(false)
     navigate('/patient/appointments')
   }
@@ -127,7 +128,7 @@ export default function TherapistProfileView() {
   if (!therapist) {
     return (
       <div className="flex flex-col items-center justify-center py-24 gap-3">
-        <span className="text-5xl">🔍</span>
+        <Search size={48} strokeWidth={1.8} className="text-warm-300" />
         <p className="font-semibold text-warm-700">Terapeuta no encontrado</p>
         <Button size="sm" variant="ghost" onClick={() => navigate(-1)}>← Volver</Button>
       </div>
@@ -173,11 +174,12 @@ export default function TherapistProfileView() {
           <Button
             variant="secondary"
             onClick={() => navigate(`/patient/chat?therapist=${therapistId}`)}
+            className="flex items-center justify-center gap-1.5"
           >
-            💬 Escribir
+            <MessageCircle size={15} strokeWidth={1.8} /> Escribir
           </Button>
-          <Button onClick={() => setShowBook(true)}>
-            📅 Agendar
+          <Button onClick={() => setShowBook(true)} className="flex items-center justify-center gap-1.5">
+            <Calendar size={15} strokeWidth={1.8} /> Agendar
           </Button>
         </div>
       </Card>
@@ -190,7 +192,7 @@ export default function TherapistProfileView() {
 
         {reviews.length === 0 ? (
           <Card className="text-center py-8">
-            <p className="text-3xl mb-2">⭐</p>
+            <div className="flex justify-center mb-2"><Star size={32} strokeWidth={1.8} className="text-amber-300" fill="currentColor" /></div>
             <p className="font-medium text-warm-700 text-sm">Aún sin reseñas</p>
             <p className="text-xs text-warm-400 mt-1 max-w-xs mx-auto">
               Sé el primero en dejar una reseña después de tu sesión
@@ -206,7 +208,7 @@ export default function TherapistProfileView() {
                   <span className="text-4xl font-bold text-warm-900">{avgRating.toFixed(1)}</span>
                   <div className="flex gap-0.5 mt-1">
                     {[1,2,3,4,5].map((s) => (
-                      <span key={s} className={`text-base ${s <= Math.round(avgRating) ? 'text-amber-400' : 'text-warm-200'}`}>★</span>
+                      <Star key={s} size={14} strokeWidth={1.8} className={s <= Math.round(avgRating) ? 'text-amber-400' : 'text-warm-200'} fill="currentColor" />
                     ))}
                   </div>
                   <span className="text-xs text-warm-400 mt-1">{reviews.length} reseña{reviews.length !== 1 ? 's' : ''}</span>
@@ -231,7 +233,7 @@ export default function TherapistProfileView() {
                     </div>
                     <div className="flex items-center gap-0.5 shrink-0">
                       {[1,2,3,4,5].map((s) => (
-                        <span key={s} className={`text-sm ${s <= r.rating ? 'text-amber-400' : 'text-warm-200'}`}>★</span>
+                        <Star key={s} size={13} strokeWidth={1.8} className={s <= r.rating ? 'text-amber-400' : 'text-warm-200'} fill="currentColor" />
                       ))}
                     </div>
                   </div>
@@ -277,7 +279,7 @@ export default function TherapistProfileView() {
             }`}>
               <div className="flex items-center justify-between">
                 <p className={`font-semibold ${bookingPreview.urgent ? 'text-orange-800' : 'text-primary-800'}`}>
-                  {bookingPreview.urgent ? '⚡ Cita urgente' : '📅 Cita estándar'}
+                  <span className="inline-flex items-center gap-1">{bookingPreview.urgent ? <><Zap size={14} strokeWidth={1.8} /> Cita urgente</> : <><Calendar size={14} strokeWidth={1.8} /> Cita estándar</>}</span>
                 </p>
                 <p className={`text-lg font-bold ${bookingPreview.urgent ? 'text-orange-700' : 'text-primary-700'}`}>
                   {formatPrice(bookingPreview.price)}

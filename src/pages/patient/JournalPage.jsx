@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { Flower2, Heart, Brain, Sprout, Users, Sparkles, BookOpen, Lock, MessageCircle, Pen, Trash2 } from 'lucide-react'
 
 // ─── Prompts terapéuticos ─────────────────────────────────────────────────────
 
@@ -25,7 +26,7 @@ const PROMPT_CATEGORIES = [
   {
     id: 'gratitud',
     label: 'Gratitud',
-    icon: '🌸',
+    Icon: Flower2,
     color: 'bg-pink-50 text-pink-700 border-pink-100',
     prompts: [
       '¿Qué tres cosas pequeñas de hoy agradezco y por qué?',
@@ -37,7 +38,7 @@ const PROMPT_CATEGORIES = [
   {
     id: 'emociones',
     label: 'Emociones',
-    icon: '💜',
+    Icon: Heart,
     color: 'bg-purple-50 text-purple-700 border-purple-100',
     prompts: [
       '¿Qué emoción predomina en mí hoy? ¿Dónde la siento en el cuerpo?',
@@ -49,7 +50,7 @@ const PROMPT_CATEGORIES = [
   {
     id: 'pensamientos',
     label: 'Pensamientos',
-    icon: '🧠',
+    Icon: Brain,
     color: 'bg-blue-50 text-blue-700 border-blue-100',
     prompts: [
       '¿Qué pensamiento recurrente me aparece esta semana? ¿Es un hecho o una interpretación?',
@@ -61,7 +62,7 @@ const PROMPT_CATEGORIES = [
   {
     id: 'metas',
     label: 'Metas',
-    icon: '🌱',
+    Icon: Sprout,
     color: 'bg-green-50 text-green-700 border-green-100',
     prompts: [
       '¿Qué pequeño paso puedo dar mañana hacia algo que me importa?',
@@ -73,7 +74,7 @@ const PROMPT_CATEGORIES = [
   {
     id: 'relaciones',
     label: 'Relaciones',
-    icon: '🤝',
+    Icon: Users,
     color: 'bg-amber-50 text-amber-700 border-amber-100',
     prompts: [
       '¿Hay alguna relación en mi vida que quiera cuidar más? ¿Qué acción pequeña podría tomar?',
@@ -85,7 +86,7 @@ const PROMPT_CATEGORIES = [
   {
     id: 'terapia',
     label: 'Terapia',
-    icon: '✨',
+    Icon: Sparkles,
     color: 'bg-teal-50 text-teal-700 border-teal-100',
     prompts: [
       '¿Qué aprendí sobre mí mismo/a en la última sesión con mi terapeuta?',
@@ -155,8 +156,8 @@ function JournalEditor({ entry, onSave, onCancel }) {
 
       {/* Prompts sugeridos */}
       <div>
-        <p className="text-xs font-semibold text-warm-500 uppercase tracking-wide mb-2">
-          ✨ Prompts para inspirarte
+        <p className="text-xs font-semibold text-warm-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+          <Sparkles size={12} strokeWidth={1.8} /> Prompts para inspirarte
         </p>
         <div className="flex flex-wrap gap-2 mb-3">
           {PROMPT_CATEGORIES.map(cat => (
@@ -164,13 +165,13 @@ function JournalEditor({ entry, onSave, onCancel }) {
               key={cat.id}
               onClick={() => setActiveCat(prev => prev === cat.id ? null : cat.id)}
               className={cn(
-                'px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
                 activeCat === cat.id
                   ? cat.color + ' shadow-sm'
                   : 'bg-white border-warm-200 text-warm-600 hover:border-warm-300'
               )}
             >
-              {cat.icon} {cat.label}
+              <cat.Icon size={11} strokeWidth={1.8} /> {cat.label}
             </button>
           ))}
         </div>
@@ -193,7 +194,7 @@ function JournalEditor({ entry, onSave, onCancel }) {
         {/* Prompt seleccionado */}
         {prompt && (
           <div className="flex items-start gap-2 bg-primary-50 border border-primary-100 rounded-xl px-3 py-2.5 mt-2">
-            <span className="text-primary-400 text-sm shrink-0 mt-0.5">💬</span>
+            <MessageCircle size={14} strokeWidth={1.8} className="text-primary-400 shrink-0 mt-0.5" />
             <p className="text-sm text-primary-700 italic flex-1">{prompt}</p>
             <button
               onClick={() => setPrompt('')}
@@ -324,14 +325,14 @@ function EntryCard({ entry, onEdit, onDelete }) {
             onClick={() => onEdit(entry)}
             className="flex items-center gap-1.5 text-xs text-warm-500 hover:text-primary-600 transition-colors px-2 py-1 rounded-lg hover:bg-primary-50"
           >
-            ✏️ Editar
+            <Pen size={12} strokeWidth={1.8} /> Editar
           </button>
           <button
             onClick={handleDelete}
             disabled={deleting}
             className="flex items-center gap-1.5 text-xs text-warm-500 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50"
           >
-            🗑️ Eliminar
+            <Trash2 size={12} strokeWidth={1.8} /> Eliminar
           </button>
         </div>
       )}
@@ -394,7 +395,7 @@ export default function JournalPage() {
 
       if (error) { toast.error('No se pudo guardar'); return }
       setEntries(prev => [data, ...prev])
-      toast.success('Entrada guardada 📓')
+      toast.success('Entrada guardada')
     }
 
     setView('list')
@@ -473,7 +474,7 @@ export default function JournalPage() {
       {/* Sin entradas — estado vacío motivador */}
       {!loading && entries.length === 0 && (
         <div className="bg-gradient-to-br from-primary-50 to-calm-50 border border-primary-100 rounded-2xl p-8 text-center mb-6">
-          <p className="text-5xl mb-4">📓</p>
+          <div className="mb-4 flex justify-center"><BookOpen size={48} strokeWidth={1.8} className="text-warm-300" /></div>
           <p className="font-serif font-semibold text-warm-900 text-lg mb-2">
             Tu diario está esperando
           </p>
@@ -482,7 +483,7 @@ export default function JournalPage() {
             más poderosas del proceso terapéutico. Es solo tuyo.
           </p>
           <Button onClick={() => setView('new')}>
-            ✏️ Escribe tu primera entrada
+            Escribe tu primera entrada
           </Button>
         </div>
       )}
@@ -544,7 +545,7 @@ export default function JournalPage() {
       {/* Nota de privacidad */}
       {!loading && entries.length > 0 && (
         <div className="flex items-center gap-2 mt-6 text-center justify-center">
-          <span className="text-warm-300 text-sm">🔒</span>
+          <Lock size={14} strokeWidth={1.8} className="text-warm-300" />
           <p className="text-xs text-warm-400">
             Tu diario es completamente privado. Ni tu terapeuta tiene acceso.
           </p>

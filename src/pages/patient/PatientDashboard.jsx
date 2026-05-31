@@ -14,7 +14,7 @@ import PendingTestsSection from '@/components/psychometrics/PendingTestsSection'
 import StarRating from '@/components/ui/StarRating'
 import { Textarea } from '@/components/ui/Input'
 import toast from 'react-hot-toast'
-import { Play, ChevronRight, Flame, Zap, Sparkles, ClipboardList, Calendar, MessageCircle, Search, Clock } from 'lucide-react'
+import { Play, ChevronRight, Flame, Zap, Sparkles, ClipboardList, Calendar, MessageCircle, Search, Clock, AlertTriangle, Sprout, Star, BarChart2 } from 'lucide-react'
 
 /**
  * Dashboard principal del paciente.
@@ -119,7 +119,7 @@ export default function PatientDashboard() {
       .update({ status: 'completed', completed_at: new Date().toISOString() })
       .eq('id', taskId)
     setTasks((t) => t.filter((task) => task.id !== taskId))
-    toast.success('¡Tarea completada! 🎉')
+    toast.success('¡Tarea completada!')
   }
 
   const submitReview = async () => {
@@ -133,7 +133,7 @@ export default function PatientDashboard() {
       comment: reviewForm.comment,
     })
     if (error) { toast.error('Error al enviar reseña'); setSubmittingReview(false); return }
-    toast.success('¡Gracias por tu reseña! 🌟')
+    toast.success('¡Gracias por tu reseña!')
     setPendingReview(null)
     setReviewForm({ rating: 0, comment: '' })
     setSubmittingReview(false)
@@ -143,7 +143,7 @@ export default function PatientDashboard() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
-        <span className="text-5xl">⚠️</span>
+        <AlertTriangle size={48} strokeWidth={1.5} className="text-warm-300" />
         <p className="font-medium text-warm-800">{error}</p>
         <Button onClick={fetchData} size="sm">Reintentar</Button>
       </div>
@@ -180,7 +180,7 @@ export default function PatientDashboard() {
       {/* Banner perfil incompleto */}
       {profile && !profile.avatar_url && (
         <div className="bg-primary-50 border border-primary-100 rounded-2xl p-4 flex gap-3 items-center">
-          <span className="text-xl shrink-0">🪴</span>
+          <Sprout size={20} strokeWidth={1.8} className="shrink-0 text-primary-600" />
           <div className="flex-1 min-w-0">
             <p className="font-medium text-primary-800 text-sm">Personaliza tu perfil</p>
             <p className="text-xs text-primary-600 mt-0.5">
@@ -196,7 +196,7 @@ export default function PatientDashboard() {
         <div className="bg-gradient-to-r from-violet-50 to-primary-50 border border-violet-200 rounded-2xl p-4">
           <div className="flex items-start justify-between mb-3">
             <div>
-              <p className="font-semibold text-warm-900 text-sm">⭐ ¿Cómo fue tu sesión?</p>
+              <p className="font-semibold text-warm-900 text-sm flex items-center gap-1.5"><Star size={14} strokeWidth={1.8} className="shrink-0" /> ¿Cómo fue tu sesión?</p>
               <p className="text-xs text-warm-500 mt-0.5">
                 Sesión con {pendingReview.therapist?.full_name} · Tu opinión ayuda a otros pacientes
               </p>
@@ -314,7 +314,7 @@ export default function PatientDashboard() {
         className="w-full flex items-center justify-between bg-white border border-warm-100 rounded-2xl px-4 py-3.5 shadow-sm hover:bg-warm-50 active:scale-[0.99] transition-all"
       >
         <div className="flex items-center gap-3">
-          <span className="text-xl">📊</span>
+          <BarChart2 size={20} strokeWidth={1.8} className="text-warm-600" />
           <div className="text-left">
             <p className="text-sm font-semibold text-warm-900">Mis resultados</p>
             <p className="text-xs text-warm-400 mt-0.5">Ver evaluaciones psicométricas disponibles</p>
@@ -359,7 +359,7 @@ export default function PatientDashboard() {
                           ? 'text-red-500 font-medium'
                           : 'text-warm-400'
                       }`}>
-                        📅 {new Date(task.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
+                        <Calendar size={11} strokeWidth={1.8} className="inline mr-0.5" />{new Date(task.due_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                       </span>
                     )}
                   </div>

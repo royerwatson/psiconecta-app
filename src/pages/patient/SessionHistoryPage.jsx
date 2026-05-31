@@ -21,6 +21,7 @@ import Avatar from '@/components/ui/Avatar'
 import Button from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { Star, Clock, Timer, ClipboardList, Stethoscope, AlertTriangle, Pencil, Lock, CalendarDays } from 'lucide-react'
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -39,7 +40,7 @@ function formatPrice(price) {
   return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(price)
 }
 
-const RISK_LABEL = { low: null, medium: '⚠️ Seguimiento', high: '🚨 Riesgo alto' }
+const RISK_LABEL = { low: null, medium: 'Seguimiento', high: 'Riesgo alto' }
 const RISK_COLOR = {
   low:    '',
   medium: 'text-amber-600 bg-amber-50 border-amber-200',
@@ -52,7 +53,8 @@ function StarDisplay({ rating }) {
   return (
     <div className="flex gap-0.5">
       {[1,2,3,4,5].map(i => (
-        <span key={i} className={i <= rating ? 'text-amber-400' : 'text-warm-200'}>★</span>
+        <Star key={i} size={14} strokeWidth={1.8}
+          className={i <= rating ? 'text-amber-400 fill-amber-400' : 'text-warm-200 fill-warm-200'} />
       ))}
     </div>
   )
@@ -92,12 +94,12 @@ function SessionCard({ session, onSaveFeedback }) {
           <p className="font-semibold text-warm-900 text-sm">{session.therapist?.full_name ?? 'Terapeuta'}</p>
           <p className="text-xs text-warm-500 mt-0.5 capitalize">{formatSessionDate(session.scheduled_at)}</p>
           <div className="flex flex-wrap items-center gap-2 mt-1.5">
-            <span className="text-xs bg-warm-50 border border-warm-100 text-warm-500 px-2 py-0.5 rounded-full">
-              🕐 {formatSessionTime(session.scheduled_at)}
+            <span className="text-xs bg-warm-50 border border-warm-100 text-warm-500 px-2 py-0.5 rounded-full flex items-center gap-1">
+              <Clock size={11} strokeWidth={1.8} className="shrink-0" />{formatSessionTime(session.scheduled_at)}
             </span>
             {session.duration && (
-              <span className="text-xs bg-warm-50 border border-warm-100 text-warm-500 px-2 py-0.5 rounded-full">
-                ⏱ {session.duration} min
+              <span className="text-xs bg-warm-50 border border-warm-100 text-warm-500 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Timer size={11} strokeWidth={1.8} className="shrink-0" />{session.duration} min
               </span>
             )}
             {formatPrice(session.price) && (
@@ -106,13 +108,13 @@ function SessionCard({ session, onSaveFeedback }) {
               </span>
             )}
             {hasReleasedNotes && (
-              <span className="text-xs bg-primary-50 border border-primary-100 text-primary-600 px-2 py-0.5 rounded-full">
-                📋 Notas compartidas
+              <span className="text-xs bg-primary-50 border border-primary-100 text-primary-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <ClipboardList size={11} strokeWidth={1.8} className="shrink-0" />Notas compartidas
               </span>
             )}
             {hasReview && (
-              <span className="text-xs bg-amber-50 border border-amber-100 text-amber-600 px-2 py-0.5 rounded-full">
-                ⭐ {review.rating}/5
+              <span className="text-xs bg-amber-50 border border-amber-100 text-amber-600 px-2 py-0.5 rounded-full flex items-center gap-1">
+                <Star size={11} strokeWidth={1.8} className="shrink-0" />{review.rating}/5
               </span>
             )}
           </div>
@@ -130,16 +132,16 @@ function SessionCard({ session, onSaveFeedback }) {
 
           {/* Especialidad del terapeuta */}
           {session.therapist?.therapist_profiles?.[0]?.specialty && (
-            <p className="text-xs text-warm-500">
-              🧑‍⚕️ {session.therapist.therapist_profiles[0].specialty}
+            <p className="text-xs text-warm-500 flex items-center gap-1">
+              <Stethoscope size={12} strokeWidth={1.8} className="shrink-0" />{session.therapist.therapist_profiles[0].specialty}
             </p>
           )}
 
           {/* Notas liberadas por el terapeuta */}
           {hasReleasedNotes && (
             <div className="flex flex-col gap-3">
-              <p className="text-xs font-semibold text-warm-500 uppercase tracking-wide">
-                📋 Resumen compartido por tu terapeuta
+              <p className="text-xs font-semibold text-warm-500 uppercase tracking-wide flex items-center gap-1">
+                <ClipboardList size={12} strokeWidth={1.8} className="shrink-0" />Resumen compartido por tu terapeuta
               </p>
               {session.clinical_history.map((note) => (
                 <div key={note.id} className="bg-primary-50 border border-primary-100 rounded-xl p-4 flex flex-col gap-2">
@@ -177,7 +179,7 @@ function SessionCard({ session, onSaveFeedback }) {
           {/* Reseña del paciente */}
           {hasReview && (
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-4">
-              <p className="text-xs font-semibold text-amber-700 mb-2">⭐ Tu reseña</p>
+              <p className="text-xs font-semibold text-amber-700 mb-2 flex items-center gap-1"><Star size={12} strokeWidth={1.8} className="shrink-0" />Tu reseña</p>
               <StarDisplay rating={review.rating} />
               {review.comment && (
                 <p className="text-sm text-amber-800 mt-2 leading-relaxed">{review.comment}</p>
@@ -187,8 +189,8 @@ function SessionCard({ session, onSaveFeedback }) {
 
           {/* Retroalimentación del paciente */}
           <div>
-            <p className="text-xs font-semibold text-warm-500 uppercase tracking-wide mb-2">
-              ✏️ Mi reflexión sobre esta sesión
+            <p className="text-xs font-semibold text-warm-500 uppercase tracking-wide mb-2 flex items-center gap-1">
+              <Pencil size={12} strokeWidth={1.8} className="shrink-0" />Mi reflexión sobre esta sesión
             </p>
 
             {session.patient_feedback && !editingFB ? (
@@ -315,7 +317,7 @@ export default function SessionHistoryPage() {
     setSessions(prev => prev.map(s =>
       s.id === sessionId ? { ...s, patient_feedback: text } : s
     ))
-    toast.success('Reflexión guardada 💬')
+    toast.success('Reflexión guardada')
   }
 
   const totalHours = Math.round(stats.totalMinutes / 60)
@@ -354,7 +356,7 @@ export default function SessionHistoryPage() {
         </div>
       ) : sessions.length === 0 ? (
         <div className="text-center py-16 text-warm-400">
-          <p className="text-5xl mb-3">🗓️</p>
+          <CalendarDays size={48} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
           <p className="font-medium text-warm-600">Aún no tienes sesiones completadas</p>
           <p className="text-sm mt-1 text-warm-400 mb-5">
             Aquí verás el resumen de cada sesión terminada
@@ -378,7 +380,7 @@ export default function SessionHistoryPage() {
       {/* Nota de privacidad */}
       {!loading && sessions.length > 0 && (
         <p className="text-xs text-warm-400 text-center mt-6">
-          🔒 Solo ves las notas que tu terapeuta decidió compartir contigo.
+          <Lock size={12} strokeWidth={1.8} className="inline mr-1" />Solo ves las notas que tu terapeuta decidió compartir contigo.
           Tu retroalimentación es privada.
         </p>
       )}

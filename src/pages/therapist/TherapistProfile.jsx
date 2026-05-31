@@ -10,6 +10,7 @@ import { VerificationBadge } from '@/components/ui/Badge'
 import { RatingDisplay } from '@/components/ui/StarRating'
 import { formatPrice } from '@/lib/utils'
 import toast from 'react-hot-toast'
+import { Pencil, CheckCircle2, XCircle, Clock, Upload } from 'lucide-react'
 
 const SPECIALTIES = [
   'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
@@ -144,7 +145,7 @@ export default function TherapistProfile() {
         <h1 className="font-serif text-2xl font-bold text-warm-900">Mi perfil</h1>
         <Button size="sm" variant={editing ? 'outline' : 'secondary'}
           onClick={() => setEditing(!editing)}>
-          {editing ? 'Cancelar' : '✏️ Editar'}
+          {editing ? 'Cancelar' : <><Pencil size={13} strokeWidth={1.8} className="inline mr-1" />Editar</>}
         </Button>
       </div>
 
@@ -218,10 +219,12 @@ export default function TherapistProfile() {
             therapist?.verification_status === 'rejected' ? 'bg-red-50 border border-red-100' :
             'bg-amber-50 border border-amber-100'
           }`}>
-            <p className="font-medium text-sm">
-              {therapist?.verification_status === 'verified' ? '✅ Credenciales verificadas' :
-               therapist?.verification_status === 'rejected' ? '❌ Verificación rechazada' :
-               '⏳ Verificación en proceso'}
+            <p className="font-medium text-sm flex items-center gap-1">
+              {therapist?.verification_status === 'verified'
+                ? <><CheckCircle2 size={14} strokeWidth={1.8} className="text-green-600" /> Credenciales verificadas</>
+                : therapist?.verification_status === 'rejected'
+                ? <><XCircle size={14} strokeWidth={1.8} className="text-red-600" /> Verificación rechazada</>
+                : <><Clock size={14} strokeWidth={1.8} className="text-amber-600" /> Verificación en proceso</>}
             </p>
             <p className="text-xs mt-1 text-warm-600">
               {therapist?.verification_status === 'verified'
@@ -237,7 +240,7 @@ export default function TherapistProfile() {
               <input type="file" className="sr-only" accept=".pdf,.jpg,.jpeg,.png"
                 onChange={uploadCredential} disabled={uploadingDoc} />
               <Button as="span" variant="secondary" fullWidth loading={uploadingDoc}>
-                📄 {uploadingDoc ? 'Subiendo...' : 'Subir documento de credencial'}
+                <Upload size={13} strokeWidth={1.8} className="inline mr-1" />{uploadingDoc ? 'Subiendo...' : 'Subir documento de credencial'}
               </Button>
             </label>
           )}
@@ -248,11 +251,11 @@ export default function TherapistProfile() {
       <Card>
         <div className="flex items-center justify-between mb-4">
           <CardHeader className="mb-0 pb-0">
-            <CardTitle>💳 Datos de pago</CardTitle>
+            <CardTitle>Datos de pago</CardTitle>
           </CardHeader>
           <Button size="sm" variant={editingPayment ? 'outline' : 'secondary'}
             onClick={() => setEditingPayment(!editingPayment)}>
-            {editingPayment ? 'Cancelar' : '✏️ Editar'}
+            {editingPayment ? 'Cancelar' : <><Pencil size={13} strokeWidth={1.8} className="inline mr-1" />Editar</>}
           </Button>
         </div>
 
@@ -265,8 +268,8 @@ export default function TherapistProfile() {
               </label>
               <div className="flex gap-2">
                 {[
-                  { value: 'bank_transfer', label: '🏦 Cuenta bancaria' },
-                  { value: 'paypal',        label: '💙 PayPal'          },
+                  { value: 'bank_transfer', label: 'Cuenta bancaria' },
+                  { value: 'paypal',        label: 'PayPal'          },
                 ].map(m => (
                   <button key={m.value}
                     onClick={() => setPaymentForm(f => ({ ...f, payment_method: m.value }))}
@@ -308,7 +311,7 @@ export default function TherapistProfile() {
             )}
 
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-700">
-              🔒 Tus datos bancarios son confidenciales y solo los utiliza Psiconecta para procesar tus pagos.
+              Tus datos bancarios son confidenciales y solo los utiliza Psiconecta para procesar tus pagos.
             </div>
 
             <Button onClick={savePaymentInfo} loading={savingPayment} fullWidth>
@@ -319,7 +322,7 @@ export default function TherapistProfile() {
           <div className="flex flex-col gap-3">
             {therapist?.payment_method === 'paypal' ? (
               <div className="bg-blue-50 rounded-xl p-3">
-                <p className="text-xs text-blue-400 font-medium mb-1">💙 PayPal</p>
+                <p className="text-xs text-blue-400 font-medium mb-1">PayPal</p>
                 <p className="text-sm font-medium text-blue-800">
                   {therapist?.paypal_email ?? (
                     <span className="text-warm-400 italic">No configurado</span>
@@ -328,7 +331,7 @@ export default function TherapistProfile() {
               </div>
             ) : (
               <div className="bg-warm-50 rounded-xl p-3 space-y-1.5">
-                <p className="text-xs text-warm-400 font-medium mb-1">🏦 Cuenta bancaria</p>
+                <p className="text-xs text-warm-400 font-medium mb-1">Cuenta bancaria</p>
                 {therapist?.bank_name && (
                   <InfoRow label="Banco" value={therapist.bank_name} />
                 )}
@@ -351,7 +354,7 @@ export default function TherapistProfile() {
 
             {!therapist?.bank_account_number && !therapist?.paypal_email && (
               <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-sm text-amber-700">
-                ⚠️ Agrega tus datos de pago para recibir tus ganancias
+                Agrega tus datos de pago para recibir tus ganancias
               </div>
             )}
           </div>
@@ -360,7 +363,7 @@ export default function TherapistProfile() {
 
       {/* ── Historial de pagos recibidos ── */}
       <Card>
-        <CardHeader><CardTitle>💰 Mis pagos recibidos</CardTitle></CardHeader>
+        <CardHeader><CardTitle>Mis pagos recibidos</CardTitle></CardHeader>
         {loadingPayouts ? (
           <div className="space-y-2">
             {[1,2].map(i => (
@@ -369,7 +372,7 @@ export default function TherapistProfile() {
           </div>
         ) : payouts.length === 0 ? (
           <div className="text-center py-8 text-warm-400">
-            <div className="text-3xl mb-2">💸</div>
+            <div className="text-3xl mb-2 text-warm-300">—</div>
             <p className="text-sm">Aquí aparecerán tus liquidaciones cuando el admin las procese</p>
           </div>
         ) : (
@@ -402,7 +405,7 @@ export default function TherapistProfile() {
                     )}
                   </div>
                   <p className="text-xs text-warm-300 shrink-0">
-                    {p.payment_method === 'paypal' ? '💙' : '🏦'}
+                    {p.payment_method === 'paypal' ? 'PP' : 'BC'}
                   </p>
                 </div>
               )

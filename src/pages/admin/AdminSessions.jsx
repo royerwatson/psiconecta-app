@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { formatPrice, formatSessionDate } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import { Select } from '@/components/ui/Input'
+import { Calendar, DollarSign, CheckCircle2, XCircle, Zap, Download } from 'lucide-react'
 
 const STATUS_CONFIG = {
   scheduled:       { label: 'Programada',     color: 'text-primary-600 bg-primary-50' },
@@ -77,7 +78,7 @@ export default function AdminSessions() {
         </div>
         <button onClick={exportCSV}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium hover:bg-emerald-100 transition-colors">
-          ⬇ CSV
+          <Download size={13} className="mr-1.5" strokeWidth={1.8} />CSV
         </button>
       </div>
 
@@ -85,13 +86,13 @@ export default function AdminSessions() {
       {!loading && (
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {[
-            { label: 'Total sesiones', value: metrics.total, icon: '📅', color: 'bg-primary-50 text-primary-700' },
-            { label: 'Ingresos',       value: formatPrice(metrics.revenue), icon: '💵', color: 'bg-emerald-50 text-emerald-700' },
-            { label: 'Completadas',    value: metrics.completed, icon: '✅', color: 'bg-teal-50 text-teal-700' },
-            { label: 'Canceladas',     value: metrics.cancelled, icon: '❌', color: 'bg-red-50 text-red-700' },
+            { label: 'Total sesiones', value: metrics.total,              Icon: Calendar,    color: 'bg-primary-50 text-primary-700'  },
+            { label: 'Ingresos',       value: formatPrice(metrics.revenue), Icon: DollarSign,  color: 'bg-emerald-50 text-emerald-700' },
+            { label: 'Completadas',    value: metrics.completed,            Icon: CheckCircle2, color: 'bg-teal-50 text-teal-700'      },
+            { label: 'Canceladas',     value: metrics.cancelled,            Icon: XCircle,     color: 'bg-red-50 text-red-700'         },
           ].map(m => (
             <div key={m.label} className={`rounded-2xl p-4 ${m.color}`}>
-              <p className="text-xl mb-1">{m.icon}</p>
+              <m.Icon size={18} strokeWidth={1.8} className="mb-1 opacity-80" />
               <p className="text-xl font-bold">{m.value}</p>
               <p className="text-xs font-medium mt-0.5 opacity-80">{m.label}</p>
             </div>
@@ -134,7 +135,7 @@ export default function AdminSessions() {
                     <td className="px-4 py-3 text-warm-600">{s.therapist?.full_name ?? '—'}</td>
                     <td className="px-4 py-3 text-warm-500 text-xs whitespace-nowrap">
                       {new Date(s.scheduled_at).toLocaleDateString('es-DO', { dateStyle: 'short' })}
-                      {s.is_urgent && <span className="ml-1 text-orange-500">⚡</span>}
+                      {s.is_urgent && <Zap size={12} className="ml-1 inline text-orange-500" fill="currentColor" />}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-xs font-medium px-2 py-1 rounded-full ${st.color}`}>{st.label}</span>

@@ -13,6 +13,7 @@ import toast from 'react-hot-toast'
 import { cn } from '@/lib/utils'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { Zap, Wind, Users, Handshake, Stethoscope, Home, Shield, Phone, AlertTriangle } from 'lucide-react'
 
 // ── Líneas de crisis de referencia ────────────────────────────────────────────
 const CRISIS_LINES = [
@@ -30,21 +31,21 @@ const CRISIS_LINES = [
 const STEPS = [
   {
     num: 1, key: 'warning_signs', color: 'amber',
-    icon: '⚡', title: 'Señales de alerta',
+    Icon: Zap, title: 'Señales de alerta',
     hint: 'Pensamientos, imágenes, estados de ánimo, situaciones o comportamientos que suelen preceder una crisis.',
     placeholder: 'p. ej. Pensar "nadie me necesita", aislarse, no dormir…',
     type: 'text',
   },
   {
     num: 2, key: 'internal_coping', color: 'blue',
-    icon: '🧘', title: 'Estrategias internas de afrontamiento',
+    Icon: Wind, title: 'Estrategias internas de afrontamiento',
     hint: 'Cosas que el/la paciente puede hacer por sí solo/a para distraerse de los pensamientos de crisis.',
     placeholder: 'p. ej. Escuchar música, caminar, técnica 5-4-3-2-1…',
     type: 'text',
   },
   {
     num: 3, key: 'social_contacts', color: 'teal',
-    icon: '👥', title: 'Contactos sociales para distracción',
+    Icon: Users, title: 'Contactos sociales para distracción',
     hint: 'Personas y lugares que pueden distraer al/la paciente de la crisis (no necesariamente conscientes del plan).',
     placeholder: 'Nombre',
     type: 'contact',
@@ -53,7 +54,7 @@ const STEPS = [
   },
   {
     num: 4, key: 'support_people', color: 'purple',
-    icon: '🤝', title: 'Personas a quienes pedir ayuda',
+    Icon: Handshake, title: 'Personas a quienes pedir ayuda',
     hint: 'Familiares o amigos de confianza a quienes el/la paciente puede llamar cuando está en crisis.',
     placeholder: 'Nombre',
     type: 'contact',
@@ -62,7 +63,7 @@ const STEPS = [
   },
   {
     num: 5, key: 'professionals', color: 'rose',
-    icon: '🩺', title: 'Profesionales y servicios de crisis',
+    Icon: Stethoscope, title: 'Profesionales y servicios de crisis',
     hint: 'Terapeuta, psiquiatra, líneas de crisis. Incluye el número de emergencias local.',
     placeholder: 'Nombre / Servicio',
     type: 'contact',
@@ -71,7 +72,7 @@ const STEPS = [
   },
   {
     num: 6, key: 'safe_environment', color: 'green',
-    icon: '🏠', title: 'Hacer el entorno seguro',
+    Icon: Home, title: 'Hacer el entorno seguro',
     hint: 'Pasos concretos para reducir el acceso a medios letales (medicamentos, armas, etc.).',
     placeholder: 'p. ej. Entregar los medicamentos a un familiar de confianza…',
     type: 'text',
@@ -188,6 +189,7 @@ function DynamicContactList({ items, onChange, fields, labels }) {
 // ── Sección de un paso ────────────────────────────────────────────────────────
 function PlanStep({ step, value, onChange }) {
   const sc = STEP_COLOR[step.color]
+  const StepIcon = step.Icon
   return (
     <div className={cn('border-l-4 rounded-r-2xl rounded-l-sm bg-white overflow-hidden', sc.border)}>
       <div className={cn('px-4 py-3', sc.bg)}>
@@ -195,7 +197,7 @@ function PlanStep({ step, value, onChange }) {
           <span className={cn('w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center shrink-0', sc.num)}>
             {step.num}
           </span>
-          <span className="text-base">{step.icon}</span>
+          <StepIcon size={16} strokeWidth={1.8} />
           <h3 className="font-serif font-semibold text-warm-900 text-sm">{step.title}</h3>
         </div>
         <p className="text-xs text-warm-500 leading-relaxed mt-1 ml-8">{step.hint}</p>
@@ -373,10 +375,11 @@ export default function SafetyPlanPage() {
         </div>
 
         {/* Info del modelo */}
-        <div className="bg-rose-50 border border-rose-100 rounded-xl px-4 py-3 text-xs text-rose-800 leading-relaxed">
-          🛡️ <span className="font-semibold">Safety Planning Intervention (Stanley & Brown, 2012)</span> —
+        <div className="bg-rose-50 border border-rose-100 rounded-xl px-4 py-3 text-xs text-rose-800 leading-relaxed flex items-start gap-1.5">
+          <Shield className="shrink-0 mt-0.5" size={12} strokeWidth={1.8} />
+          <span><span className="font-semibold">Safety Planning Intervention (Stanley & Brown, 2012)</span> —
           Protocolo basado en evidencia para pacientes con ideación suicida activa o factores de riesgo
-          elevados. Completa el plan en colaboración con el/la paciente durante o después de la sesión.
+          elevados. Completa el plan en colaboración con el/la paciente durante o después de la sesión.</span>
         </div>
 
         {/* Selección de paciente */}
@@ -420,7 +423,7 @@ export default function SafetyPlanPage() {
             className="w-full flex items-center justify-between"
           >
             <div className="flex items-center gap-2">
-              <span className="text-base">📞</span>
+              <Phone size={16} strokeWidth={1.8} className="text-warm-500" />
               <span className="font-semibold text-warm-800 text-sm">Líneas de crisis de referencia</span>
             </div>
             <svg className={cn('w-4 h-4 text-warm-400 transition-transform', showCrisisLines && 'rotate-180')}
@@ -516,9 +519,10 @@ export default function SafetyPlanPage() {
       ) : (
         <>
           {/* Aviso clínico */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800 leading-relaxed">
-            ⚠️ <span className="font-semibold">Completa este plan en colaboración con el/la paciente</span> —
-            la participación activa aumenta significativamente su efectividad. Revísalo en cada sesión.
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-xs text-amber-800 leading-relaxed flex items-start gap-1.5">
+            <AlertTriangle className="shrink-0 mt-0.5" size={12} strokeWidth={1.8} />
+            <span><span className="font-semibold">Completa este plan en colaboración con el/la paciente</span> —
+            la participación activa aumenta significativamente su efectividad. Revísalo en cada sesión.</span>
           </div>
 
           {/* Los 6 pasos */}
@@ -535,8 +539,7 @@ export default function SafetyPlanPage() {
           <div className="border-l-4 border-primary-400 rounded-r-2xl rounded-l-sm bg-white overflow-hidden">
             <div className="bg-primary-50 px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center">✦</span>
-                <span className="text-base">💙</span>
+                <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center">+</span>
                 <h3 className="font-serif font-semibold text-warm-900 text-sm">Razones para vivir</h3>
               </div>
               <p className="text-xs text-warm-500 leading-relaxed mt-1 ml-8">
@@ -556,7 +559,7 @@ export default function SafetyPlanPage() {
           {/* Líneas de crisis de referencia */}
           <div className="bg-white border border-warm-100 rounded-2xl p-4">
             <div className="flex items-center gap-2 mb-3">
-              <span className="text-base">📞</span>
+              <Phone size={14} strokeWidth={1.8} className="text-warm-400" />
               <p className="text-xs font-bold text-warm-500 uppercase tracking-wider">Líneas de crisis — referencia rápida</p>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">

@@ -13,6 +13,7 @@ import StarRating from '@/components/ui/StarRating'
 import { Textarea } from '@/components/ui/Input'
 import { differenceInHours, parseISO } from 'date-fns'
 import toast from 'react-hot-toast'
+import { AlertTriangle, Calendar, BookOpen, Zap, Video, RefreshCw, Star, MessageCircle, Check } from 'lucide-react'
 
 export default function MyAppointments() {
   const { user } = useAuthStore()
@@ -137,7 +138,7 @@ export default function MyAppointments() {
       return
     }
 
-    toast.success(`✅ Terapeuta cambiado a ${selectedTherapist.profile?.full_name}`)
+    toast.success(`Terapeuta cambiado a ${selectedTherapist.profile?.full_name}`)
     setChangeModal(null)
     setSelectedTherapist(null)
     setChanging(false)
@@ -184,7 +185,7 @@ export default function MyAppointments() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
-        <span className="text-5xl">⚠️</span>
+        <AlertTriangle size={48} strokeWidth={1.5} className="text-warm-300" />
         <p className="font-medium text-warm-800">{error}</p>
         <Button onClick={fetchSessions} size="sm">Reintentar</Button>
       </div>
@@ -220,8 +221,8 @@ export default function MyAppointments() {
         <div className="flex flex-col gap-3">{[1,2,3].map(i => <Skeleton key={i} className="h-28" />)}</div>
       ) : displayed.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4 text-3xl">
-            {tab === 'upcoming' ? '📅' : '📖'}
+          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4">
+            {tab === 'upcoming' ? <Calendar size={28} strokeWidth={1.8} className="text-primary-500" /> : <BookOpen size={28} strokeWidth={1.8} className="text-primary-500" />}
           </div>
           <p className="font-semibold text-warm-800 mb-1">
             {tab === 'upcoming' ? 'Sin citas próximas' : 'Sin sesiones anteriores'}
@@ -266,7 +267,7 @@ export default function MyAppointments() {
                       } dot>
                         {session.status === 'completed' ? 'Completada' :
                          session.status === 'cancelled' ? 'Cancelada' :
-                         session.is_urgent ? '⚡ Urgente' : 'Programada'}
+                         session.is_urgent ? <span className="flex items-center gap-1"><Zap size={12} strokeWidth={1.8} className="inline" />Urgente</span> : 'Programada'}
                       </Badge>
                     </div>
                     <p className="text-sm text-warm-600 mt-1.5">{formatSessionDate(session.scheduled_at)}</p>
@@ -278,12 +279,12 @@ export default function MyAppointments() {
                 <div className="flex flex-wrap gap-2 mt-4">
                   {canVideo && (
                     <Button size="sm" variant="calm" onClick={() => navigate(`/video-call/${session.id}`)}>
-                      📹 Unirse
+                      <Video size={14} strokeWidth={1.8} className="inline mr-1" />Unirse
                     </Button>
                   )}
                   {canChange && (
                     <Button size="sm" variant="secondary" onClick={() => openChangeModal(session)}>
-                      🔄 Cambiar terapeuta
+                      <RefreshCw size={14} strokeWidth={1.8} className="inline mr-1" />Cambiar terapeuta
                     </Button>
                   )}
                   {session.status === 'scheduled' && !canVideo && (
@@ -293,12 +294,12 @@ export default function MyAppointments() {
                   )}
                   {session.status === 'completed' && !hasReview && (
                     <Button size="sm" variant="secondary" onClick={() => setReviewModal(session)}>
-                      ⭐ Dejar reseña
+                      <Star size={14} strokeWidth={1.8} className="inline mr-1" />Dejar reseña
                     </Button>
                   )}
                   {session.status === 'completed' && (
                     <Button size="sm" variant="ghost" onClick={() => navigate(`/patient/chat?therapist=${session.therapist?.id}`)}>
-                      💬 Chat
+                      <MessageCircle size={14} strokeWidth={1.8} className="inline mr-1" />Chat
                     </Button>
                   )}
                 </div>
@@ -313,7 +314,7 @@ export default function MyAppointments() {
         {changeModal && (
           <div className="flex flex-col gap-4">
             <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-sm text-amber-800">
-              ⚠️ Puedes cambiar de terapeuta hasta 48 horas antes de la sesión. Tu cita mantendrá la misma fecha y hora.
+              Puedes cambiar de terapeuta hasta 48 horas antes de la sesión. Tu cita mantendrá la misma fecha y hora.
             </div>
 
             {loadingTherapists ? (
@@ -341,7 +342,7 @@ export default function MyAppointments() {
                       <p className="text-xs text-warm-400">{formatPrice(t.price_per_session)}/sesión</p>
                     </div>
                     {selectedTherapist?.id === t.id && (
-                      <span className="text-primary-600 text-lg">✓</span>
+                      <Check size={16} strokeWidth={2.5} className="text-primary-600" />
                     )}
                   </button>
                 ))}

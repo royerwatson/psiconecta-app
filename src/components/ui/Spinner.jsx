@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils'
+import { Zap } from 'lucide-react'
 
 export default function Spinner({ size = 'md', className = '' }) {
   const sizes = {
@@ -21,7 +22,7 @@ export function LoadingScreen({ message = 'Cargando...' }) {
   return (
     <div className="fixed inset-0 bg-psiconecta flex flex-col items-center justify-center gap-4 z-50">
       <div className="flex flex-col items-center gap-3">
-        <div className="text-4xl">🧠</div>
+        <div className="w-12 h-12 bg-gradient-brand rounded-2xl flex items-center justify-center shadow-calm"><Zap size={24} className="text-white" strokeWidth={2} /></div>
         <Spinner size="lg" />
         <p className="text-sm text-warm-500 font-medium">{message}</p>
       </div>

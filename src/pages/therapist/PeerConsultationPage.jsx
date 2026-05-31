@@ -21,6 +21,7 @@ import { formatRelative } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 import { cn } from '@/lib/utils'
+import { CheckCircle2, Stethoscope, Lock, MessageCircle } from 'lucide-react'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const lastSeenKey = (myId, peerId) => `peer_chat_seen_${myId}_${peerId}`
@@ -55,7 +56,7 @@ function TherapistRow({ therapist, isActive, unread, lastMsg, onClick }) {
           <p className={cn('font-medium text-sm truncate', isActive ? 'text-primary-700' : 'text-warm-800')}>
             {therapist.full_name}
           </p>
-          {verified && <span title="Credenciales verificadas" className="text-[10px]">✅</span>}
+          {verified && <CheckCircle2 title="Credenciales verificadas" size={12} strokeWidth={1.8} className="text-green-500 shrink-0" />}
         </div>
         <p className="text-xs text-warm-400 truncate">
           {lastMsg ? lastMsg.content : (specialty ?? 'Terapeuta')}
@@ -77,8 +78,8 @@ function MessageBubble({ msg, isOwn }) {
     <div className={cn('flex', isOwn ? 'justify-end' : 'justify-start')}>
       <div className={cn('flex flex-col gap-1', isOwn ? 'items-end' : 'items-start')}>
         {msg.is_interconsulta && (
-          <span className="text-[10px] font-semibold text-amber-600 px-1">
-            🩺 Interconsulta formal
+          <span className="text-[10px] font-semibold text-amber-600 px-1 flex items-center gap-0.5">
+            <Stethoscope size={10} strokeWidth={1.8} className="inline" /> Interconsulta formal
           </span>
         )}
         <div className={cn(
@@ -351,7 +352,7 @@ export default function PeerConsultationPage() {
             </div>
           ) : sortedTherapists.length === 0 ? (
             <div className="p-8 text-center text-warm-400 text-sm">
-              <p className="text-3xl mb-2">👨‍⚕️</p>
+              <Stethoscope size={32} strokeWidth={1.5} className="mx-auto mb-2 text-warm-300" />
               <p>{search ? 'Sin resultados' : 'No hay otros terapeutas aún'}</p>
             </div>
           ) : sortedTherapists.map(t => (
@@ -384,7 +385,7 @@ export default function PeerConsultationPage() {
               <div className="flex items-center gap-1.5">
                 <p className="font-semibold text-warm-900 text-sm truncate">{activeTherapist.full_name}</p>
                 {activeTherapist.therapist_profiles?.[0]?.verification_status === 'verified' && (
-                  <span className="text-xs" title="Credenciales verificadas">✅</span>
+                  <CheckCircle2 size={12} strokeWidth={1.8} className="text-emerald-500 shrink-0" title="Credenciales verificadas" />
                 )}
               </div>
               <p className="text-xs text-warm-400">
@@ -395,7 +396,7 @@ export default function PeerConsultationPage() {
 
           {/* Aviso de confidencialidad */}
           <div className="bg-amber-50 border-b border-amber-100 px-4 py-2 flex items-center gap-2 shrink-0">
-            <span className="text-sm shrink-0">🔒</span>
+            <Lock size={14} strokeWidth={1.8} className="text-warm-400 shrink-0" />
             <p className="text-[11px] text-amber-700 leading-snug">
               <span className="font-semibold">Canal de interconsulta clínica.</span> No compartas datos
               identificables del paciente. Usa iniciales, edad y síntomas generales.
@@ -410,7 +411,7 @@ export default function PeerConsultationPage() {
               </div>
             ) : messages.length === 0 ? (
               <div className="text-center text-warm-400 text-sm mt-16">
-                <p className="text-3xl mb-3">👋</p>
+                <MessageCircle size={32} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
                 <p className="font-medium text-warm-600">Inicia la interconsulta</p>
                 <p className="text-xs mt-1 text-warm-400 max-w-xs mx-auto">
                   Este canal es solo para comunicación entre colegas. Recuerda anonimizar los casos.
@@ -433,7 +434,7 @@ export default function PeerConsultationPage() {
                   : 'border-warm-200 text-warm-400 hover:border-warm-300',
               )}
             >
-              🩺 {isInterconsulta ? 'Interconsulta formal activa' : 'Marcar como interconsulta formal'}
+              <Stethoscope size={12} strokeWidth={1.8} className="inline mr-1" />{isInterconsulta ? 'Interconsulta formal activa' : 'Marcar como interconsulta formal'}
             </button>
           </div>
 
@@ -478,7 +479,7 @@ export default function PeerConsultationPage() {
       ) : (
         <div className="hidden sm:flex flex-1 items-center justify-center bg-warm-50 rounded-r-2xl">
           <div className="text-center text-warm-400 max-w-xs px-4">
-            <p className="text-5xl mb-4">👨‍⚕️</p>
+            <Stethoscope size={48} strokeWidth={1.5} className="mx-auto mb-4 text-warm-300" />
             <p className="font-semibold text-warm-700">Interconsultas entre colegas</p>
             <p className="text-sm mt-2 text-warm-400 leading-relaxed">
               Selecciona un terapeuta para iniciar una consulta clínica.

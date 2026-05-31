@@ -3,9 +3,13 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { formatPrice } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
-import Avatar from '@/components/ui/Avatar'
+import {
+  Users, Stethoscope, Calendar, DollarSign, Bot,
+  AlertCircle, AlertTriangle, ClipboardList, BookOpen,
+  CheckCircle2, TrendingUp, UsersRound, Bell, ChevronRight,
+} from 'lucide-react'
 
-function StatCard({ icon, label, value, sub, color = 'primary', onClick }) {
+function StatCard({ Icon, label, value, sub, color = 'primary', onClick }) {
   const colors = {
     primary: 'bg-primary-50 text-primary-700 border-primary-100',
     emerald: 'bg-emerald-50 text-emerald-700 border-emerald-100',
@@ -19,7 +23,7 @@ function StatCard({ icon, label, value, sub, color = 'primary', onClick }) {
       className={`rounded-2xl border p-5 ${colors[color]} ${onClick ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}`}
       onClick={onClick}
     >
-      <div className="text-2xl mb-2">{icon}</div>
+      {Icon && <Icon size={22} strokeWidth={1.8} className="mb-2 opacity-80" />}
       <p className="text-2xl font-bold">{value}</p>
       <p className="text-sm font-medium mt-0.5">{label}</p>
       {sub && <p className="text-xs opacity-70 mt-1">{sub}</p>}
@@ -28,18 +32,27 @@ function StatCard({ icon, label, value, sub, color = 'primary', onClick }) {
 }
 
 const statusLabel = {
-  scheduled:       { label: 'Programada', color: 'text-primary-600 bg-primary-50' },
-  in_progress:     { label: 'En curso',   color: 'text-amber-600 bg-amber-50' },
-  completed:       { label: 'Completada', color: 'text-emerald-600 bg-emerald-50' },
-  cancelled:       { label: 'Cancelada',  color: 'text-red-600 bg-red-50' },
-  payment_pending: { label: 'Pago pendiente', color: 'text-warm-500 bg-warm-50' },
+  scheduled:       { label: 'Programada',      color: 'text-primary-600 bg-primary-50' },
+  in_progress:     { label: 'En curso',         color: 'text-amber-600 bg-amber-50' },
+  completed:       { label: 'Completada',        color: 'text-emerald-600 bg-emerald-50' },
+  cancelled:       { label: 'Cancelada',         color: 'text-red-600 bg-red-50' },
+  payment_pending: { label: 'Pago pendiente',    color: 'text-warm-500 bg-warm-50' },
 }
 
 const RISK_CONFIG = {
-  high:   { label: 'Riesgo alto',   color: 'text-red-700 bg-red-50 border-red-100',     dot: 'bg-red-500'   },
-  medium: { label: 'Riesgo medio',  color: 'text-amber-700 bg-amber-50 border-amber-100', dot: 'bg-amber-500' },
+  high:   { label: 'Riesgo alto',   color: 'text-red-700 bg-red-50 border-red-100',          dot: 'bg-red-500'     },
+  medium: { label: 'Riesgo medio',  color: 'text-amber-700 bg-amber-50 border-amber-100',    dot: 'bg-amber-500'   },
   low:    { label: 'Bien',          color: 'text-emerald-700 bg-emerald-50 border-emerald-100', dot: 'bg-emerald-500' },
 }
+
+const QUICK_LINKS = [
+  { Icon: Bot,          label: 'Alertas IA',          to: '/admin/ai-alerts',  color: 'bg-red-50 border-red-100 text-red-700'         },
+  { Icon: Stethoscope,  label: 'Verificar terapeutas', to: '/admin/therapists', color: 'bg-violet-50 border-violet-100 text-violet-700' },
+  { Icon: TrendingUp,   label: 'Estadísticas',         to: '/admin/stats',      color: 'bg-emerald-50 border-emerald-100 text-emerald-700' },
+  { Icon: Users,        label: 'Pacientes',            to: '/admin/patients',   color: 'bg-primary-50 border-primary-100 text-primary-700' },
+  { Icon: Calendar,     label: 'Sesiones',             to: '/admin/sessions',   color: 'bg-amber-50 border-amber-100 text-amber-700'   },
+  { Icon: UsersRound,   label: 'Sesiones grupales',    to: '/admin/groups',     color: 'bg-teal-50 border-teal-100 text-teal-700'      },
+]
 
 export default function AdminDashboard() {
   const navigate = useNavigate()
@@ -113,7 +126,6 @@ export default function AdminDashboard() {
 
     setRecentSessions(recent ?? [])
 
-    // Alertas recientes de riesgo alto
     const { data: alerts } = await supabase
       .from('ai_checkins')
       .select(`
@@ -124,7 +136,6 @@ export default function AdminDashboard() {
       .order('created_at', { ascending: false })
       .limit(6)
     setRecentAlerts(alerts ?? [])
-
     setLoading(false)
   }
 
@@ -155,14 +166,14 @@ export default function AdminDashboard() {
                   onClick={() => navigate('/admin/ai-alerts')}
                   className="w-full text-left bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3 hover:bg-red-100 transition-colors"
                 >
-                  <span className="text-2xl">🚨</span>
+                  <AlertCircle size={22} className="text-red-500 shrink-0" />
                   <div className="flex-1">
                     <p className="font-semibold text-red-800 text-sm">
                       {stats.highRiskUnread} alerta{stats.highRiskUnread > 1 ? 's' : ''} de riesgo alto sin revisar
                     </p>
-                    <p className="text-xs text-red-600 mt-0.5">Pacientes que necesitan atención urgente → Ver alertas</p>
+                    <p className="text-xs text-red-600 mt-0.5">Pacientes que necesitan atención urgente</p>
                   </div>
-                  <span className="text-red-400 text-lg">→</span>
+                  <ChevronRight size={16} className="text-red-400 shrink-0" />
                 </button>
               )}
               {stats.pendingTherapists > 0 && (
@@ -170,14 +181,14 @@ export default function AdminDashboard() {
                   onClick={() => navigate('/admin/therapists')}
                   className="w-full text-left bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 hover:bg-amber-100 transition-colors"
                 >
-                  <span className="text-2xl">⚠️</span>
+                  <AlertTriangle size={22} className="text-amber-500 shrink-0" />
                   <div className="flex-1">
                     <p className="font-semibold text-amber-800 text-sm">
                       {stats.pendingTherapists} terapeuta{stats.pendingTherapists > 1 ? 's' : ''} esperando verificación
                     </p>
-                    <p className="text-xs text-amber-600 mt-0.5">Ve a "Terapeutas" para revisar sus credenciales → Verificar</p>
+                    <p className="text-xs text-amber-600 mt-0.5">Ve a "Terapeutas" para revisar sus credenciales</p>
                   </div>
-                  <span className="text-amber-400 text-lg">→</span>
+                  <ChevronRight size={16} className="text-amber-400 shrink-0" />
                 </button>
               )}
             </div>
@@ -185,47 +196,40 @@ export default function AdminDashboard() {
 
           {/* ── KPIs principales ── */}
           <div className="grid grid-cols-2 gap-3">
-            <StatCard icon="👥" label="Pacientes" value={stats.totalPatients} color="primary"
+            <StatCard Icon={Users}       label="Pacientes"        value={stats.totalPatients}  color="primary"
               onClick={() => navigate('/admin/patients')} />
-            <StatCard icon="🧠" label="Terapeutas" value={stats.totalTherapists}
+            <StatCard Icon={Stethoscope} label="Terapeutas"       value={stats.totalTherapists}
               sub={stats.pendingTherapists > 0 ? `${stats.pendingTherapists} por verificar` : 'Todos verificados'}
               color="violet" onClick={() => navigate('/admin/therapists')} />
-            <StatCard icon="📅" label="Sesiones totales" value={stats.totalSessions}
+            <StatCard Icon={Calendar}    label="Sesiones totales" value={stats.totalSessions}
               sub={`${stats.completedSessions} completadas`} color="amber"
               onClick={() => navigate('/admin/sessions')} />
-            <StatCard icon="💵" label="Ingresos totales" value={formatPrice(stats.totalRevenue)}
+            <StatCard Icon={DollarSign}  label="Ingresos totales" value={formatPrice(stats.totalRevenue)}
               sub={`Este mes: ${formatPrice(stats.monthRevenue)}`} color="emerald"
               onClick={() => navigate('/admin/stats')} />
           </div>
 
           {/* ── Métricas de IA y engagement ── */}
           <div>
-            <h2 className="font-semibold text-warm-800 mb-3">🤖 Bienestar y engagement del paciente</h2>
+            <h2 className="flex items-center gap-2 font-semibold text-warm-800 mb-3">
+              <Bot size={17} className="text-warm-500" /> Bienestar y engagement del paciente
+            </h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              <StatCard icon="🔴" label="Check-ins riesgo alto"
-                value={stats.highRiskUnread}
-                sub="Sin revisar hoy"
+              <StatCard Icon={AlertCircle}   label="Check-ins riesgo alto"
+                value={stats.highRiskUnread} sub="Sin revisar hoy"
                 color={stats.highRiskUnread > 0 ? 'red' : 'teal'}
                 onClick={() => navigate('/admin/ai-alerts')} />
-              <StatCard icon="🤖" label="Check-ins totales"
-                value={stats.totalCheckins}
-                sub="Histórico"
-                color="primary" />
-              <StatCard icon="📋" label="Tareas pendientes"
+              <StatCard Icon={Bot}            label="Check-ins totales"
+                value={stats.totalCheckins} sub="Histórico" color="primary" />
+              <StatCard Icon={ClipboardList}  label="Tareas pendientes"
                 value={engagement.pendingTasks}
-                sub={`${engagement.completedTasks} completadas`}
-                color="amber" />
-              <StatCard icon="📓" label="Entradas de diario"
-                value={engagement.journalEntries}
-                sub="Escritura reflexiva"
-                color="violet" />
-              <StatCard icon="✅" label="Tareas completadas"
-                value={engagement.completedTasks}
-                sub="Por pacientes"
-                color="emerald" />
-              <StatCard icon="🟡" label="Check-ins medio riesgo"
-                value={stats.mediumRiskUnread}
-                sub="Sin revisar"
+                sub={`${engagement.completedTasks} completadas`} color="amber" />
+              <StatCard Icon={BookOpen}       label="Entradas de diario"
+                value={engagement.journalEntries} sub="Escritura reflexiva" color="violet" />
+              <StatCard Icon={CheckCircle2}   label="Tareas completadas"
+                value={engagement.completedTasks} sub="Por pacientes" color="emerald" />
+              <StatCard Icon={AlertTriangle}  label="Riesgo medio"
+                value={stats.mediumRiskUnread} sub="Sin revisar"
                 color={stats.mediumRiskUnread > 0 ? 'amber' : 'teal'}
                 onClick={() => navigate('/admin/ai-alerts')} />
             </div>
@@ -235,7 +239,9 @@ export default function AdminDashboard() {
           {recentAlerts.length > 0 && (
             <div>
               <div className="flex items-center justify-between mb-3">
-                <h2 className="font-semibold text-warm-800">🔔 Alertas de bienestar recientes</h2>
+                <h2 className="flex items-center gap-2 font-semibold text-warm-800">
+                  <Bell size={16} className="text-warm-500" /> Alertas de bienestar recientes
+                </h2>
                 <button
                   onClick={() => navigate('/admin/ai-alerts')}
                   className="text-xs text-primary-600 hover:text-primary-800 font-medium"
@@ -251,7 +257,7 @@ export default function AdminDashboard() {
                       className={`rounded-2xl border p-4 ${rc.color} ${alert.notified ? 'opacity-60' : ''}`}>
                       <div className="flex items-start justify-between gap-2">
                         <div className="flex items-start gap-3 flex-1 min-w-0">
-                          <span className={`mt-1 w-2 h-2 rounded-full shrink-0 ${rc.dot}`} />
+                          <span className={`mt-1.5 w-2 h-2 rounded-full shrink-0 ${rc.dot}`} />
                           <div className="min-w-0">
                             <p className="font-semibold text-sm truncate">
                               {alert.patient?.full_name ?? 'Paciente'}
@@ -263,16 +269,17 @@ export default function AdminDashboard() {
                             </p>
                           </div>
                         </div>
-                        {!alert.notified && (
+                        {!alert.notified ? (
                           <button
                             onClick={() => markReviewed(alert.id)}
                             className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg border border-current opacity-70 hover:opacity-100 transition-opacity"
                           >
                             Revisar
                           </button>
-                        )}
-                        {alert.notified && (
-                          <span className="shrink-0 text-xs font-medium opacity-60">✓ Revisado</span>
+                        ) : (
+                          <span className="shrink-0 text-xs font-medium opacity-60 flex items-center gap-1">
+                            <CheckCircle2 size={12} /> Revisado
+                          </span>
                         )}
                       </div>
                     </div>
@@ -330,19 +337,12 @@ export default function AdminDashboard() {
           <div>
             <h2 className="font-semibold text-warm-800 mb-3">Accesos rápidos</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {[
-                { icon: '🤖', label: 'Alertas IA',       to: '/admin/ai-alerts',  color: 'bg-red-50 border-red-100 text-red-700' },
-                { icon: '🧠', label: 'Verificar terapeutas', to: '/admin/therapists', color: 'bg-violet-50 border-violet-100 text-violet-700' },
-                { icon: '📈', label: 'Estadísticas',     to: '/admin/stats',      color: 'bg-emerald-50 border-emerald-100 text-emerald-700' },
-                { icon: '👥', label: 'Pacientes',        to: '/admin/patients',   color: 'bg-primary-50 border-primary-100 text-primary-700' },
-                { icon: '📅', label: 'Sesiones',         to: '/admin/sessions',   color: 'bg-amber-50 border-amber-100 text-amber-700' },
-                { icon: '🫂', label: 'Sesiones grupales', to: '/admin/groups',    color: 'bg-teal-50 border-teal-100 text-teal-700' },
-              ].map(item => (
-                <button key={item.to}
-                  onClick={() => navigate(item.to)}
-                  className={`rounded-2xl border p-4 text-left hover:shadow-md transition-shadow ${item.color}`}>
-                  <div className="text-xl mb-1">{item.icon}</div>
-                  <p className="text-sm font-medium">{item.label}</p>
+              {QUICK_LINKS.map(({ Icon: QIcon, label, to, color }) => (
+                <button key={to}
+                  onClick={() => navigate(to)}
+                  className={`rounded-2xl border p-4 text-left hover:shadow-md transition-shadow ${color}`}>
+                  <QIcon size={20} strokeWidth={1.8} className="mb-2" />
+                  <p className="text-sm font-medium">{label}</p>
                 </button>
               ))}
             </div>

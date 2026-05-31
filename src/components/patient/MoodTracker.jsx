@@ -6,6 +6,7 @@ import {
 } from 'recharts'
 import { format, subDays, parseISO, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { BarChart2 } from 'lucide-react'
 
 // ── Escala de ánimo ────────────────────────────────────────────────────────────
 const MOODS = [
@@ -100,7 +101,7 @@ export default function MoodTracker({ userId }) {
     return (
       <div className="bg-white rounded-2xl border border-warm-100 p-4">
         <div className="flex items-center justify-between mb-3">
-          <p className="font-semibold text-warm-800 text-sm">📊 Estado de ánimo</p>
+          <p className="font-semibold text-warm-800 text-sm flex items-center gap-1.5"><BarChart2 size={14} strokeWidth={1.8} />Estado de ánimo</p>
           <button
             onClick={() => setShowChart(v => !v)}
             className="text-xs text-primary-600 hover:text-primary-800 font-medium transition-colors"
@@ -175,7 +176,7 @@ export default function MoodTracker({ userId }) {
   return (
     <div className="bg-gradient-to-br from-primary-50 to-calm-50 rounded-2xl border border-primary-100 p-4">
       <div className="flex items-center gap-2 mb-3">
-        <span className="text-xl">📊</span>
+        <BarChart2 size={18} strokeWidth={1.8} className="text-primary-500" />
         <p className="font-semibold text-primary-800 text-sm">¿Cómo te sientes hoy?</p>
       </div>
 

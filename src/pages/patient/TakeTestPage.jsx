@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
+import { AlertTriangle, ClipboardList, Timer, FileText, AlertCircle, Heart, CheckCircle2 } from 'lucide-react'
 
 // ─── Cálculo de scores en cliente ────────────────────────────────────────────
 function calculateScores(scoringRules, itemResponses, items) {
@@ -340,7 +341,7 @@ export default function TakeTestPage() {
   if (phase === 'error') return (
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-calm-50 flex items-center justify-center p-6">
       <div className="bg-white rounded-3xl shadow-lg p-8 max-w-sm w-full text-center">
-        <div className="text-5xl mb-4">⚠️</div>
+        <div className="flex justify-center mb-4"><AlertTriangle size={48} strokeWidth={1.8} className="text-warm-400" /></div>
         <h2 className="font-serif text-xl font-semibold text-warm-900 mb-2">Algo salió mal</h2>
         <p className="text-sm text-warm-500 mb-6">{errorMsg}</p>
         <button onClick={() => navigate(-1)}
@@ -364,7 +365,7 @@ export default function TakeTestPage() {
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-calm-50 flex items-center justify-center p-6">
       <div className="bg-white rounded-3xl shadow-lg p-8 max-w-md w-full">
         <div className="text-center mb-6">
-          <div className="text-5xl mb-4">📋</div>
+          <div className="flex justify-center mb-4"><ClipboardList size={48} strokeWidth={1.8} className="text-warm-400" /></div>
           <h1 className="font-serif text-2xl font-semibold text-warm-900 mb-2">{test?.name}</h1>
           {assignment?.reason && (
             <p className="text-sm text-warm-500 italic">"{assignment.reason}"</p>
@@ -378,9 +379,9 @@ export default function TakeTestPage() {
         )}
 
         <div className="flex items-center gap-4 mb-6 text-sm text-warm-500">
-          <span>⏱ ~{test?.estimated_minutes} minutos</span>
+          <span className="flex items-center gap-1.5"><Timer size={15} strokeWidth={1.8} /> ~{test?.estimated_minutes} minutos</span>
           <span>·</span>
-          <span>📝 {allItems.length} preguntas</span>
+          <span className="flex items-center gap-1.5"><FileText size={15} strokeWidth={1.8} /> {allItems.length} preguntas</span>
         </div>
 
         <div className="bg-warm-50 rounded-2xl p-4 mb-6 text-xs text-warm-500 leading-relaxed">
@@ -520,7 +521,7 @@ export default function TakeTestPage() {
           {/* Alerta de riesgo */}
           {hasRisk && (
             <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
-              <p className="text-sm font-semibold text-red-800 mb-1">🔴 Tu terapeuta ha sido notificado</p>
+              <p className="text-sm font-semibold text-red-800 mb-1 flex items-center gap-1.5"><AlertCircle size={15} strokeWidth={1.8} /> Tu terapeuta ha sido notificado</p>
               <p className="text-xs text-red-600 leading-relaxed">
                 Tus respuestas indican que puede ser un momento difícil. Tu terapeuta recibirá esta información y se pondrá en contacto contigo pronto.
               </p>
@@ -528,7 +529,12 @@ export default function TakeTestPage() {
           )}
 
           <div className="text-center mb-6">
-            <div className="text-5xl mb-3">{hasRisk ? '💙' : '✅'}</div>
+            <div className="flex justify-center mb-3">
+              {hasRisk
+                ? <Heart size={44} strokeWidth={1.8} className="text-blue-400" fill="currentColor" />
+                : <CheckCircle2 size={44} strokeWidth={1.8} className="text-success" />
+              }
+            </div>
             <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Test completado</h2>
             <p className="text-sm text-warm-500">Gracias por responder con honestidad</p>
           </div>

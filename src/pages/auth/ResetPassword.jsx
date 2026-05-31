@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import toast from 'react-hot-toast'
+import { Zap, Loader2 } from 'lucide-react'
 
 export default function ResetPassword() {
   const [password, setPassword]   = useState('')
@@ -41,7 +42,9 @@ export default function ResetPassword() {
     <div className="min-h-dvh bg-psiconecta flex items-center justify-center p-4">
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-10">
-          <div className="text-5xl mb-4">🧠</div>
+          <div className="w-14 h-14 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-calm">
+              <Zap size={28} className="text-white" strokeWidth={2} />
+            </div>
           <h1 className="font-serif text-3xl font-bold text-primary-800">
             Psico<span className="text-calm-500">necta</span>
           </h1>
@@ -50,7 +53,7 @@ export default function ResetPassword() {
         <div className="bg-white rounded-3xl shadow-float p-8 border border-warm-100">
           {!ready ? (
             <div className="text-center py-4">
-              <div className="text-4xl mb-3 animate-pulse">⏳</div>
+              <Loader2 size={36} strokeWidth={1.8} className="mx-auto mb-3 animate-spin text-primary-400" />
               <p className="text-warm-500 text-sm">Verificando enlace de recuperación...</p>
             </div>
           ) : (

@@ -12,6 +12,7 @@ import {
 } from 'recharts'
 import { subWeeks, startOfWeek, endOfWeek, parseISO, format, eachWeekOfInterval } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { Wallet, PieChart as PieIcon, GraduationCap, Target, ClipboardList, CheckCircle2, BookOpen, AlertCircle, Bot, Trophy, Download } from 'lucide-react'
 
 const PIE_COLORS = {
   scheduled: '#2d6a9f',
@@ -244,10 +245,10 @@ export default function AdminStats() {
           {/* ── Ingresos por semana ── */}
           <div className="bg-white rounded-2xl border border-warm-100 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-warm-900">💰 Ingresos por semana</h2>
+              <h2 className="flex items-center gap-2 font-semibold text-warm-900"><Wallet size={16} className="text-warm-400" /> Ingresos por semana</h2>
               <button onClick={exportRevenueCSV}
-                className="text-xs text-emerald-600 hover:text-emerald-800 font-medium px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 transition-colors border border-emerald-200">
-                ⬇ CSV
+                className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 transition-colors border border-emerald-200">
+                <Download size={13} /> CSV
               </button>
             </div>
             <ResponsiveContainer width="100%" height={220}>
@@ -274,7 +275,7 @@ export default function AdminStats() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Pie chart */}
             <div className="bg-white rounded-2xl border border-warm-100 p-5">
-              <h2 className="font-semibold text-warm-900 mb-4">📊 Sesiones por estado</h2>
+              <h2 className="flex items-center gap-2 font-semibold text-warm-900 mb-4"><PieIcon size={16} className="text-warm-400" /> Sesiones por estado</h2>
               {statusData.length === 0 ? (
                 <p className="text-warm-400 text-sm text-center py-8">Sin datos</p>
               ) : (
@@ -296,7 +297,7 @@ export default function AdminStats() {
 
             {/* Bar chart especialidades */}
             <div className="bg-white rounded-2xl border border-warm-100 p-5">
-              <h2 className="font-semibold text-warm-900 mb-4">🎓 Sesiones por especialidad</h2>
+              <h2 className="flex items-center gap-2 font-semibold text-warm-900 mb-4"><GraduationCap size={16} className="text-warm-400" /> Sesiones por especialidad</h2>
               {specialtyData.length === 0 ? (
                 <p className="text-warm-400 text-sm text-center py-8">Sin datos</p>
               ) : (
@@ -322,16 +323,16 @@ export default function AdminStats() {
           {/* ── Engagement de pacientes ── */}
           {engagementStats && (
             <div className="bg-white rounded-2xl border border-warm-100 p-5">
-              <h2 className="font-semibold text-warm-900 mb-4">🎯 Engagement y bienestar del paciente</h2>
+              <h2 className="flex items-center gap-2 font-semibold text-warm-900 mb-4"><Target size={16} className="text-warm-400" /> Engagement y bienestar del paciente</h2>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                 {[
-                  { icon: '📋', label: 'Tareas totales',    value: engagementStats.totalTasks,      color: 'text-primary-700' },
-                  { icon: '✅', label: 'Tareas completadas', value: engagementStats.completedTasks,   color: 'text-emerald-700' },
-                  { icon: '📓', label: 'Entradas de diario', value: engagementStats.journalEntries,   color: 'text-violet-700' },
-                  { icon: '🔴', label: 'Check-ins riesgo alto', value: engagementStats.highRiskCheckins, color: 'text-red-700' },
+                  { Icon: ClipboardList, label: 'Tareas totales',         value: engagementStats.totalTasks,          color: 'text-primary-700'  },
+                  { Icon: CheckCircle2,  label: 'Tareas completadas',      value: engagementStats.completedTasks,      color: 'text-emerald-700'  },
+                  { Icon: BookOpen,      label: 'Entradas de diario',      value: engagementStats.journalEntries,      color: 'text-violet-700'   },
+                  { Icon: AlertCircle,   label: 'Check-ins riesgo alto',   value: engagementStats.highRiskCheckins,    color: 'text-red-700'      },
                 ].map(m => (
                   <div key={m.label} className="text-center">
-                    <p className="text-2xl mb-1">{m.icon}</p>
+                    <m.Icon size={22} strokeWidth={1.8} className={`mx-auto mb-1 ${m.color}`} />
                     <p className={`text-2xl font-bold ${m.color}`}>{m.value}</p>
                     <p className="text-xs text-warm-500 mt-0.5">{m.label}</p>
                   </div>
@@ -359,7 +360,7 @@ export default function AdminStats() {
           {/* ── Check-ins por riesgo por semana ── */}
           {checkinData.length > 0 && (
             <div className="bg-white rounded-2xl border border-warm-100 p-5">
-              <h2 className="font-semibold text-warm-900 mb-4">🤖 Check-ins IA por semana y nivel de riesgo</h2>
+              <h2 className="flex items-center gap-2 font-semibold text-warm-900 mb-4"><Bot size={16} className="text-warm-400" /> Check-ins IA por semana y nivel de riesgo</h2>
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={checkinData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f0f4f8" />
@@ -378,10 +379,10 @@ export default function AdminStats() {
           {/* ── Top terapeutas ── */}
           <div className="bg-white rounded-2xl border border-warm-100 p-5">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-warm-900">🏆 Terapeutas más activos</h2>
+              <h2 className="flex items-center gap-2 font-semibold text-warm-900"><Trophy size={16} className="text-warm-400" /> Terapeutas más activos</h2>
               <button onClick={exportTherapistsCSV}
-                className="text-xs text-emerald-600 hover:text-emerald-800 font-medium px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 transition-colors border border-emerald-200">
-                ⬇ CSV
+                className="flex items-center gap-1 text-xs text-emerald-600 hover:text-emerald-800 font-medium px-3 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 transition-colors border border-emerald-200">
+                <Download size={13} /> CSV
               </button>
             </div>
             {topTherapists.length === 0 ? (

@@ -9,6 +9,7 @@ import Badge from '@/components/ui/Badge'
 import { formatSessionDate, formatPrice } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { Users, AlertTriangle, Calendar, Video } from 'lucide-react'
 
 export default function GroupSessions() {
   const { user } = useAuthStore()
@@ -71,7 +72,7 @@ export default function GroupSessions() {
       </div>
 
       <div className="bg-primary-50 border border-primary-100 rounded-2xl p-4">
-        <p className="text-sm font-medium text-primary-800 mb-1">👥 ¿Qué es la terapia grupal?</p>
+        <p className="text-sm font-medium text-primary-800 mb-1 flex items-center gap-1.5"><Users size={15} strokeWidth={1.8} className="shrink-0" /> ¿Qué es la terapia grupal?</p>
         <p className="text-xs text-primary-600">
           Sesiones guiadas por un terapeuta donde varios participantes comparten experiencias
           y se apoyan mutuamente en un ambiente seguro y confidencial.
@@ -96,13 +97,13 @@ export default function GroupSessions() {
         <div className="flex flex-col gap-3">{[1,2].map(i => <Skeleton key={i} className="h-40" />)}</div>
       ) : error ? (
         <Card className="text-center py-10">
-          <div className="text-4xl mb-2">⚠️</div>
+          <AlertTriangle size={40} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
           <p className="text-warm-600 font-medium">{error}</p>
           <Button size="sm" className="mt-4" onClick={fetchGroups}>Reintentar</Button>
         </Card>
       ) : displayed.length === 0 ? (
         <Card className="text-center py-10">
-          <div className="text-4xl mb-2">👥</div>
+          <Users size={40} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
           <p className="text-warm-600 font-medium">
             {tab === 'available' ? 'No hay sesiones disponibles' : 'No estás inscrito en ninguna sesión'}
           </p>
@@ -131,8 +132,8 @@ export default function GroupSessions() {
             </div>
 
             <div className="flex items-center justify-between text-xs text-warm-500 mb-4">
-              <span>📅 {formatSessionDate(group.scheduled_at)}</span>
-              <span>👥 {participants.length}/{group.max_participants ?? 10} participantes</span>
+              <span className="flex items-center gap-1"><Calendar size={13} strokeWidth={1.8} className="shrink-0" /> {formatSessionDate(group.scheduled_at)}</span>
+              <span className="flex items-center gap-1"><Users size={13} strokeWidth={1.8} className="shrink-0" /> {participants.length}/{group.max_participants ?? 10} participantes</span>
               <span className="font-medium text-primary-600">{formatPrice(group.price ?? 0)}</span>
             </div>
 
@@ -150,7 +151,7 @@ export default function GroupSessions() {
               {isJoined ? (
                 <Button size="sm" variant="calm" fullWidth
                   onClick={() => navigate(`/video-call/${group.id}`)}>
-                  📹 Unirse a la sesión
+                  <Video size={15} strokeWidth={1.8} className="inline mr-1" />Unirse a la sesión
                 </Button>
               ) : (
                 <Button size="sm" fullWidth disabled={isFull} onClick={() => joinGroup(group)}>

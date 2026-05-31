@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import { formatDateTime } from '@/lib/utils'
+import { Brain, Scan, Microscope, Settings, AlertTriangle, Users, Puzzle, Baby, BarChart2, Calendar } from 'lucide-react'
 
 // ─── Helpers visuales ────────────────────────────────────────────────────────
 
@@ -24,14 +25,14 @@ const SEVERITY_CONFIG = {
 }
 
 const CATEGORY_ICON = {
-  sintomas:       '🧠',
-  personalidad:   '🪞',
-  cognitivo:      '🔬',
-  funcional:      '⚙️',
-  riesgo:         '⚠️',
-  relacional:     '💑',
-  neuropsicologia:'🧩',
-  infantil:       '🧒',
+  sintomas:        Brain,
+  personalidad:    Scan,
+  cognitivo:       Microscope,
+  funcional:       Settings,
+  riesgo:          AlertTriangle,
+  relacional:      Users,
+  neuropsicologia: Puzzle,
+  infantil:        Baby,
 }
 
 // Agrupa sesiones por test slug
@@ -122,7 +123,7 @@ export default function MyResultsPage() {
       {/* Estado vacío */}
       {totalSessions === 0 && (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="text-5xl mb-4">📊</div>
+          <div className="mb-4"><BarChart2 size={48} strokeWidth={1.8} className="text-warm-300" /></div>
           <p className="font-semibold text-warm-700 mb-1">Sin resultados todavía</p>
           <p className="text-sm text-warm-400 leading-relaxed max-w-xs">
             Cuando completes un test y tu terapeuta libere los resultados, aparecerán aquí.
@@ -134,7 +135,7 @@ export default function MyResultsPage() {
       {Object.entries(groups).map(([slug, sessions]) => {
         const test      = sessions[0].test_assignments?.tests
         const latest    = sessions[0]
-        const icon      = CATEGORY_ICON[test?.category] ?? '📋'
+        const IconComp  = CATEGORY_ICON[test?.category] ?? BarChart2
 
         // Resultados liberados de la sesión más reciente
         const latestResults = (latest.test_results ?? []).filter(r => r.released_to_patient)
@@ -147,7 +148,7 @@ export default function MyResultsPage() {
             {/* Cabecera del test */}
             <div className="p-4 pb-3">
               <div className="flex items-start gap-3">
-                <span className="text-2xl mt-0.5">{icon}</span>
+                <IconComp size={22} strokeWidth={1.8} className="text-warm-500 mt-0.5 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <h2 className="font-semibold text-warm-900 text-sm leading-snug">{test?.name}</h2>
                   <p className="text-xs text-warm-400 mt-0.5">
@@ -197,7 +198,9 @@ export default function MyResultsPage() {
                     <div className={`w-2 h-2 rounded-full flex-shrink-0 ${sCfg.dot ?? 'bg-warm-300'}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-xs text-warm-500">
-                        {idx === 0 ? '📅 Más reciente · ' : ''}{formatDateTime(s.completed_at)}
+                        {idx === 0 ? (
+                          <span className="inline-flex items-center gap-1"><Calendar size={11} strokeWidth={1.8} className="inline" /> Más reciente · </span>
+                        ) : ''}{formatDateTime(s.completed_at)}
                       </p>
                       {sPrimary && (
                         <p className={`text-xs font-semibold mt-0.5 ${sCfg.text ?? 'text-warm-600'}`}>

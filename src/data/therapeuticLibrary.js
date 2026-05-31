@@ -17,14 +17,14 @@
 
 // ── Categorías ────────────────────────────────────────────────────────────────
 export const CATEGORIES = [
-  { id: 'tcc',         label: 'TCC',                 icon: '🧠', color: 'blue'   },
-  { id: 'dbt',         label: 'DBT',                 icon: '🌊', color: 'teal'   },
-  { id: 'act',         label: 'ACT',                 icon: '🌿', color: 'green'  },
-  { id: 'mindfulness', label: 'Mindfulness',          icon: '🧘', color: 'purple' },
-  { id: 'activacion',  label: 'Activación conductual',icon: '💪', color: 'amber'  },
-  { id: 'emocional',   label: 'Regulación emocional', icon: '😌', color: 'rose'   },
-  { id: 'relajacion',  label: 'Relajación',           icon: '🌬️', color: 'sky'    },
-  { id: 'escritura',   label: 'Escritura reflexiva',  icon: '📔', color: 'orange' },
+  { id: 'tcc',         label: 'TCC',                 icon: 'Brain',    color: 'blue'   },
+  { id: 'dbt',         label: 'DBT',                 icon: 'Waves',    color: 'teal'   },
+  { id: 'act',         label: 'ACT',                 icon: 'Leaf',     color: 'green'  },
+  { id: 'mindfulness', label: 'Mindfulness',          icon: 'Focus2',   color: 'purple' },
+  { id: 'activacion',  label: 'Activación conductual',icon: 'Dumbbell', color: 'amber'  },
+  { id: 'emocional',   label: 'Regulación emocional', icon: 'Smile',    color: 'rose'   },
+  { id: 'relajacion',  label: 'Relajación',           icon: 'Wind',     color: 'sky'    },
+  { id: 'escritura',   label: 'Escritura reflexiva',  icon: 'BookOpen', color: 'orange' },
 ]
 
 export const CATEGORY_MAP = Object.fromEntries(CATEGORIES.map(c => [c.id, c]))
@@ -490,9 +490,9 @@ Escribe al menos 3 frases comenzando con "Noto que…" sobre tu semana.`,
 
 3. ¿Qué acción concreta haré esta semana?
    Debe ser:
-   ✓ Específica (qué, cuándo, cómo)
-   ✓ Pequeña y realista (no perfecta, solo posible)
-   ✓ Tuya (no depende de que otros cambien)
+   - Específica (qué, cuándo, cómo)
+   - Pequeña y realista (no perfecta, solo posible)
+   - Tuya (no depende de que otros cambien)
 
    Ejemplo: "El martes a las 7 pm leeré un cuento a mi hijo sin el celular cerca."
 
@@ -687,13 +687,13 @@ Trae la tabla a la próxima sesión para analizarla juntos.`,
     tags: ['placer', 'refuerzo', 'bienestar', 'banco', 'recursos'],
     instructions: `Crea tu banco personal de actividades placenteras en tres categorías:
 
-🟢 Actividades sencillas (5–15 min, sin preparación):
+SENCILLAS — Actividades cortas (5–15 min, sin preparación):
 Escribe al menos 10: escuchar una canción favorita, salir a la calle, preparar un té, llamar a alguien, leer unas páginas, estirar el cuerpo, mirar fotos bonitas…
 
-🟡 Actividades medianas (30 min – 2h, algo de planificación):
+MEDIANAS — Actividades (30 min – 2h, algo de planificación):
 Escribe al menos 8: ir al cine, cocinar algo especial, pasear en un parque, ver una serie, practicar un hobby, visitar a alguien…
 
-🔴 Actividades especiales (más de 2h, planificación mayor):
+ESPECIALES — Actividades (más de 2h, planificación mayor):
 Escribe al menos 5: un viaje de fin de semana, un concierto, una clase nueva, un día en la naturaleza…
 
 Guarda esta lista en un lugar visible.

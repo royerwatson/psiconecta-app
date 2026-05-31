@@ -9,6 +9,7 @@ import Input, { Select, Textarea } from '@/components/ui/Input'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 import { differenceInHours, parseISO } from 'date-fns'
+import { Users, Calendar, DollarSign, XCircle } from 'lucide-react'
 
 const EMPTY_FORM = {
   therapist_id:    '',
@@ -72,7 +73,7 @@ export default function AdminGroupSessions() {
       status:           'scheduled',
     })
     if (error) { toast.error('Error al crear sesión grupal'); setSaving(false); return }
-    toast.success('✅ Sesión grupal creada')
+    toast.success('Sesión grupal creada')
     setCreateModal(false)
     setForm(EMPTY_FORM)
     setSaving(false)
@@ -116,9 +117,9 @@ export default function AdminGroupSessions() {
       <div className="flex gap-2 flex-wrap">
         {[
           { id: 'all',       label: 'Todas' },
-          { id: 'scheduled', label: '📅 Programadas' },
-          { id: 'completed', label: '✅ Completadas' },
-          { id: 'cancelled', label: '❌ Canceladas' },
+          { id: 'scheduled', label: 'Programadas' },
+          { id: 'completed', label: 'Completadas' },
+          { id: 'cancelled', label: 'Canceladas' },
         ].map(f => (
           <button key={f.id} onClick={() => setFilter(f.id)}
             className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
@@ -135,7 +136,7 @@ export default function AdminGroupSessions() {
         <div className="flex flex-col gap-3">{[1,2,3].map(i => <Skeleton key={i} className="h-28" />)}</div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-12 text-warm-400">
-          <div className="text-4xl mb-2">👥</div>
+          <Users size={40} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
           <p>No hay sesiones grupales en esta categoría</p>
         </div>
       ) : (
@@ -163,9 +164,9 @@ export default function AdminGroupSessions() {
                     </div>
 
                     <div className="flex flex-wrap gap-3 mt-2 text-xs text-warm-500">
-                      <span>📅 {formatSessionDate(g.scheduled_at)}</span>
-                      <span>👥 {g.participants?.length ?? 0}/{g.max_participants} participantes</span>
-                      <span>💵 {formatPrice(g.price_per_person)}/persona</span>
+                      <span className="flex items-center gap-1"><Calendar size={11} strokeWidth={1.8} /> {formatSessionDate(g.scheduled_at)}</span>
+                      <span className="flex items-center gap-1"><Users size={11} strokeWidth={1.8} /> {g.participants?.length ?? 0}/{g.max_participants} participantes</span>
+                      <span className="flex items-center gap-1"><DollarSign size={11} strokeWidth={1.8} /> {formatPrice(g.price_per_person)}/persona</span>
                       {isFull && <span className="text-amber-600 font-medium">Cupo lleno</span>}
                     </div>
 
@@ -179,7 +180,7 @@ export default function AdminGroupSessions() {
                   <div className="mt-3 pt-3 border-t border-warm-100 flex justify-end">
                     <Button size="sm" variant="outline" loading={cancelling === g.id}
                       onClick={() => cancelGroup(g)}>
-                      ❌ Cancelar sesión
+                      <XCircle size={13} className="mr-1" strokeWidth={1.8} />Cancelar sesión
                     </Button>
                   </div>
                 )}

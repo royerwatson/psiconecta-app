@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import toast from 'react-hot-toast'
+import { Lock } from 'lucide-react'
 
 export default function AdminLogin() {
   const [form, setForm]       = useState({ email: '', password: '' })
@@ -49,7 +50,7 @@ export default function AdminLogin() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary-800/60 border border-primary-700/50 mb-4 shadow-lg">
-            <span className="text-3xl">🧠</span>
+            <svg viewBox="0 0 24 24" className="w-8 h-8 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <h1 className="font-serif text-2xl font-bold text-white">
             Psico<span className="text-calm-400">necta</span>
@@ -169,7 +170,7 @@ export default function AdminLogin() {
         {/* Footer */}
         <div className="text-center mt-6 flex flex-col gap-2">
           <p className="text-primary-500 text-xs">
-            🔒 Acceso cifrado y protegido
+            <Lock size={11} className="inline mr-1" strokeWidth={2} />Acceso cifrado y protegido
           </p>
           <button
             onClick={() => navigate('/login')}

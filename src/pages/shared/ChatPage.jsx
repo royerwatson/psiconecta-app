@@ -28,6 +28,7 @@ import Button from '@/components/ui/Button'
 import { formatRelative } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { AlertTriangle, MessageCircle, Hand } from 'lucide-react'
 
 export default function ChatPage() {
   const { user, role } = useAuthStore()
@@ -246,7 +247,7 @@ export default function ChatPage() {
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 h-[calc(100dvh-8rem)]">
-        <span className="text-5xl">⚠️</span>
+        <AlertTriangle size={48} strokeWidth={1.8} className="text-warm-400" />
         <p className="font-medium text-warm-800">{error}</p>
         <Button onClick={fetchConversations} size="sm">Reintentar</Button>
       </div>
@@ -272,7 +273,7 @@ export default function ChatPage() {
             </div>
           ) : conversations.length === 0 ? (
             <div className="p-8 text-center text-warm-400 text-sm">
-              <p className="text-3xl mb-2">💬</p>
+              <div className="flex justify-center mb-2"><MessageCircle size={32} strokeWidth={1.8} className="text-warm-300" /></div>
               <p>No hay conversaciones aún</p>
               <p className="text-xs mt-2 text-warm-300">
                 Reserva una sesión para comenzar a chatear
@@ -341,7 +342,7 @@ export default function ChatPage() {
               </div>
             ) : messages.length === 0 ? (
               <div className="text-center text-warm-400 text-sm mt-10">
-                <p className="text-3xl mb-2">👋</p>
+                <div className="flex justify-center mb-2"><Hand size={32} strokeWidth={1.8} className="text-warm-300" /></div>
                 <p>Inicia la conversación</p>
                 <p className="text-xs mt-1 text-warm-300">Los mensajes son privados y seguros</p>
               </div>
@@ -402,7 +403,7 @@ export default function ChatPage() {
         /* Estado vacío en desktop cuando no hay conversación seleccionada */
         <div className="hidden sm:flex flex-1 items-center justify-center bg-warm-50 rounded-r-2xl">
           <div className="text-center text-warm-400">
-            <p className="text-5xl mb-3">💬</p>
+            <div className="flex justify-center mb-3"><MessageCircle size={48} strokeWidth={1.8} className="text-warm-300" /></div>
             <p className="font-medium">Selecciona una conversación</p>
             <p className="text-sm mt-1 text-warm-300">Tus mensajes son privados y cifrados</p>
           </div>

@@ -1,15 +1,17 @@
 import { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { Bell, ClipboardList, Calendar, XCircle, FileText, MessageCircle, Bot, Pin } from 'lucide-react'
 
 const TYPE_CONFIG = {
-  new_task:          { icon: '📋', color: 'text-primary-600 bg-primary-50'   },
-  session_confirmed: { icon: '📅', color: 'text-emerald-600 bg-emerald-50'  },
-  session_cancelled: { icon: '❌', color: 'text-red-600 bg-red-50'           },
-  notes_released:    { icon: '📄', color: 'text-violet-600 bg-violet-50'    },
-  new_message:       { icon: '💬', color: 'text-calm-600 bg-calm-50'         },
-  checkin_alert:     { icon: '🤖', color: 'text-amber-600 bg-amber-50'       },
+  new_task:          { Icon: ClipboardList, color: 'text-primary-600 bg-primary-50'  },
+  session_confirmed: { Icon: Calendar,      color: 'text-emerald-600 bg-emerald-50'  },
+  session_cancelled: { Icon: XCircle,       color: 'text-red-600 bg-red-50'          },
+  notes_released:    { Icon: FileText,      color: 'text-violet-600 bg-violet-50'   },
+  new_message:       { Icon: MessageCircle, color: 'text-calm-600 bg-calm-50'        },
+  checkin_alert:     { Icon: Bot,           color: 'text-amber-600 bg-amber-50'      },
 }
+const DEFAULT_CONFIG = { Icon: Pin, color: 'text-warm-600 bg-warm-50' }
 
 export default function NotificationBell({ userId }) {
   const [notifs, setNotifs]     = useState([])
@@ -24,7 +26,6 @@ export default function NotificationBell({ userId }) {
     if (!userId) return
     fetchNotifs()
 
-    // Realtime: nuevas notificaciones
     const channel = supabase
       .channel(`notifs-${userId}`)
       .on('postgres_changes', {
@@ -38,7 +39,6 @@ export default function NotificationBell({ userId }) {
     return () => { channel.unsubscribe() }
   }, [userId])
 
-  // Cerrar al hacer clic fuera
   useEffect(() => {
     const handler = (e) => {
       if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false)
@@ -89,16 +89,12 @@ export default function NotificationBell({ userId }) {
 
   return (
     <div className="relative" ref={panelRef}>
-      {/* Botón campana */}
       <button
         onClick={() => setOpen(v => !v)}
         className="relative p-2 rounded-xl hover:bg-warm-100 transition-colors"
         title="Notificaciones"
       >
-        <svg className="w-5 h-5 text-warm-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-        </svg>
+        <Bell size={20} strokeWidth={1.8} className="text-warm-600" />
         {unread > 0 && (
           <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 leading-none animate-pulse">
             {unread > 9 ? '9+' : unread}
@@ -106,10 +102,8 @@ export default function NotificationBell({ userId }) {
         )}
       </button>
 
-      {/* Panel desplegable */}
       {open && (
         <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-float border border-warm-100 z-50 animate-fade-in overflow-hidden">
-          {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-warm-100">
             <p className="font-semibold text-warm-900 text-sm">
               Notificaciones
@@ -129,7 +123,6 @@ export default function NotificationBell({ userId }) {
             )}
           </div>
 
-          {/* Lista */}
           <div className="max-h-80 overflow-y-auto">
             {loading ? (
               <div className="flex flex-col gap-0">
@@ -145,12 +138,13 @@ export default function NotificationBell({ userId }) {
               </div>
             ) : notifs.length === 0 ? (
               <div className="text-center py-10">
-                <div className="text-3xl mb-2">🔔</div>
+                <Bell size={32} className="text-warm-200 mx-auto mb-2" />
                 <p className="text-warm-400 text-sm">No tienes notificaciones aún</p>
               </div>
             ) : (
               notifs.map(notif => {
-                const tc = TYPE_CONFIG[notif.type] ?? { icon: '📌', color: 'text-warm-600 bg-warm-50' }
+                const tc = TYPE_CONFIG[notif.type] ?? DEFAULT_CONFIG
+                const { Icon: NIcon, color } = tc
                 return (
                   <button
                     key={notif.id}
@@ -159,8 +153,8 @@ export default function NotificationBell({ userId }) {
                       !notif.read ? 'bg-primary-50/40' : ''
                     }`}
                   >
-                    <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-base ${tc.color}`}>
-                      {tc.icon}
+                    <span className={`shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${color}`}>
+                      <NIcon size={15} strokeWidth={1.8} />
                     </span>
                     <div className="flex-1 min-w-0">
                       <p className={`text-sm leading-snug ${notif.read ? 'text-warm-600' : 'text-warm-900 font-medium'}`}>

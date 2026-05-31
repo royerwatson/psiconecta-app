@@ -4,6 +4,7 @@ import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import { Textarea, Select } from '@/components/ui/Input'
 import toast from 'react-hot-toast'
+import { Timer, RefreshCw } from 'lucide-react'
 
 const CATEGORY_LABELS = {
   sintomas:       'Síntomas',
@@ -201,9 +202,9 @@ export default function AssignTestModal({ isOpen, onClose, therapistId, patientI
                         <p className="text-xs text-warm-500 mt-1 line-clamp-2">{test.description}</p>
                       )}
                       <div className="flex items-center gap-3 mt-1.5">
-                        <span className="text-xs text-warm-400">⏱ ~{test.estimated_minutes} min</span>
+                        <span className="text-xs text-warm-400 flex items-center gap-1"><Timer size={11} /> ~{test.estimated_minutes} min</span>
                         {test.min_reapplication_days && (
-                          <span className="text-xs text-warm-400">🔄 Mín. {test.min_reapplication_days} días entre aplicaciones</span>
+                          <span className="text-xs text-warm-400 flex items-center gap-1"><RefreshCw size={11} /> Mín. {test.min_reapplication_days} días entre aplicaciones</span>
                         )}
                       </div>
                     </div>

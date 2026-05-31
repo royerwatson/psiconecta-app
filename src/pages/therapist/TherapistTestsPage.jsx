@@ -25,6 +25,7 @@ import Input from '@/components/ui/Input'
 import Avatar from '@/components/ui/Avatar'
 import { Skeleton } from '@/components/ui/Spinner'
 import { formatDateTime } from '@/lib/utils'
+import { Search, Timer, RefreshCw, FlaskConical } from 'lucide-react'
 
 // ── Constantes de dominio ─────────────────────────────────────────────────────
 const CATEGORY_META = {
@@ -150,7 +151,7 @@ function CatalogTab() {
       {/* Resultados vacíos */}
       {filtered.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 text-center">
-          <span className="text-4xl mb-3">🔍</span>
+          <Search size={40} strokeWidth={1.5} className="text-warm-300 mb-3 mx-auto" />
           <p className="font-semibold text-warm-700">Sin resultados</p>
           <p className="text-sm text-warm-400 mt-1">Prueba con otros términos o categoría</p>
           <button onClick={() => { setSearch(''); setFilterCat('all') }}
@@ -193,9 +194,9 @@ function CatalogTab() {
                           <p className="text-xs text-warm-500 mt-1 line-clamp-1">{test.description}</p>
                         )}
                         <div className="flex items-center gap-4 mt-1.5">
-                          <span className="text-xs text-warm-400">⏱ ~{test.estimated_minutes} min</span>
+                          <span className="text-xs text-warm-400 flex items-center gap-0.5"><Timer size={10} strokeWidth={1.8} /> ~{test.estimated_minutes} min</span>
                           {test.min_reapplication_days && (
-                            <span className="text-xs text-warm-400">🔄 Mín. {test.min_reapplication_days} días entre aplicaciones</span>
+                            <span className="text-xs text-warm-400 flex items-center gap-0.5"><RefreshCw size={10} strokeWidth={1.8} /> Mín. {test.min_reapplication_days} días entre aplicaciones</span>
                           )}
                         </div>
                       </div>
@@ -336,7 +337,7 @@ function AppliedTab({ therapistId }) {
   if (assignments.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <span className="text-5xl mb-3">🧪</span>
+        <FlaskConical size={48} strokeWidth={1.5} className="text-warm-300 mb-3 mx-auto" />
         <p className="font-semibold text-warm-700">Aún no has asignado tests</p>
         <p className="text-sm text-warm-400 mt-1 max-w-xs leading-relaxed">
           Asigna instrumentos desde el perfil de cada paciente para verlos aquí.
@@ -437,7 +438,7 @@ function AppliedTab({ therapistId }) {
       {/* Sin resultados tras filtrar */}
       {filtered.length === 0 && (
         <div className="flex flex-col items-center py-12 text-center">
-          <span className="text-3xl mb-2">🔍</span>
+          <Search size={32} strokeWidth={1.5} className="text-warm-300 mb-2 mx-auto" />
           <p className="font-medium text-warm-700">Sin coincidencias</p>
           <button
             onClick={() => { setSearch(''); setFilterStatus('all'); setFilterCat('all') }}
@@ -532,8 +533,8 @@ export default function TherapistTestsPage() {
       {/* Tabs */}
       <div className="flex bg-warm-100 rounded-2xl p-1 gap-1">
         {[
-          { key: 'catalog', label: '📚 Catálogo' },
-          { key: 'applied', label: '🧪 Aplicados' },
+          { key: 'catalog', label: 'Catálogo' },
+          { key: 'applied', label: 'Aplicados' },
         ].map(({ key, label }) => (
           <button
             key={key}

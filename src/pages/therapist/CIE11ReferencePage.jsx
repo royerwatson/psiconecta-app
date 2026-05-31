@@ -5,6 +5,7 @@
 import { useState, useMemo } from 'react'
 import { CIE11, searchCIE11 } from '@/data/cie11'
 import Input from '@/components/ui/Input'
+import { Lightbulb, AlertTriangle, Search } from 'lucide-react'
 
 // ── Colores por capítulo ──────────────────────────────────────────────────────
 const CHAPTER_COLORS = [
@@ -61,7 +62,7 @@ function DiagnosisCard({ diagnosis, chapterId, defaultOpen = false }) {
               </span>
               {isNew && (
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200 font-semibold">
-                  ✦ Nuevo CIE-11
+                  · Nuevo CIE-11
                 </span>
               )}
             </div>
@@ -120,7 +121,7 @@ function DiagnosisCard({ diagnosis, chapterId, defaultOpen = false }) {
           {/* Notas clínicas */}
           {diagnosis.notes && (
             <div className="bg-blue-50 border border-blue-100 rounded-xl px-4 py-3">
-              <p className="text-xs font-bold text-blue-700 mb-1">💡 Nota clínica / CIE-11</p>
+              <p className="text-xs font-bold text-blue-700 mb-1 flex items-center gap-1"><Lightbulb className="inline" size={12} strokeWidth={1.8} /> Nota clínica / CIE-11</p>
               <p className="text-sm text-blue-800 leading-relaxed">{diagnosis.notes}</p>
             </div>
           )}
@@ -173,14 +174,15 @@ export default function CIE11ReferencePage() {
 
         {/* Novedades CIE-11 */}
         <div className="mt-3 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-2.5 text-xs text-emerald-800 leading-relaxed">
-          <span className="font-semibold">✦ Novedades CIE-11 vs CIE-10:</span>{' '}
+          <span className="font-semibold">Novedades CIE-11 vs CIE-10:</span>{' '}
           TEPT Complejo (6B41) como diagnóstico independiente · Duelo prolongado (6B42) · Trastorno de videojuegos (6C51) ·
           Personalidad: modelo dimensional · Incongruencia de género despatologizada (cap. 17)
         </div>
 
-        <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 text-xs text-amber-700 leading-relaxed">
-          ⚠️ Referencia clínica resumida. Características parafraseadas con fines educativos. Consulta la versión oficial en{' '}
-          <span className="font-mono">icd.who.int</span> para uso diagnóstico formal.
+        <div className="mt-2 bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 text-xs text-amber-700 leading-relaxed flex items-start gap-1.5">
+          <AlertTriangle className="shrink-0 mt-0.5" size={12} strokeWidth={1.8} />
+          <span>Referencia clínica resumida. Características parafraseadas con fines educativos. Consulta la versión oficial en{' '}
+          <span className="font-mono">icd.who.int</span> para uso diagnóstico formal.</span>
         </div>
       </div>
 
@@ -229,7 +231,7 @@ export default function CIE11ReferencePage() {
         <div className="flex flex-col gap-2">
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center py-16 text-center">
-              <span className="text-4xl mb-3">🔍</span>
+              <Search className="text-warm-300 mb-3" size={40} strokeWidth={1.8} />
               <p className="font-semibold text-warm-700">Sin resultados para "{search}"</p>
               <button
                 onClick={() => { setSearch(''); setFilterChapter('all') }}

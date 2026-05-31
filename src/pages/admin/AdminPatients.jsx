@@ -6,11 +6,12 @@ import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
 import toast from 'react-hot-toast'
 import { formatPrice } from '@/lib/utils'
+import { Calendar, ClipboardList, Bot } from 'lucide-react'
 
 const RISK_CONFIG = {
-  high:   { label: 'Alto',  badge: 'bg-red-100 text-red-700',    icon: '🔴' },
-  medium: { label: 'Medio', badge: 'bg-amber-100 text-amber-700', icon: '🟡' },
-  low:    { label: 'Bien',  badge: 'bg-green-100 text-green-700', icon: '🟢' },
+  high:   { label: 'Alto',  badge: 'bg-red-100 text-red-700',    dot: 'bg-red-500'   },
+  medium: { label: 'Medio', badge: 'bg-amber-100 text-amber-700', dot: 'bg-amber-500' },
+  low:    { label: 'Bien',  badge: 'bg-green-100 text-green-700', dot: 'bg-green-500' },
 }
 
 export default function AdminPatients() {
@@ -130,7 +131,7 @@ export default function AdminPatients() {
       return
     }
 
-    toast.success(newState ? '✅ Cuenta reactivada' : '🚫 Cuenta desactivada')
+    toast.success(newState ? 'Cuenta reactivada' : 'Cuenta desactivada')
     setToggling(null)
     fetchPatients()
   }
@@ -173,17 +174,18 @@ export default function AdminPatients() {
         <div className="flex gap-2 flex-wrap">
           {[
             { id: 'all',      label: 'Todos' },
-            { id: 'high',     label: '🔴 Riesgo alto' },
-            { id: 'medium',   label: '🟡 Riesgo medio' },
-            { id: 'active',   label: '✅ Activos' },
-            { id: 'inactive', label: '🚫 Inactivos' },
+            { id: 'high',     label: 'Riesgo alto',  dot: 'bg-red-500'   },
+            { id: 'medium',   label: 'Riesgo medio', dot: 'bg-amber-500' },
+            { id: 'active',   label: 'Activos' },
+            { id: 'inactive', label: 'Inactivos' },
           ].map(f => (
             <button key={f.id} onClick={() => setRiskFilter(f.id)}
-              className={`px-3 py-2 rounded-xl text-xs font-medium border transition-all whitespace-nowrap ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium border transition-all whitespace-nowrap ${
                 riskFilter === f.id
                   ? 'bg-primary-600 text-white border-primary-600'
                   : 'bg-white text-warm-600 border-warm-200 hover:border-warm-300'
               }`}>
+              {f.dot && <span className={`w-1.5 h-1.5 rounded-full ${riskFilter === f.id ? 'bg-white' : f.dot}`} />}
               {f.label}
             </button>
           ))}
@@ -243,8 +245,8 @@ export default function AdminPatients() {
 
                     <td className="px-4 py-3 text-center hidden md:table-cell">
                       {rc ? (
-                        <span className={`text-xs font-medium px-2 py-1 rounded-full ${rc.badge}`}>
-                          {rc.icon} {rc.label}
+                        <span className={`text-xs font-medium px-2 py-1 rounded-full flex items-center gap-1 ${rc.badge}`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${rc.dot}`} />{rc.label}
                         </span>
                       ) : <span className="text-warm-300 text-xs">Sin datos</span>}
                     </td>
@@ -311,12 +313,11 @@ export default function AdminPatients() {
                 detail.checkins[0]?.risk_level === 'high'   ? 'bg-red-50' :
                 detail.checkins[0]?.risk_level === 'medium' ? 'bg-amber-50' : 'bg-green-50'
               }`}>
-                <p className={`text-xl font-bold ${
-                  detail.checkins[0]?.risk_level === 'high'   ? 'text-red-700' :
-                  detail.checkins[0]?.risk_level === 'medium' ? 'text-amber-700' : 'text-green-700'
-                }`}>
-                  {RISK_CONFIG[detail.checkins[0]?.risk_level ?? 'low']?.icon ?? '—'}
-                </p>
+                <div className="flex justify-center">
+                  <span className={`w-5 h-5 rounded-full ${
+                    RISK_CONFIG[detail.checkins[0]?.risk_level ?? 'low']?.dot ?? 'bg-warm-200'
+                  }`} />
+                </div>
                 <p className={`text-xs mt-0.5 ${
                   detail.checkins[0]?.risk_level === 'high'   ? 'text-red-500' :
                   detail.checkins[0]?.risk_level === 'medium' ? 'text-amber-500' : 'text-green-500'
@@ -326,7 +327,7 @@ export default function AdminPatients() {
 
             {/* Sesiones recientes */}
             <div>
-              <h3 className="font-semibold text-warm-800 mb-2 text-sm">📅 Sesiones recientes</h3>
+              <h3 className="font-semibold text-warm-800 mb-2 text-sm flex items-center gap-1.5"><Calendar size={13} className="text-warm-400" />Sesiones recientes</h3>
               {detail.sessions.length === 0 ? (
                 <p className="text-warm-400 text-sm">Sin sesiones registradas</p>
               ) : (
@@ -354,7 +355,7 @@ export default function AdminPatients() {
 
             {/* Tareas */}
             <div>
-              <h3 className="font-semibold text-warm-800 mb-2 text-sm">📋 Tareas asignadas</h3>
+              <h3 className="font-semibold text-warm-800 mb-2 text-sm flex items-center gap-1.5"><ClipboardList size={13} className="text-warm-400" />Tareas asignadas</h3>
               {detail.tasks.length === 0 ? (
                 <p className="text-warm-400 text-sm">Sin tareas asignadas</p>
               ) : (
@@ -367,7 +368,7 @@ export default function AdminPatients() {
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
                         t.completed_at ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
                       }`}>
-                        {t.completed_at ? '✓ Completada' : 'Pendiente'}
+                        {t.completed_at ? 'Completada' : 'Pendiente'}
                       </span>
                     </div>
                   ))}
@@ -377,7 +378,7 @@ export default function AdminPatients() {
 
             {/* Check-ins recientes */}
             <div>
-              <h3 className="font-semibold text-warm-800 mb-2 text-sm">🤖 Últimos check-ins</h3>
+              <h3 className="font-semibold text-warm-800 mb-2 text-sm flex items-center gap-1.5"><Bot size={13} className="text-warm-400" />Últimos check-ins</h3>
               {detail.checkins.length === 0 ? (
                 <p className="text-warm-400 text-sm">Sin check-ins registrados</p>
               ) : (
@@ -390,8 +391,8 @@ export default function AdminPatients() {
                         c.risk_level === 'medium' ? 'bg-amber-50 border-amber-100' : 'bg-green-50 border-green-100'
                       }`}>
                         <div className="flex items-center justify-between gap-2">
-                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${rc.badge}`}>
-                            {rc.icon} {rc.label}
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full flex items-center gap-1 ${rc.badge}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${rc.dot}`} />{rc.label}
                           </span>
                           <span className="text-xs text-warm-400">
                             {new Date(c.created_at).toLocaleDateString('es-DO', { dateStyle: 'short' })}

@@ -5,15 +5,17 @@ import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { Star, Trophy, Trash2 } from 'lucide-react'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 const Stars = ({ value, size = 'sm' }) => {
-  const sz = size === 'lg' ? 'text-2xl' : 'text-sm'
+  const sz = size === 'lg' ? 20 : 13
   return (
-    <span className={sz}>
+    <span className="inline-flex items-center gap-0.5">
       {[1,2,3,4,5].map(i => (
-        <span key={i} className={i <= value ? 'text-amber-400' : 'text-warm-200'}>★</span>
+        <Star key={i} size={sz} strokeWidth={1.5}
+          className={i <= value ? 'text-amber-400 fill-amber-400' : 'text-warm-200'} />
       ))}
     </span>
   )
@@ -116,7 +118,7 @@ export default function AdminReviews() {
                     ratingFilter === String(star) ? 'bg-amber-50' : 'hover:bg-warm-50'
                   }`}
                 >
-                  <span className="text-xs text-warm-500 w-6 shrink-0">{star}★</span>
+                  <span className="text-xs text-warm-500 w-6 shrink-0 flex items-center gap-0.5">{star}<Star size={10} strokeWidth={0} className="fill-amber-400 text-amber-400" /></span>
                   <div className="flex-1 bg-warm-100 rounded-full h-1.5">
                     <div className="bg-amber-400 h-1.5 rounded-full transition-all"
                       style={{ width: `${pct}%` }} />
@@ -129,7 +131,7 @@ export default function AdminReviews() {
 
           {/* Top 3 terapeutas mejor calificados */}
           <div className="bg-white border border-warm-100 rounded-2xl p-4">
-            <p className="text-sm font-semibold text-warm-800 mb-3">🏆 Mejor calificados</p>
+            <p className="text-sm font-semibold text-warm-800 mb-3 flex items-center gap-1.5"><Trophy size={14} strokeWidth={1.8} className="text-amber-500" /> Mejor calificados</p>
             {(() => {
               const byT = {}
               reviews.forEach(r => {
@@ -144,14 +146,14 @@ export default function AdminReviews() {
                 .slice(0, 3)
                 .map((t, i) => (
                   <div key={t.name} className="flex items-center gap-3 py-1.5">
-                    <span className="text-lg">{['🥇','🥈','🥉'][i]}</span>
+                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${i === 0 ? 'bg-amber-100 text-amber-700' : i === 1 ? 'bg-warm-100 text-warm-600' : 'bg-orange-100 text-orange-700'}`}>{i + 1}</span>
                     <Avatar name={t.name} size="sm" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-warm-800 truncate">{t.name}</p>
                       <p className="text-xs text-warm-400">{t.ratings.length} reseñas</p>
                     </div>
-                    <span className="text-sm font-bold text-amber-500">
-                      {t.avg.toFixed(1)}★
+                    <span className="text-sm font-bold text-amber-500 flex items-center gap-0.5">
+                      {t.avg.toFixed(1)}<Star size={12} className="fill-amber-400 text-amber-400" strokeWidth={1.5} />
                     </span>
                   </div>
                 ))
@@ -182,7 +184,7 @@ export default function AdminReviews() {
                   ? 'bg-amber-400 text-white'
                   : 'text-warm-400 hover:text-amber-500'
               }`}>
-              {s}★
+              {s}<Star size={11} className="inline ml-0.5 fill-current" strokeWidth={0} />
             </button>
           ))}
         </div>
@@ -195,7 +197,7 @@ export default function AdminReviews() {
         </div>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16 text-warm-400">
-          <div className="text-4xl mb-2">⭐</div>
+          <Star size={40} strokeWidth={1.5} className="mx-auto mb-3 text-warm-300" />
           <p>No hay reseñas que coincidan con el filtro</p>
         </div>
       ) : (
@@ -233,7 +235,7 @@ export default function AdminReviews() {
                 </Button>
                 <Button size="sm" variant="outline"
                   onClick={() => setConfirmDelete(r.id)} fullWidth>
-                  🗑️ Eliminar
+                  <Trash2 size={13} className="mr-1" strokeWidth={1.8} />Eliminar
                 </Button>
               </div>
             </div>
@@ -301,7 +303,7 @@ export default function AdminReviews() {
 
             <Button variant="outline" fullWidth
               onClick={() => { setConfirmDelete(selected.id); setSelected(null) }}>
-              🗑️ Eliminar esta reseña
+              <Trash2 size={13} strokeWidth={1.8} className="mr-1.5" />Eliminar esta reseña
             </Button>
           </div>
         )}
@@ -314,8 +316,8 @@ export default function AdminReviews() {
           <div className="bg-white rounded-2xl p-6 max-w-sm w-full shadow-float border border-warm-100"
             onClick={e => e.stopPropagation()}>
             <div className="text-center mb-5">
-              <span className="text-4xl">🗑️</span>
-              <p className="font-serif font-semibold text-warm-900 mt-3">¿Eliminar reseña?</p>
+              <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-3"><Trash2 size={24} className="text-red-400" strokeWidth={1.8} /></div>
+              <p className="font-serif font-semibold text-warm-900">¿Eliminar reseña?</p>
               <p className="text-sm text-warm-500 mt-1">
                 Esta acción es permanente y no se puede deshacer.
               </p>

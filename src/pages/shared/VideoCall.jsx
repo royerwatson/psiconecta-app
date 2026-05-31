@@ -28,6 +28,7 @@ import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import Button from '@/components/ui/Button'
 import toast from 'react-hot-toast'
+import { XCircle, Video, Loader2, Mic, MicOff, VideoOff, PhoneOff } from 'lucide-react'
 
 export default function VideoCall() {
   const { sessionId } = useParams()
@@ -199,7 +200,7 @@ export default function VideoCall() {
   if (!loading && !session) {
     return (
       <div className="fixed inset-0 bg-warm-900 flex flex-col items-center justify-center z-50 gap-4">
-        <span className="text-5xl">❌</span>
+        <XCircle size={56} className="text-red-400" />
         <p className="text-white font-medium">Sesión no encontrada</p>
         <p className="text-warm-400 text-sm">El ID de sesión no es válido o la sesión fue eliminada</p>
         <Button onClick={() => navigate(-1)} variant="secondary">
@@ -228,8 +229,10 @@ export default function VideoCall() {
         {(!roomUrl || loading) && (
           <div className="absolute inset-0 flex items-center justify-center z-10">
             <div className="text-center text-white">
-              <div className="text-5xl mb-4">
-                {polling ? '⏳' : '📹'}
+              <div className="flex items-center justify-center mb-4">
+                {polling
+                  ? <Loader2 size={48} className="text-warm-400 animate-spin" />
+                  : <Video size={48} className="text-warm-400" />}
               </div>
               <p className="font-medium">
                 {polling
@@ -250,14 +253,14 @@ export default function VideoCall() {
         <ControlButton
           onClick={toggleMic}
           active={micOn}
-          icon={micOn ? '🎤' : '🔇'}
+          Icon={micOn ? Mic : MicOff}
           label={micOn ? 'Mutear' : 'Activar mic'}
           disabled={!callFrame}
         />
         <ControlButton
           onClick={toggleCam}
           active={camOn}
-          icon={camOn ? '📹' : '📷'}
+          Icon={camOn ? Video : VideoOff}
           label={camOn ? 'Ocultar cam' : 'Mostrar cam'}
           disabled={!callFrame}
         />
@@ -265,7 +268,7 @@ export default function VideoCall() {
           onClick={handleLeave}
           className="flex flex-col items-center gap-1 bg-red-600 hover:bg-red-700 text-white rounded-2xl px-6 py-3 transition-colors"
         >
-          <span>📴</span>
+          <PhoneOff size={20} />
           <span className="text-xs font-medium">Finalizar</span>
         </button>
       </div>
@@ -273,7 +276,7 @@ export default function VideoCall() {
   )
 }
 
-function ControlButton({ onClick, active, icon, label, disabled }) {
+function ControlButton({ onClick, active, Icon, label, disabled }) {
   return (
     <button
       onClick={onClick}
@@ -282,7 +285,7 @@ function ControlButton({ onClick, active, icon, label, disabled }) {
         active ? 'bg-warm-700 hover:bg-warm-600 text-white' : 'bg-red-900/40 hover:bg-red-900/60 text-red-300'
       }`}
     >
-      <span className="text-lg">{icon}</span>
+      <Icon size={20} strokeWidth={1.8} />
       <span className="text-xs font-medium">{label}</span>
     </button>
   )

@@ -13,6 +13,7 @@ import { addDays, startOfWeek, format, parseISO, isSameDay, isToday } from 'date
 import { es } from 'date-fns/locale'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
+import { Ban, Zap, Video, ClipboardList, CheckCircle2 } from 'lucide-react'
 
 const DAYS_SHORT = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 const HOURS      = Array.from({ length: 12 }, (_, i) => `${String(8 + i).padStart(2,'0')}:00`)
@@ -92,7 +93,7 @@ export default function TherapistSchedule() {
     setMarkingDone(true)
     const { error } = await supabase.from('sessions').update({ status: 'completed' }).eq('id', selectedSession.id)
     if (error) { toast.error('Error al actualizar sesión'); setMarkingDone(false); return }
-    toast.success('✅ Sesión marcada como completada')
+    toast.success('Sesión marcada como completada')
     setSelectedSession(null)
     setMarkingDone(false)
     fetchWeek()
@@ -126,7 +127,7 @@ export default function TherapistSchedule() {
       reason: blockForm.reason.trim() || null,
     }, { onConflict: 'therapist_id,blocked_date' })
     if (error) { toast.error('Error guardando fecha bloqueada'); setSavingBlock(false); return }
-    toast.success('📅 Fecha bloqueada correctamente')
+    toast.success('Fecha bloqueada correctamente')
     setShowBlockModal(false)
     setBlockForm({ date: '', reason: '' })
     setSavingBlock(false)
@@ -220,7 +221,7 @@ export default function TherapistSchedule() {
             <p className="text-xs text-warm-500 mt-0.5">Vacaciones o días no disponibles</p>
           </div>
           <Button size="sm" variant="secondary" className="mr-3 shrink-0" onClick={() => setShowBlockModal(true)}>
-            🚫 Bloquear
+            <Ban size={13} strokeWidth={1.8} className="inline mr-1" /> Bloquear
           </Button>
         </Card>
       </div>
@@ -288,7 +289,7 @@ export default function TherapistSchedule() {
                   })}
                   {blocked && (
                     <div className="flex-1 flex flex-col items-center justify-center gap-0.5 py-2">
-                      <span className="text-base">🚫</span>
+                      <Ban size={16} strokeWidth={1.8} className="text-red-400" />
                       <span className="text-red-400 text-[9px] font-medium text-center">Bloqueado</span>
                     </div>
                   )}
@@ -325,7 +326,7 @@ export default function TherapistSchedule() {
           <div className="flex flex-col gap-2">
             {blockedDates.map((b) => (
               <div key={b.id} className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
-                <span className="text-red-400 text-lg">🚫</span>
+                <Ban size={18} strokeWidth={1.8} className="text-red-400 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-red-700 text-sm">
                     {format(new Date(b.blocked_date + 'T12:00:00'), "EEEE d 'de' MMMM", { locale: es })}
@@ -366,7 +367,7 @@ export default function TherapistSchedule() {
                 <p className="text-warm-500 text-xs uppercase font-semibold mb-1">Precio</p>
                 <p className="font-bold text-warm-800 text-base">{formatPrice(selectedSession.price ?? 0)}</p>
                 {selectedSession.is_urgent && (
-                  <p className="text-orange-500 text-xs mt-0.5">⚡ Cita urgente</p>
+                  <p className="text-orange-500 text-xs mt-0.5 flex items-center gap-0.5"><Zap size={11} strokeWidth={1.8} className="inline" /> Cita urgente</p>
                 )}
               </div>
               <div className="bg-warm-50 rounded-xl p-3">
@@ -385,7 +386,7 @@ export default function TherapistSchedule() {
             <div className="flex flex-col gap-2">
               {selectedSession.status !== 'completed' && (
                 <Button variant="calm" fullWidth onClick={() => navigate(`/video-call/${selectedSession.id}`)}>
-                  📹 Iniciar videollamada
+                  <Video size={13} strokeWidth={1.8} className="inline mr-1" /> Iniciar videollamada
                 </Button>
               )}
               <Button
@@ -393,16 +394,16 @@ export default function TherapistSchedule() {
                 fullWidth
                 onClick={() => navigate(`/therapist/patients/${selectedSession.patient?.id}`)}
               >
-                📋 Ver historial del paciente
+                <ClipboardList size={13} strokeWidth={1.8} className="inline mr-1" /> Ver historial del paciente
               </Button>
               {selectedSession.status === 'scheduled' && (
                 <Button variant="ghost" fullWidth loading={markingDone} onClick={markSessionCompleted}>
-                  ✅ Marcar como completada
+                  <CheckCircle2 size={13} strokeWidth={1.8} className="inline mr-1" /> Marcar como completada
                 </Button>
               )}
               {selectedSession.status === 'completed' && (
                 <div className="flex items-center justify-center gap-2 py-2.5 text-sm text-green-700 bg-green-50 rounded-xl font-medium">
-                  ✅ Sesión completada
+                  <CheckCircle2 size={14} strokeWidth={1.8} className="inline mr-1" /> Sesión completada
                 </div>
               )}
             </div>
@@ -441,7 +442,7 @@ export default function TherapistSchedule() {
               <span className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors ${
                 noWeekendsActive ? 'bg-primary-600 border-primary-600 text-white' : 'border-warm-300'
               }`}>
-                {noWeekendsActive && <span className="text-xs font-bold">✓</span>}
+                {noWeekendsActive && <CheckCircle2 size={12} strokeWidth={1.8} />}
               </span>
               Solo días laborales (Lun–Vie)
             </button>
@@ -478,7 +479,7 @@ export default function TherapistSchedule() {
       >
         <div className="flex flex-col gap-4">
           <div className="bg-red-50 border border-red-100 rounded-xl p-3 text-sm text-red-700 flex items-center gap-2">
-            <span>🚫</span>
+            <Ban size={15} strokeWidth={1.8} className="shrink-0" />
             <span>Los pacientes no podrán agendar citas en esta fecha.</span>
           </div>
           <div>

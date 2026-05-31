@@ -301,7 +301,7 @@ export default function AICheckin({ userId }) {
             <span className="text-2xl">{selectedMood?.emoji}</span>
             <div>
               <p className="text-xs font-bold text-warm-900">{selectedMood?.label}</p>
-              <p className="text-[10px] text-warm-400">Registrado ✓</p>
+              <p className="text-[10px] text-warm-400">Registrado</p>
             </div>
           </div>
           {/* Mini gráfico inline */}

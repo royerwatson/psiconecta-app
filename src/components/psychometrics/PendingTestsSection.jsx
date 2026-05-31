@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
+import { Timer, AlertTriangle, Calendar, Pencil } from 'lucide-react'
 
 export default function PendingTestsSection({ userId }) {
   const [assignments, setAssignments] = useState([])
@@ -60,14 +61,14 @@ export default function PendingTestsSection({ userId }) {
                     {a.reason ? `: "${a.reason}"` : ''}
                   </p>
                   <div className="flex items-center gap-3 mt-2">
-                    <span className="text-xs text-warm-400">⏱ ~{a.tests?.estimated_minutes} min</span>
+                    <span className="text-xs text-warm-400 flex items-center gap-1"><Timer size={11} /> ~{a.tests?.estimated_minutes} min</span>
                     {a.due_at && (
-                      <span className={`text-xs ${isOverdue ? 'text-red-500 font-medium' : 'text-warm-400'}`}>
-                        {isOverdue ? '⚠️ Vencido' : `📅 Vence ${new Date(a.due_at).toLocaleDateString('es-MX')}`}
+                      <span className={`text-xs flex items-center gap-1 ${isOverdue ? 'text-red-500 font-medium' : 'text-warm-400'}`}>
+                        {isOverdue ? <><AlertTriangle size={11} /> Vencido</> : <><Calendar size={11} /> Vence {new Date(a.due_at).toLocaleDateString('es-MX')}</>}
                       </span>
                     )}
                     {isResume && (
-                      <span className="text-xs text-blue-500 font-medium">✏️ En progreso</span>
+                      <span className="text-xs text-blue-500 font-medium flex items-center gap-1"><Pencil size={11} /> En progreso</span>
                     )}
                   </div>
                 </div>

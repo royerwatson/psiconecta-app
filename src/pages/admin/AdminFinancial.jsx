@@ -6,6 +6,7 @@ import {
   Tooltip, ResponsiveContainer, Legend
 } from 'recharts'
 import { Skeleton } from '@/components/ui/Spinner'
+import { Wallet, CheckCircle2, Clock, XCircle, Download } from 'lucide-react'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -156,7 +157,7 @@ export default function AdminFinancial() {
           ))}
           <button onClick={exportCSV}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium bg-emerald-600 text-white hover:bg-emerald-700 transition-colors">
-            ⬇️ CSV
+            <Download size={13} className="mr-1.5" strokeWidth={1.8} />CSV
           </button>
         </div>
       </div>
@@ -169,13 +170,14 @@ export default function AdminFinancial() {
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {[
-            { label: 'Ingresos totales',   value: formatPrice(kpis.total),     color: 'from-emerald-50 to-emerald-100/40', icon: '💰' },
-            { label: 'Sesiones cobradas',  value: formatPrice(kpis.completed), color: 'from-primary-50 to-primary-100/40', icon: '✅' },
-            { label: 'Por cobrar',         value: formatPrice(kpis.pending),   color: 'from-amber-50 to-amber-100/40',     icon: '⏳' },
-            { label: 'Cancelaciones',      value: kpis.cancelled,              color: 'from-red-50 to-red-100/40',         icon: '❌' },
-          ].map(({ label, value, color, icon }) => (
+            { label: 'Ingresos totales',  value: formatPrice(kpis.total),     color: 'from-emerald-50 to-emerald-100/40', Icon: Wallet        },
+            { label: 'Sesiones cobradas', value: formatPrice(kpis.completed), color: 'from-primary-50 to-primary-100/40', Icon: CheckCircle2  },
+            { label: 'Por cobrar',        value: formatPrice(kpis.pending),   color: 'from-amber-50 to-amber-100/40',     Icon: Clock         },
+            { label: 'Cancelaciones',     value: kpis.cancelled,              color: 'from-red-50 to-red-100/40',         Icon: XCircle       },
+          ].map(({ label, value, color, Icon: KpiIcon }) => (
             <div key={label} className={`bg-gradient-to-br ${color} border border-warm-100 rounded-2xl p-4`}>
-              <p className="text-xs text-warm-400 font-medium">{icon} {label}</p>
+              <KpiIcon size={16} className="text-warm-400 mb-1" strokeWidth={1.8} />
+              <p className="text-xs text-warm-400 font-medium">{label}</p>
               <p className="text-xl font-bold text-warm-900 mt-1">{value}</p>
             </div>
           ))}
