@@ -41,6 +41,7 @@ export default function ChatPage() {
   const [loadingMessages, setLoadingMessages] = useState(false)
   const [error, setError] = useState(null)
   const [sending, setSending] = useState(false)
+  const [unreadCounts, setUnreadCounts] = useState({}) // { [convId]: number }
   const bottomRef = useRef(null)
   const channelRef = useRef(null)
   const inputRef = useRef(null)
@@ -97,6 +98,7 @@ export default function ChatPage() {
         }
       }
       setConversations(convs)
+      fetchUnreadCounts(convs)
 
       // Auto-abrir: target desde query param o primera conversación
       if (targetId) {
@@ -129,8 +131,58 @@ export default function ChatPage() {
       console.error('Error cargando mensajes:', fetchError)
     } else {
       setMessages(data ?? [])
+      // Marcar como leídos los mensajes de esta conversación
+      markAsRead(conv.id)
     }
     setLoadingMessages(false)
+  }
+
+  const markAsRead = async (convId) => {
+    // Intentar con RPC (requiere migration_messages_read_at.sql ejecutado)
+    const { error } = await supabase.rpc('mark_messages_read', {
+      p_sender_id:   convId,
+      p_receiver_id: user.id,
+    }).catch(() => ({ error: true }))
+
+    if (error) {
+      // Fallback: UPDATE directo (funciona sin la RPC; también actualiza campo 'read')
+      await supabase
+        .from('messages')
+        .update({ read_at: new Date().toISOString(), read: true })
+        .eq('receiver_id', user.id)
+        .eq('sender_id', convId)
+        .is('read_at', null)
+    }
+    // Limpiar badge de no leídos para esta conversación
+    setUnreadCounts(prev => ({ ...prev, [convId]: 0 }))
+  }
+
+  // Cargar conteo de no leídos por conversación
+  // Usa read_at si existe (post-migración), si no usa read=false (esquema original)
+  const fetchUnreadCounts = async (convs) => {
+    const counts = {}
+    await Promise.all(convs.map(async (conv) => {
+      // Intentar con read_at primero
+      let { count, error } = await supabase
+        .from('messages')
+        .select('id', { count: 'exact', head: true })
+        .eq('receiver_id', user.id)
+        .eq('sender_id', conv.id)
+        .is('read_at', null)
+
+      if (error) {
+        // Fallback al campo booleano original
+        const res = await supabase
+          .from('messages')
+          .select('id', { count: 'exact', head: true })
+          .eq('receiver_id', user.id)
+          .eq('sender_id', conv.id)
+          .eq('read', false)
+        count = res.count
+      }
+      counts[conv.id] = count ?? 0
+    }))
+    setUnreadCounts(counts)
   }
 
   /**
@@ -153,13 +205,24 @@ export default function ChatPage() {
           filter: `receiver_id=eq.${user.id}`,
         },
         (payload) => {
-          // Solo mostrar si el remitente es el interlocutor activo
-          if (payload.new.sender_id === conv.id) {
+          const senderId = payload.new.sender_id
+          if (senderId === conv.id) {
+            // Mensaje del interlocutor activo: mostrar directamente
             setMessages((prev) => {
-              // Evitar duplicados por si el mensaje ya está en la lista
               if (prev.some((m) => m.id === payload.new.id)) return prev
               return [...prev, payload.new]
             })
+            // Marcar como leído inmediatamente (ya está viendo esta conv)
+            supabase.from('messages')
+              .update({ read_at: new Date().toISOString() })
+              .eq('id', payload.new.id)
+              .then()
+          } else {
+            // Mensaje de otra conversación: incrementar badge
+            setUnreadCounts((prev) => ({
+              ...prev,
+              [senderId]: (prev[senderId] ?? 0) + 1,
+            }))
           }
         }
       )
@@ -304,6 +367,12 @@ export default function ChatPage() {
                   </p>
                   <p className="text-xs text-warm-400 truncate">{subtitle}</p>
                 </div>
+                {/* Badge de mensajes no leídos */}
+                {!isActive && (unreadCounts[conv.id] ?? 0) > 0 && (
+                  <span className="shrink-0 min-w-[20px] h-5 bg-primary-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1.5">
+                    {unreadCounts[conv.id] > 9 ? '9+' : unreadCounts[conv.id]}
+                  </span>
+                )}
                 {isActive && <span className="w-2 h-2 rounded-full bg-primary-400 shrink-0" />}
               </button>
             )

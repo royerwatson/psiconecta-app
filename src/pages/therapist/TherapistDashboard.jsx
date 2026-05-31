@@ -60,11 +60,13 @@ export default function TherapistDashboard() {
         .gte('scheduled_at', today + 'T00:00:00')
         .lt('scheduled_at', today + 'T23:59:59')
 
-      const { count: patientsCount } = await supabase
+      // COUNT DISTINCT patient_id para no contar duplicados
+      const { data: patientsRaw } = await supabase
         .from('sessions')
-        .select('patient_id', { count: 'exact' })
+        .select('patient_id')
         .eq('therapist_id', user.id)
         .eq('status', 'completed')
+      const patientsCount = new Set((patientsRaw ?? []).map(r => r.patient_id)).size
 
       const { data: alertsData } = await supabase
         .from('ai_checkins')

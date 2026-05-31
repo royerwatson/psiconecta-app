@@ -5,7 +5,7 @@ import Avatar from '@/components/ui/Avatar'
 import toast from 'react-hot-toast'
 
 export default function AvatarUpload({ size = 'xl' }) {
-  const { user, profile, updateProfile } = useAuthStore()
+  const { user, profile, updateProfile, fetchProfile } = useAuthStore()
   const [uploading, setUploading] = useState(false)
   const inputRef = useRef(null)
 
@@ -48,8 +48,9 @@ export default function AvatarUpload({ size = 'xl' }) {
 
       if (updateError) throw updateError
 
-      // Actualizar store local
+      // Actualizar store local de forma inmediata y re-fetch completo
       updateProfile({ avatar_url: publicUrl })
+      fetchProfile(user).catch(() => {})   // sincronización completa en background
       toast.success('Foto actualizada')
     } catch (err) {
       console.error(err)
