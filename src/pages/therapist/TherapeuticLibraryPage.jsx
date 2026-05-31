@@ -10,11 +10,11 @@ import Avatar from '@/components/ui/Avatar'
 import Input from '@/components/ui/Input'
 import toast from 'react-hot-toast'
 import { cn } from '@/lib/utils'
-import { Timer, RefreshCw, Check, Search, Brain, Waves, Leaf, Focus2, Dumbbell, Smile, Wind, BookOpen } from 'lucide-react'
+import { Timer, RefreshCw, Check, Search, Brain, Waves, Leaf, Focus, Dumbbell, Smile, Wind, BookOpen } from 'lucide-react'
 
 // ── Mapa de iconos de categoría ───────────────────────────────────────────────
 const CAT_ICON_MAP = {
-  Brain, Waves, Leaf, Focus2, Dumbbell, Smile, Wind, BookOpen
+  Brain, Waves, Leaf, Focus, Dumbbell, Smile, Wind, BookOpen
 }
 function CatIcon({ name, ...props }) {
   const Icon = CAT_ICON_MAP[name]

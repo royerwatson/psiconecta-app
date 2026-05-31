@@ -15,15 +15,14 @@
  *     2. startPolling — consulta sessions.video_room_url hasta que el terapeuta cree la sala
  *     3. Al detectar URL válida: para el polling y llama a initCall
  *
- * Variables de entorno:
- *   VITE_DAILY_API_KEY — API Key de Daily.co (solo para crear salas desde el cliente;
- *                        en producción mover a Edge Function por seguridad)
+ * Variables de entorno requeridas:
+ *   VITE_SUPABASE_URL — para llamar a la Edge Function create-daily-room
+ *   (VITE_DAILY_API_KEY ya no se usa — la key está en Supabase Secrets)
  *
- * Conocido: max_participants=2 impide sesiones grupales a través de esta ruta.
- * Ver PENDIENTES.md para el plan de soporte a grupos.
+ * Sesiones grupales: pasar ?type=group&max=N en la URL para salas de más de 2 participantes.
  */
 import { useEffect, useRef, useState, useCallback } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import Button from '@/components/ui/Button'
@@ -32,6 +31,9 @@ import { XCircle, Video, Loader2, Mic, MicOff, VideoOff, PhoneOff } from 'lucide
 
 export default function VideoCall() {
   const { sessionId } = useParams()
+  const [searchParams] = useSearchParams()
+  const isGroup = searchParams.get('type') === 'group'
+  const groupMax = parseInt(searchParams.get('max') ?? '20', 10)
   const { user, role } = useAuthStore()
   const navigate = useNavigate()
   const [session, setSession]     = useState(null)
@@ -109,31 +111,28 @@ export default function VideoCall() {
 
   const createRoom = async (sessionData) => {
     try {
-      const response = await fetch('https://api.daily.co/v1/rooms', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_DAILY_API_KEY}`,
-        },
-        body: JSON.stringify({
-          name: `psiconecta-${sessionId.slice(0, 8)}-${Date.now()}`,
-          properties: {
-            exp: Math.floor(Date.now() / 1000) + 3600 * 2,
-            max_participants: 2,
-            enable_chat: false,
+      const { data: { session: authSession } } = await supabase.auth.getSession()
+      const token = authSession?.access_token
+      if (!token) throw new Error('No autenticado')
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-daily-room`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
           },
-        }),
-      })
-      const room = await response.json()
-      if (room.url) {
-        setRoomUrl(room.url)
-        await supabase.from('sessions').update({
-          video_room_url: room.url,
-          status: 'in_progress',
-        }).eq('id', sessionId)
-      } else {
-        toast.error('Error al crear la sala: ' + (room.error ?? 'respuesta inválida'))
-      }
+          body: JSON.stringify({
+            sessionId,
+            isGroup,
+            maxParticipants: isGroup ? groupMax : 2,
+          }),
+        }
+      )
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Error creando sala')
+      setRoomUrl(data.url)
     } catch (err) {
       toast.error('Error al crear la sala de video')
       console.error(err)

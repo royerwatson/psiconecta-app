@@ -20,7 +20,7 @@ export const CATEGORIES = [
   { id: 'tcc',         label: 'TCC',                 icon: 'Brain',    color: 'blue'   },
   { id: 'dbt',         label: 'DBT',                 icon: 'Waves',    color: 'teal'   },
   { id: 'act',         label: 'ACT',                 icon: 'Leaf',     color: 'green'  },
-  { id: 'mindfulness', label: 'Mindfulness',          icon: 'Focus2',   color: 'purple' },
+  { id: 'mindfulness', label: 'Mindfulness',          icon: 'Focus',    color: 'purple' },
   { id: 'activacion',  label: 'Activación conductual',icon: 'Dumbbell', color: 'amber'  },
   { id: 'emocional',   label: 'Regulación emocional', icon: 'Smile',    color: 'rose'   },
   { id: 'relajacion',  label: 'Relajación',           icon: 'Wind',     color: 'sky'    },

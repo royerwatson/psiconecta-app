@@ -150,7 +150,7 @@ export default function GroupSessions() {
             <div className="flex gap-2">
               {isJoined ? (
                 <Button size="sm" variant="calm" fullWidth
-                  onClick={() => navigate(`/video-call/${group.id}`)}>
+                  onClick={() => navigate(`/video-call/${group.id}?type=group&max=${group.max_participants ?? 20}`)}>
                   <Video size={15} strokeWidth={1.8} className="inline mr-1" />Unirse a la sesión
                 </Button>
               ) : (

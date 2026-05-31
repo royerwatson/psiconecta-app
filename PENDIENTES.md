@@ -1,126 +1,91 @@
 # PENDIENTES — Problemas conocidos y mejoras futuras
 
-Archivo generado automáticamente durante la revisión de código (2026-05-29).
-Lista de issues que requieren más contexto, infraestructura externa, o decisiones de producto para resolverse.
+Última actualización: 2026-05-31
 
 ---
 
-## 🔴 Críticos (afectan funcionalidad en producción)
+## Resueltos en este sprint
 
-### 1. `VITE_DAILY_API_KEY` expuesta en el cliente
-**Archivo:** `src/pages/shared/VideoCall.jsx` → función `createRoom`
-
-La sala de Daily.co se crea llamando directamente a `https://api.daily.co/v1/rooms` desde el navegador usando la API Key. Esto expone la clave en el bundle de producción (visible con DevTools).
-
-**Solución:** Crear una Supabase Edge Function `create-daily-room` que reciba el `sessionId`, cree la sala en Daily.co usando la API Key guardada como secret, y devuelva la URL. El cliente nunca ve la clave.
-
----
-
-### 2. Sesiones grupales llegan a `VideoCall` con `max_participants: 2`
-**Archivo:** `src/pages/shared/VideoCall.jsx` → `createRoom` (línea ~97)
-**Contexto:** `GroupSessions.jsx` redirige a `/video-call/${group.id}`, que usa el mismo componente.
-
-El endpoint de Daily.co recibe `max_participants: 2`, por lo que solo dos personas podrán unirse a una sala pensada para grupos.
-
-**Solución (opciones):**
-- Pasar un query param `?type=group` desde `GroupSessions` y ajustar `max_participants` según corresponda.
-- Crear una ruta y componente dedicado `/video-call/group/:groupId` con su propio `createRoom`.
-- Almacenar `is_group` en la sesión DB y leer ese campo en `VideoCall`.
+| # | Problema | Commit |
+|---|----------|--------|
+| 1 | API Key Daily.co expuesta en el cliente | `9ce9bb4` — Edge Function `create-daily-room` |
+| 2 | Sesiones grupales con `max_participants: 2` | `9ce9bb4` — query param `?type=group&max=N` |
+| 3 | `TherapistProfileView` inserción directa sin PayPal | `9ce9bb4` — ahora usa `<PayPalButton>` |
+| 4 | Conteo de pacientes incluye duplicados | `9ce9bb4` — `COUNT(DISTINCT)` via Set |
+| 5 | Imagen de avatar no se sincroniza | `9ce9bb4` — `fetchProfile()` post-upload |
+| 6 | Chat sin indicador de mensajes no leídos | `9ce9bb4` — `read_at` + badge + `mark_messages_read` |
 
 ---
 
-### 3. Edge Functions de PayPal no desplegadas
-**Funciones requeridas:**
-- `supabase/functions/create-paypal-order`
-- `supabase/functions/capture-paypal-order`
+## Pendientes de infraestructura (requieren acceso externo)
 
-Ambas deben existir en el proyecto Supabase y tener las variables de entorno:
-- `PAYPAL_CLIENT_ID`
-- `PAYPAL_CLIENT_SECRET`
-- `PAYPAL_BASE_URL` (`https://api-m.sandbox.paypal.com` o producción)
+### 1. Ejecutar migración SQL en Supabase
+**Archivo:** `sql/014_messages_read_at.sql`
 
-Mientras no estén desplegadas, el flujo de pago fallará con un error 404.
+Agregar `read_at` a `messages` y crear la RPC `mark_messages_read`.
 
-**Verificar con:** `supabase functions list`
-
----
-
-### 4. Edge Function `notify-new-message` no desplegada
-**Archivo:** `src/pages/shared/ChatPage.jsx` → `sendMessage`
-
-La notificación por email al destinatario de un mensaje llama a `/functions/v1/notify-new-message`. El error es silenciado (`catch(() => {})`) así que el chat funciona, pero los usuarios no reciben emails de nuevos mensajes.
-
-**Solución:** Implementar y desplegar la función, o integrar con Resend/SendGrid desde un trigger de BD (más robusto).
-
----
-
-## 🟡 Importantes (UX degradada)
-
-### 5. Estado "En línea" hardcodeado en el chat
-**Archivo:** `src/pages/shared/ChatPage.jsx` → línea ~294
-
-El indicador verde siempre muestra "Sesión activa" independientemente de si el interlocutor está conectado. No existe un sistema de presencia real.
-
-**Solución:** Implementar Supabase Presence con el canal de Realtime, o simplemente eliminar el indicador para no desinformar al usuario.
-
----
-
-### 6. `TherapistProfileView.jsx` inserta sesiones saltando PayPal
-**Archivo:** `src/pages/patient/TherapistProfileView.jsx`
-
-Cuando el paciente reserva desde la vista de perfil del terapeuta, la sesión se inserta directamente en la tabla `sessions` con status `'scheduled'` sin pasar por el flujo PayPal. Esto es inconsistente con `FindTherapist.jsx` que sí usa `PayPalButton`.
-
-**Decisión de producto necesaria:**
-- ¿La reserva desde el perfil también debe pasar por pago?
-- Si sí: reemplazar el `supabase.from('sessions').insert(...)` directo por el componente `<PayPalButton>` igual que en `FindTherapist`.
-- Si no: documentar que este flujo es gratuito/por invitación del terapeuta.
-
----
-
-### 7. Conteo de pacientes incluye duplicados
-**Archivo:** `src/pages/therapist/TherapistDashboard.jsx` → consulta `patientsCount`
-
-```js
-const { count: patientsCount } = await supabase
-  .from('sessions')
-  .select('patient_id', { count: 'exact' })
-  .eq('therapist_id', user.id)
-  .eq('status', 'completed')
+```bash
+supabase db push
+# o en el dashboard: SQL Editor → ejecutar 014_messages_read_at.sql
 ```
 
-`COUNT` sin `DISTINCT` cuenta filas, no pacientes únicos. Un paciente con 5 sesiones completadas suma 5.
+---
 
-**Solución:** Usar una RPC/función de Postgres con `COUNT(DISTINCT patient_id)`, o hacer el conteo en el cliente con un `Set`.
+### 2. Variables de entorno de producción
+Configurar en Supabase Dashboard → Edge Functions → Secrets:
+
+| Variable | Descripción |
+|----------|-------------|
+| `DAILY_API_KEY` | API Key de Daily.co (ya no se usa en el cliente) |
+| `PAYPAL_CLIENT_ID` | Client ID de PayPal |
+| `PAYPAL_CLIENT_SECRET` | Secret de PayPal |
+| `PAYPAL_BASE_URL` | `https://api-m.sandbox.paypal.com` (sandbox) o producción |
+| `RESEND_API_KEY` | Para envío de emails (notify-new-message, etc.) |
+| `ANTHROPIC_API_KEY` | Para la Edge Function ai-checkin |
+
+Y en el `.env` del frontend:
+```
+VITE_SUPABASE_URL=...
+VITE_SUPABASE_ANON_KEY=...
+VITE_PAYPAL_CLIENT_ID=...
+# VITE_DAILY_API_KEY ya no es necesaria (movida a Edge Function)
+```
 
 ---
 
-## 🟢 Mejoras de producto (baja urgencia)
-
-### 8. Chat: no hay indicación de "mensajes no leídos"
-No existe un campo `read_at` o `is_read` en la tabla `messages`. No se puede mostrar el badge de mensajes sin leer en el sidebar ni en el layout.
-
-**Sugerencia:** Agregar columna `read_at TIMESTAMPTZ` a `messages` y actualizar al abrir la conversación.
-
----
-
-### 9. VideoCall: sin reconexión automática si se corta la red
-Si el usuario pierde conectividad brevemente, el iframe de Daily.co muestra error pero no hay lógica para reconectar o reiniciar el frame.
-
-**Sugerencia:** Escuchar el evento `network-quality-change` de Daily.co y mostrar un banner de advertencia con opción de "Reconectar".
+### 3. Desplegar Edge Functions pendientes
+```bash
+supabase functions deploy create-daily-room
+supabase functions deploy create-paypal-order
+supabase functions deploy capture-paypal-order
+supabase functions deploy notify-new-message
+supabase functions deploy ai-checkin
+```
 
 ---
 
-### 10. Sin paginación en la lista de mensajes
-`fetchMessages` limita a 100 mensajes. Conversaciones largas perderán el historial.
-
-**Sugerencia:** Cargar más mensajes al hacer scroll hacia arriba (infinite scroll inverso) usando `.range()` de Supabase.
+### 4. Instalar dependencias npm
+```bash
+npm install
+# Instalará lucide-react ^0.469.0 (recién agregado al package.json)
+```
 
 ---
 
-### 11. Imagen de avatar no se actualiza tras cambio en perfil
-`useAuthStore.updateProfile()` actualiza el estado local, pero si el usuario sube un nuevo avatar, otros componentes que leen `profile.avatar_url` del store puede que no reflejen el cambio hasta recargar la página.
+## Mejoras de producto (baja urgencia)
 
-**Sugerencia:** Después de subir el avatar, llamar a `fetchProfile(user)` para sincronizar el store completo con la BD.
+### 5. VideoCall: sin reconexión automática si se corta la red
+Escuchar `network-quality-change` de Daily.co y mostrar banner con opción "Reconectar".
+
+---
+
+### 6. Sin paginación en la lista de mensajes
+`fetchMessages` limita a 100 mensajes. Para conversaciones largas, implementar scroll infinito inverso con `.range()` de Supabase.
+
+---
+
+### 7. Estado "En línea" hardcodeado en el chat
+El indicador verde siempre muestra "Sesión activa". Implementar Supabase Presence o simplemente eliminar el indicador.
 
 ---
 

@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils'
 import Button from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
-import { Flower2, Heart, Brain, Sprout, Users, Sparkles, BookOpen, Lock, MessageCircle, Pen, Trash2 } from 'lucide-react'
+import { Sun, Heart, Brain, Sprout, Users, Sparkles, BookOpen, Lock, MessageCircle, Pen, Trash2 } from 'lucide-react'
 
 // ─── Prompts terapéuticos ─────────────────────────────────────────────────────
 
@@ -26,7 +26,7 @@ const PROMPT_CATEGORIES = [
   {
     id: 'gratitud',
     label: 'Gratitud',
-    Icon: Flower2,
+    Icon: Sun,
     color: 'bg-pink-50 text-pink-700 border-pink-100',
     prompts: [
       '¿Qué tres cosas pequeñas de hoy agradezco y por qué?',
