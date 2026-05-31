@@ -28,23 +28,70 @@ export default function TherapistProfile() {
     specialty: therapist?.specialty ?? SPECIALTIES[0],
     price:     therapist?.price_per_session ?? 0,
   })
-  const [saving, setSaving] = useState(false)
+  const [saving, setSaving]         = useState(false)
   const [uploadingDoc, setUploadingDoc] = useState(false)
-  const [stats, setStats] = useState({ sessions: 0, patients: 0 })
+  const [stats, setStats]           = useState({ sessions: 0, patients: 0, totalEarned: 0 })
+
+  // ── Datos de pago ──────────────────────────────────────────────────────────
+  const [editingPayment, setEditingPayment] = useState(false)
+  const [paymentForm, setPaymentForm] = useState({
+    payment_method:      therapist?.payment_method      ?? 'bank_transfer',
+    paypal_email:        therapist?.paypal_email         ?? '',
+    bank_name:           therapist?.bank_name            ?? '',
+    bank_account_name:   therapist?.bank_account_name   ?? '',
+    bank_account_number: therapist?.bank_account_number ?? '',
+    bank_routing:        therapist?.bank_routing         ?? '',
+  })
+  const [savingPayment, setSavingPayment] = useState(false)
+  const [payouts, setPayouts]             = useState([])
+  const [loadingPayouts, setLoadingPayouts] = useState(false)
 
   useEffect(() => {
-    if (user) fetchStats()
+    if (user) { fetchStats(); fetchPayouts() }
   }, [user])
 
   const fetchStats = async () => {
     const { data } = await supabase
       .from('sessions')
-      .select('id, patient_id, status')
+      .select('id, patient_id, status, price')
       .eq('therapist_id', user.id)
     if (!data) return
-    const completed  = data.filter(s => s.status === 'completed').length
-    const patients   = new Set(data.map(s => s.patient_id)).size
-    setStats({ sessions: completed, patients })
+    const completed    = data.filter(s => s.status === 'completed')
+    const patients     = new Set(data.map(s => s.patient_id)).size
+    const totalEarned  = completed.reduce((a, s) => a + (s.price ?? 0), 0)
+    setStats({ sessions: completed.length, patients, totalEarned })
+  }
+
+  const fetchPayouts = async () => {
+    setLoadingPayouts(true)
+    const { data } = await supabase
+      .from('payouts')
+      .select('id, amount, currency, status, payment_method, reference, paid_at, period_start, period_end, created_at')
+      .eq('therapist_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(10)
+    setPayouts(data ?? [])
+    setLoadingPayouts(false)
+  }
+
+  const savePaymentInfo = async () => {
+    setSavingPayment(true)
+    const { error } = await supabase
+      .from('therapist_profiles')
+      .update({
+        payment_method:      paymentForm.payment_method,
+        paypal_email:        paymentForm.paypal_email || null,
+        bank_name:           paymentForm.bank_name || null,
+        bank_account_name:   paymentForm.bank_account_name || null,
+        bank_account_number: paymentForm.bank_account_number || null,
+        bank_routing:        paymentForm.bank_routing || null,
+      })
+      .eq('user_id', user.id)
+
+    if (error) { toast.error('Error al guardar datos de pago'); setSavingPayment(false); return }
+    toast.success('Datos de pago actualizados')
+    setEditingPayment(false)
+    setSavingPayment(false)
   }
 
   const handleChange = (e) => setForm(f => ({ ...f, [e.target.name]: e.target.value }))
@@ -121,14 +168,18 @@ export default function TherapistProfile() {
         </div>
 
         {/* Stats rápidas */}
-        <div className="grid grid-cols-2 gap-3 mt-4 pt-4 border-t border-warm-100">
+        <div className="grid grid-cols-3 gap-3 mt-4 pt-4 border-t border-warm-100">
           <div className="bg-primary-50 rounded-xl p-3 text-center">
             <p className="text-2xl font-bold text-primary-600">{stats.sessions}</p>
-            <p className="text-xs text-primary-500 mt-0.5">Sesiones completadas</p>
+            <p className="text-xs text-primary-500 mt-0.5">Sesiones</p>
           </div>
           <div className="bg-calm-50 rounded-xl p-3 text-center">
             <p className="text-2xl font-bold text-calm-600">{stats.patients}</p>
-            <p className="text-xs text-calm-500 mt-0.5">Pacientes atendidos</p>
+            <p className="text-xs text-calm-500 mt-0.5">Pacientes</p>
+          </div>
+          <div className="bg-emerald-50 rounded-xl p-3 text-center">
+            <p className="text-lg font-bold text-emerald-600">{formatPrice(stats.totalEarned)}</p>
+            <p className="text-xs text-emerald-500 mt-0.5">Generado</p>
           </div>
         </div>
       </Card>
@@ -191,6 +242,173 @@ export default function TherapistProfile() {
             </label>
           )}
         </div>
+      </Card>
+
+      {/* ── Datos de pago ── */}
+      <Card>
+        <div className="flex items-center justify-between mb-4">
+          <CardHeader className="mb-0 pb-0">
+            <CardTitle>💳 Datos de pago</CardTitle>
+          </CardHeader>
+          <Button size="sm" variant={editingPayment ? 'outline' : 'secondary'}
+            onClick={() => setEditingPayment(!editingPayment)}>
+            {editingPayment ? 'Cancelar' : '✏️ Editar'}
+          </Button>
+        </div>
+
+        {editingPayment ? (
+          <div className="flex flex-col gap-4">
+            {/* Método preferido */}
+            <div>
+              <label className="block text-xs font-medium text-warm-600 mb-2">
+                Método de pago preferido
+              </label>
+              <div className="flex gap-2">
+                {[
+                  { value: 'bank_transfer', label: '🏦 Cuenta bancaria' },
+                  { value: 'paypal',        label: '💙 PayPal'          },
+                ].map(m => (
+                  <button key={m.value}
+                    onClick={() => setPaymentForm(f => ({ ...f, payment_method: m.value }))}
+                    className={`flex-1 py-2.5 rounded-xl text-sm font-medium border transition-all ${
+                      paymentForm.payment_method === m.value
+                        ? 'bg-primary-600 text-white border-primary-600'
+                        : 'bg-white text-warm-600 border-warm-200 hover:border-warm-300'
+                    }`}>
+                    {m.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Campos según método */}
+            {paymentForm.payment_method === 'bank_transfer' ? (
+              <>
+                <Input label="Nombre del banco" placeholder="Ej: Banco Popular, Scotiabank..."
+                  value={paymentForm.bank_name}
+                  onChange={e => setPaymentForm(f => ({ ...f, bank_name: e.target.value }))} />
+                <Input label="Nombre del titular de la cuenta"
+                  placeholder="Como aparece en el banco"
+                  value={paymentForm.bank_account_name}
+                  onChange={e => setPaymentForm(f => ({ ...f, bank_account_name: e.target.value }))} />
+                <Input label="Número de cuenta / IBAN"
+                  placeholder="Número completo de la cuenta"
+                  value={paymentForm.bank_account_number}
+                  onChange={e => setPaymentForm(f => ({ ...f, bank_account_number: e.target.value }))} />
+                <Input label="Routing / SWIFT / CLABE (opcional)"
+                  placeholder="Código de ruta bancaria"
+                  value={paymentForm.bank_routing}
+                  onChange={e => setPaymentForm(f => ({ ...f, bank_routing: e.target.value }))} />
+              </>
+            ) : (
+              <Input label="Email de tu cuenta PayPal"
+                type="email" placeholder="tu@correo.com"
+                value={paymentForm.paypal_email}
+                onChange={e => setPaymentForm(f => ({ ...f, paypal_email: e.target.value }))} />
+            )}
+
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-700">
+              🔒 Tus datos bancarios son confidenciales y solo los utiliza Psiconecta para procesar tus pagos.
+            </div>
+
+            <Button onClick={savePaymentInfo} loading={savingPayment} fullWidth>
+              Guardar datos de pago
+            </Button>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {therapist?.payment_method === 'paypal' ? (
+              <div className="bg-blue-50 rounded-xl p-3">
+                <p className="text-xs text-blue-400 font-medium mb-1">💙 PayPal</p>
+                <p className="text-sm font-medium text-blue-800">
+                  {therapist?.paypal_email ?? (
+                    <span className="text-warm-400 italic">No configurado</span>
+                  )}
+                </p>
+              </div>
+            ) : (
+              <div className="bg-warm-50 rounded-xl p-3 space-y-1.5">
+                <p className="text-xs text-warm-400 font-medium mb-1">🏦 Cuenta bancaria</p>
+                {therapist?.bank_name && (
+                  <InfoRow label="Banco" value={therapist.bank_name} />
+                )}
+                {therapist?.bank_account_name && (
+                  <InfoRow label="Titular" value={therapist.bank_account_name} />
+                )}
+                {therapist?.bank_account_number ? (
+                  <InfoRow label="Cuenta"
+                    value={`••••${therapist.bank_account_number.slice(-4)}`} />
+                ) : (
+                  <p className="text-sm text-warm-400 italic">
+                    No has configurado tus datos bancarios aún
+                  </p>
+                )}
+                {therapist?.bank_routing && (
+                  <InfoRow label="Routing/SWIFT" value={therapist.bank_routing} />
+                )}
+              </div>
+            )}
+
+            {!therapist?.bank_account_number && !therapist?.paypal_email && (
+              <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-sm text-amber-700">
+                ⚠️ Agrega tus datos de pago para recibir tus ganancias
+              </div>
+            )}
+          </div>
+        )}
+      </Card>
+
+      {/* ── Historial de pagos recibidos ── */}
+      <Card>
+        <CardHeader><CardTitle>💰 Mis pagos recibidos</CardTitle></CardHeader>
+        {loadingPayouts ? (
+          <div className="space-y-2">
+            {[1,2].map(i => (
+              <div key={i} className="h-14 bg-warm-100 rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : payouts.length === 0 ? (
+          <div className="text-center py-8 text-warm-400">
+            <div className="text-3xl mb-2">💸</div>
+            <p className="text-sm">Aquí aparecerán tus liquidaciones cuando el admin las procese</p>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            {payouts.map(p => {
+              const statusConfig = {
+                pending:    { label: 'Pendiente',  color: 'bg-warm-100 text-warm-500'       },
+                processing: { label: 'Procesando', color: 'bg-blue-100 text-blue-600'       },
+                completed:  { label: 'Recibido',   color: 'bg-emerald-100 text-emerald-700' },
+                failed:     { label: 'Fallido',    color: 'bg-red-100 text-red-600'         },
+              }[p.status] ?? { label: p.status, color: 'bg-warm-100 text-warm-500' }
+              return (
+                <div key={p.id} className="flex items-center gap-3 bg-warm-50 rounded-xl p-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-bold text-warm-900">
+                        {formatPrice(p.amount)}
+                      </p>
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${statusConfig.color}`}>
+                        {statusConfig.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-warm-400 mt-0.5">
+                      {p.period_start
+                        ? `${new Date(p.period_start).toLocaleDateString('es-DO', { day:'2-digit', month:'short' })} — ${new Date(p.period_end).toLocaleDateString('es-DO', { day:'2-digit', month:'short', year:'numeric' })}`
+                        : new Date(p.created_at).toLocaleDateString('es-DO', { day:'2-digit', month:'short', year:'numeric' })}
+                    </p>
+                    {p.reference && (
+                      <p className="text-xs text-emerald-600 mt-0.5">Ref: {p.reference}</p>
+                    )}
+                  </div>
+                  <p className="text-xs text-warm-300 shrink-0">
+                    {p.payment_method === 'paypal' ? '💙' : '🏦'}
+                  </p>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </Card>
     </div>
   )
