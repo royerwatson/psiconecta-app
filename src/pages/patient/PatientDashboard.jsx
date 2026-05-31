@@ -14,6 +14,7 @@ import PendingTestsSection from '@/components/psychometrics/PendingTestsSection'
 import StarRating from '@/components/ui/StarRating'
 import { Textarea } from '@/components/ui/Input'
 import toast from 'react-hot-toast'
+import { Play, ChevronRight, Flame, Zap, Sparkles, ClipboardList, Calendar, MessageCircle, Search } from 'lucide-react'
 
 /**
  * Dashboard principal del paciente.
@@ -143,19 +144,27 @@ export default function PatientDashboard() {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
-      {/* Bienvenida */}
-      <div className="flex items-start justify-between">
+      {/* ── Bienvenida ── */}
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">
-            {getGreeting()}, {profile?.full_name?.split(' ')[0]} 🌟
+          <p className="text-xs font-semibold text-warm-400 uppercase tracking-widest mb-1">
+            {getGreeting()}
+          </p>
+          <h1 className="text-2xl font-bold text-warm-900 tracking-tight leading-tight">
+            {profile?.full_name?.split(' ')[0]}
           </h1>
-          <p className="text-warm-500 text-sm mt-1">¿Cómo te sientes hoy?</p>
+          <p className="text-warm-400 text-sm mt-1">¿Cómo te sientes hoy?</p>
         </div>
         {streak > 0 && (
-          <div className="flex flex-col items-center bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl px-3 py-2 min-w-[64px]">
-            <span className="text-2xl leading-none">{streak >= 7 ? '🔥' : streak >= 3 ? '⚡' : '✨'}</span>
-            <span className="text-lg font-bold text-amber-600 leading-tight">{streak}</span>
-            <span className="text-[10px] text-amber-500 font-medium">{streak === 1 ? 'día' : 'días'}</span>
+          <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100 rounded-2xl px-3 py-2.5 min-w-[60px] shrink-0">
+            {streak >= 7
+              ? <Flame size={22} className="text-orange-500" strokeWidth={2} />
+              : streak >= 3
+              ? <Zap size={22} className="text-amber-500" strokeWidth={2} />
+              : <Sparkles size={22} className="text-amber-400" strokeWidth={2} />
+            }
+            <span className="text-lg font-bold text-orange-600 leading-tight mt-0.5">{streak}</span>
+            <span className="text-[10px] text-orange-400 font-semibold">{streak === 1 ? 'día' : 'días'}</span>
           </div>
         )}
       </div>
@@ -207,35 +216,69 @@ export default function PatientDashboard() {
       {/* Check-in diario */}
       <AICheckin userId={user?.id} />
 
-      {/* Próxima cita */}
+      {/* ── Próxima sesión ── */}
       {loading ? (
-        <Skeleton className="h-28" />
+        <Skeleton className="h-32" />
       ) : nextSession ? (
-        <div className="bg-gradient-to-r from-primary-600 to-calm-500 rounded-2xl p-5 text-white">
-          <p className="text-sm font-medium opacity-80 mb-2">Tu próxima sesión</p>
-          <div className="flex items-center gap-3">
-            <Avatar name={nextSession.therapist?.full_name ?? ''} size="md"
-              className="ring-2 ring-white/30" />
-            <div className="flex-1">
-              <p className="font-semibold">{nextSession.therapist?.full_name}</p>
-              <p className="text-sm opacity-80">{nextSession.therapist?.therapist_profiles?.[0]?.specialty}</p>
-              <p className="text-sm font-medium mt-0.5">{formatSessionDate(nextSession.scheduled_at)}</p>
+        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-accent-700 p-5 text-white shadow-float">
+          {/* Círculos decorativos */}
+          <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-white/10" />
+          <div className="absolute -bottom-10 -left-6 w-28 h-28 rounded-full bg-accent-500/20" />
+          <div className="absolute top-4 right-16 w-12 h-12 rounded-full bg-white/5" />
+
+          <p className="text-xs font-semibold uppercase tracking-widest text-white/60 mb-3 relative">
+            Tu próxima sesión
+          </p>
+
+          <div className="flex items-center gap-3 relative">
+            <div className="relative shrink-0">
+              <Avatar name={nextSession.therapist?.full_name ?? ''} size="md"
+                className="ring-2 ring-white/30" />
+              <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-primary-700" />
             </div>
-            {canStartVideo(nextSession.scheduled_at) && (
-              <Button size="sm" className="bg-white text-primary-700 hover:bg-white/90 border-0 shadow-none"
-                onClick={() => navigate(`/video-call/${nextSession.id}`)}>
-                📹 Unirse
-              </Button>
+
+            <div className="flex-1 min-w-0">
+              <p className="font-bold text-base leading-tight">
+                {nextSession.therapist?.full_name}
+              </p>
+              <p className="text-xs text-white/70 mt-0.5">
+                {nextSession.therapist?.therapist_profiles?.[0]?.specialty}
+              </p>
+              <p className="text-sm font-semibold text-white/90 mt-1.5">
+                {formatSessionDate(nextSession.scheduled_at)}
+              </p>
+            </div>
+
+            {canStartVideo(nextSession.scheduled_at) ? (
+              <button
+                onClick={() => navigate(`/video-call/${nextSession.id}`)}
+                className="shrink-0 flex items-center justify-center w-12 h-12 rounded-2xl bg-white text-primary-700 hover:bg-white/90 active:scale-95 transition-all shadow-lg"
+                title="Unirse a la sesión"
+              >
+                <Play size={20} strokeWidth={2.5} fill="currentColor" />
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate('/patient/appointments')}
+                className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-white/15 hover:bg-white/25 text-white text-xs font-semibold transition-all"
+              >
+                Ver cita
+                <ChevronRight size={13} />
+              </button>
             )}
           </div>
         </div>
       ) : (
-        <Card className="text-center py-6 border-dashed border-2 border-warm-200">
-          <p className="text-warm-500 text-sm mb-3">No tienes sesiones programadas</p>
+        <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-warm-200 bg-white p-6 text-center">
+          <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+            <Calendar size={22} className="text-primary-500" />
+          </div>
+          <p className="font-semibold text-warm-700 mb-1">Sin sesiones próximas</p>
+          <p className="text-sm text-warm-400 mb-4">Encuentra un terapeuta y agenda tu primera sesión</p>
           <Button size="sm" onClick={() => navigate('/patient/find')}>
             Buscar terapeuta
           </Button>
-        </Card>
+        </div>
       )}
 
       {/* Mood tracker */}
@@ -315,20 +358,22 @@ export default function PatientDashboard() {
         </div>
       )}
 
-      {/* Accesos rápidos */}
+      {/* ── Accesos rápidos ── */}
       <div>
-        <h2 className="font-serif text-lg font-semibold text-warm-900 mb-3">¿Qué necesitas hoy?</h2>
+        <h2 className="text-base font-bold text-warm-900 mb-3">¿Qué necesitas hoy?</h2>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { icon: '🔍', label: 'Buscar terapeuta', to: '/patient/find',         color: 'from-primary-50 to-primary-100/50' },
-            { icon: '📅', label: 'Mis citas',         to: '/patient/appointments', color: 'from-calm-50 to-calm-100/50'     },
-            { icon: '📋', label: 'Mis tareas',         to: '/patient/tasks',        color: 'from-amber-50 to-amber-100/50'   },
-            { icon: '💬', label: 'Mensajes',           to: '/patient/chat',         color: 'from-violet-50 to-violet-100/50' },
-          ].map(({ icon, label, to, color }) => (
+            { icon: Search,         label: 'Buscar terapeuta', to: '/patient/find',         bg: 'bg-primary-600',  light: 'bg-primary-50 text-primary-600' },
+            { icon: Calendar,       label: 'Mis citas',         to: '/patient/appointments', bg: 'bg-accent-600',   light: 'bg-accent-50 text-accent-600'   },
+            { icon: ClipboardList,  label: 'Mis tareas',         to: '/patient/tasks',        bg: 'bg-orange-500',   light: 'bg-orange-50 text-orange-600'   },
+            { icon: MessageCircle,  label: 'Mensajes',           to: '/patient/chat',         bg: 'bg-green-600',    light: 'bg-green-50 text-green-600'     },
+          ].map(({ icon: Icon, label, to, light }) => (
             <button key={to} onClick={() => navigate(to)}
-              className={`bg-gradient-to-br ${color} border border-warm-100 rounded-2xl p-4 flex flex-col items-center gap-2 hover:shadow-calm transition-all active:scale-95`}>
-              <span className="text-2xl">{icon}</span>
-              <span className="text-sm font-medium text-warm-700">{label}</span>
+              className="bg-white border border-warm-100 rounded-2xl p-4 flex items-center gap-3 hover:shadow-card hover:border-warm-200 active:scale-[0.97] transition-all text-left">
+              <span className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${light}`}>
+                <Icon size={18} strokeWidth={2} />
+              </span>
+              <span className="text-sm font-semibold text-warm-800 leading-tight">{label}</span>
             </button>
           ))}
         </div>
