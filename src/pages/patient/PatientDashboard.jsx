@@ -252,10 +252,10 @@ export default function PatientDashboard() {
             {canStartVideo(nextSession.scheduled_at) ? (
               <button
                 onClick={() => navigate(`/video-call/${nextSession.id}`)}
-                className="shrink-0 flex items-center justify-center w-12 h-12 rounded-2xl bg-white text-primary-700 hover:bg-white/90 active:scale-95 transition-all shadow-lg"
+                className="shrink-0 flex items-center justify-center w-12 h-12 rounded-2xl bg-white hover:bg-white/90 active:scale-95 transition-all shadow-lg"
                 title="Unirse a la sesión"
               >
-                <Play size={20} strokeWidth={2.5} fill="currentColor" />
+                <Play size={20} strokeWidth={0} fill="#4338ca" />
               </button>
             ) : (
               <button
