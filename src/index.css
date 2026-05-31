@@ -4,9 +4,10 @@
 
 @layer base {
   html {
-    font-family: 'Open Sans', system-ui, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
   body {
@@ -15,88 +16,114 @@
   }
 
   h1, h2, h3 {
-    font-family: 'Lora', Georgia, serif;
-    @apply text-warm-900;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    @apply font-bold text-warm-900;
+    letter-spacing: -0.02em;
   }
 
   /* Safe area para dispositivos iOS con notch */
   #root {
     padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
   }
 }
 
 @layer components {
   /* Scrollbar personalizado */
-  ::-webkit-scrollbar {
-    width: 4px;
-    height: 4px;
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { @apply bg-transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-warm-200 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-warm-300; }
+  .scrollbar-none::-webkit-scrollbar { display: none; }
+  .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* Cards */
+  .card {
+    @apply bg-white rounded-2xl shadow-card border border-warm-100/60 p-5;
   }
-  ::-webkit-scrollbar-track {
-    @apply bg-warm-100;
-  }
-  ::-webkit-scrollbar-thumb {
-    @apply bg-primary-200 rounded-full;
-  }
-  ::-webkit-scrollbar-thumb:hover {
-    @apply bg-primary-300;
+
+  /* Glass card */
+  .card-glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    @apply rounded-2xl border border-white/50 shadow-card;
   }
 
   /* Gradiente de fondo suave — marca Psiconecta */
   .bg-psiconecta {
-    background: linear-gradient(135deg, #eff6ff 0%, #f0f9ff 50%, #f8fafc 100%);
-  }
-
-  /* Card con sombra calma */
-  .card {
-    @apply bg-white rounded-2xl shadow-card p-6;
-  }
-
-  /* Animación de entrada estándar */
-  .animate-enter {
-    @apply animate-fade-in;
-  }
-
-  /* Estado de carga */
-  .skeleton {
-    @apply bg-warm-200 animate-pulse rounded-xl;
-  }
-
-  /* Línea separadora suave */
-  .divider {
-    @apply border-t border-warm-100 my-4;
+    background: linear-gradient(145deg, #eef2ff 0%, #faf5ff 50%, #f8fafc 100%);
   }
 
   /* Badge de estado */
   .status-badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold;
+  }
+
+  /* Divider */
+  .divider { @apply border-t border-warm-100 my-4; }
+
+  /* Input base */
+  .input-base {
+    @apply w-full px-3.5 py-2.5 text-sm rounded-xl border border-warm-200
+           bg-white text-warm-800 placeholder-warm-300
+           focus:outline-none focus:ring-2 focus:ring-primary-400/30 focus:border-primary-400
+           transition-all duration-200;
+  }
+
+  /* Botón primario */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl
+           bg-primary-600 text-white text-sm font-semibold
+           hover:bg-primary-700 active:scale-[0.97]
+           shadow-calm transition-all duration-200;
+  }
+
+  /* Tab pill */
+  .tab-pill {
+    @apply absolute inset-y-1 rounded-lg bg-primary-600
+           transition-all duration-300 ease-spring;
   }
 }
 
 @layer utilities {
-  /* Texto gradiente azul */
-  .text-gradient {
-    @apply bg-gradient-to-r from-primary-700 to-calm-500 bg-clip-text text-transparent;
+  /* Texto gradiente */
+  .text-gradient-brand {
+    @apply bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent;
+  }
+  .text-gradient-warm {
+    @apply bg-gradient-to-r from-orange-500 to-orange-400 bg-clip-text text-transparent;
   }
 
   /* Sombra de botón */
-  .btn-shadow {
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-  }
+  .btn-shadow { box-shadow: 0 4px 14px rgba(79, 70, 229, 0.30); }
+  .btn-shadow-orange { box-shadow: 0 4px 14px rgba(249, 115, 22, 0.30); }
 
-  /* Animaciones escalonadas para listas de cards */
-  .stagger-children > * {
-    animation: fadeSlideUp 0.35s ease-out both;
-  }
-  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-  .stagger-children > *:nth-child(2) { animation-delay: 60ms; }
-  .stagger-children > *:nth-child(3) { animation-delay: 120ms; }
-  .stagger-children > *:nth-child(4) { animation-delay: 180ms; }
-  .stagger-children > *:nth-child(5) { animation-delay: 240ms; }
-  .stagger-children > *:nth-child(n+6) { animation-delay: 300ms; }
+  /* Animaciones escalonadas */
+  .stagger > * { animation: fadeSlideUp 0.3s ease-out both; }
+  .stagger > *:nth-child(1) { animation-delay: 0ms; }
+  .stagger > *:nth-child(2) { animation-delay: 50ms; }
+  .stagger > *:nth-child(3) { animation-delay: 100ms; }
+  .stagger > *:nth-child(4) { animation-delay: 150ms; }
+  .stagger > *:nth-child(5) { animation-delay: 200ms; }
+  .stagger > *:nth-child(n+6) { animation-delay: 250ms; }
 
   @keyframes fadeSlideUp {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Círculos decorativos para cards gradiente */
+  .deco-circle {
+    @apply absolute rounded-full pointer-events-none;
+  }
+
+  /* Noise texture overlay */
+  .noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
   }
 }

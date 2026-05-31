@@ -7,55 +7,138 @@ import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import OnboardingSlides from '@/components/onboarding/OnboardingSlides'
 import NotificationBell from '@/components/ui/NotificationBell'
+import {
+  Home, Calendar, MessageCircle, User, Search,
+  Users, ClipboardList, BookOpen, Clock, Heart,
+  LayoutDashboard, TestTube, Shield, Library,
+  BookMarked, Stethoscope, FolderOpen, MoreHorizontal,
+  X, Zap, Bell, ChevronRight, LogOut,
+} from 'lucide-react'
 
-// ─── Navegación ───────────────────────────────────────────────────────────────
+// ─── Navegación ────────────────────────────────────────────────────────────────
 
-const therapistNav = [
-  { to: '/therapist/dashboard', icon: '🏠', label: 'Inicio'     },
-  { to: '/therapist/schedule',  icon: '📅', label: 'Agenda'     },
-  { to: '/therapist/patients',  icon: '👥', label: 'Pacientes'  },
-  { to: '/therapist/tests',     icon: '🧪', label: 'Tests'      },
-  { to: '/therapist/dsm',       icon: '📖', label: 'DSM-5-TR'   },
-  { to: '/therapist/cie',       icon: '🏥', label: 'CIE-11'     },
-  { to: '/therapist/scales',      icon: '🧮', label: 'Escalas'    },
-  { to: '/therapist/safety-plan', icon: '🛡️', label: 'Plan Crisis' },
-  { to: '/therapist/library',     icon: '📚', label: 'Biblioteca'  },
-  { to: '/therapist/peers',       icon: '👨‍⚕️', label: 'Colegas'    },
-  { to: '/therapist/protocols',   icon: '🗂️', label: 'Protocolos' },
-  { to: '/therapist/chat',        icon: '💬', label: 'Mensajes'   },
-  { to: '/therapist/profile',   icon: '⚙️', label: 'Perfil'     },
+const THERAPIST_PRIMARY = [
+  { to: '/therapist/dashboard', icon: Home,          label: 'Inicio'    },
+  { to: '/therapist/schedule',  icon: Calendar,      label: 'Agenda'    },
+  { to: '/therapist/patients',  icon: Users,         label: 'Pacientes' },
+  { to: '/therapist/chat',      icon: MessageCircle, label: 'Mensajes', badge: 'chat' },
+  { to: '/therapist/profile',   icon: User,          label: 'Perfil'    },
+]
+const THERAPIST_SECONDARY = [
+  { to: '/therapist/tests',       icon: TestTube,        label: 'Tests'       },
+  { to: '/therapist/dsm',         icon: BookOpen,        label: 'DSM-5-TR'    },
+  { to: '/therapist/cie',         icon: BookMarked,      label: 'CIE-11'      },
+  { to: '/therapist/scales',      icon: LayoutDashboard, label: 'Escalas'     },
+  { to: '/therapist/safety-plan', icon: Shield,          label: 'Plan Crisis' },
+  { to: '/therapist/library',     icon: Library,         label: 'Biblioteca'  },
+  { to: '/therapist/peers',       icon: Stethoscope,     label: 'Colegas'     },
+  { to: '/therapist/protocols',   icon: FolderOpen,      label: 'Protocolos'  },
 ]
 
-const patientNav = [
-  { to: '/patient/dashboard',    icon: '🏠', label: 'Inicio'     },
-  { to: '/patient/find',         icon: '🔍', label: 'Terapeutas' },
-  { to: '/patient/appointments', icon: '📅', label: 'Mis Citas'  },
-  { to: '/patient/tasks',        icon: '📋', label: 'Mis Tareas' },
-  { to: '/patient/journal',      icon: '📓', label: 'Diario'     },
-  { to: '/patient/sessions',     icon: '🗓️', label: 'Historial'  },
-  { to: '/patient/chat',         icon: '💬', label: 'Mensajes'   },
-  { to: '/patient/profile',      icon: '⚙️', label: 'Perfil'     },
+const PATIENT_PRIMARY = [
+  { to: '/patient/dashboard',    icon: Home,          label: 'Inicio'  },
+  { to: '/patient/find',         icon: Search,        label: 'Buscar'  },
+  { to: '/patient/appointments', icon: Calendar,      label: 'Citas'   },
+  { to: '/patient/chat',         icon: MessageCircle, label: 'Mensajes', badge: 'chat' },
+  { to: '/patient/profile',      icon: User,          label: 'Perfil'  },
+]
+const PATIENT_SECONDARY = [
+  { to: '/patient/tasks',    icon: ClipboardList, label: 'Mis Tareas' },
+  { to: '/patient/journal',  icon: BookOpen,      label: 'Diario'     },
+  { to: '/patient/sessions', icon: Clock,         label: 'Historial'  },
+  { to: '/patient/crisis',   icon: Heart,         label: 'Apoyo'      },
 ]
 
-// ─── Componente principal ─────────────────────────────────────────────────────
+// ─── Sidebar nav item ─────────────────────────────────────────────────────────
+
+function SideNavItem({ to, icon: Icon, label, unread = 0 }) {
+  return (
+    <NavLink to={to}
+      className={({ isActive }) => cn(
+        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+        isActive
+          ? 'bg-primary-600 text-white shadow-calm'
+          : 'text-warm-500 hover:bg-warm-50 hover:text-warm-800',
+      )}
+    >
+      {({ isActive }) => (
+        <>
+          <span className="relative shrink-0">
+            <Icon size={17} strokeWidth={isActive ? 2.5 : 2} />
+            {unread > 0 && (
+              <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-0.5">
+                {unread > 9 ? '9+' : unread}
+              </span>
+            )}
+          </span>
+          <span className="flex-1 truncate">{label}</span>
+          {unread > 0 && (
+            <span className="bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 shrink-0">
+              {unread > 9 ? '9+' : unread}
+            </span>
+          )}
+        </>
+      )}
+    </NavLink>
+  )
+}
+
+// ─── Bottom tab item ──────────────────────────────────────────────────────────
+
+function TabItem({ to, icon: Icon, label, unread = 0 }) {
+  const location = useLocation()
+  const isActive = location.pathname.startsWith(to)
+
+  return (
+    <NavLink to={to}
+      className="relative flex-1 flex flex-col items-center justify-center gap-0.5 pt-2 pb-1 min-w-0"
+    >
+      <span className="relative">
+        <span className={cn(
+          'flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200',
+          isActive && 'bg-primary-600 shadow-calm scale-105',
+        )}>
+          <Icon size={19} strokeWidth={isActive ? 2.5 : 1.8}
+            className={isActive ? 'text-white' : 'text-warm-400'} />
+        </span>
+        {unread > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-0.5">
+            {unread > 9 ? '9+' : unread}
+          </span>
+        )}
+      </span>
+      <span className={cn(
+        'text-[10px] font-semibold truncate leading-none',
+        isActive ? 'text-primary-600' : 'text-warm-400',
+      )}>
+        {label}
+      </span>
+    </NavLink>
+  )
+}
+
+// ─── Layout ───────────────────────────────────────────────────────────────────
 
 export default function Layout() {
   const { profile, role, user, signOut } = useAuthStore()
   const navigate  = useNavigate()
   const location  = useLocation()
-  const nav       = role === 'therapist' ? therapistNav : patientNav
 
-  const [unreadCount, setUnreadCount]   = useState(0)
-  const [alertCount, setAlertCount]     = useState(0)
-  const [showLogout, setShowLogout]     = useState(false)
-  const lastSeenKey = user ? `chat_last_seen_${user.id}` : null
-  const channelRef  = useRef(null)
+  const primaryNav   = role === 'therapist' ? THERAPIST_PRIMARY   : PATIENT_PRIMARY
+  const secondaryNav = role === 'therapist' ? THERAPIST_SECONDARY : PATIENT_SECONDARY
 
-  // ── Mensajes no leídos ──────────────────────────────────────────────────────
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [alertCount, setAlertCount]   = useState(0)
+  const [showMore, setShowMore]       = useState(false)
+  const [showLogout, setShowLogout]   = useState(false)
+  const lastSeenKey  = user ? `chat_last_seen_${user.id}` : null
+  const channelRef   = useRef(null)
+  const drawerRef    = useRef(null)
+
+  // Mensajes no leídos
   useEffect(() => {
     if (!user) return
     countUnread()
-
     channelRef.current = supabase
       .channel(`unread-${user.id}`)
       .on('postgres_changes', {
@@ -68,7 +151,6 @@ export default function Layout() {
         }
       })
       .subscribe()
-
     return () => { channelRef.current?.unsubscribe() }
   }, [user?.id])
 
@@ -78,32 +160,36 @@ export default function Layout() {
       setUnreadCount(0)
       if (lastSeenKey) localStorage.setItem(lastSeenKey, new Date().toISOString())
     }
+    setShowMore(false)
   }, [location.pathname])
 
   const countUnread = async () => {
     const lastSeen = lastSeenKey ? localStorage.getItem(lastSeenKey) : null
     const since    = lastSeen ?? new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
     const { count } = await supabase
-      .from('messages')
-      .select('id', { count: 'exact', head: true })
-      .eq('receiver_id', user.id)
-      .gte('created_at', since)
+      .from('messages').select('id', { count: 'exact', head: true })
+      .eq('receiver_id', user.id).gte('created_at', since)
     setUnreadCount(count ?? 0)
   }
 
-  // ── Alertas IA riesgo alto — solo terapeuta ─────────────────────────────────
+  // Alertas IA (terapeuta)
   useEffect(() => {
     if (!user || role !== 'therapist') return
-    supabase
-      .from('ai_checkins')
+    supabase.from('ai_checkins')
       .select('id', { count: 'exact', head: true })
-      .eq('therapist_id', user.id)
-      .eq('risk_level', 'high')
-      .eq('notified', false)
+      .eq('therapist_id', user.id).eq('risk_level', 'high').eq('notified', false)
       .then(({ count }) => setAlertCount(count ?? 0))
   }, [user?.id, role])
 
-  // ── Logout ──────────────────────────────────────────────────────────────────
+  // Cerrar drawer al clic afuera
+  useEffect(() => {
+    const handler = (e) => {
+      if (drawerRef.current && !drawerRef.current.contains(e.target)) setShowMore(false)
+    }
+    if (showMore) document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [showMore])
+
   const handleSignOut = async () => {
     setShowLogout(false)
     await signOut()
@@ -111,60 +197,50 @@ export default function Layout() {
     toast.success('Sesión cerrada correctamente')
   }
 
-  // ─── Render ─────────────────────────────────────────────────────────────────
+  const secondaryActive = secondaryNav.some(n => location.pathname.startsWith(n.to))
+
   return (
     <div className="min-h-dvh flex flex-col bg-warm-50">
       <OnboardingSlides />
 
       {/* ── Header ── */}
-      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-warm-100">
-        <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-warm-100/80">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
 
-          {/* Logo */}
           <button
             onClick={() => navigate(role === 'therapist' ? '/therapist/dashboard' : '/patient/dashboard')}
-            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
           >
-            <span className="text-2xl">🧠</span>
-            <span className="font-serif font-bold text-primary-700 text-lg tracking-tight">
-              Psico<span className="text-calm-500">necta</span>
+            <div className="w-7 h-7 rounded-lg bg-gradient-brand flex items-center justify-center">
+              <Zap size={13} className="text-white" strokeWidth={2.5} />
+            </div>
+            <span className="font-bold text-warm-900 tracking-tight">
+              Psico<span className="text-transparent bg-clip-text bg-gradient-brand">necta</span>
             </span>
           </button>
 
-          {/* Derecha: campana alertas + usuario */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
+            {role === 'patient' && <NotificationBell userId={user?.id} />}
 
-            {/* Campana notificaciones — solo paciente */}
-            {role === 'patient' && (
-              <NotificationBell userId={user?.id} />
-            )}
-
-            {/* Campana alertas IA — solo terapeuta */}
             {role === 'therapist' && alertCount > 0 && (
-              <button
-                onClick={() => navigate('/therapist/dashboard')}
-                title={`${alertCount} alerta${alertCount !== 1 ? 's' : ''} de bienestar`}
-                className="relative p-2 rounded-xl hover:bg-red-50 transition-colors"
-              >
-                <span className="text-xl">🔔</span>
-                <span className="absolute top-0.5 right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5 leading-none">
-                  {alertCount > 9 ? '9+' : alertCount}
-                </span>
+              <button onClick={() => navigate('/therapist/dashboard')}
+                className="relative p-2 rounded-xl hover:bg-red-50 transition-colors">
+                <Bell size={18} className="text-warm-600" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
               </button>
             )}
 
-            {/* Avatar + nombre — desktop */}
             <button
               onClick={() => navigate(role === 'therapist' ? '/therapist/profile' : '/patient/profile')}
-              className="hidden sm:flex items-center gap-2.5 hover:opacity-80 transition-opacity"
+              className="hidden sm:flex items-center gap-2 pl-2 hover:opacity-80 transition-opacity"
             >
               <Avatar name={profile?.full_name ?? ''} size="sm" />
-              <div className="text-left">
-                <p className="text-sm font-medium text-warm-800 leading-none">
-                  {profile?.full_name ?? 'Usuario'}
+              <div className="text-left hidden md:block">
+                <p className="text-sm font-semibold text-warm-800 leading-none">
+                  {profile?.full_name?.split(' ')[0] ?? 'Usuario'}
                 </p>
                 <p className="text-xs text-warm-400 mt-0.5">
-                  {role === 'therapist' ? '🧑‍⚕️ Terapeuta' : '🙋 Paciente'}
+                  {role === 'therapist' ? 'Terapeuta' : 'Paciente'}
                 </p>
               </div>
             </button>
@@ -172,149 +248,151 @@ export default function Layout() {
         </div>
       </header>
 
-      {/* ── Layout: sidebar + contenido ── */}
+      {/* ── Contenido ── */}
       <div className="flex-1 max-w-5xl mx-auto w-full px-4">
-        <div className="flex gap-6 pt-6 pb-24 sm:pb-10">
+        <div className="flex gap-6 pt-6 pb-28 sm:pb-10">
 
-          {/* ── Sidebar desktop (sticky) ── */}
+          {/* Sidebar desktop */}
           <aside className="hidden sm:block w-52 shrink-0">
-            <nav className="sticky top-24 flex flex-col gap-0.5 bg-white rounded-2xl shadow-card border border-warm-100 p-2 max-h-[calc(100dvh-7rem)] overflow-y-auto">
-              {nav.map(({ to, icon, label }) => {
-                const isChat = label === 'Mensajes'
-                return (
-                  <NavLink key={to} to={to}
-                    className={({ isActive }) => cn(
-                      'flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all',
-                      isActive
-                        ? 'bg-gradient-to-r from-primary-50 to-calm-50 text-primary-700 shadow-sm border border-primary-100'
-                        : 'text-warm-500 hover:bg-warm-50 hover:text-warm-800',
-                    )}
-                  >
-                    {({ isActive }) => (
-                      <>
-                        <span className="relative shrink-0">
-                          <span className={cn('text-lg block transition-transform', isActive && 'scale-110')}>
-                            {icon}
-                          </span>
-                          {isChat && unreadCount > 0 && (
-                            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5">
-                              {unreadCount > 9 ? '9+' : unreadCount}
-                            </span>
-                          )}
-                        </span>
-                        <span className="flex-1">{label}</span>
-                        {isChat && unreadCount > 0 && (
-                          <span className="bg-red-500 text-white text-xs font-bold rounded-full px-1.5 py-0.5 shrink-0">
-                            {unreadCount > 9 ? '9+' : unreadCount}
-                          </span>
-                        )}
-                        {isActive && (
-                          <span className="w-1.5 h-1.5 rounded-full bg-primary-500 shrink-0" />
-                        )}
-                      </>
-                    )}
-                  </NavLink>
-                )
-              })}
-
-              <div className="border-t border-warm-100 my-1" />
-
-              {/* Cerrar sesión en sidebar */}
-              <button
-                onClick={() => setShowLogout(true)}
-                className="flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-warm-400 hover:bg-red-50 hover:text-red-500 transition-all w-full text-left"
-              >
-                <span className="text-lg">🚪</span>
+            <nav className="sticky top-20 flex flex-col gap-0.5 bg-white rounded-2xl shadow-card border border-warm-100/60 p-2 max-h-[calc(100dvh-6rem)] overflow-y-auto scrollbar-none">
+              {primaryNav.map(({ to, icon, label, badge }) => (
+                <SideNavItem key={to} to={to} icon={icon} label={label}
+                  unread={badge === 'chat' ? unreadCount : 0} />
+              ))}
+              <div className="my-1.5 h-px bg-warm-100" />
+              {secondaryNav.map(({ to, icon, label }) => (
+                <SideNavItem key={to} to={to} icon={icon} label={label} />
+              ))}
+              <div className="my-1.5 h-px bg-warm-100" />
+              <button onClick={() => setShowLogout(true)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-warm-400 hover:bg-red-50 hover:text-red-500 transition-all w-full text-left">
+                <LogOut size={16} />
                 <span>Cerrar sesión</span>
               </button>
             </nav>
           </aside>
 
-          {/* ── Contenido principal ── */}
           <main className="flex-1 min-w-0">
             <Outlet />
           </main>
         </div>
       </div>
 
-      {/* ── Nav inferior móvil ── */}
+      {/* ── Tab bar móvil ── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-warm-100 sm:hidden"
+        className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-warm-100/80 sm:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
-        <div className="flex items-stretch overflow-x-auto scrollbar-none">
-          {nav.map(({ to, icon, label }) => {
-            const isChat = label === 'Mensajes'
-            return (
-              <NavLink key={to} to={to}
-                className={({ isActive }) => cn(
-                  'shrink-0 flex flex-col items-center justify-center gap-0.5 py-2 px-2 min-w-[52px] text-[10px] font-medium transition-colors',
-                  isActive ? 'text-primary-600' : 'text-warm-400 hover:text-warm-600',
-                )}
-              >
-                {({ isActive }) => (
-                  <>
-                    <span className="relative">
-                      <span className={cn('text-lg transition-transform block', isActive && 'scale-110')}>
-                        {icon}
-                      </span>
-                      {isChat && unreadCount > 0 && (
-                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-0.5">
-                          {unreadCount > 9 ? '9+' : unreadCount}
-                        </span>
-                      )}
-                    </span>
-                    <span className="truncate max-w-[48px] text-center">{label}</span>
-                    {isActive && <span className="w-1 h-1 rounded-full bg-primary-500" />}
-                  </>
-                )}
-              </NavLink>
-            )
-          })}
+        <div className="flex items-stretch h-16">
+          {primaryNav.map(({ to, icon, label, badge }) => (
+            <TabItem key={to} to={to} icon={icon} label={label}
+              unread={badge === 'chat' ? unreadCount : 0} />
+          ))}
+
+          {/* Botón Más */}
+          <button
+            onClick={() => setShowMore(v => !v)}
+            className="relative flex-1 flex flex-col items-center justify-center gap-0.5 pt-2 pb-1"
+          >
+            <span className={cn(
+              'flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200',
+              showMore && 'bg-accent-100',
+            )}>
+              {showMore
+                ? <X size={19} className="text-accent-600" strokeWidth={2} />
+                : <MoreHorizontal size={19} className={secondaryActive ? 'text-accent-500' : 'text-warm-400'} strokeWidth={1.8} />
+              }
+            </span>
+            <span className={cn(
+              'text-[10px] font-semibold truncate leading-none',
+              (showMore || secondaryActive) ? 'text-accent-600' : 'text-warm-400',
+            )}>
+              Más
+            </span>
+            {secondaryActive && !showMore && (
+              <span className="absolute top-2 right-3 w-1.5 h-1.5 bg-accent-500 rounded-full" />
+            )}
+          </button>
         </div>
       </nav>
 
-      {/* ── Botón flotante de crisis — solo paciente ── */}
+      {/* ── Drawer secundario ── */}
+      {showMore && (
+        <div className="fixed inset-0 z-20 sm:hidden bg-black/20 backdrop-blur-sm"
+          onClick={() => setShowMore(false)}>
+          <div
+            ref={drawerRef}
+            className="absolute bottom-16 left-0 right-0 bg-white rounded-t-3xl shadow-float border-t border-warm-100 p-4 animate-slide-up"
+            style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="w-10 h-1 bg-warm-200 rounded-full mx-auto mb-4" />
+            <p className="text-xs font-bold text-warm-400 uppercase tracking-widest px-1 mb-3">
+              Más secciones
+            </p>
+            <div className="grid grid-cols-2 gap-2">
+              {secondaryNav.map(({ to, icon: Icon, label }) => {
+                const isActive = location.pathname.startsWith(to)
+                return (
+                  <NavLink key={to} to={to} onClick={() => setShowMore(false)}
+                    className={cn(
+                      'flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all',
+                      isActive
+                        ? 'bg-accent-50 text-accent-700 border border-accent-100'
+                        : 'bg-warm-50 text-warm-700 hover:bg-warm-100',
+                    )}
+                  >
+                    <Icon size={17} strokeWidth={isActive ? 2.5 : 2} />
+                    <span className="truncate">{label}</span>
+                  </NavLink>
+                )
+              })}
+            </div>
+            <div className="mt-3 pt-3 border-t border-warm-100">
+              <button onClick={() => { setShowMore(false); setShowLogout(true) }}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-warm-400 hover:bg-red-50 hover:text-red-500 transition-all">
+                <LogOut size={16} />
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Crisis button ── */}
       {role === 'patient' && (
         <button
           onClick={() => navigate('/patient/crisis')}
-          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 bg-calm-600 hover:bg-calm-700 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-float transition-all"
-          title="Apoyo en crisis"
+          className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 bg-gradient-to-r from-accent-600 to-primary-600 hover:opacity-90 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-float transition-all"
         >
-          <span className="text-base">💙</span>
+          <Heart size={14} strokeWidth={2.5} />
           <span className="hidden sm:inline">Apoyo en crisis</span>
           <span className="sm:hidden">SOS</span>
         </button>
       )}
 
-      {/* ── Modal logout con confirmación ── */}
+      {/* ── Logout modal ── */}
       {showLogout && (
-        <div
-          className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 animate-fade-in"
-          onClick={() => setShowLogout(false)}
-        >
-          <div
-            className="bg-white rounded-2xl p-6 max-w-xs w-full shadow-float border border-warm-100"
-            onClick={e => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in"
+          onClick={() => setShowLogout(false)}>
+          <div className="bg-white rounded-3xl p-6 max-w-xs w-full shadow-float"
+            onClick={e => e.stopPropagation()}>
             <div className="text-center mb-5">
-              <span className="text-4xl">👋</span>
-              <p className="font-serif font-semibold text-warm-900 mt-3">¿Cerrar sesión?</p>
+              <div className="w-14 h-14 bg-warm-100 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                <LogOut size={22} className="text-warm-500" />
+              </div>
+              <p className="font-bold text-warm-900 text-lg">¿Cerrar sesión?</p>
               <p className="text-sm text-warm-400 mt-1">
                 Tendrás que volver a iniciar sesión para acceder.
               </p>
             </div>
             <div className="flex gap-3">
-              <button
-                onClick={() => setShowLogout(false)}
-                className="flex-1 py-2.5 rounded-xl border border-warm-200 text-sm font-medium text-warm-600 hover:bg-warm-50 transition-colors"
-              >
+              <button onClick={() => setShowLogout(false)}
+                className="flex-1 py-3 rounded-xl border border-warm-200 text-sm font-semibold text-warm-600 hover:bg-warm-50 transition-colors">
                 Cancelar
               </button>
-              <button
-                onClick={handleSignOut}
-                className="flex-1 py-2.5 rounded-xl bg-red-500 text-white text-sm font-semibold hover:bg-red-600 transition-colors"
-              >
+              <button onClick={handleSignOut}
+                className="flex-1 py-3 rounded-xl bg-red-500 text-white text-sm font-bold hover:bg-red-600 transition-colors">
                 Salir
               </button>
             </div>
