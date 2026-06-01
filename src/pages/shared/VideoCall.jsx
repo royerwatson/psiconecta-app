@@ -36,13 +36,15 @@ export default function VideoCall() {
   const groupMax = parseInt(searchParams.get('max') ?? '20', 10)
   const { user, role } = useAuthStore()
   const navigate = useNavigate()
-  const [session, setSession]     = useState(null)
-  const [loading, setLoading]     = useState(true)
-  const [roomUrl, setRoomUrl]     = useState(null)
-  const [callFrame, setCallFrame] = useState(null)
-  const [micOn, setMicOn]         = useState(true)
-  const [camOn, setCamOn]         = useState(true)
-  const [polling, setPolling]     = useState(false)
+  const [session, setSession]         = useState(null)
+  const [loading, setLoading]         = useState(true)
+  const [roomUrl, setRoomUrl]         = useState(null)
+  const [callFrame, setCallFrame]     = useState(null)
+  const [micOn, setMicOn]             = useState(true)
+  const [camOn, setCamOn]             = useState(true)
+  const [polling, setPolling]         = useState(false)
+  const [netQuality, setNetQuality]   = useState('good')   // 'good' | 'low' | 'very-low' | 'lost'
+  const [reconnecting, setReconnecting] = useState(false)
   const containerRef  = useRef(null)
   const pollTimerRef  = useRef(null)
   const callFrameRef  = useRef(null)
@@ -161,7 +163,36 @@ export default function VideoCall() {
       })
 
       frame.on('left-meeting', handleLeave)
-      frame.on('error', (e) => toast.error('Error en la videollamada: ' + e.errorMsg))
+      frame.on('error', (e) => {
+        console.error('Daily error:', e)
+        toast.error('Error en la videollamada: ' + (e.errorMsg ?? 'intenta reconectar'))
+      })
+
+      // Monitoreo de calidad de red
+      frame.on('network-quality-change', ({ threshold }) => {
+        // threshold: 'good' | 'low' | 'very-low' | 'lost'
+        setNetQuality(threshold)
+        if (threshold === 'lost') {
+          setReconnecting(true)
+          toast.error('Conexión perdida. Intentando reconectar...', { id: 'net-lost', duration: 999999 })
+        } else if (threshold !== 'good') {
+          toast.dismiss('net-lost')
+          setReconnecting(false)
+        } else {
+          toast.dismiss('net-lost')
+          setReconnecting(false)
+        }
+      })
+
+      // Reconexión automática cuando se restaura la red
+      frame.on('network-connection', ({ event }) => {
+        if (event === 'reconnected') {
+          toast.dismiss('net-lost')
+          setReconnecting(false)
+          setNetQuality('good')
+          toast.success('Conexión restaurada')
+        }
+      })
 
       await frame.join({ url: roomUrl, userName: user?.email })
       callFrameRef.current = frame
@@ -191,6 +222,25 @@ export default function VideoCall() {
     setCamOn(!camOn)
   }
 
+  // Reconexión manual: destruye el frame actual y vuelve a crear la sala
+  const handleReconnect = async () => {
+    setReconnecting(true)
+    toast.dismiss('net-lost')
+    try {
+      callFrameRef.current?.destroy()
+      callFrameRef.current = null
+      setCallFrame(null)
+      // Pequeña pausa para que el DOM se limpie
+      await new Promise(r => setTimeout(r, 600))
+      await initCall()
+      setNetQuality('good')
+    } catch {
+      toast.error('No se pudo reconectar. Verifica tu conexión a internet.')
+    } finally {
+      setReconnecting(false)
+    }
+  }
+
   const other = session
     ? (role === 'therapist' ? session.patient : session.therapist)
     : null
@@ -217,11 +267,58 @@ export default function VideoCall() {
           <p className="text-xs text-warm-400">Sesión en curso con</p>
           <p className="font-semibold">{other?.full_name ?? '...'}</p>
         </div>
-        <div className="flex items-center gap-1">
-          <span className={`w-2 h-2 rounded-full ${polling ? 'bg-amber-400' : 'bg-red-500 animate-pulse'}`} />
-          <span className="text-xs text-warm-400">{polling ? 'Esperando...' : 'En vivo'}</span>
+        <div className="flex items-center gap-2">
+          {/* Indicador de calidad de red */}
+          {callFrame && (
+            <div className="flex items-center gap-1.5">
+              <span className={`w-2 h-2 rounded-full transition-colors ${
+                netQuality === 'good'      ? 'bg-green-400' :
+                netQuality === 'low'       ? 'bg-amber-400 animate-pulse' :
+                netQuality === 'very-low'  ? 'bg-orange-500 animate-pulse' :
+                'bg-red-500 animate-pulse'
+              }`} />
+              <span className="text-xs text-warm-400">
+                {netQuality === 'good'     ? 'En vivo' :
+                 netQuality === 'low'      ? 'Señal baja' :
+                 netQuality === 'very-low' ? 'Señal muy baja' :
+                 'Sin conexión'}
+              </span>
+            </div>
+          )}
+          {!callFrame && (
+            <div className="flex items-center gap-1">
+              <span className={`w-2 h-2 rounded-full ${polling ? 'bg-amber-400' : 'bg-warm-600'}`} />
+              <span className="text-xs text-warm-400">{polling ? 'Esperando...' : 'Conectando...'}</span>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Banner de red degradada / perdida */}
+      {callFrame && netQuality !== 'good' && (
+        <div className={`px-4 py-2.5 flex items-center justify-between transition-all ${
+          netQuality === 'lost' ? 'bg-red-900/90' : 'bg-amber-900/80'
+        }`}>
+          <div className="flex items-center gap-2">
+            <Loader2 size={14} className={`shrink-0 ${netQuality === 'lost' ? 'text-red-300 animate-spin' : 'text-amber-300'}`} />
+            <p className="text-xs text-white font-medium">
+              {netQuality === 'lost'
+                ? 'Conexión perdida — intentando reconectar automáticamente'
+                : netQuality === 'very-low'
+                ? 'Señal muy baja — la calidad de video puede verse afectada'
+                : 'Señal baja — verifica tu conexión a internet'}
+            </p>
+          </div>
+          {netQuality === 'lost' && !reconnecting && (
+            <button
+              onClick={handleReconnect}
+              className="text-xs text-white bg-white/20 hover:bg-white/30 px-3 py-1 rounded-lg font-medium transition-colors shrink-0 ml-3"
+            >
+              Reconectar
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Video container */}
       <div className="flex-1 relative mx-4 mb-4 rounded-2xl overflow-hidden bg-warm-800">

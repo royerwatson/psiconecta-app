@@ -39,11 +39,15 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [loadingMessages, setLoadingMessages] = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(false)
   const [error, setError] = useState(null)
   const [sending, setSending] = useState(false)
   const [unreadCounts, setUnreadCounts] = useState({}) // { [convId]: number }
+  const [onlineUsers, setOnlineUsers] = useState(new Set()) // Set de user IDs en línea
   const bottomRef = useRef(null)
   const channelRef = useRef(null)
+  const presenceRef = useRef(null)
   const inputRef = useRef(null)
 
   // Abrir conversación desde query param (?patient=id o ?therapist=id)
@@ -53,14 +57,45 @@ export default function ChatPage() {
     if (user) fetchConversations()
   }, [user])
 
+  // Canal de presencia global — indica quién está en el chat ahora mismo
+  useEffect(() => {
+    if (!user) return
+
+    const presence = supabase.channel('chat-presence', {
+      config: { presence: { key: user.id } },
+    })
+
+    presence
+      .on('presence', { event: 'sync' }, () => {
+        const state = presence.presenceState()
+        const online = new Set(Object.keys(state))
+        setOnlineUsers(online)
+      })
+      .on('presence', { event: 'join' }, ({ key }) => {
+        setOnlineUsers(prev => new Set([...prev, key]))
+      })
+      .on('presence', { event: 'leave' }, ({ key }) => {
+        setOnlineUsers(prev => { const s = new Set(prev); s.delete(key); return s })
+      })
+      .subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await presence.track({ user_id: user.id, online_at: new Date().toISOString() })
+        }
+      })
+
+    presenceRef.current = presence
+    return () => {
+      presence.untrack()
+      presence.unsubscribe()
+    }
+  }, [user?.id])
+
   useEffect(() => {
     if (activeConv) {
       fetchMessages(activeConv)
       subscribeToMessages(activeConv)
-      // Enfocar el input al cambiar de conversación
       setTimeout(() => inputRef.current?.focus(), 100)
     }
-    // Limpiar suscripción al cambiar de conversación o desmontar
     return () => channelRef.current?.unsubscribe()
   }, [activeConv?.id])
 
@@ -115,8 +150,11 @@ export default function ChatPage() {
     }
   }
 
+  const PAGE_SIZE = 40
+
   const fetchMessages = async (conv) => {
     setLoadingMessages(true)
+    setHasMore(false)
     const { data, error: fetchError } = await supabase
       .from('messages')
       .select('*')
@@ -124,17 +162,43 @@ export default function ChatPage() {
         `and(sender_id.eq.${user.id},receiver_id.eq.${conv.id}),` +
         `and(sender_id.eq.${conv.id},receiver_id.eq.${user.id})`
       )
-      .order('created_at')
-      .limit(100)
+      .order('created_at', { ascending: false })
+      .limit(PAGE_SIZE)
 
     if (fetchError) {
       console.error('Error cargando mensajes:', fetchError)
     } else {
-      setMessages(data ?? [])
-      // Marcar como leídos los mensajes de esta conversación
+      const sorted = (data ?? []).reverse()  // mostrar cronológicamente
+      setMessages(sorted)
+      setHasMore((data ?? []).length === PAGE_SIZE)
       markAsRead(conv.id)
     }
     setLoadingMessages(false)
+  }
+
+  // Cargar mensajes anteriores (scroll infinito inverso)
+  const fetchMoreMessages = async () => {
+    if (!activeConv || loadingMore || !hasMore || messages.length === 0) return
+    setLoadingMore(true)
+
+    const oldest = messages[0]?.created_at
+    const { data, error } = await supabase
+      .from('messages')
+      .select('*')
+      .or(
+        `and(sender_id.eq.${user.id},receiver_id.eq.${activeConv.id}),` +
+        `and(sender_id.eq.${activeConv.id},receiver_id.eq.${user.id})`
+      )
+      .lt('created_at', oldest)
+      .order('created_at', { ascending: false })
+      .limit(PAGE_SIZE)
+
+    if (!error) {
+      const sorted = (data ?? []).reverse()
+      setMessages(prev => [...sorted, ...prev])
+      setHasMore((data ?? []).length === PAGE_SIZE)
+    }
+    setLoadingMore(false)
   }
 
   const markAsRead = async (convId) => {
@@ -396,15 +460,49 @@ export default function ChatPage() {
             <Avatar name={activeConv.full_name} size="sm" />
             <div className="flex-1">
               <p className="font-semibold text-warm-900 text-sm">{activeConv.full_name}</p>
-              <p className="text-xs text-success flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-success inline-block" />
-                Sesión activa
-              </p>
+              {onlineUsers.has(activeConv.id) ? (
+                <p className="text-xs text-green-600 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+                  En línea
+                </p>
+              ) : (
+                <p className="text-xs text-warm-400 flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-warm-300 inline-block" />
+                  Desconectado
+                </p>
+              )}
             </div>
           </div>
 
           {/* Mensajes */}
-          <div className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 bg-warm-50">
+          <div
+            className="flex-1 overflow-y-auto px-4 py-4 flex flex-col gap-3 bg-warm-50"
+            onScroll={(e) => {
+              // Cargar más cuando el scroll llega al tope (mensajes anteriores)
+              if (e.currentTarget.scrollTop < 60 && !loadingMore && hasMore) {
+                fetchMoreMessages()
+              }
+            }}
+          >
+            {/* Indicador de carga de mensajes anteriores */}
+            {loadingMore && (
+              <div className="flex justify-center py-2">
+                <div className="flex items-center gap-2 text-xs text-warm-400">
+                  <div className="w-3 h-3 border-2 border-warm-300 border-t-primary-400 rounded-full animate-spin" />
+                  Cargando mensajes anteriores...
+                </div>
+              </div>
+            )}
+            {!loadingMore && hasMore && (
+              <div className="flex justify-center">
+                <button
+                  onClick={fetchMoreMessages}
+                  className="text-xs text-primary-500 hover:text-primary-700 font-medium py-1 px-3 rounded-lg hover:bg-primary-50 transition-colors"
+                >
+                  Ver mensajes anteriores
+                </button>
+              </div>
+            )}
             {loadingMessages ? (
               <div className="flex flex-col gap-3">
                 {[1, 2, 3].map((i) => <Skeleton key={i} className="h-12" />)}
