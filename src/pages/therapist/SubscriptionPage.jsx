@@ -15,6 +15,7 @@ import {
   Check, Zap, Star, Crown, TrendingUp, Users, Eye, BarChart2,
   Calendar, ChevronRight, AlertCircle,
 } from 'lucide-react'
+import { useCurrencyContext } from '@/context/CurrencyContext'
 
 // ── Definición de planes ──────────────────────────────────────────────────────
 
@@ -93,6 +94,7 @@ function savings(plan, monthlySessions, avgPrice) {
 
 export default function SubscriptionPage() {
   const { user } = useAuthStore()
+  const { formatWithLocal } = useCurrencyContext()
   const [currentPlan, setCurrentPlan]   = useState('basic')
   const [planExpires, setPlanExpires]   = useState(null)
   const [loading, setLoading]           = useState(true)
@@ -288,7 +290,16 @@ export default function SubscriptionPage() {
               </div>
 
               <div className="mb-3">
-                <span className="text-2xl font-bold text-warm-900">{plan.priceLabel}</span>
+                <div>
+                  <span className="text-2xl font-bold text-warm-900">
+                    {plan.price === 0 ? 'Gratis' : `$${plan.price}.00 USD`}
+                  </span>
+                  {plan.price > 0 && (
+                    <p className="text-xs text-warm-400 mt-0.5">
+                      ≈ {formatWithLocal(plan.price).split('≈')[1]?.trim() ?? ''} /mes
+                    </p>
+                  )}
+                </div>
                 <p className="text-xs text-warm-400 mt-0.5">{plan.commission}% comisión por sesión</p>
               </div>
 
@@ -324,9 +335,10 @@ export default function SubscriptionPage() {
       <div className="flex items-start gap-2 text-xs text-warm-400 bg-warm-50 rounded-xl p-4">
         <AlertCircle size={14} strokeWidth={1.8} className="shrink-0 mt-0.5" />
         <p>
-          Los planes Pro y Premium se facturan mensualmente a través de PayPal.
-          Puedes cancelar en cualquier momento. La comisión se aplica automáticamente
-          en cada sesión completada según el plan vigente en ese momento.
+          Los planes Pro y Premium se facturan mensualmente en <strong>USD</strong> a través de PayPal.
+          La conversión a tu moneda local es referencial — el monto exacto lo determina
+          PayPal según su tipo de cambio al momento del pago.
+          Puedes cancelar en cualquier momento.
         </p>
       </div>
 
