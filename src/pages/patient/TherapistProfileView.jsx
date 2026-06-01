@@ -54,7 +54,8 @@ export default function TherapistProfileView() {
     setLoading(true)
     const [{ data: t }, { data: r }] = await Promise.all([
       supabase.from('therapist_profiles').select(`
-        *, profile:profiles!therapist_profiles_user_id_fkey(id, full_name, avatar_url, email)
+        *, profile:profiles!therapist_profiles_user_id_fkey(id, full_name, avatar_url, email),
+        subscription_plan, commission_rate
       `).eq('user_id', therapistId).single(),
       supabase.from('reviews').select(`
         *, patient:profiles!reviews_patient_id_fkey(full_name)
@@ -144,9 +145,22 @@ export default function TherapistProfileView() {
         <div className="flex items-start gap-4">
           <Avatar name={therapist.profile?.full_name ?? ''} size="xl" />
           <div className="flex-1 min-w-0">
-            <h1 className="font-serif text-xl font-bold text-warm-900 leading-tight">
-              {therapist.profile?.full_name}
-            </h1>
+            <div className="flex items-start justify-between gap-2 flex-wrap">
+              <h1 className="font-serif text-xl font-bold text-warm-900 leading-tight">
+                {therapist.profile?.full_name}
+              </h1>
+              {/* Badge de plan destacado */}
+              {therapist.subscription_plan === 'premium' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-white text-xs font-bold shadow-sm shrink-0">
+                  <Crown size={11} strokeWidth={2.5} />Premium
+                </span>
+              )}
+              {therapist.subscription_plan === 'pro' && (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-bold shadow-sm shrink-0">
+                  <Star size={11} strokeWidth={2.5} />Pro
+                </span>
+              )}
+            </div>
             <p className="text-warm-500 text-sm mt-0.5">{therapist.specialty}</p>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <VerificationBadge status={therapist.verified ? 'verified' : 'pending'} />
