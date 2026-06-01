@@ -59,9 +59,11 @@ export const getAvatarColor = (name = '') => {
   return AVATAR_COLORS[index]
 }
 
-// Formateo de precio
-export const formatPrice = (amount, currency = 'USD') =>
-  new Intl.NumberFormat('es-MX', { style: 'currency', currency }).format(amount)
+// Formateo de precio — siempre en USD
+export const formatPrice = (amount) => {
+  const num = parseFloat(amount ?? 0)
+  return `$${num.toFixed(2)} USD`
+}
 
 // Nivel de riesgo del check-in IA
 export const getRiskLabel = (level) => {
