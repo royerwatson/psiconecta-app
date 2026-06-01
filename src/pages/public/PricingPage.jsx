@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { Check, Zap, Star, Crown, ArrowRight, Users, Shield, Video } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
+import { useCurrencyContext } from '@/context/CurrencyContext'
 
 const PLANS = [
   {
@@ -98,6 +99,7 @@ const FAQS = [
 
 export default function PricingPage() {
   const navigate = useNavigate()
+  const { formatWithLocal } = useCurrencyContext()
 
   return (
     <div className="min-h-dvh bg-psiconecta">
@@ -166,6 +168,12 @@ export default function PricingPage() {
                   <span className="text-4xl font-bold">{plan.priceLabel}</span>
                   {plan.period && <span className={`text-sm mb-1.5 ${isHighlight ? 'text-white/70' : 'text-warm-400'}`}>{plan.period}</span>}
                 </div>
+                {/* Conversión a moneda local para planes de pago */}
+                {plan.price > 0 && (
+                  <p className={`text-xs mt-0.5 ${isHighlight ? 'text-white/60' : 'text-warm-400'}`}>
+                    ≈ {formatWithLocal(plan.price).split('≈')[1]?.trim() ?? ''} /mes
+                  </p>
+                )}
                 <p className={`text-sm mt-1 ${isHighlight ? 'text-white/80' : 'text-warm-500'}`}>
                   {plan.commission} de comisión por sesión
                 </p>

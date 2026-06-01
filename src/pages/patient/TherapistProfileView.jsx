@@ -11,6 +11,7 @@ import Input from '@/components/ui/Input'
 import { RatingDisplay } from '@/components/ui/StarRating'
 import StarRating from '@/components/ui/StarRating'
 import { formatDate, formatPrice, formatRelative } from '@/lib/utils'
+import { useCurrencyContext } from '@/context/CurrencyContext'
 import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
 import toast from 'react-hot-toast'
@@ -38,6 +39,7 @@ export default function TherapistProfileView() {
   const { therapistId } = useParams()
   const { user } = useAuthStore()
   const navigate = useNavigate()
+  const { formatWithLocal, formatLocal } = useCurrencyContext()
   const [therapist, setTherapist] = useState(null)
   const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
@@ -153,7 +155,7 @@ export default function TherapistProfileView() {
               )}
             </div>
             <p className="text-primary-600 font-bold text-lg mt-2">
-              {formatPrice(therapist.price_per_session)}
+              {formatWithLocal(therapist.price_per_session)}
               <span className="text-sm font-normal text-warm-500">/sesión</span>
             </p>
           </div>
@@ -280,7 +282,7 @@ export default function TherapistProfileView() {
                         : <><Calendar size={14} strokeWidth={1.8} />Cita estándar</>}
                     </p>
                     <p className={`text-lg font-bold ${bookingPreview.urgent ? 'text-orange-700' : 'text-primary-700'}`}>
-                      {formatPrice(bookingPreview.price)} USD
+                      {formatWithLocal(bookingPreview.price)}
                     </p>
                   </div>
                   {bookingPreview.urgent && (
@@ -319,7 +321,7 @@ export default function TherapistProfileView() {
                 </div>
                 <div className="flex justify-between text-warm-900 font-bold mt-2 pt-2 border-t border-warm-200">
                   <span>Total</span>
-                  <span>{formatPrice(bookingPreview.price)} USD</span>
+                  <span>{formatWithLocal(bookingPreview.price)}</span>
                 </div>
               </div>
 
@@ -332,6 +334,12 @@ export default function TherapistProfileView() {
                 onSuccess={handlePaymentSuccess}
                 onError={(msg) => toast.error(msg)}
               />
+
+              <p className="text-[11px] text-warm-400 text-center leading-relaxed">
+                El cobro se realiza en <strong>USD</strong>. La conversión a tu moneda local
+                es referencial — el monto exacto lo determina PayPal según su
+                tipo de cambio al momento del pago.
+              </p>
 
               <button onClick={() => setBookStep('form')} className="text-xs text-warm-400 hover:text-warm-600 text-center transition-colors">
                 ← Cambiar fecha u hora

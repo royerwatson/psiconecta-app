@@ -15,6 +15,7 @@ import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
 import toast from 'react-hot-toast'
 import { DollarSign, Zap, AlertTriangle, Search, Calendar, Crown, Star } from 'lucide-react'
+import { useCurrencyContext } from '@/context/CurrencyContext'
 
 const SPECIALTIES = [
   'Todas', 'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
@@ -23,6 +24,7 @@ const SPECIALTIES = [
 
 export default function FindTherapist() {
   const { user } = useAuthStore()
+  const { formatWithLocal, formatLocal } = useCurrencyContext()
   const [therapists, setTherapists] = useState([])
   const [search, setSearch] = useState('')
   const [specialty, setSpecialty] = useState('Todas')
@@ -209,7 +211,8 @@ export default function FindTherapist() {
                   <div className="flex items-center gap-3 mt-2">
                     <RatingDisplay value={t.avg_rating} reviews={t.review_count} />
                     <span className="text-sm font-medium text-primary-700">
-                      {formatPrice(t.price_per_session)}/sesión
+                      <span>{formatWithLocal(t.price_per_session)}</span>
+                      <span className="text-warm-400">/sesión</span>
                     </span>
                   </div>
                   {t.bio && <p className="text-xs text-warm-500 mt-2 line-clamp-2">{t.bio}</p>}
@@ -264,7 +267,7 @@ export default function FindTherapist() {
                         {urgent ? <><Zap size={13} strokeWidth={1.8} className="inline mr-1" />Cita urgente</> : <><Calendar size={13} strokeWidth={1.8} className="inline mr-1" />Cita estándar</>}
                       </p>
                       <p className={`text-xs mt-0.5 ${urgent ? 'text-orange-600' : 'text-primary-600'}`}>
-                        Total: <strong>{formatPrice(price)} USD</strong>
+                        Total: <strong>{formatWithLocal(price)}</strong>
                         {urgent && ' (incluye 30% de tarifa urgente)'}
                       </p>
                     </div>
@@ -320,7 +323,7 @@ export default function FindTherapist() {
                     )}
                     <div className="flex justify-between text-warm-900 font-bold mt-2 pt-2 border-t border-warm-200">
                       <span>Total</span>
-                      <span>{formatPrice(price)} USD</span>
+                      <span>{formatWithLocal(price)}</span>
                     </div>
                   </div>
 
@@ -333,6 +336,12 @@ export default function FindTherapist() {
                     onSuccess={handlePaymentSuccess}
                     onError={handlePaymentError}
                   />
+
+                  <p className="text-[11px] text-warm-400 text-center leading-relaxed">
+                    El cobro se realiza en <strong>USD</strong>. La conversión a tu moneda local
+                    es referencial — el monto exacto lo determina PayPal según su
+                    tipo de cambio al momento del pago.
+                  </p>
 
                   <button onClick={() => setBookingStep('form')}
                     className="text-xs text-warm-400 hover:text-warm-600 text-center transition-colors">
