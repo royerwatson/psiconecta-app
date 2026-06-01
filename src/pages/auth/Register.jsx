@@ -5,7 +5,8 @@ import Button from '@/components/ui/Button'
 import Input, { Select } from '@/components/ui/Input'
 import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
-import { Zap, User, Stethoscope, ChevronRight, FileCheck } from 'lucide-react'
+import { User, Stethoscope, ChevronRight, FileCheck } from 'lucide-react'
+import { PsiconectaLogo } from '@/components/ui/Spinner'
 
 const SPECIALTIES = [
   'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
@@ -73,7 +74,7 @@ export default function Register() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="w-12 h-12 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-calm">
-              <Zap size={24} className="text-white" strokeWidth={2} />
+              <PsiconectaLogo size={30} color="white" />
             </div>
           <h1 className="font-serif text-2xl font-bold text-primary-800">
             Psico<span className="text-calm-500">necta</span>
