@@ -73,6 +73,7 @@ import PaymentCancel  from '@/pages/payment/PaymentCancel'
 // Suscripciones y precios
 import SubscriptionPage from '@/pages/therapist/SubscriptionPage'
 import PricingPage      from '@/pages/public/PricingPage'
+import StatsPage        from '@/pages/therapist/StatsPage'
 
 export default function App() {
   const { initialize, initialized } = useAuthStore()
@@ -153,6 +154,9 @@ export default function App() {
           } />
           <Route path="/therapist/subscription" element={
             <TherapistRoute><SubscriptionPage /></TherapistRoute>
+          } />
+          <Route path="/therapist/stats" element={
+            <TherapistRoute><StatsPage /></TherapistRoute>
           } />
           <Route path="/therapist/test-result/:sessionId" element={
             <TherapistRoute><TestResultPage /></TherapistRoute>
