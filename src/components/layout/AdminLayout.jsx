@@ -3,21 +3,22 @@ import { useAuthStore } from '@/store/authStore'
 import {
   LayoutDashboard, Bot, Stethoscope, Users, Calendar,
   UsersRound, TrendingUp, Wallet, ArrowDownToLine,
-  ClipboardList, Star, LogOut,
+  ClipboardList, Star, Crown, LogOut,
 } from 'lucide-react'
 
 const NAV = [
-  { to: '/admin/dashboard',  Icon: LayoutDashboard,   label: 'Dashboard'     },
-  { to: '/admin/ai-alerts',  Icon: Bot,               label: 'Alertas IA'   },
-  { to: '/admin/therapists', Icon: Stethoscope,        label: 'Terapeutas'   },
-  { to: '/admin/patients',   Icon: Users,             label: 'Pacientes'    },
-  { to: '/admin/sessions',   Icon: Calendar,          label: 'Sesiones'     },
-  { to: '/admin/groups',     Icon: UsersRound,        label: 'Grupales'     },
-  { to: '/admin/stats',      Icon: TrendingUp,        label: 'Estadísticas' },
-  { to: '/admin/financial',  Icon: Wallet,            label: 'Finanzas'     },
-  { to: '/admin/payouts',    Icon: ArrowDownToLine,   label: 'Pagos'        },
-  { to: '/admin/activity',   Icon: ClipboardList,     label: 'Actividad'    },
-  { to: '/admin/reviews',    Icon: Star,              label: 'Reseñas'      },
+  { to: '/admin/dashboard',     Icon: LayoutDashboard,  label: 'Dashboard'      },
+  { to: '/admin/ai-alerts',     Icon: Bot,              label: 'Alertas IA'     },
+  { to: '/admin/therapists',    Icon: Stethoscope,      label: 'Terapeutas'     },
+  { to: '/admin/patients',      Icon: Users,            label: 'Pacientes'      },
+  { to: '/admin/sessions',      Icon: Calendar,         label: 'Sesiones'       },
+  { to: '/admin/groups',        Icon: UsersRound,       label: 'Grupales'       },
+  { to: '/admin/stats',         Icon: TrendingUp,       label: 'Estadísticas'   },
+  { to: '/admin/financial',     Icon: Wallet,           label: 'Finanzas'       },
+  { to: '/admin/payouts',       Icon: ArrowDownToLine,  label: 'Pagos'          },
+  { to: '/admin/subscriptions', Icon: Crown,            label: 'Suscripciones'  },
+  { to: '/admin/activity',      Icon: ClipboardList,    label: 'Actividad'      },
+  { to: '/admin/reviews',       Icon: Star,             label: 'Reseñas'        },
 ]
 
 export default function AdminLayout() {

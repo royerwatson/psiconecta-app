@@ -18,6 +18,7 @@ import AdminGroupSessions  from '@/pages/admin/AdminGroupSessions'
 import AdminAIAlerts       from '@/pages/admin/AdminAIAlerts'
 import AdminFinancial      from '@/pages/admin/AdminFinancial'
 import AdminPayouts        from '@/pages/admin/AdminPayouts'
+import AdminSubscriptions  from '@/pages/admin/AdminSubscriptions'
 import AdminActivityLog    from '@/pages/admin/AdminActivityLog'
 import AdminReviews        from '@/pages/admin/AdminReviews'
 
@@ -69,6 +70,10 @@ import PatientResultDetailPage   from '@/pages/patient/PatientResultDetailPage'
 import PaymentSuccess from '@/pages/payment/PaymentSuccess'
 import PaymentCancel  from '@/pages/payment/PaymentCancel'
 
+// Suscripciones y precios
+import SubscriptionPage from '@/pages/therapist/SubscriptionPage'
+import PricingPage      from '@/pages/public/PricingPage'
+
 export default function App() {
   const { initialize, initialized } = useAuthStore()
 
@@ -94,6 +99,9 @@ export default function App() {
       />
 
       <Routes>
+        {/* Páginas públicas */}
+        <Route path="/pricing"         element={<PricingPage />} />
+
         {/* Auth — pacientes y terapeutas */}
         <Route path="/login"           element={<Login />} />
         <Route path="/register"        element={<Register />} />
@@ -142,6 +150,9 @@ export default function App() {
           } />
           <Route path="/therapist/profile" element={
             <TherapistRoute><TherapistProfile /></TherapistRoute>
+          } />
+          <Route path="/therapist/subscription" element={
+            <TherapistRoute><SubscriptionPage /></TherapistRoute>
           } />
           <Route path="/therapist/test-result/:sessionId" element={
             <TherapistRoute><TestResultPage /></TherapistRoute>
@@ -224,8 +235,9 @@ export default function App() {
           <Route path="sessions"   element={<AdminSessions />} />
           <Route path="groups"     element={<AdminGroupSessions />} />
           <Route path="stats"      element={<AdminStats />} />
-          <Route path="financial"  element={<AdminFinancial />} />
-          <Route path="payouts"    element={<AdminPayouts />} />
+          <Route path="financial"      element={<AdminFinancial />} />
+          <Route path="payouts"        element={<AdminPayouts />} />
+          <Route path="subscriptions"  element={<AdminSubscriptions />} />
           <Route path="activity"   element={<AdminActivityLog />} />
           <Route path="reviews"    element={<AdminReviews />} />
         </Route>
