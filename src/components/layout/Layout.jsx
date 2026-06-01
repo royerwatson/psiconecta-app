@@ -14,6 +14,7 @@ import {
   BookMarked, Stethoscope, FolderOpen, MoreHorizontal,
   X, Zap, Bell, ChevronRight, LogOut,
 } from 'lucide-react'
+import { PsiconectaLogo } from '@/components/ui/Spinner'
 
 // ─── Navegación ────────────────────────────────────────────────────────────────
 
@@ -212,7 +213,7 @@ export default function Layout() {
             className="flex items-center gap-2.5 hover:opacity-80 transition-opacity"
           >
             <div className="w-7 h-7 rounded-lg bg-gradient-brand flex items-center justify-center">
-              <Zap size={13} className="text-white" strokeWidth={2.5} />
+              <PsiconectaLogo size={18} color="white" />
             </div>
             <span className="font-bold text-warm-900 tracking-tight">
               Psico<span className="text-transparent bg-clip-text bg-gradient-brand">necta</span>

@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import toast from 'react-hot-toast'
-import { Zap } from 'lucide-react'
+import { PsiconectaLogo } from '@/components/ui/Spinner'
 
 export default function ForgotPassword() {
   const [email, setEmail]     = useState('')
@@ -32,7 +32,7 @@ export default function ForgotPassword() {
       <div className="w-full max-w-md animate-fade-in">
         <div className="text-center mb-10">
           <div className="w-14 h-14 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-calm">
-              <Zap size={28} className="text-white" strokeWidth={2} />
+              <PsiconectaLogo size={36} color="white" />
             </div>
           <h1 className="font-serif text-3xl font-bold text-primary-800">
             Psico<span className="text-calm-500">necta</span>
