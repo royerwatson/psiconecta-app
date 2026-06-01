@@ -1,0 +1,251 @@
+/**
+ * PricingPage — Página pública de planes y precios.
+ * Ruta: /pricing (no requiere autenticación)
+ */
+import { useNavigate } from 'react-router-dom'
+import { Check, Zap, Star, Crown, ArrowRight, Users, Shield, Video } from 'lucide-react'
+import Button from '@/components/ui/Button'
+import { PsiconectaLogo } from '@/components/ui/Spinner'
+
+const PLANS = [
+  {
+    id:          'basic',
+    name:        'Básico',
+    priceLabel:  'Gratis',
+    commission:  '10%',
+    Icon:        Zap,
+    color:       'text-warm-400',
+    bg:          'bg-white',
+    border:      'border-warm-200',
+    highlight:   false,
+    cta:         'Comenzar gratis',
+    features: [
+      'Perfil verificado en la plataforma',
+      'Gestión de agenda y citas',
+      'Chat privado con pacientes',
+      'Videollamadas ilimitadas',
+      'Historial clínico digital',
+      '10% de comisión por sesión',
+    ],
+  },
+  {
+    id:          'pro',
+    name:        'Pro',
+    priceLabel:  '$39',
+    period:      '/mes',
+    commission:  '7.5%',
+    Icon:        Star,
+    color:       'text-primary-500',
+    bg:          'bg-primary-600',
+    textColor:   'text-white',
+    border:      'border-primary-600',
+    highlight:   true,
+    cta:         'Empezar plan Pro',
+    features: [
+      'Todo lo del plan Básico',
+      'Badge Pro en tu perfil',
+      'Mayor posición en búsquedas',
+      'Estadísticas de perfil detalladas',
+      'Acceso prioritario a soporte',
+      '7.5% de comisión por sesión',
+    ],
+  },
+  {
+    id:          'premium',
+    name:        'Premium',
+    priceLabel:  '$79',
+    period:      '/mes',
+    commission:  '5%',
+    Icon:        Crown,
+    color:       'text-amber-500',
+    bg:          'bg-white',
+    border:      'border-amber-200',
+    highlight:   false,
+    cta:         'Empezar plan Premium',
+    features: [
+      'Todo lo del plan Pro',
+      'Badge Premium destacado',
+      'Posición #1 en búsquedas',
+      'Dashboard avanzado de ingresos',
+      'Soporte prioritario 24/7',
+      '5% de comisión por sesión',
+    ],
+  },
+]
+
+const FAQS = [
+  {
+    q: '¿Cuándo se cobra la comisión?',
+    a: 'La comisión se descuenta automáticamente en el momento en que el paciente realiza el pago. El resto se transfiere a tu cuenta en el siguiente ciclo de liquidación.',
+  },
+  {
+    q: '¿Puedo cambiar de plan en cualquier momento?',
+    a: 'Sí. Puedes hacer upgrade o downgrade desde tu perfil en cualquier momento. El cambio aplica inmediatamente.',
+  },
+  {
+    q: '¿Qué pasa si cancelo mi suscripción Pro o Premium?',
+    a: 'Conservas los beneficios hasta el final del período pagado. Al vencer, tu cuenta pasa automáticamente al plan Básico.',
+  },
+  {
+    q: '¿El plan Básico es realmente gratis?',
+    a: 'Sí, sin límite de tiempo ni tarjeta de crédito requerida. Solo pagamos juntos una comisión del 10% sobre cada sesión completada.',
+  },
+  {
+    q: '¿Hay un período de prueba para los planes Pro y Premium?',
+    a: 'No ofrecemos período de prueba, pero puedes comenzar en Básico y hacer upgrade cuando quieras sin penalización.',
+  },
+]
+
+export default function PricingPage() {
+  const navigate = useNavigate()
+
+  return (
+    <div className="min-h-dvh bg-psiconecta">
+
+      {/* Navbar mínima */}
+      <nav className="flex items-center justify-between px-6 py-4 max-w-5xl mx-auto">
+        <button onClick={() => navigate('/')} className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <div className="w-8 h-8 bg-gradient-brand rounded-xl flex items-center justify-center">
+            <PsiconectaLogo size={20} color="white" />
+          </div>
+          <span className="font-bold text-warm-900">Psico<span className="text-primary-600">necta</span></span>
+        </button>
+        <div className="flex items-center gap-3">
+          <button onClick={() => navigate('/login')} className="text-sm text-warm-600 hover:text-warm-900">
+            Iniciar sesión
+          </button>
+          <Button size="sm" onClick={() => navigate('/register')}>
+            Crear cuenta
+          </Button>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <div className="text-center px-4 pt-12 pb-16 max-w-3xl mx-auto">
+        <span className="inline-block bg-primary-100 text-primary-700 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
+          Para terapeutas
+        </span>
+        <h1 className="font-serif text-4xl font-bold text-warm-900 mb-4 leading-tight">
+          Planes que crecen<br/>contigo
+        </h1>
+        <p className="text-warm-500 text-lg leading-relaxed max-w-xl mx-auto">
+          Comienza gratis. Cuando tu práctica crezca, elige el plan que mejor
+          se ajuste a tu volumen y reduce la comisión por sesión.
+        </p>
+      </div>
+
+      {/* Planes */}
+      <div className="grid sm:grid-cols-3 gap-5 max-w-5xl mx-auto px-4 pb-16">
+        {PLANS.map((plan) => {
+          const PlanIcon = plan.Icon
+          const isHighlight = plan.highlight
+          return (
+            <div
+              key={plan.id}
+              className={`relative rounded-3xl border-2 ${plan.border} ${plan.bg} p-7 flex flex-col shadow-sm ${
+                isHighlight ? 'shadow-primary-100 shadow-lg scale-[1.02]' : ''
+              }`}
+            >
+              {isHighlight && (
+                <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                  <span className="bg-primary-500 text-white text-xs font-bold px-4 py-1.5 rounded-full">
+                    Más popular
+                  </span>
+                </div>
+              )}
+
+              <div className={`flex items-center gap-2 mb-6 ${isHighlight ? 'text-white' : ''}`}>
+                <PlanIcon size={20} strokeWidth={1.8} className={isHighlight ? 'text-white/80' : plan.color} />
+                <span className={`font-bold text-lg ${isHighlight ? 'text-white' : 'text-warm-900'}`}>
+                  {plan.name}
+                </span>
+              </div>
+
+              <div className="mb-6">
+                <div className={`flex items-end gap-1 ${isHighlight ? 'text-white' : 'text-warm-900'}`}>
+                  <span className="text-4xl font-bold">{plan.priceLabel}</span>
+                  {plan.period && <span className={`text-sm mb-1.5 ${isHighlight ? 'text-white/70' : 'text-warm-400'}`}>{plan.period}</span>}
+                </div>
+                <p className={`text-sm mt-1 ${isHighlight ? 'text-white/80' : 'text-warm-500'}`}>
+                  {plan.commission} de comisión por sesión
+                </p>
+              </div>
+
+              <ul className="space-y-3 mb-8 flex-1">
+                {plan.features.map((f, i) => (
+                  <li key={i} className={`flex items-start gap-2.5 text-sm ${isHighlight ? 'text-white/90' : 'text-warm-700'}`}>
+                    <Check size={15} strokeWidth={2.5} className={`shrink-0 mt-0.5 ${isHighlight ? 'text-white' : 'text-green-500'}`} />
+                    {f}
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => navigate('/register?role=therapist')}
+                className={`w-full py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                  isHighlight
+                    ? 'bg-white text-primary-700 hover:bg-primary-50'
+                    : 'bg-primary-600 text-white hover:bg-primary-700'
+                }`}
+              >
+                {plan.cta}
+                <ArrowRight size={15} strokeWidth={2} />
+              </button>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Stats de confianza */}
+      <div className="bg-white border-y border-warm-100 py-12 px-4 mb-16">
+        <div className="max-w-3xl mx-auto grid grid-cols-3 gap-8 text-center">
+          <div>
+            <div className="flex justify-center mb-2">
+              <Users size={24} strokeWidth={1.5} className="text-primary-400" />
+            </div>
+            <p className="text-2xl font-bold text-warm-900">100%</p>
+            <p className="text-sm text-warm-400 mt-0.5">Terapeutas verificados</p>
+          </div>
+          <div>
+            <div className="flex justify-center mb-2">
+              <Shield size={24} strokeWidth={1.5} className="text-primary-400" />
+            </div>
+            <p className="text-2xl font-bold text-warm-900">SSL</p>
+            <p className="text-sm text-warm-400 mt-0.5">Pagos cifrados</p>
+          </div>
+          <div>
+            <div className="flex justify-center mb-2">
+              <Video size={24} strokeWidth={1.5} className="text-primary-400" />
+            </div>
+            <p className="text-2xl font-bold text-warm-900">HD</p>
+            <p className="text-sm text-warm-400 mt-0.5">Video de alta calidad</p>
+          </div>
+        </div>
+      </div>
+
+      {/* FAQ */}
+      <div className="max-w-2xl mx-auto px-4 pb-20">
+        <h2 className="font-serif text-2xl font-bold text-warm-900 text-center mb-8">
+          Preguntas frecuentes
+        </h2>
+        <div className="space-y-4">
+          {FAQS.map((faq, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-warm-100 p-5">
+              <p className="font-semibold text-warm-900 mb-2">{faq.q}</p>
+              <p className="text-sm text-warm-500 leading-relaxed">{faq.a}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="text-center mt-12">
+          <p className="text-warm-500 mb-4">¿Listo para unirte?</p>
+          <Button onClick={() => navigate('/register?role=therapist')} size="lg">
+            Crear cuenta de terapeuta gratis
+            <ArrowRight size={16} strokeWidth={2} className="ml-2" />
+          </Button>
+        </div>
+      </div>
+
+    </div>
+  )
+}

@@ -14,7 +14,7 @@ import { useAuthStore } from '@/store/authStore'
 import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
 import toast from 'react-hot-toast'
-import { DollarSign, Zap, AlertTriangle, Search, Calendar } from 'lucide-react'
+import { DollarSign, Zap, AlertTriangle, Search, Calendar, Crown, Star } from 'lucide-react'
 
 const SPECIALTIES = [
   'Todas', 'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
@@ -57,11 +57,16 @@ export default function FindTherapist() {
       const { data, error: queryError } = await query.order('rating', { ascending: false })
       if (queryError) throw queryError
 
-      const withRating = (data ?? []).map((t) => ({
-        ...t,
-        avg_rating: t.rating ?? 0,
-        review_count: t.review_count ?? 0,
-      }))
+      // Orden de visibilidad: premium → pro → basic, luego por rating
+      const PLAN_ORDER = { premium: 0, pro: 1, basic: 2 }
+      const withRating = (data ?? [])
+        .map((t) => ({
+          ...t,
+          avg_rating:   t.rating ?? 0,
+          review_count: t.review_count ?? 0,
+          plan_order:   PLAN_ORDER[t.subscription_plan ?? 'basic'] ?? 2,
+        }))
+        .sort((a, b) => a.plan_order - b.plan_order || b.avg_rating - a.avg_rating)
 
       setTherapists(withRating)
     } catch (err) {
@@ -184,7 +189,19 @@ export default function FindTherapist() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2">
                     <div>
-                      <p className="font-semibold text-warm-900">{t.profile?.full_name}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="font-semibold text-warm-900">{t.profile?.full_name}</p>
+                        {t.subscription_plan === 'premium' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1">
+                            <Crown size={9} strokeWidth={2} />Premium
+                          </span>
+                        )}
+                        {t.subscription_plan === 'pro' && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 flex items-center gap-1">
+                            <Star size={9} strokeWidth={2} />Pro
+                          </span>
+                        )}
+                      </div>
                       <p className="text-sm text-warm-500">{t.specialty}</p>
                     </div>
                     <VerificationBadge status="verified" />

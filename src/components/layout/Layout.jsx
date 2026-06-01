@@ -12,7 +12,7 @@ import {
   Users, ClipboardList, BookOpen, Clock, Heart,
   LayoutDashboard, TestTube, Shield, Library,
   BookMarked, Stethoscope, FolderOpen, MoreHorizontal,
-  X, Zap, Bell, ChevronRight, LogOut,
+  X, Zap, Bell, ChevronRight, LogOut, Crown,
 } from 'lucide-react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 
@@ -26,14 +26,15 @@ const THERAPIST_PRIMARY = [
   { to: '/therapist/profile',   icon: User,          label: 'Perfil'    },
 ]
 const THERAPIST_SECONDARY = [
-  { to: '/therapist/tests',       icon: TestTube,        label: 'Tests'       },
-  { to: '/therapist/dsm',         icon: BookOpen,        label: 'DSM-5-TR'    },
-  { to: '/therapist/cie',         icon: BookMarked,      label: 'CIE-11'      },
-  { to: '/therapist/scales',      icon: LayoutDashboard, label: 'Escalas'     },
-  { to: '/therapist/safety-plan', icon: Shield,          label: 'Plan Crisis' },
-  { to: '/therapist/library',     icon: Library,         label: 'Biblioteca'  },
-  { to: '/therapist/peers',       icon: Stethoscope,     label: 'Colegas'     },
-  { to: '/therapist/protocols',   icon: FolderOpen,      label: 'Protocolos'  },
+  { to: '/therapist/subscription', icon: Crown,          label: 'Mi plan'     },
+  { to: '/therapist/tests',        icon: TestTube,       label: 'Tests'       },
+  { to: '/therapist/dsm',          icon: BookOpen,       label: 'DSM-5-TR'   },
+  { to: '/therapist/cie',          icon: BookMarked,     label: 'CIE-11'      },
+  { to: '/therapist/scales',       icon: LayoutDashboard,label: 'Escalas'     },
+  { to: '/therapist/safety-plan',  icon: Shield,         label: 'Plan Crisis' },
+  { to: '/therapist/library',      icon: Library,        label: 'Biblioteca'  },
+  { to: '/therapist/peers',        icon: Stethoscope,    label: 'Colegas'     },
+  { to: '/therapist/protocols',    icon: FolderOpen,     label: 'Protocolos'  },
 ]
 
 const PATIENT_PRIMARY = [

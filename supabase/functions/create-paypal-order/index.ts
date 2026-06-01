@@ -48,21 +48,36 @@ Deno.serve(async (req) => {
 
     const finalPrice = +(priceBase * (isUrgent ? 1.3 : 1)).toFixed(2)
 
-    // Crear sesión en Supabase con status payment_pending
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
+
+    // Obtener tasa de comisión del terapeuta según su plan
+    const { data: therapistProfile } = await supabaseAdmin
+      .from('therapist_profiles')
+      .select('commission_rate, subscription_plan')
+      .eq('user_id', therapistId)
+      .single()
+
+    const commissionRate  = therapistProfile?.commission_rate ?? 0.10
+    const platformCommission = +(finalPrice * commissionRate).toFixed(2)
+    const therapistNet       = +(finalPrice - platformCommission).toFixed(2)
+
+    // Crear sesión en Supabase con status payment_pending
     const { data: session, error: sessionError } = await supabaseAdmin
       .from('sessions')
       .insert({
-        therapist_id: therapistId,
-        patient_id: user.id,
-        scheduled_at: scheduledAt,
-        status: 'payment_pending',
-        price: finalPrice,
-        is_urgent: isUrgent ?? false,
-        duration: 60,
+        therapist_id:        therapistId,
+        patient_id:          user.id,
+        scheduled_at:        scheduledAt,
+        status:              'payment_pending',
+        price:               finalPrice,
+        is_urgent:           isUrgent ?? false,
+        duration:            60,
+        commission_rate:     commissionRate,
+        platform_commission: platformCommission,
+        therapist_net:       therapistNet,
       })
       .select('id')
       .single()
