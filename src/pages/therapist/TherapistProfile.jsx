@@ -10,7 +10,26 @@ import { VerificationBadge } from '@/components/ui/Badge'
 import { RatingDisplay } from '@/components/ui/StarRating'
 import { formatPrice } from '@/lib/utils'
 import toast from 'react-hot-toast'
-import { Pencil, CheckCircle2, XCircle, Clock, Upload } from 'lucide-react'
+import { Pencil, CheckCircle2, XCircle, Clock, Upload, FileText, AlertCircle } from 'lucide-react'
+
+// ── Documentos requeridos para verificación ────────────────────────────────
+const REQUIRED_DOCS = [
+  {
+    type:        'titulo_profesional',
+    label:       'Título profesional',
+    description: 'Diploma universitario que acredita tu grado en Psicología',
+  },
+  {
+    type:        'exequatur',
+    label:       'Exequátur',
+    description: 'Autorización emitida por el Estado para ejercer la profesión',
+  },
+  {
+    type:        'colegio_psicologico',
+    label:       'Acreditación del Colegio Psicológico',
+    description: 'Certificado vigente de membresía en el colegio profesional',
+  },
+]
 
 const SPECIALTIES = [
   'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
@@ -30,7 +49,8 @@ export default function TherapistProfile() {
     price:     therapist?.price_per_session ?? 0,
   })
   const [saving, setSaving]         = useState(false)
-  const [uploadingDoc, setUploadingDoc] = useState(false)
+  const [uploadingDoc, setUploadingDoc] = useState(null)  // doc type being uploaded
+  const [credentials, setCredentials]   = useState({})    // { type: credential }
   const [stats, setStats]           = useState({ sessions: 0, patients: 0, totalEarned: 0 })
 
   // ── Datos de pago ──────────────────────────────────────────────────────────
@@ -48,8 +68,23 @@ export default function TherapistProfile() {
   const [loadingPayouts, setLoadingPayouts] = useState(false)
 
   useEffect(() => {
-    if (user) { fetchStats(); fetchPayouts() }
+    if (user) { fetchStats(); fetchPayouts(); fetchCredentials() }
   }, [user])
+
+  const fetchCredentials = async () => {
+    const { data } = await supabase
+      .from('therapist_credentials')
+      .select('id, document_type, document_url, status, rejection_reason, created_at')
+      .eq('therapist_id', user.id)
+      .order('created_at', { ascending: false })
+
+    // Quedarse con el más reciente por tipo
+    const map = {}
+    for (const c of (data ?? [])) {
+      if (!map[c.document_type]) map[c.document_type] = c
+    }
+    setCredentials(map)
+  }
 
   const fetchStats = async () => {
     const { data } = await supabase
@@ -123,20 +158,37 @@ export default function TherapistProfile() {
     setSaving(false)
   }
 
-  const uploadCredential = async (e) => {
+  const uploadCredential = async (docType, e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setUploadingDoc(true)
-    const path = `credentials/${user.id}/${Date.now()}-${file.name}`
-    const { error } = await supabase.storage.from('credentials').upload(path, file)
-    if (error) { toast.error('Error subiendo documento'); setUploadingDoc(false); return }
 
-    await supabase.from('therapist_credentials').insert({
-      therapist_id: user.id, document_url: path, status: 'pending',
+    const maxSize = 10 * 1024 * 1024 // 10 MB
+    if (file.size > maxSize) { toast.error('El archivo no puede superar 10 MB'); return }
+
+    setUploadingDoc(docType)
+    const ext  = file.name.split('.').pop()
+    const path = `credentials/${user.id}/${docType}-${Date.now()}.${ext}`
+
+    const { error: uploadError } = await supabase.storage.from('credentials').upload(path, file)
+    if (uploadError) { toast.error('Error subiendo el documento'); setUploadingDoc(null); return }
+
+    const { error: dbError } = await supabase.from('therapist_credentials').insert({
+      therapist_id:  user.id,
+      document_type: docType,
+      document_url:  path,
+      status:        'pending',
     })
-    await supabase.from('therapist_profiles').update({ verification_status: 'pending' }).eq('user_id', user.id)
-    toast.success('Documento enviado para verificación')
-    setUploadingDoc(false)
+    if (dbError) { toast.error('Error registrando el documento'); setUploadingDoc(null); return }
+
+    // Marcar perfil como pendiente de revisión
+    await supabase.from('therapist_profiles')
+      .update({ verification_status: 'pending' })
+      .eq('user_id', user.id)
+
+    toast.success('Documento enviado para revisión')
+    setUploadingDoc(null)
+    e.target.value = ''
+    fetchCredentials()
   }
 
   return (
@@ -213,37 +265,144 @@ export default function TherapistProfile() {
         <CardHeader>
           <CardTitle>Verificación de credenciales</CardTitle>
         </CardHeader>
-        <div className="flex flex-col gap-3">
-          <div className={`rounded-xl p-4 ${
+        <div className="flex flex-col gap-4">
+
+          {/* Estado general de verificación */}
+          <div className={`rounded-xl p-4 flex items-start gap-3 ${
             therapist?.verification_status === 'verified' ? 'bg-green-50 border border-green-100' :
             therapist?.verification_status === 'rejected' ? 'bg-red-50 border border-red-100' :
             'bg-amber-50 border border-amber-100'
           }`}>
-            <p className="font-medium text-sm flex items-center gap-1">
-              {therapist?.verification_status === 'verified'
-                ? <><CheckCircle2 size={14} strokeWidth={1.8} className="text-green-600" /> Credenciales verificadas</>
-                : therapist?.verification_status === 'rejected'
-                ? <><XCircle size={14} strokeWidth={1.8} className="text-red-600" /> Verificación rechazada</>
-                : <><Clock size={14} strokeWidth={1.8} className="text-amber-600" /> Verificación en proceso</>}
-            </p>
-            <p className="text-xs mt-1 text-warm-600">
-              {therapist?.verification_status === 'verified'
-                ? 'Tu perfil está activo y visible para los pacientes.'
-                : therapist?.verification_status === 'rejected'
-                ? 'Por favor sube documentos actualizados.'
-                : 'Estamos revisando tus documentos (24-48 horas).'}
-            </p>
+            {therapist?.verification_status === 'verified'
+              ? <CheckCircle2 size={18} strokeWidth={1.8} className="text-green-600 shrink-0 mt-0.5" />
+              : therapist?.verification_status === 'rejected'
+              ? <XCircle size={18} strokeWidth={1.8} className="text-red-600 shrink-0 mt-0.5" />
+              : <Clock size={18} strokeWidth={1.8} className="text-amber-600 shrink-0 mt-0.5" />}
+            <div>
+              <p className="font-semibold text-sm text-warm-900">
+                {therapist?.verification_status === 'verified' ? 'Credenciales verificadas' :
+                 therapist?.verification_status === 'rejected' ? 'Verificación rechazada' :
+                 'Verificación pendiente'}
+              </p>
+              <p className="text-xs text-warm-500 mt-0.5">
+                {therapist?.verification_status === 'verified'
+                  ? 'Tu perfil está activo y visible para los pacientes.'
+                  : therapist?.verification_status === 'rejected'
+                  ? 'Uno o más documentos fueron rechazados. Revisa el detalle y sube versiones actualizadas.'
+                  : 'Sube los 3 documentos requeridos. El equipo los revisará en 24-48 horas.'}
+              </p>
+            </div>
           </div>
 
+          {/* Los 3 documentos requeridos */}
+          <div className="space-y-3">
+            {REQUIRED_DOCS.map((doc) => {
+              const cred     = credentials[doc.type]
+              const status   = cred?.status ?? 'missing'
+              const isUploading = uploadingDoc === doc.type
+
+              return (
+                <div key={doc.type} className={`rounded-xl border p-4 transition-all ${
+                  status === 'verified' ? 'border-green-200 bg-green-50' :
+                  status === 'rejected' ? 'border-red-200 bg-red-50' :
+                  status === 'pending'  ? 'border-amber-200 bg-amber-50' :
+                  'border-warm-200 bg-warm-50'
+                }`}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3 flex-1 min-w-0">
+                      {/* Ícono de estado */}
+                      <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                        status === 'verified' ? 'bg-green-100' :
+                        status === 'rejected' ? 'bg-red-100'   :
+                        status === 'pending'  ? 'bg-amber-100' :
+                        'bg-warm-100'
+                      }`}>
+                        {status === 'verified' ? <CheckCircle2 size={18} strokeWidth={1.8} className="text-green-600" /> :
+                         status === 'rejected' ? <XCircle size={18} strokeWidth={1.8} className="text-red-600" /> :
+                         status === 'pending'  ? <Clock size={18} strokeWidth={1.8} className="text-amber-600" /> :
+                         <FileText size={18} strokeWidth={1.8} className="text-warm-400" />}
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-warm-900">{doc.label}</p>
+                        <p className="text-xs text-warm-500 mt-0.5">{doc.description}</p>
+                        {status === 'rejected' && cred?.rejection_reason && (
+                          <div className="flex items-start gap-1.5 mt-2 bg-red-100 rounded-lg px-2.5 py-1.5">
+                            <AlertCircle size={12} strokeWidth={1.8} className="text-red-500 shrink-0 mt-0.5" />
+                            <p className="text-xs text-red-700">{cred.rejection_reason}</p>
+                          </div>
+                        )}
+                        {status !== 'missing' && (
+                          <p className={`text-[10px] font-semibold mt-1.5 ${
+                            status === 'verified' ? 'text-green-600' :
+                            status === 'rejected' ? 'text-red-600'   :
+                            'text-amber-600'
+                          }`}>
+                            {status === 'verified' ? 'Aprobado' :
+                             status === 'rejected' ? 'Rechazado — sube un nuevo documento' :
+                             'En revisión (24-48 horas)'}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Botón de subir */}
+                    {status !== 'verified' && (
+                      <label className="cursor-pointer shrink-0">
+                        <input
+                          type="file"
+                          className="sr-only"
+                          accept=".pdf,.jpg,.jpeg,.png"
+                          disabled={!!uploadingDoc}
+                          onChange={(e) => uploadCredential(doc.type, e)}
+                        />
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                          isUploading
+                            ? 'bg-warm-200 text-warm-500 cursor-not-allowed'
+                            : 'bg-primary-500 text-white hover:bg-primary-600 cursor-pointer'
+                        }`}>
+                          {isUploading ? (
+                            <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24" fill="none">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                            </svg>
+                          ) : (
+                            <Upload size={12} strokeWidth={2} />
+                          )}
+                          {isUploading ? 'Subiendo...' : status === 'missing' ? 'Subir' : 'Actualizar'}
+                        </span>
+                      </label>
+                    )}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {/* Progreso: X de 3 documentos enviados */}
           {therapist?.verification_status !== 'verified' && (
-            <label className="cursor-pointer">
-              <input type="file" className="sr-only" accept=".pdf,.jpg,.jpeg,.png"
-                onChange={uploadCredential} disabled={uploadingDoc} />
-              <Button as="span" variant="secondary" fullWidth loading={uploadingDoc}>
-                <Upload size={13} strokeWidth={1.8} className="inline mr-1" />{uploadingDoc ? 'Subiendo...' : 'Subir documento de credencial'}
-              </Button>
-            </label>
+            <div className="bg-warm-50 rounded-xl p-3">
+              {(() => {
+                const uploaded = REQUIRED_DOCS.filter(d => credentials[d.type]).length
+                const verified = REQUIRED_DOCS.filter(d => credentials[d.type]?.status === 'verified').length
+                return (
+                  <>
+                    <div className="flex justify-between text-xs text-warm-500 mb-2">
+                      <span>Progreso de verificación</span>
+                      <span className="font-semibold">{verified === 3 ? '¡Completado!' : `${uploaded}/3 enviados · ${verified}/3 aprobados`}</span>
+                    </div>
+                    <div className="h-2 bg-warm-200 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-primary-500 rounded-full transition-all duration-500"
+                        style={{ width: `${(verified / 3) * 100}%` }}
+                      />
+                    </div>
+                  </>
+                )
+              })()}
+            </div>
           )}
+
         </div>
       </Card>
 

@@ -74,7 +74,7 @@ export default function AdminTherapists() {
     setCredentials([])
     const { data } = await supabase
       .from('therapist_credentials')
-      .select('id, document_url, status, created_at')
+      .select('id, document_url, document_type, status, rejection_reason, created_at')
       .eq('therapist_id', t.user_id)
       .order('created_at', { ascending: false })
 
@@ -271,37 +271,52 @@ export default function AdminTherapists() {
                 <div className="bg-warm-50 rounded-xl p-4 text-center text-sm text-warm-400 animate-pulse">
                   Cargando documentos...
                 </div>
-              ) : credentials.length === 0 ? (
-                <div className="bg-warm-50 rounded-xl p-4 text-center text-sm text-warm-400">
-                  No ha subido documentos aún
-                </div>
               ) : (
                 <div className="flex flex-col gap-2">
-                  {credentials.map((doc, i) => {
-                    const isImage = /\.(jpg|jpeg|png|webp)$/i.test(doc.document_url)
-                    const isPDF   = /\.pdf$/i.test(doc.document_url)
+                  {[
+                    { type: 'titulo_profesional',  label: 'Título profesional' },
+                    { type: 'exequatur',            label: 'Exequátur' },
+                    { type: 'colegio_psicologico',  label: 'Acreditación Colegio Psicológico' },
+                  ].map((req) => {
+                    // Más reciente de ese tipo
+                    const doc = credentials.find(c => c.document_type === req.type)
                     return (
-                      <div key={doc.id} className="bg-warm-50 rounded-xl p-3 flex items-center gap-3">
-                        <span className="w-9 h-9 rounded-xl bg-warm-100 flex items-center justify-center shrink-0">
-                          {isPDF ? <FileText size={16} className="text-warm-500" /> : isImage ? <Image size={16} className="text-warm-500" /> : <File size={16} className="text-warm-500" />}
-                        </span>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-medium text-warm-700 truncate">
-                            Documento {i + 1}
-                          </p>
-                          <p className="text-xs text-warm-400">
-                            {new Date(doc.created_at).toLocaleDateString('es-DO', { dateStyle: 'medium' })}
-                          </p>
+                      <div key={req.type} className={`rounded-xl p-3 border ${
+                        !doc                         ? 'bg-warm-50 border-warm-200' :
+                        doc.status === 'verified'    ? 'bg-green-50 border-green-200' :
+                        doc.status === 'rejected'    ? 'bg-red-50 border-red-200' :
+                        'bg-amber-50 border-amber-200'
+                      }`}>
+                        <div className="flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0 border border-warm-100">
+                            <FileText size={14} className="text-warm-500" />
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-semibold text-warm-800">{req.label}</p>
+                            {!doc ? (
+                              <p className="text-[10px] text-warm-400">No subido aún</p>
+                            ) : (
+                              <p className={`text-[10px] font-medium ${
+                                doc.status === 'verified' ? 'text-green-600' :
+                                doc.status === 'rejected' ? 'text-red-600' : 'text-amber-600'
+                              }`}>
+                                {doc.status === 'verified' ? 'Aprobado' :
+                                 doc.status === 'rejected' ? 'Rechazado' : 'En revisión'}
+                                {' · '}{new Date(doc.created_at).toLocaleDateString('es-DO', { dateStyle: 'short' })}
+                              </p>
+                            )}
+                          </div>
+                          {doc?.signedUrl && (
+                            <a href={doc.signedUrl} target="_blank" rel="noopener noreferrer"
+                              className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-lg bg-primary-50 text-primary-600 border border-primary-200 hover:bg-primary-100 transition-colors">
+                              Ver →
+                            </a>
+                          )}
                         </div>
-                        {doc.signedUrl && (
-                          <a
-                            href={doc.signedUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="shrink-0 text-xs font-medium px-3 py-1.5 rounded-lg bg-primary-50 text-primary-600 border border-primary-200 hover:bg-primary-100 transition-colors"
-                          >
-                            Ver →
-                          </a>
+                        {doc?.status === 'rejected' && doc.rejection_reason && (
+                          <p className="text-[10px] text-red-600 mt-1.5 bg-red-100 rounded-lg px-2 py-1">
+                            Motivo: {doc.rejection_reason}
+                          </p>
                         )}
                       </div>
                     )
