@@ -9,7 +9,7 @@ import Card, { StatCard } from '@/components/ui/Card'
 import Badge, { VerificationBadge } from '@/components/ui/Badge'
 import Button from '@/components/ui/Button'
 import Avatar from '@/components/ui/Avatar'
-import { formatSessionDate, formatPrice, canStartVideo, getGreeting } from '@/lib/utils'
+import { formatSessionDate, formatPrice, canStartVideo, getGreeting, getDisplayName } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import {
   Calendar, Users, DollarSign, Bot, MessageCircle,
@@ -45,7 +45,7 @@ export default function TherapistDashboard() {
 
       const { data: sessionsData } = await supabase
         .from('sessions')
-        .select(`*, patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url)`)
+        .select(`*, patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url, is_anonymous)`)
         .eq('therapist_id', user.id)
         .in('status', ['scheduled', 'in_progress'])
         .gte('scheduled_at', new Date(Date.now() - 90 * 60 * 1000).toISOString())
@@ -312,9 +312,9 @@ function SessionCard({ session, onStart, onView }) {
   const canVideo = canStartVideo(session.scheduled_at)
   return (
     <Card className="flex items-center gap-4">
-      <Avatar name={session.patient?.full_name ?? ''} size="md" />
+      <Avatar name={getDisplayName(session.patient)} size="md" />
       <div className="flex-1 min-w-0">
-        <p className="font-semibold text-warm-900 truncate">{session.patient?.full_name}</p>
+        <p className="font-semibold text-warm-900 truncate">{getDisplayName(session.patient)}</p>
         <p className="text-sm text-warm-500">{formatSessionDate(session.scheduled_at)}</p>
         <div className="flex items-center gap-2 mt-1">
           <Badge variant={session.is_urgent ? 'urgent' : 'primary'} dot>

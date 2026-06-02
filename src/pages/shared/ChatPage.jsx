@@ -25,7 +25,7 @@ import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import Avatar from '@/components/ui/Avatar'
 import Button from '@/components/ui/Button'
-import { formatRelative } from '@/lib/utils'
+import { formatRelative, getDisplayName } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 import { AlertTriangle, MessageCircle, Hand } from 'lucide-react'
@@ -111,8 +111,8 @@ export default function ChatPage() {
       // Determinar el campo y join según el rol del usuario actual
       const otherField = role === 'therapist' ? 'therapist_id' : 'patient_id'
       const profileJoin = role === 'therapist'
-        ? 'patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url)'
-        : 'therapist:profiles!sessions_therapist_id_fkey(id, full_name, avatar_url, therapist_profiles(specialty))'
+        ? 'patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url, is_anonymous)'
+        : 'therapist:profiles!sessions_therapist_id_fkey(id, full_name, avatar_url, is_anonymous, therapist_profiles(specialty))'
 
       const { data, error: fetchError } = await supabase
         .from('sessions')
@@ -420,14 +420,14 @@ export default function ChatPage() {
                 }`}
               >
                 <div className="relative shrink-0">
-                  <Avatar name={conv.full_name} size="md" />
+                  <Avatar name={getDisplayName(conv)} size="md" />
                   {isActive && (
                     <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 rounded-full border-2 border-white" />
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className={`font-medium text-sm truncate ${isActive ? 'text-primary-700' : 'text-warm-800'}`}>
-                    {conv.full_name}
+                    {getDisplayName(conv)}
                   </p>
                   <p className="text-xs text-warm-400 truncate">{subtitle}</p>
                 </div>
@@ -457,9 +457,9 @@ export default function ChatPage() {
             >
               ←
             </button>
-            <Avatar name={activeConv.full_name} size="sm" />
+            <Avatar name={getDisplayName(activeConv)} size="sm" />
             <div className="flex-1">
-              <p className="font-semibold text-warm-900 text-sm">{activeConv.full_name}</p>
+              <p className="font-semibold text-warm-900 text-sm">{getDisplayName(activeConv)}</p>
               {onlineUsers.has(activeConv.id) ? (
                 <p className="text-xs text-green-600 flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />

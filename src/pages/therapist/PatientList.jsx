@@ -7,9 +7,9 @@ import Avatar from '@/components/ui/Avatar'
 import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Input from '@/components/ui/Input'
-import { formatDate, truncate } from '@/lib/utils'
+import { formatDate, truncate, getDisplayName } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
-import { Search, Users, Calendar } from 'lucide-react'
+import { Search, Users, Calendar, EyeOff } from 'lucide-react'
 
 export default function PatientList() {
   const { user } = useAuthStore()
@@ -32,7 +32,7 @@ export default function PatientList() {
         patient_id,
         scheduled_at,
         status,
-        patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url, email),
+        patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url, email, is_anonymous),
         clinical_history(id, diagnosis, created_at)
       `)
       .eq('therapist_id', user.id)
@@ -131,9 +131,16 @@ export default function PatientList() {
           {filtered.map(({ patient, scheduled_at, status, clinical_history, nextSession, lastSession }) => (
             <Card key={patient.id} hover onClick={() => navigate(`/therapist/patients/${patient.id}`)}>
               <div className="flex items-center gap-4">
-                <Avatar name={patient.full_name} size="md" />
+                <Avatar name={getDisplayName(patient)} size="md" />
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-warm-900">{patient.full_name}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-warm-900">{getDisplayName(patient)}</p>
+                    {patient.is_anonymous && (
+                      <span className="text-[10px] text-warm-400 flex items-center gap-0.5">
+                        <EyeOff size={10} strokeWidth={1.8} />Anónimo
+                      </span>
+                    )}
+                  </div>
                   {nextSession ? (
                     <p className="text-xs text-primary-600 font-medium mt-0.5 flex items-center gap-1">
                       <Calendar size={11} strokeWidth={1.8} /> Próxima cita: {formatDate(nextSession)}

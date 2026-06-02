@@ -8,7 +8,7 @@ import Badge from '@/components/ui/Badge'
 import Avatar from '@/components/ui/Avatar'
 import Modal from '@/components/ui/Modal'
 import { Select } from '@/components/ui/Input'
-import { formatDate, formatTime, formatPrice } from '@/lib/utils'
+import { formatDate, formatTime, formatPrice, getDisplayName } from '@/lib/utils'
 import { addDays, startOfWeek, format, parseISO, isSameDay, isToday } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { Skeleton } from '@/components/ui/Spinner'
@@ -56,7 +56,7 @@ export default function TherapistSchedule() {
     const [{ data }, { data: avail }, { data: blocked }] = await Promise.all([
       supabase
         .from('sessions')
-        .select('*, patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url)')
+        .select('*, patient:profiles!sessions_patient_id_fkey(id, full_name, avatar_url, is_anonymous)')
         .eq('therapist_id', user.id)
         .gte('scheduled_at', weekStart.toISOString())
         .lte('scheduled_at', weekEnd.toISOString())
@@ -282,7 +282,7 @@ export default function TherapistSchedule() {
                           {formatTime(s.scheduled_at)}
                         </p>
                         <p className="text-[10px] truncate leading-tight opacity-80">
-                          {s.patient?.full_name?.split(' ')[0]}
+                          {getDisplayName(s.patient)?.split(' ')[0]}
                         </p>
                       </button>
                     )
@@ -353,9 +353,9 @@ export default function TherapistSchedule() {
         {selectedSession && (
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3 bg-warm-50 rounded-xl p-3">
-              <Avatar name={selectedSession.patient?.full_name ?? ''} size="lg" />
+              <Avatar name={getDisplayName(selectedSession.patient)} size="lg" />
               <div>
-                <p className="font-semibold text-warm-900">{selectedSession.patient?.full_name}</p>
+                <p className="font-semibold text-warm-900">{getDisplayName(selectedSession.patient)}</p>
                 <p className="text-sm text-warm-500">
                   {formatDate(selectedSession.scheduled_at)} · {formatTime(selectedSession.scheduled_at)}
                 </p>

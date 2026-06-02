@@ -116,3 +116,24 @@ export const generateId = () => Math.random().toString(36).slice(2, 11)
 // Truncar texto
 export const truncate = (text = '', maxLen = 100) =>
   text.length > maxLen ? text.slice(0, maxLen) + '…' : text
+
+/**
+ * getDisplayName — Devuelve el nombre a mostrar según privacidad.
+ * Si el perfil tiene is_anonymous=true, devuelve solo las iniciales.
+ * Ej: "María García" → "M. G."
+ * El paciente siempre ve su propio nombre completo (pasar isSelf=true).
+ */
+export const getDisplayName = (profile, isSelf = false) => {
+  if (!profile) return 'Usuario'
+  if (isSelf || !profile.is_anonymous) return profile.full_name ?? 'Usuario'
+  const parts = (profile.full_name ?? '').trim().split(/\s+/)
+  return parts
+    .slice(0, 2)
+    .map(p => p[0]?.toUpperCase() + '.')
+    .join(' ')
+}
+
+/**
+ * isAnonymous — Indica si un perfil tiene el anonimato activado.
+ */
+export const isAnonymous = (profile) => profile?.is_anonymous === true

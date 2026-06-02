@@ -8,7 +8,7 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
 import toast from 'react-hot-toast'
-import { Bell, Lock, ClipboardList, Pencil, Hand } from 'lucide-react'
+import { Bell, Lock, ClipboardList, Hand, EyeOff } from 'lucide-react'
 
 // ── Toggle UI ──────────────────────────────────────────────────────
 function Toggle({ checked, onChange }) {
@@ -37,14 +37,14 @@ export default function PatientProfile() {
   const { profile, user, updateProfile, signOut } = useAuthStore()
   const navigate = useNavigate()
 
-  const [editing, setEditing]         = useState(false)
-  const [form, setForm]               = useState({ full_name: profile?.full_name ?? '' })
-  const [saving, setSaving]           = useState(false)
-
   // Modales
   const [notifModal, setNotifModal]   = useState(false)
   const [privModal, setPrivModal]     = useState(false)
   const [showLogout, setShowLogout]   = useState(false)
+
+  // Anonimato
+  const [isAnon, setIsAnon]           = useState(profile?.is_anonymous ?? false)
+  const [savingAnon, setSavingAnon]   = useState(false)
 
   // Preferencias de notificaciones
   const [prefs, setPrefs]             = useState(DEFAULT_PREFS)
@@ -79,25 +79,25 @@ export default function PatientProfile() {
 
   const togglePref = (key) => setPrefs(p => ({ ...p, [key]: !p[key] }))
 
-  const saveProfile = async () => {
-    if (!form.full_name.trim()) {
-      toast.error('El nombre no puede estar vacío')
-      return
-    }
-    if (form.full_name.trim().length < 3) {
-      toast.error('El nombre debe tener al menos 3 caracteres')
-      return
-    }
-    setSaving(true)
+  const toggleAnonymity = async () => {
+    setSavingAnon(true)
+    const next = !isAnon
     const { error } = await supabase
       .from('profiles')
-      .update({ full_name: form.full_name.trim() })
+      .update({ is_anonymous: next })
       .eq('id', user.id)
-    if (error) { toast.error('Error al guardar el perfil. Intenta de nuevo.'); setSaving(false); return }
-    updateProfile({ full_name: form.full_name.trim() })
-    toast.success('Perfil actualizado correctamente')
-    setEditing(false)
-    setSaving(false)
+    if (error) {
+      toast.error('Error al cambiar la configuración')
+      setSavingAnon(false)
+      return
+    }
+    setIsAnon(next)
+    updateProfile({ is_anonymous: next })
+    toast.success(next
+      ? 'Modo anónimo activado — los terapeutas verán solo tus iniciales'
+      : 'Modo anónimo desactivado — los terapeutas verán tu nombre completo'
+    )
+    setSavingAnon(false)
   }
 
   const SETTINGS = [
@@ -114,24 +114,51 @@ export default function PatientProfile() {
       <Card>
         <div className="flex flex-col items-center gap-4 py-4">
           <AvatarUpload size="2xl" />
-          {editing ? (
-            <div className="w-full flex flex-col gap-3">
-              <Input label="Nombre completo" value={form.full_name}
-                onChange={(e) => setForm(f => ({ ...f, full_name: e.target.value }))} />
-              <div className="flex gap-2">
-                <Button variant="outline" onClick={() => setEditing(false)} className="flex-1">Cancelar</Button>
-                <Button onClick={saveProfile} loading={saving} className="flex-1">Guardar</Button>
+          <div className="text-center">
+            <h2 className="font-serif text-xl font-bold text-warm-900">{profile?.full_name}</h2>
+            <p className="text-warm-500 text-sm mt-0.5">{profile?.email}</p>
+          </div>
+
+          {/* Toggle de anonimato */}
+          <div className={`w-full rounded-2xl border-2 p-4 transition-all ${
+            isAnon
+              ? 'border-primary-200 bg-primary-50'
+              : 'border-warm-100 bg-warm-50'
+          }`}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <EyeOff size={15} strokeWidth={1.8} className={isAnon ? 'text-primary-600' : 'text-warm-400'} />
+                  <p className={`font-semibold text-sm ${isAnon ? 'text-primary-800' : 'text-warm-700'}`}>
+                    Modo anónimo
+                  </p>
+                  {isAnon && (
+                    <span className="text-[10px] font-bold bg-primary-500 text-white px-2 py-0.5 rounded-full">
+                      Activo
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-warm-500 leading-relaxed">
+                  {isAnon
+                    ? `Los terapeutas y otros usuarios solo ven tus iniciales: "${
+                        (profile?.full_name ?? '').trim().split(/\s+/).slice(0,2).map(p => p[0]?.toUpperCase() + '.').join(' ')
+                      }"`
+                    : 'Activa el anonimato para que los terapeutas vean solo tus iniciales en lugar de tu nombre completo.'}
+                </p>
               </div>
+              <button
+                onClick={toggleAnonymity}
+                disabled={savingAnon}
+                className={`relative w-12 h-6 rounded-full transition-colors duration-200 shrink-0 mt-0.5 ${
+                  isAnon ? 'bg-primary-500' : 'bg-warm-200'
+                } disabled:opacity-60`}
+              >
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ${
+                  isAnon ? 'translate-x-6' : 'translate-x-0'
+                }`} />
+              </button>
             </div>
-          ) : (
-            <>
-              <div className="text-center">
-                <h2 className="font-serif text-xl font-bold text-warm-900">{profile?.full_name}</h2>
-                <p className="text-warm-500 text-sm mt-0.5">{profile?.email}</p>
-              </div>
-              <Button size="sm" variant="secondary" onClick={() => setEditing(true)}><Pencil size={14} strokeWidth={1.8} className="inline mr-1" />Editar nombre</Button>
-            </>
-          )}
+          </div>
         </div>
       </Card>
 
