@@ -28,6 +28,7 @@ import Register       from '@/pages/auth/Register'
 import ForgotPassword from '@/pages/auth/ForgotPassword'
 import ResetPassword  from '@/pages/auth/ResetPassword'
 import AdminLogin     from '@/pages/auth/AdminLogin'
+import AuthCallback   from '@/pages/auth/AuthCallback'
 
 // Terapeuta
 import TherapistDashboard  from '@/pages/therapist/TherapistDashboard'
@@ -103,6 +104,7 @@ export default function App() {
       <Routes>
         {/* Páginas públicas */}
         <Route path="/pricing"         element={<PricingPage />} />
+        <Route path="/auth/callback"   element={<AuthCallback />} />
 
         {/* Auth — pacientes y terapeutas */}
         <Route path="/login"           element={<Login />} />

@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import { User, Stethoscope, ChevronRight, FileCheck } from 'lucide-react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
+import SocialLoginButtons from '@/components/auth/SocialLoginButtons'
 
 const SPECIALTIES = [
   'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
@@ -196,6 +197,21 @@ export default function Register() {
             </form>
           )}
         </div>
+
+        {/* Login social — solo en paso 1 */}
+        {step === 1 && (
+          <div className="mt-5">
+            <div className="relative mb-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-warm-100" />
+              </div>
+              <div className="relative flex justify-center">
+                <span className="text-xs text-warm-400 bg-psiconecta px-3">o regístrate con</span>
+              </div>
+            </div>
+            <SocialLoginButtons />
+          </div>
+        )}
 
         <p className="text-center mt-5 text-sm text-warm-500">
           ¿Ya tienes cuenta?{' '}

@@ -6,6 +6,7 @@ import Input from '@/components/ui/Input'
 import toast from 'react-hot-toast'
 import { supabase } from '@/lib/supabase'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
+import SocialLoginButtons from '@/components/auth/SocialLoginButtons'
 
 export default function Login() {
   const [form, setForm] = useState({ email: '', password: '' })
@@ -106,13 +107,25 @@ export default function Login() {
             </Button>
           </form>
 
-          {/* Separador */}
+          {/* Login social */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-warm-100" />
             </div>
-            <div className="relative flex justify-center text-xs text-warm-400 bg-white px-3">
-              ¿No tienes cuenta?
+            <div className="relative flex justify-center">
+              <span className="text-xs text-warm-400 bg-white px-3">o continúa con</span>
+            </div>
+          </div>
+
+          <SocialLoginButtons />
+
+          {/* Separador crear cuenta */}
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-warm-100" />
+            </div>
+            <div className="relative flex justify-center">
+              <span className="text-xs text-warm-400 bg-white px-3">¿No tienes cuenta?</span>
             </div>
           </div>
 
