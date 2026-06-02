@@ -16,16 +16,19 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Librerías de React
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          // Supabase (client + realtime)
+          'vendor-react':    ['react', 'react-dom', 'react-router-dom'],
           'vendor-supabase': ['@supabase/supabase-js'],
-          // Recharts (gráficas)
           'vendor-recharts': ['recharts'],
-          // Utilidades de fecha
-          'vendor-dates': ['date-fns'],
-          // UI y estado
-          'vendor-ui': ['react-hot-toast', 'zustand'],
+          'vendor-dates':    ['date-fns'],
+          'vendor-ui':       ['react-hot-toast', 'zustand'],
+          'vendor-icons':    ['lucide-react'],
+          // Datos clínicos pesados — se cargan solo cuando el terapeuta los necesita
+          'data-clinical':   [
+            './src/data/dsm5tr.js',
+            './src/data/cie11.js',
+            './src/data/therapeuticLibrary.js',
+            './src/data/therapeuticProtocols.js',
+          ],
         },
       },
     },
