@@ -2,109 +2,80 @@
  * SubscriptionPage — Gestión de plan de suscripción del terapeuta.
  *
  * Planes:
- *   Basic   — Gratis · 10% comisión
- *   Pro     — $39/mes · 7.5% comisión · badge · mayor visibilidad
- *   Premium — $79/mes · 5% comisión · todo lo anterior · estadísticas avanzadas
+ *   Gratuito  — $0/mes · 10% comisión · funciones core
+ *   Pro       — $50/mes · 10% comisión · herramientas clínicas completas
  */
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import Button from '@/components/ui/Button'
 import toast from 'react-hot-toast'
-import {
-  Check, Zap, Star, Crown, TrendingUp, Users, Eye, BarChart2,
-  Calendar, ChevronRight, AlertCircle,
-} from 'lucide-react'
+import { Check, Zap, Star, AlertCircle, Lock, FlaskConical,
+  BookOpen, BookMarked, LayoutDashboard, Shield, Library,
+  Stethoscope, FolderOpen } from 'lucide-react'
 import { useCurrencyContext } from '@/context/CurrencyContext'
 
 // ── Definición de planes ──────────────────────────────────────────────────────
 
 const PLANS = [
   {
-    id:           'basic',
-    name:         'Básico',
-    price:        0,
-    priceLabel:   'Gratis',
-    commission:   10,
-    color:        'warm',
-    Icon:         Zap,
-    description:  'Empieza a ofrecer tus servicios en la plataforma sin costo mensual.',
+    id:          'basic',
+    name:        'Gratuito',
+    price:       0,
+    commission:  10,
+    Icon:        Zap,
+    highlight:   false,
+    description: 'Todo lo necesario para comenzar tu práctica online sin costo mensual.',
     features: [
-      'Perfil público verificado',
-      'Agenda y gestión de citas',
-      'Chat con pacientes',
-      'Videollamadas ilimitadas',
-      '10% de comisión por sesión',
+      { text: 'Perfil público verificado',    Icon: Check },
+      { text: 'Agenda y gestión de citas',    Icon: Check },
+      { text: 'Chat con pacientes',           Icon: Check },
+      { text: 'Videollamadas ilimitadas',     Icon: Check },
+      { text: '10% de comisión por sesión',   Icon: Check },
     ],
-    highlight: false,
+    locked: [
+      { text: 'Tests psicométricos',          Icon: FlaskConical },
+      { text: 'DSM-5-TR y CIE-11',            Icon: BookOpen     },
+      { text: 'Escalas clínicas',             Icon: LayoutDashboard },
+      { text: 'Plan de crisis',               Icon: Shield       },
+      { text: 'Biblioteca terapéutica',       Icon: Library      },
+      { text: 'Consulta con colegas',         Icon: Stethoscope  },
+      { text: 'Protocolos terapéuticos',      Icon: FolderOpen   },
+    ],
   },
   {
-    id:           'pro',
-    name:         'Pro',
-    price:        39,
-    priceLabel:   '$39/mes',
-    commission:   7.5,
-    color:        'primary',
-    Icon:         Star,
-    description:  'Para terapeutas con flujo activo de pacientes. Mayor visibilidad y menor comisión.',
+    id:          'pro',
+    name:        'Suscripción',
+    price:       50,
+    commission:  10,
+    Icon:        Star,
+    highlight:   true,
+    description: 'Herramientas clínicas completas para potenciar tu práctica profesional.',
     features: [
-      'Todo lo del plan Básico',
-      'Badge Pro en tu perfil',
-      'Mayor visibilidad en búsquedas',
-      'Estadísticas de perfil avanzadas',
-      '7.5% de comisión por sesión',
+      { text: 'Todo lo del plan Gratuito',    Icon: Check },
+      { text: 'Tests psicométricos (45+)',    Icon: FlaskConical },
+      { text: 'DSM-5-TR y CIE-11',            Icon: BookOpen     },
+      { text: 'Escalas clínicas validadas',   Icon: LayoutDashboard },
+      { text: 'Plan de crisis (Stanley-Brown)',Icon: Shield       },
+      { text: 'Biblioteca terapéutica',       Icon: Library      },
+      { text: 'Consulta con colegas',         Icon: Stethoscope  },
+      { text: 'Protocolos terapéuticos',      Icon: FolderOpen   },
+      { text: 'Dashboard de estadísticas',    Icon: Star         },
     ],
-    highlight: true,
-  },
-  {
-    id:           'premium',
-    name:         'Premium',
-    price:        79,
-    priceLabel:   '$79/mes',
-    commission:   5,
-    color:        'amber',
-    Icon:         Crown,
-    description:  'Para terapeutas de alto volumen. La menor comisión y máxima visibilidad.',
-    features: [
-      'Todo lo del plan Pro',
-      'Badge Premium destacado',
-      'Posición prioritaria en búsquedas',
-      'Dashboard de ingresos avanzado',
-      '5% de comisión por sesión',
-    ],
-    highlight: false,
   },
 ]
-
-const PLAN_COLORS = {
-  warm:    { bg: 'bg-warm-50',    border: 'border-warm-200',    badge: 'bg-warm-100 text-warm-700',    btn: '' },
-  primary: { bg: 'bg-primary-50', border: 'border-primary-300', badge: 'bg-primary-500 text-white',    btn: 'ring-2 ring-primary-300' },
-  amber:   { bg: 'bg-amber-50',   border: 'border-amber-200',   badge: 'bg-amber-100 text-amber-700',  btn: '' },
-}
-
-// Cuánto ahorra el terapeuta vs plan Basic con un volumen dado
-function savings(plan, monthlySessions, avgPrice) {
-  const basicComm   = monthlySessions * avgPrice * 0.10
-  const planComm    = monthlySessions * avgPrice * (plan.commission / 100)
-  const saved       = basicComm - planComm - plan.price
-  return saved
-}
 
 // ── Componente ────────────────────────────────────────────────────────────────
 
 export default function SubscriptionPage() {
   const { user } = useAuthStore()
   const { formatWithLocal } = useCurrencyContext()
-  const [currentPlan, setCurrentPlan]   = useState('basic')
-  const [planExpires, setPlanExpires]   = useState(null)
-  const [loading, setLoading]           = useState(true)
-  const [upgrading, setUpgrading]       = useState(null) // plan id en proceso
-  const [sessions, setSessions]         = useState(10)   // slider para calculadora
-  const [avgPrice, setAvgPrice]         = useState(60)
+  const [currentPlan, setCurrentPlan] = useState('basic')
+  const [planExpires, setPlanExpires] = useState(null)
+  const [loading, setLoading]         = useState(true)
+  const [upgrading, setUpgrading]     = useState(false)
 
-  useEffect(() => {
-    fetchPlan()
-  }, [user])
+  useEffect(() => { fetchPlan() }, [user])
 
   const fetchPlan = async () => {
     if (!user) return
@@ -120,22 +91,8 @@ export default function SubscriptionPage() {
     setLoading(false)
   }
 
-  const handleUpgrade = async (plan) => {
-    if (plan.id === currentPlan) return
-    if (plan.price === 0) {
-      // Downgrade a basic
-      const { error } = await supabase
-        .from('therapist_profiles')
-        .update({ subscription_plan: 'basic', plan_expires_at: null })
-        .eq('user_id', user.id)
-      if (error) { toast.error('Error al cambiar el plan'); return }
-      setCurrentPlan('basic')
-      setPlanExpires(null)
-      toast.success('Plan cambiado a Básico')
-      return
-    }
-    // Upgrade a Pro o Premium — redirigir a PayPal
-    setUpgrading(plan.id)
+  const handleUpgrade = async () => {
+    setUpgrading(true)
     try {
       const { data: { session: authSession } } = await supabase.auth.getSession()
       const token = authSession?.access_token
@@ -144,18 +101,28 @@ export default function SubscriptionPage() {
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ plan: plan.id, amount: plan.price }),
+          body: JSON.stringify({ plan: 'pro', amount: 50 }),
         }
       )
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
-      // Redirigir a PayPal
       window.location.href = data.approveUrl
     } catch (err) {
       toast.error(err.message ?? 'Error iniciando el pago')
     } finally {
-      setUpgrading(null)
+      setUpgrading(false)
     }
+  }
+
+  const handleDowngrade = async () => {
+    const { error } = await supabase
+      .from('therapist_profiles')
+      .update({ subscription_plan: 'basic', plan_expires_at: null })
+      .eq('user_id', user.id)
+    if (error) { toast.error('Error al cambiar el plan'); return }
+    setCurrentPlan('basic')
+    setPlanExpires(null)
+    toast.success('Plan cambiado a Gratuito')
   }
 
   if (loading) return (
@@ -164,124 +131,62 @@ export default function SubscriptionPage() {
     </div>
   )
 
-  const currentPlanData = PLANS.find(p => p.id === currentPlan) ?? PLANS[0]
+  const isPro = currentPlan === 'pro' || currentPlan === 'premium'
 
   return (
-    <div className="space-y-8 max-w-3xl mx-auto">
+    <div className="space-y-8 max-w-2xl mx-auto">
 
       {/* Header */}
       <div>
         <h1 className="font-serif text-2xl font-bold text-warm-900">Mi suscripción</h1>
         <p className="text-warm-500 text-sm mt-1">
-          Gestiona tu plan y conoce cómo maximizar tus ingresos en Psiconecta.
+          {isPro
+            ? 'Tienes acceso completo a todas las herramientas clínicas.'
+            : 'Actualiza para acceder a las herramientas clínicas profesionales.'}
         </p>
       </div>
 
-      {/* Plan actual */}
-      <div className="bg-white border border-warm-100 rounded-2xl p-5">
-        <div className="flex items-center justify-between flex-wrap gap-3">
+      {/* Estado actual */}
+      {isPro && (
+        <div className="bg-primary-50 border border-primary-100 rounded-2xl p-4 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-              currentPlan === 'premium' ? 'bg-amber-100' :
-              currentPlan === 'pro'     ? 'bg-primary-100' : 'bg-warm-100'
-            }`}>
-              {(() => { const I = currentPlanData.Icon; return <I size={20} strokeWidth={1.8} className={
-                currentPlan === 'premium' ? 'text-amber-600' :
-                currentPlan === 'pro'     ? 'text-primary-600' : 'text-warm-500'
-              } /> })()}
+            <div className="w-10 h-10 bg-primary-100 rounded-xl flex items-center justify-center">
+              <Star size={20} strokeWidth={1.8} className="text-primary-600" />
             </div>
             <div>
-              <p className="font-semibold text-warm-900">Plan {currentPlanData.name}</p>
-              <p className="text-sm text-warm-400">
-                {currentPlan === 'basic'
-                  ? 'Gratis · 10% de comisión'
-                  : `${currentPlanData.priceLabel} · ${currentPlanData.commission}% de comisión`}
-              </p>
+              <p className="font-semibold text-primary-900">Plan Suscripción activo</p>
+              <p className="text-sm text-primary-600">$50.00 USD/mes · {formatWithLocal(50).split('≈')[1]?.trim() ?? ''}</p>
             </div>
           </div>
           {planExpires && (
-            <div className="flex items-center gap-1.5 text-xs text-warm-400 bg-warm-50 px-3 py-1.5 rounded-lg">
-              <Calendar size={12} strokeWidth={1.8} />
+            <p className="text-xs text-primary-500">
               Renueva: {new Date(planExpires).toLocaleDateString('es-DO', { dateStyle: 'medium' })}
-            </div>
+            </p>
           )}
         </div>
-      </div>
-
-      {/* Calculadora de ahorro */}
-      <div className="bg-gradient-to-br from-primary-50 to-calm-50 border border-primary-100 rounded-2xl p-5">
-        <div className="flex items-center gap-2 mb-4">
-          <TrendingUp size={16} strokeWidth={1.8} className="text-primary-600" />
-          <p className="font-semibold text-primary-900 text-sm">Calculadora de ahorro</p>
-        </div>
-        <p className="text-xs text-primary-700 mb-4">
-          ¿Cuántas sesiones haces al mes y a qué precio promedio?
-        </p>
-        <div className="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <label className="text-xs text-primary-700 font-medium mb-1 block">
-              Sesiones/mes: <strong>{sessions}</strong>
-            </label>
-            <input type="range" min="5" max="80" value={sessions}
-              onChange={e => setSessions(+e.target.value)}
-              className="w-full accent-primary-500" />
-          </div>
-          <div>
-            <label className="text-xs text-primary-700 font-medium mb-1 block">
-              Precio promedio: <strong>${avgPrice}</strong>
-            </label>
-            <input type="range" min="30" max="200" step="5" value={avgPrice}
-              onChange={e => setAvgPrice(+e.target.value)}
-              className="w-full accent-primary-500" />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          {PLANS.filter(p => p.price > 0).map(plan => {
-            const saved = savings(plan, sessions, avgPrice)
-            return (
-              <div key={plan.id} className="bg-white rounded-xl p-3 border border-primary-100">
-                <p className="text-xs font-semibold text-warm-700 mb-1">Plan {plan.name}</p>
-                <p className={`text-lg font-bold ${saved > 0 ? 'text-green-600' : 'text-red-500'}`}>
-                  {saved > 0 ? `+$${saved.toFixed(0)}/mes` : `-$${Math.abs(saved).toFixed(0)}/mes`}
-                </p>
-                <p className="text-[10px] text-warm-400 mt-0.5">
-                  vs plan Básico · {sessions} sesiones × ${avgPrice}
-                </p>
-              </div>
-            )
-          })}
-        </div>
-      </div>
+      )}
 
       {/* Planes */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid sm:grid-cols-2 gap-5">
         {PLANS.map((plan) => {
-          const clr      = PLAN_COLORS[plan.color]
-          const isCurrent = plan.id === currentPlan
-          const PlanIcon  = plan.icon
+          const PlanIcon   = plan.Icon
+          const isCurrent  = (plan.id === 'basic' && !isPro) || (plan.id === 'pro' && isPro)
           return (
-            <div
-              key={plan.id}
-              className={`relative rounded-2xl border-2 p-5 flex flex-col transition-all ${
-                isCurrent
-                  ? `${clr.border} ${clr.bg}`
-                  : 'border-warm-100 bg-white hover:border-warm-200'
-              }`}
-            >
+            <div key={plan.id} className={`rounded-2xl border-2 p-6 flex flex-col transition-all ${
+              plan.highlight
+                ? 'border-primary-300 bg-primary-50'
+                : 'border-warm-200 bg-white'
+            } ${isCurrent ? 'ring-2 ring-offset-1 ring-primary-300' : ''}`}>
+
               {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-primary-500 text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                    Más popular
-                  </span>
-                </div>
+                <span className="self-start text-[10px] font-bold bg-primary-500 text-white px-3 py-1 rounded-full mb-3 uppercase tracking-wide">
+                  Recomendado
+                </span>
               )}
 
-              <div className="flex items-center gap-2 mb-3">
-                {(() => { const I = plan.Icon; return <I size={18} strokeWidth={1.8} className={
-                  plan.color === 'amber' ? 'text-amber-500' :
-                  plan.color === 'primary' ? 'text-primary-500' : 'text-warm-400'
-                } /> })()}
-                <span className="font-bold text-warm-900">{plan.name}</span>
+              <div className="flex items-center gap-2 mb-2">
+                <PlanIcon size={18} strokeWidth={1.8} className={plan.highlight ? 'text-primary-500' : 'text-warm-400'} />
+                <span className="font-bold text-warm-900 text-lg">{plan.name}</span>
                 {isCurrent && (
                   <span className="ml-auto text-[10px] font-bold bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
                     Actual
@@ -290,52 +195,65 @@ export default function SubscriptionPage() {
               </div>
 
               <div className="mb-3">
-                <div>
-                  <span className="text-2xl font-bold text-warm-900">
-                    {plan.price === 0 ? 'Gratis' : `$${plan.price}.00 USD`}
-                  </span>
-                  {plan.price > 0 && (
-                    <p className="text-xs text-warm-400 mt-0.5">
-                      ≈ {formatWithLocal(plan.price).split('≈')[1]?.trim() ?? ''} /mes
-                    </p>
-                  )}
-                </div>
-                <p className="text-xs text-warm-400 mt-0.5">{plan.commission}% comisión por sesión</p>
+                <p className="text-3xl font-bold text-warm-900">
+                  {plan.price === 0 ? 'Gratis' : '$50.00 USD'}
+                </p>
+                {plan.price > 0 && (
+                  <p className="text-xs text-warm-400 mt-0.5">
+                    ≈ {formatWithLocal(plan.price).split('≈')[1]?.trim() ?? ''} /mes
+                  </p>
+                )}
+                <p className="text-xs text-warm-500 mt-1">{plan.commission}% de comisión por sesión</p>
               </div>
 
               <p className="text-xs text-warm-500 leading-relaxed mb-4">{plan.description}</p>
 
-              <ul className="space-y-2 mb-5 flex-1">
+              {/* Features incluidas */}
+              <ul className="space-y-2 mb-4 flex-1">
                 {plan.features.map((f, i) => (
-                  <li key={i} className="flex items-start gap-2 text-xs text-warm-700">
-                    <Check size={13} strokeWidth={2.5} className="text-green-500 shrink-0 mt-0.5" />
-                    {f}
+                  <li key={i} className="flex items-center gap-2 text-xs text-warm-700">
+                    <f.Icon size={12} strokeWidth={2} className="text-green-500 shrink-0" />
+                    {f.text}
                   </li>
                 ))}
               </ul>
 
-              <Button
-                size="sm"
-                fullWidth
-                variant={isCurrent ? 'secondary' : plan.highlight ? 'primary' : 'outline'}
-                disabled={isCurrent || upgrading === plan.id}
-                loading={upgrading === plan.id}
-                onClick={() => handleUpgrade(plan)}
-              >
-                {isCurrent ? 'Plan actual' :
-                 plan.price === 0 ? 'Cambiar a Básico' :
-                 `Upgrade a ${plan.name}`}
-              </Button>
+              {/* Features bloqueadas (solo plan básico) */}
+              {plan.locked && (
+                <ul className="space-y-2 mb-4 pt-3 border-t border-warm-100">
+                  {plan.locked.map((f, i) => (
+                    <li key={i} className="flex items-center gap-2 text-xs text-warm-400">
+                      <Lock size={11} strokeWidth={1.8} className="shrink-0" />
+                      {f.text}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {/* CTA */}
+              {isCurrent ? (
+                <div className="w-full py-2.5 rounded-xl bg-green-50 border border-green-200 text-green-700 text-sm font-medium text-center">
+                  Plan actual
+                </div>
+              ) : plan.id === 'pro' ? (
+                <Button fullWidth loading={upgrading} onClick={handleUpgrade}>
+                  Suscribirme por $50/mes
+                </Button>
+              ) : (
+                <Button fullWidth variant="outline" onClick={handleDowngrade}>
+                  Cambiar a Gratuito
+                </Button>
+              )}
             </div>
           )
         })}
       </div>
 
-      {/* Nota de facturación */}
+      {/* Disclaimer */}
       <div className="flex items-start gap-2 text-xs text-warm-400 bg-warm-50 rounded-xl p-4">
         <AlertCircle size={14} strokeWidth={1.8} className="shrink-0 mt-0.5" />
         <p>
-          Los planes Pro y Premium se facturan mensualmente en <strong>USD</strong> a través de PayPal.
+          La suscripción se factura mensualmente en <strong>USD</strong> a través de PayPal.
           La conversión a tu moneda local es referencial — el monto exacto lo determina
           PayPal según su tipo de cambio al momento del pago.
           Puedes cancelar en cualquier momento.

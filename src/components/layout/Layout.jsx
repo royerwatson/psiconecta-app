@@ -12,7 +12,7 @@ import {
   Users, ClipboardList, BookOpen, Clock, Heart,
   LayoutDashboard, TestTube, Shield, Library,
   BookMarked, Stethoscope, FolderOpen, MoreHorizontal,
-  X, Zap, Bell, ChevronRight, LogOut, Crown, TrendingUp,
+  X, Zap, Bell, ChevronRight, LogOut, Crown, TrendingUp, Lock,
 } from 'lucide-react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 
@@ -122,6 +122,13 @@ function TabItem({ to, icon: Icon, label, unread = 0 }) {
 
 // ─── Layout ───────────────────────────────────────────────────────────────────
 
+// Rutas que requieren plan Suscripción
+const PRO_ROUTES = new Set([
+  '/therapist/tests', '/therapist/dsm', '/therapist/cie',
+  '/therapist/scales', '/therapist/safety-plan', '/therapist/library',
+  '/therapist/peers', '/therapist/protocols', '/therapist/stats',
+])
+
 export default function Layout() {
   const { profile, role, user, signOut } = useAuthStore()
   const navigate  = useNavigate()
@@ -134,9 +141,20 @@ export default function Layout() {
   const [alertCount, setAlertCount]   = useState(0)
   const [showMore, setShowMore]       = useState(false)
   const [showLogout, setShowLogout]   = useState(false)
+  const [therapistPlan, setTherapistPlan] = useState('basic')
   const lastSeenKey  = user ? `chat_last_seen_${user.id}` : null
   const channelRef   = useRef(null)
   const drawerRef    = useRef(null)
+
+  // Plan del terapeuta (para mostrar candado en nav)
+  useEffect(() => {
+    if (!user || role !== 'therapist') return
+    supabase.from('therapist_profiles')
+      .select('subscription_plan')
+      .eq('user_id', user.id)
+      .single()
+      .then(({ data }) => setTherapistPlan(data?.subscription_plan ?? 'basic'))
+  }, [user, role])
 
   // Mensajes no leídos
   useEffect(() => {
@@ -263,9 +281,19 @@ export default function Layout() {
                   unread={badge === 'chat' ? unreadCount : 0} />
               ))}
               <div className="my-1.5 h-px bg-warm-100" />
-              {secondaryNav.map(({ to, icon, label }) => (
-                <SideNavItem key={to} to={to} icon={icon} label={label} />
-              ))}
+              {secondaryNav.map(({ to, icon, label }) => {
+                const isLocked = role === 'therapist' && therapistPlan === 'basic' && PRO_ROUTES.has(to)
+                return (
+                  <div key={to} className="relative">
+                    <SideNavItem to={to} icon={icon} label={label} />
+                    {isLocked && (
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+                        <Lock size={11} strokeWidth={2} className="text-warm-300" />
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
               <div className="my-1.5 h-px bg-warm-100" />
               <button onClick={() => setShowLogout(true)}
                 className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-warm-400 hover:bg-red-50 hover:text-red-500 transition-all w-full text-left">
@@ -335,18 +363,20 @@ export default function Layout() {
             </p>
             <div className="grid grid-cols-2 gap-2">
               {secondaryNav.map(({ to, icon: Icon, label }) => {
-                const isActive = location.pathname.startsWith(to)
+                const isActive  = location.pathname.startsWith(to)
+                const isLocked  = role === 'therapist' && therapistPlan === 'basic' && PRO_ROUTES.has(to)
                 return (
                   <NavLink key={to} to={to} onClick={() => setShowMore(false)}
                     className={cn(
-                      'flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all',
+                      'flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all relative',
                       isActive
                         ? 'bg-accent-50 text-accent-700 border border-accent-100'
                         : 'bg-warm-50 text-warm-700 hover:bg-warm-100',
                     )}
                   >
                     <Icon size={17} strokeWidth={isActive ? 2.5 : 2} />
-                    <span className="truncate">{label}</span>
+                    <span className="truncate flex-1">{label}</span>
+                    {isLocked && <Lock size={11} strokeWidth={2} className="text-warm-300 shrink-0" />}
                   </NavLink>
                 )
               })}

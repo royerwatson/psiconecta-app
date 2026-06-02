@@ -74,6 +74,7 @@ import PaymentCancel  from '@/pages/payment/PaymentCancel'
 import SubscriptionPage from '@/pages/therapist/SubscriptionPage'
 import PricingPage      from '@/pages/public/PricingPage'
 import StatsPage        from '@/pages/therapist/StatsPage'
+import ProGate         from '@/components/layout/ProGate'
 
 export default function App() {
   const { initialize, initialized } = useAuthStore()
@@ -155,35 +156,36 @@ export default function App() {
           <Route path="/therapist/subscription" element={
             <TherapistRoute><SubscriptionPage /></TherapistRoute>
           } />
+          {/* Rutas exclusivas plan Suscripción — ProGate bloquea a plan gratuito */}
           <Route path="/therapist/stats" element={
-            <TherapistRoute><StatsPage /></TherapistRoute>
+            <TherapistRoute><ProGate featureName="las estadísticas avanzadas"><StatsPage /></ProGate></TherapistRoute>
+          } />
+          <Route path="/therapist/tests" element={
+            <TherapistRoute><ProGate featureName="los tests psicométricos"><TherapistTestsPage /></ProGate></TherapistRoute>
           } />
           <Route path="/therapist/test-result/:sessionId" element={
             <TherapistRoute><TestResultPage /></TherapistRoute>
           } />
-          <Route path="/therapist/tests" element={
-            <TherapistRoute><TherapistTestsPage /></TherapistRoute>
-          } />
           <Route path="/therapist/dsm" element={
-            <TherapistRoute><DSMReferencePage /></TherapistRoute>
+            <TherapistRoute><ProGate featureName="el DSM-5-TR"><DSMReferencePage /></ProGate></TherapistRoute>
           } />
           <Route path="/therapist/cie" element={
-            <TherapistRoute><CIE11ReferencePage /></TherapistRoute>
+            <TherapistRoute><ProGate featureName="el CIE-11"><CIE11ReferencePage /></ProGate></TherapistRoute>
           } />
           <Route path="/therapist/scales" element={
-            <TherapistRoute><ClinicalScalesPage /></TherapistRoute>
+            <TherapistRoute><ProGate featureName="las escalas clínicas"><ClinicalScalesPage /></ProGate></TherapistRoute>
           } />
           <Route path="/therapist/safety-plan" element={
-            <TherapistRoute><SafetyPlanPage /></TherapistRoute>
+            <TherapistRoute><ProGate featureName="el plan de crisis"><SafetyPlanPage /></ProGate></TherapistRoute>
           } />
           <Route path="/therapist/library" element={
-            <TherapistRoute><TherapeuticLibraryPage /></TherapistRoute>
+            <TherapistRoute><ProGate featureName="la biblioteca terapéutica"><TherapeuticLibraryPage /></ProGate></TherapistRoute>
           } />
           <Route path="/therapist/peers" element={
-            <TherapistRoute><PeerConsultationPage /></TherapistRoute>
+            <TherapistRoute><ProGate featureName="la consulta con colegas"><PeerConsultationPage /></ProGate></TherapistRoute>
           } />
           <Route path="/therapist/protocols" element={
-            <TherapistRoute><TherapeuticProtocolsPage /></TherapistRoute>
+            <TherapistRoute><ProGate featureName="los protocolos terapéuticos"><TherapeuticProtocolsPage /></ProGate></TherapistRoute>
           } />
 
           {/* ── Paciente ── */}

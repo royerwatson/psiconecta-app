@@ -3,73 +3,49 @@
  * Ruta: /pricing (no requiere autenticación)
  */
 import { useNavigate } from 'react-router-dom'
-import { Check, Zap, Star, Crown, ArrowRight, Users, Shield, Video } from 'lucide-react'
+import { Check, Zap, Star, ArrowRight, Users, Shield, Video,
+  FlaskConical, BookOpen, LayoutDashboard, Library, Stethoscope, FolderOpen } from 'lucide-react'
 import Button from '@/components/ui/Button'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import { useCurrencyContext } from '@/context/CurrencyContext'
 
 const PLANS = [
   {
-    id:          'basic',
-    name:        'Básico',
-    priceLabel:  'Gratis',
-    commission:  '10%',
-    Icon:        Zap,
-    color:       'text-warm-400',
-    bg:          'bg-white',
-    border:      'border-warm-200',
-    highlight:   false,
-    cta:         'Comenzar gratis',
+    id:        'basic',
+    name:      'Gratuito',
+    price:     0,
+    Icon:      Zap,
+    bg:        'bg-white',
+    border:    'border-warm-200',
+    highlight: false,
+    cta:       'Comenzar gratis',
     features: [
-      'Perfil verificado en la plataforma',
-      'Gestión de agenda y citas',
+      'Perfil público verificado',
+      'Agenda y gestión de citas',
       'Chat privado con pacientes',
       'Videollamadas ilimitadas',
-      'Historial clínico digital',
       '10% de comisión por sesión',
     ],
   },
   {
-    id:          'pro',
-    name:        'Pro',
-    priceLabel:  '$39',
-    period:      '/mes',
-    commission:  '7.5%',
-    Icon:        Star,
-    color:       'text-primary-500',
-    bg:          'bg-primary-600',
-    textColor:   'text-white',
-    border:      'border-primary-600',
-    highlight:   true,
-    cta:         'Empezar plan Pro',
+    id:        'pro',
+    name:      'Suscripción',
+    price:     50,
+    Icon:      Star,
+    bg:        'bg-primary-600',
+    border:    'border-primary-600',
+    highlight: true,
+    cta:       'Suscribirme por $50/mes',
     features: [
-      'Todo lo del plan Básico',
-      'Badge Pro en tu perfil',
-      'Mayor posición en búsquedas',
-      'Estadísticas de perfil detalladas',
-      'Acceso prioritario a soporte',
-      '7.5% de comisión por sesión',
-    ],
-  },
-  {
-    id:          'premium',
-    name:        'Premium',
-    priceLabel:  '$79',
-    period:      '/mes',
-    commission:  '5%',
-    Icon:        Crown,
-    color:       'text-amber-500',
-    bg:          'bg-white',
-    border:      'border-amber-200',
-    highlight:   false,
-    cta:         'Empezar plan Premium',
-    features: [
-      'Todo lo del plan Pro',
-      'Badge Premium destacado',
-      'Posición #1 en búsquedas',
-      'Dashboard avanzado de ingresos',
-      'Soporte prioritario 24/7',
-      '5% de comisión por sesión',
+      'Todo lo del plan Gratuito',
+      'Tests psicométricos (45+ instrumentos)',
+      'DSM-5-TR y CIE-11 de referencia',
+      'Escalas clínicas validadas',
+      'Plan de crisis (Stanley-Brown)',
+      'Biblioteca terapéutica',
+      'Consulta con colegas',
+      'Protocolos terapéuticos',
+      'Dashboard de estadísticas avanzadas',
     ],
   },
 ]
@@ -77,23 +53,23 @@ const PLANS = [
 const FAQS = [
   {
     q: '¿Cuándo se cobra la comisión?',
-    a: 'La comisión se descuenta automáticamente en el momento en que el paciente realiza el pago. El resto se transfiere a tu cuenta en el siguiente ciclo de liquidación.',
+    a: 'La comisión del 10% se descuenta automáticamente cuando el paciente paga. El resto se transfiere a tu cuenta en el siguiente ciclo de liquidación.',
   },
   {
-    q: '¿Puedo cambiar de plan en cualquier momento?',
-    a: 'Sí. Puedes hacer upgrade o downgrade desde tu perfil en cualquier momento. El cambio aplica inmediatamente.',
+    q: '¿La suscripción cambia la comisión?',
+    a: 'No. Ambos planes mantienen el mismo 10% de comisión. La suscripción te da acceso a las herramientas clínicas, no a una comisión reducida.',
   },
   {
-    q: '¿Qué pasa si cancelo mi suscripción Pro o Premium?',
-    a: 'Conservas los beneficios hasta el final del período pagado. Al vencer, tu cuenta pasa automáticamente al plan Básico.',
+    q: '¿Puedo cancelar la suscripción en cualquier momento?',
+    a: 'Sí. Conservas el acceso hasta el final del período pagado. Al vencer, tu cuenta pasa automáticamente al plan Gratuito.',
   },
   {
-    q: '¿El plan Básico es realmente gratis?',
-    a: 'Sí, sin límite de tiempo ni tarjeta de crédito requerida. Solo pagamos juntos una comisión del 10% sobre cada sesión completada.',
+    q: '¿El plan Gratuito tiene límite de tiempo?',
+    a: 'No. Es gratuito para siempre. Solo activas la suscripción cuando quieras acceder a las herramientas clínicas avanzadas.',
   },
   {
-    q: '¿Hay un período de prueba para los planes Pro y Premium?',
-    a: 'No ofrecemos período de prueba, pero puedes comenzar en Básico y hacer upgrade cuando quieras sin penalización.',
+    q: '¿Hay período de prueba?',
+    a: 'No ofrecemos período de prueba, pero puedes comenzar con el plan Gratuito y suscribirte cuando lo necesites, sin penalización.',
   },
 ]
 
