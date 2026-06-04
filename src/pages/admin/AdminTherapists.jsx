@@ -7,17 +7,26 @@ import { VerificationBadge } from '@/components/ui/Badge'
 import { Skeleton } from '@/components/ui/Spinner'
 import Modal from '@/components/ui/Modal'
 import toast from 'react-hot-toast'
-import { Search, DollarSign, Calendar, Wallet, CheckCircle2, XCircle, FileText, Image, File } from 'lucide-react'
+import { Search, DollarSign, Calendar, Wallet, CheckCircle2, XCircle, FileText, Image, File, AlertCircle } from 'lucide-react'
+
+const REQUIRED_DOCS = [
+  { type: 'titulo_profesional', label: 'Título profesional' },
+  { type: 'exequatur',          label: 'Exequátur' },
+  { type: 'colegio_psicologico',label: 'Acreditación Colegio Psicológico' },
+]
 
 export default function AdminTherapists() {
   const [therapists, setTherapists] = useState([])
   const [loading, setLoading]       = useState(true)
-  const [filter, setFilter]         = useState('all') // all | pending | verified | rejected
+  const [filter, setFilter]         = useState('all')
   const [selected, setSelected]     = useState(null)
   const [acting, setActing]         = useState(false)
   const [toggling, setToggling]     = useState(null)
   const [credentials, setCredentials] = useState([])
   const [loadingCreds, setLoadingCreds] = useState(false)
+  const [rejectingDoc, setRejectingDoc] = useState(null)  // { credId, label }
+  const [rejectReason, setRejectReason] = useState('')
+  const [actingDoc, setActingDoc]       = useState(null)  // credId being processed
 
   useEffect(() => { fetchTherapists() }, [])
 
@@ -89,20 +98,58 @@ export default function AdminTherapists() {
     setLoadingCreds(false)
   }
 
-  const updateStatus = async (therapistId, userId, status) => {
+  // Aprobar un documento individual
+  const approveDoc = async (credId) => {
+    setActingDoc(credId)
+    const { error } = await supabase
+      .from('therapist_credentials')
+      .update({ status: 'verified', rejection_reason: null })
+      .eq('id', credId)
+    if (error) { toast.error('Error aprobando documento'); setActingDoc(null); return }
+    toast.success('Documento aprobado')
+    setActingDoc(null)
+    await openDetail(selected)  // refrescar credenciales
+  }
+
+  // Rechazar un documento individual con motivo
+  const rejectDoc = async () => {
+    if (!rejectReason.trim()) { toast.error('Escribe el motivo del rechazo'); return }
+    setActingDoc(rejectingDoc.credId)
+    const { error } = await supabase
+      .from('therapist_credentials')
+      .update({ status: 'rejected', rejection_reason: rejectReason.trim() })
+      .eq('id', rejectingDoc.credId)
+    if (error) { toast.error('Error rechazando documento'); setActingDoc(null); return }
+    toast.success('Documento rechazado')
+    setRejectingDoc(null)
+    setRejectReason('')
+    setActingDoc(null)
+    await openDetail(selected)
+  }
+
+  // Completar verificación — activa al terapeuta (todos los docs aprobados)
+  const completeVerification = async () => {
     setActing(true)
-    const verified = status === 'verified'
     const { error } = await supabase
       .from('therapist_profiles')
-      .update({ verification_status: status, verified })
+      .update({ verification_status: 'verified', verified: true })
+      .eq('user_id', selected.user_id)
+    if (error) { toast.error('Error completando verificación'); setActing(false); return }
+    toast.success('Terapeuta verificado y activado correctamente')
+    setSelected(null)
+    setActing(false)
+    fetchTherapists()
+  }
+
+  // Rechazar toda la verificación
+  const updateStatus = async (therapistId, userId, status) => {
+    setActing(true)
+    const { error } = await supabase
+      .from('therapist_profiles')
+      .update({ verification_status: status, verified: status === 'verified' })
       .eq('user_id', userId)
-
     if (error) { toast.error('Error actualizando estado'); setActing(false); return }
-
-    toast.success(
-      status === 'verified' ? 'Terapeuta verificado' :
-      status === 'rejected' ? 'Terapeuta rechazado' : 'Estado actualizado'
-    )
+    toast.success(status === 'rejected' ? 'Verificación rechazada' : 'Estado actualizado')
     setSelected(null)
     setActing(false)
     fetchTherapists()
@@ -272,50 +319,75 @@ export default function AdminTherapists() {
                   Cargando documentos...
                 </div>
               ) : (
-                <div className="flex flex-col gap-2">
-                  {[
-                    { type: 'titulo_profesional',  label: 'Título profesional' },
-                    { type: 'exequatur',            label: 'Exequátur' },
-                    { type: 'colegio_psicologico',  label: 'Acreditación Colegio Psicológico' },
-                  ].map((req) => {
-                    // Más reciente de ese tipo
+                <div className="flex flex-col gap-3">
+                  {REQUIRED_DOCS.map((req) => {
                     const doc = credentials.find(c => c.document_type === req.type)
+                    const isBusy = actingDoc === doc?.id
                     return (
-                      <div key={req.type} className={`rounded-xl p-3 border ${
-                        !doc                         ? 'bg-warm-50 border-warm-200' :
-                        doc.status === 'verified'    ? 'bg-green-50 border-green-200' :
-                        doc.status === 'rejected'    ? 'bg-red-50 border-red-200' :
+                      <div key={req.type} className={`rounded-xl border p-3 ${
+                        !doc                      ? 'bg-warm-50 border-warm-200' :
+                        doc.status === 'verified' ? 'bg-green-50 border-green-200' :
+                        doc.status === 'rejected' ? 'bg-red-50 border-red-200' :
                         'bg-amber-50 border-amber-200'
                       }`}>
-                        <div className="flex items-center gap-3">
+                        {/* Fila principal */}
+                        <div className="flex items-center gap-2">
                           <span className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shrink-0 border border-warm-100">
                             <FileText size={14} className="text-warm-500" />
                           </span>
                           <div className="flex-1 min-w-0">
                             <p className="text-xs font-semibold text-warm-800">{req.label}</p>
-                            {!doc ? (
-                              <p className="text-[10px] text-warm-400">No subido aún</p>
-                            ) : (
-                              <p className={`text-[10px] font-medium ${
-                                doc.status === 'verified' ? 'text-green-600' :
-                                doc.status === 'rejected' ? 'text-red-600' : 'text-amber-600'
-                              }`}>
-                                {doc.status === 'verified' ? 'Aprobado' :
-                                 doc.status === 'rejected' ? 'Rechazado' : 'En revisión'}
-                                {' · '}{new Date(doc.created_at).toLocaleDateString('es-DO', { dateStyle: 'short' })}
-                              </p>
-                            )}
+                            <p className={`text-[10px] font-medium ${
+                              !doc                      ? 'text-warm-400' :
+                              doc.status === 'verified' ? 'text-green-600' :
+                              doc.status === 'rejected' ? 'text-red-600'  : 'text-amber-600'
+                            }`}>
+                              {!doc ? 'No subido aún' :
+                               doc.status === 'verified' ? 'Aprobado' :
+                               doc.status === 'rejected' ? 'Rechazado' : 'Pendiente de revisión'}
+                            </p>
                           </div>
+                          {/* Ver documento */}
                           {doc?.signedUrl && (
                             <a href={doc.signedUrl} target="_blank" rel="noopener noreferrer"
-                              className="shrink-0 text-xs font-medium px-2.5 py-1 rounded-lg bg-primary-50 text-primary-600 border border-primary-200 hover:bg-primary-100 transition-colors">
+                              className="text-xs px-2.5 py-1 rounded-lg bg-white border border-warm-200 text-primary-600 hover:bg-primary-50 transition-colors font-medium shrink-0">
                               Ver →
                             </a>
                           )}
                         </div>
+
+                        {/* Motivo de rechazo */}
                         {doc?.status === 'rejected' && doc.rejection_reason && (
-                          <p className="text-[10px] text-red-600 mt-1.5 bg-red-100 rounded-lg px-2 py-1">
-                            Motivo: {doc.rejection_reason}
+                          <div className="flex items-start gap-1.5 mt-2 bg-red-100 rounded-lg px-2 py-1.5">
+                            <AlertCircle size={11} className="text-red-500 shrink-0 mt-0.5" />
+                            <p className="text-[10px] text-red-700">{doc.rejection_reason}</p>
+                          </div>
+                        )}
+
+                        {/* Acciones por documento (solo si fue subido y no está verificado aún) */}
+                        {doc && doc.status !== 'verified' && (
+                          <div className="flex gap-2 mt-2.5">
+                            <button
+                              disabled={isBusy}
+                              onClick={() => approveDoc(doc.id)}
+                              className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-green-500 hover:bg-green-600 text-white text-xs font-semibold transition-colors disabled:opacity-60"
+                            >
+                              {isBusy ? <div className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin" /> : <CheckCircle2 size={12} strokeWidth={2} />}
+                              Aprobar
+                            </button>
+                            <button
+                              disabled={isBusy}
+                              onClick={() => { setRejectingDoc({ credId: doc.id, label: req.label }); setRejectReason('') }}
+                              className="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg bg-white border border-red-300 text-red-600 hover:bg-red-50 text-xs font-semibold transition-colors disabled:opacity-60"
+                            >
+                              <XCircle size={12} strokeWidth={2} />
+                              Rechazar
+                            </button>
+                          </div>
+                        )}
+                        {doc?.status === 'verified' && (
+                          <p className="text-[10px] text-green-600 mt-2 flex items-center gap-1">
+                            <CheckCircle2 size={11} strokeWidth={2} /> Documento verificado
                           </p>
                         )}
                       </div>
@@ -323,21 +395,89 @@ export default function AdminTherapists() {
                   })}
                 </div>
               )}
+
+              {/* Barra de progreso */}
+              {credentials.length > 0 && (() => {
+                const approved = REQUIRED_DOCS.filter(r => credentials.find(c => c.document_type === r.type && c.status === 'verified')).length
+                return (
+                  <div className="bg-warm-50 rounded-xl p-3 mt-1">
+                    <div className="flex justify-between text-xs text-warm-500 mb-1.5">
+                      <span>Documentos aprobados</span>
+                      <span className="font-semibold text-warm-800">{approved} / 3</span>
+                    </div>
+                    <div className="h-2 bg-warm-200 rounded-full overflow-hidden">
+                      <div className="h-full bg-green-500 rounded-full transition-all duration-500"
+                        style={{ width: `${(approved / 3) * 100}%` }} />
+                    </div>
+                  </div>
+                )
+              })()}
             </div>
 
-            <div className="flex gap-2">
-              <Button fullWidth loading={acting}
-                onClick={() => updateStatus(selected.id, selected.user_id, 'verified')}>
-                <CheckCircle2 size={13} strokeWidth={1.8} className="mr-1.5" />Verificar
-              </Button>
-              <Button fullWidth variant="outline" loading={acting}
-                onClick={() => updateStatus(selected.id, selected.user_id, 'rejected')}>
-                <XCircle size={13} strokeWidth={1.8} className="mr-1.5" />Rechazar
-              </Button>
-            </div>
+            {/* Botón de completar verificación — solo aparece cuando los 3 docs están aprobados */}
+            {(() => {
+              const allApproved = REQUIRED_DOCS.every(r =>
+                credentials.find(c => c.document_type === r.type && c.status === 'verified')
+              )
+              const alreadyVerified = selected?.verification_status === 'verified'
+              return allApproved && !alreadyVerified ? (
+                <div className="bg-green-50 border-2 border-green-300 rounded-2xl p-4 text-center">
+                  <CheckCircle2 size={28} strokeWidth={1.5} className="text-green-500 mx-auto mb-2" />
+                  <p className="font-semibold text-green-800 text-sm mb-1">Los 3 documentos están aprobados</p>
+                  <p className="text-xs text-green-600 mb-3">
+                    Al completar la verificación el terapeuta quedará activo y visible para los pacientes.
+                  </p>
+                  <Button fullWidth loading={acting} onClick={completeVerification}
+                    className="bg-green-600 hover:bg-green-700 text-white border-green-600">
+                    <CheckCircle2 size={15} strokeWidth={2} className="mr-1.5" />
+                    Completar verificación
+                  </Button>
+                </div>
+              ) : alreadyVerified ? (
+                <div className="bg-green-50 border border-green-200 rounded-xl p-3 flex items-center gap-2">
+                  <CheckCircle2 size={16} className="text-green-600 shrink-0" />
+                  <p className="text-sm text-green-700 font-medium">Terapeuta verificado y activo</p>
+                </div>
+              ) : (
+                <p className="text-xs text-warm-400 text-center">
+                  Aprueba los 3 documentos para habilitar la verificación final.
+                </p>
+              )
+            })()}
+
           </div>
         )}
       </Modal>
+
+      {/* Modal de motivo de rechazo */}
+      {rejectingDoc && (
+        <div className="fixed inset-0 z-[70] bg-black/40 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+            <h3 className="font-serif font-bold text-warm-900 mb-1">Rechazar documento</h3>
+            <p className="text-sm text-warm-500 mb-4">
+              Indica el motivo para rechazar <strong>{rejectingDoc.label}</strong>.
+              El terapeuta verá este mensaje y podrá corregirlo.
+            </p>
+            <textarea
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              placeholder="Ej: El documento está vencido, la firma no es legible, falta el sello oficial..."
+              rows={3}
+              className="w-full rounded-xl border border-warm-200 px-3 py-2.5 text-sm text-warm-800 focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-red-400 resize-none mb-4"
+            />
+            <div className="flex gap-2">
+              <button onClick={() => { setRejectingDoc(null); setRejectReason('') }}
+                className="flex-1 py-2.5 rounded-xl border border-warm-200 text-warm-600 text-sm font-medium hover:bg-warm-50 transition-colors">
+                Cancelar
+              </button>
+              <button onClick={rejectDoc} disabled={!!actingDoc}
+                className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-colors disabled:opacity-60">
+                {actingDoc ? 'Rechazando...' : 'Confirmar rechazo'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
