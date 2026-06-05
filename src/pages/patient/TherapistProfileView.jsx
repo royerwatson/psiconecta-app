@@ -230,7 +230,7 @@ export default function TherapistProfileView() {
                   ))}
                 </div>
               </div>
-            </Card>
+            </div>
 
             {/* Lista de reseñas */}
             <div className="flex flex-col gap-3 stagger-children">

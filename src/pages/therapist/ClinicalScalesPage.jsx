@@ -505,7 +505,7 @@ export default function ClinicalScalesPage() {
   // ── Selector de escalas ───────────────────────────────────────────────────
   if (!scale) {
     return (
-      <div className="flex flex-col gap-6 animate-fade-in">
+      <><div className="flex flex-col gap-6 animate-fade-in">
         <div>
           <h1 className="font-serif text-2xl font-bold text-warm-900">Escalas clínicas</h1>
           <p className="text-warm-500 text-sm mt-0.5">
@@ -550,7 +550,8 @@ export default function ClinicalScalesPage() {
           onApplied={() => setApplyScale(null)}
         />
       )}
-    )
+    </>
+  )
   }
 
   // ── Cuestionario activo ───────────────────────────────────────────────────
