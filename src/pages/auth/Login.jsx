@@ -27,42 +27,32 @@ export default function Login() {
       await signIn(form)
       toast.success('¡Bienvenido/a de vuelta!')
 
-      // Verificar suscripción pendiente: primero en DB (más confiable), luego localStorage
+      // Verificar suscripción pendiente en la BD
       const currentRole = useAuthStore.getState().role
       const currentUser = useAuthStore.getState().user
       if (currentRole === 'therapist' && currentUser) {
         try {
-          // Método 1: buscar en subscription_payments (no depende del browser)
-          const oneHourAgo = new Date(Date.now() - 3600000).toISOString()
-          const { data: pendingDb } = await supabase
+          // Sin filtro de tiempo — buscar el más reciente con status pending
+          const { data: pendingDb, error: pendingErr } = await supabase
             .from('subscription_payments')
-            .select('paypal_order_id')
-            .eq('therapist_id', currentUser.id)
+            .select('paypal_order_id, created_at')
             .eq('status', 'pending')
-            .gte('created_at', oneHourAgo)
             .order('created_at', { ascending: false })
             .limit(1)
             .single()
 
+          if (pendingErr && pendingErr.code !== 'PGRST116') {
+            console.error('[Login] Error buscando suscripción pendiente:', pendingErr)
+          }
+
           if (pendingDb?.paypal_order_id) {
+            toast('Completando tu suscripción...', { duration: 3000 })
             localStorage.removeItem('psiconecta_pending_sub')
             navigate(`/payment/subscription-success?token=${pendingDb.paypal_order_id}`, { replace: true })
             return
           }
-
-          // Método 2: localStorage como fallback
-          const pendingLocal = localStorage.getItem('psiconecta_pending_sub')
-          if (pendingLocal) {
-            const { orderId, timestamp } = JSON.parse(pendingLocal)
-            if (Date.now() - timestamp < 3600000) {
-              localStorage.removeItem('psiconecta_pending_sub')
-              navigate(`/payment/subscription-success?token=${orderId}`, { replace: true })
-              return
-            }
-            localStorage.removeItem('psiconecta_pending_sub')
-          }
         } catch (e) {
-          localStorage.removeItem('psiconecta_pending_sub')
+          console.error('[Login] Unexpected error:', e)
         }
       }
 
