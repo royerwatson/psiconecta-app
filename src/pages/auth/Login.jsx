@@ -27,19 +27,44 @@ export default function Login() {
       await signIn(form)
       toast.success('¡Bienvenido/a de vuelta!')
 
-      // Verificar si hay una suscripción pendiente de PayPal
-      try {
-        const pendingSub = localStorage.getItem('psiconecta_pending_sub')
-        if (pendingSub) {
-          const { orderId, timestamp } = JSON.parse(pendingSub)
-          if (Date.now() - timestamp < 3600000) { // válido por 1 hora
+      // Verificar suscripción pendiente: primero en DB (más confiable), luego localStorage
+      const currentRole = useAuthStore.getState().role
+      const currentUser = useAuthStore.getState().user
+      if (currentRole === 'therapist' && currentUser) {
+        try {
+          // Método 1: buscar en subscription_payments (no depende del browser)
+          const oneHourAgo = new Date(Date.now() - 3600000).toISOString()
+          const { data: pendingDb } = await supabase
+            .from('subscription_payments')
+            .select('paypal_order_id')
+            .eq('therapist_id', currentUser.id)
+            .eq('status', 'pending')
+            .gte('created_at', oneHourAgo)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+
+          if (pendingDb?.paypal_order_id) {
             localStorage.removeItem('psiconecta_pending_sub')
-            navigate(`/payment/subscription-success?token=${orderId}`, { replace: true })
+            navigate(`/payment/subscription-success?token=${pendingDb.paypal_order_id}`, { replace: true })
             return
           }
+
+          // Método 2: localStorage como fallback
+          const pendingLocal = localStorage.getItem('psiconecta_pending_sub')
+          if (pendingLocal) {
+            const { orderId, timestamp } = JSON.parse(pendingLocal)
+            if (Date.now() - timestamp < 3600000) {
+              localStorage.removeItem('psiconecta_pending_sub')
+              navigate(`/payment/subscription-success?token=${orderId}`, { replace: true })
+              return
+            }
+            localStorage.removeItem('psiconecta_pending_sub')
+          }
+        } catch (e) {
           localStorage.removeItem('psiconecta_pending_sub')
         }
-      } catch (e) { localStorage.removeItem('psiconecta_pending_sub') }
+      }
 
       // El rol ya está en el store después de signIn → fetchProfile
       const role = useAuthStore.getState().role
