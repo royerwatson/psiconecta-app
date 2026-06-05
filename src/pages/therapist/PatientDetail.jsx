@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
@@ -12,7 +12,9 @@ import { formatDate, formatDateTime, formatPrice } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 import PatientTestsTab from '@/components/psychometrics/PatientTestsTab'
-import { MessageCircle, Lock, Calendar, ClipboardList, CheckCircle2, Bot, FlaskConical, AlertTriangle, Eye, Unlock, AlertCircle, Check } from 'lucide-react'
+import { MessageCircle, Lock, Calendar, ClipboardList, CheckCircle2, Bot, FlaskConical, AlertTriangle, Eye, Unlock, AlertCircle, Check, BookOpen, Search, X } from 'lucide-react'
+import { LIBRARY, CATEGORIES } from '@/data/therapeuticLibrary'
+import { cn } from '@/lib/utils'
 
 export default function PatientDetail() {
   const { patientId } = useParams()
@@ -32,6 +34,10 @@ export default function PatientDetail() {
   const [releasingId, setReleasingId] = useState(null)   // id del entry con panel de liberar abierto
   const [releasedNotesEdit, setReleasedNotesEdit] = useState('')
   const [taskForm, setTaskForm] = useState({ title: '', description: '', due_date: '' })
+  const [showLibraryPicker, setShowLibraryPicker] = useState(false)
+  const [libraryQuery, setLibraryQuery] = useState('')
+  const [libraryCat, setLibraryCat] = useState('all')
+  const [addingFromLib, setAddingFromLib] = useState(null)
 
   useEffect(() => {
     fetchAll()
@@ -118,6 +124,32 @@ export default function PatientDetail() {
     await supabase.from('patient_tasks').update({ status: task.completed_at ? 'pending' : 'completed', completed_at: task.completed_at ? null : new Date().toISOString() }).eq('id', task.id)
     fetchAll()
   }
+
+  const assignFromLibrary = async (exercise) => {
+    setAddingFromLib(exercise.id)
+    const { error } = await supabase.from('patient_tasks').insert({
+      patient_id:   patientId,
+      therapist_id: user.id,
+      title:        exercise.title,
+      description:  exercise.summary,
+      instructions: exercise.instructions,
+      category:     exercise.category,
+      frequency:    exercise.frequency ?? null,
+      status:       'pending',
+    })
+    setAddingFromLib(null)
+    if (error) { toast.error('Error al asignar ejercicio'); return }
+    toast.success(`"${exercise.title}" asignado al paciente`)
+    setShowLibraryPicker(false)
+    fetchAll()
+  }
+
+  const filteredLibrary = LIBRARY.filter(e => {
+    const matchCat = libraryCat === 'all' || e.category === libraryCat
+    const q = libraryQuery.toLowerCase()
+    const matchQ = !q || e.title.toLowerCase().includes(q) || e.summary.toLowerCase().includes(q)
+    return matchCat && matchQ
+  })
 
   const markCheckinReviewed = async (checkinId) => {
     await supabase.from('ai_checkins').update({ notified: true }).eq('id', checkinId)
@@ -288,7 +320,10 @@ export default function PatientDetail() {
       {/* Tareas */}
       {tab === 'tasks' && (
         <div className="flex flex-col gap-3">
-          <div className="flex justify-end">
+          <div className="flex justify-end gap-2">
+            <Button size="sm" variant="secondary" onClick={() => setShowLibraryPicker(true)}>
+              <BookOpen size={13} strokeWidth={1.8} /> Desde biblioteca
+            </Button>
             <Button size="sm" onClick={() => setShowTaskModal(true)}>+ Asignar tarea</Button>
           </div>
           {tasks.length === 0 ? (
@@ -427,6 +462,57 @@ export default function PatientDetail() {
           <Button onClick={saveHistory} fullWidth>Guardar nota clínica</Button>
         </div>
       </Modal>
+
+      {/* Modal biblioteca terapéutica */}
+      {showLibraryPicker && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowLibraryPicker(false)}>
+          <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg shadow-float border border-warm-100 max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
+            <div className="w-10 h-1 bg-warm-200 rounded-full mx-auto mt-3 sm:hidden" />
+            <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-warm-100">
+              <div>
+                <p className="font-serif font-semibold text-warm-900">Biblioteca terapéutica</p>
+                <p className="text-xs text-warm-400">Selecciona un ejercicio para asignar a {patient?.full_name?.split(' ')[0]}</p>
+              </div>
+              <button onClick={() => setShowLibraryPicker(false)} className="p-1.5 rounded-lg hover:bg-warm-100 transition-colors">
+                <X size={18} strokeWidth={1.8} className="text-warm-500" />
+              </button>
+            </div>
+            <div className="px-5 pt-3 pb-2 space-y-2">
+              <div className="relative">
+                <Search size={14} strokeWidth={1.8} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-300 pointer-events-none" />
+                <input value={libraryQuery} onChange={e => setLibraryQuery(e.target.value)} placeholder="Buscar ejercicio…"
+                  className="w-full pl-9 pr-4 py-2 rounded-xl border border-warm-200 text-sm text-warm-800 placeholder:text-warm-400 outline-none focus:ring-2 focus:ring-primary-300" />
+              </div>
+              <div className="flex gap-1.5 overflow-x-auto pb-1">
+                <button onClick={() => setLibraryCat('all')} className={cn('shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all', libraryCat === 'all' ? 'bg-warm-800 text-white' : 'bg-warm-100 text-warm-600 hover:bg-warm-200')}>Todos</button>
+                {CATEGORIES.map(c => (
+                  <button key={c.id} onClick={() => setLibraryCat(c.id)} className={cn('shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all', libraryCat === c.id ? 'bg-primary-600 text-white' : 'bg-warm-100 text-warm-600 hover:bg-warm-200')}>{c.label}</button>
+                ))}
+              </div>
+            </div>
+            <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-2">
+              {filteredLibrary.length === 0 ? (
+                <p className="text-center text-sm text-warm-400 py-10">Sin resultados</p>
+              ) : filteredLibrary.map(ex => (
+                <div key={ex.id} className="bg-white border border-warm-100 rounded-xl p-3.5 flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-warm-900 leading-snug">{ex.title}</p>
+                    <p className="text-xs text-warm-500 mt-0.5 line-clamp-2">{ex.summary}</p>
+                    <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                      {ex.duration && <span className="text-[10px] text-warm-400 bg-warm-50 px-2 py-0.5 rounded-full border border-warm-100">{ex.duration}</span>}
+                      {ex.frequency && <span className="text-[10px] text-warm-400 bg-warm-50 px-2 py-0.5 rounded-full border border-warm-100">{ex.frequency}</span>}
+                    </div>
+                  </div>
+                  <button onClick={() => assignFromLibrary(ex)} disabled={addingFromLib === ex.id}
+                    className="shrink-0 px-3 py-1.5 rounded-lg bg-primary-500 text-white text-xs font-semibold hover:bg-primary-600 disabled:opacity-50 transition-colors">
+                    {addingFromLib === ex.id ? '…' : '+ Asignar'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal tarea */}
       <Modal isOpen={showTaskModal} onClose={() => setShowTaskModal(false)} title="Asignar tarea">
