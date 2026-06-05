@@ -76,12 +76,22 @@ export default function TherapistDashboard() {
         .order('created_at', { ascending: false })
         .limit(5)
 
+      // Ingresos del mes actual (sesiones completadas)
+      const monthStart = new Date(); monthStart.setDate(1); monthStart.setHours(0,0,0,0)
+      const { data: completedThisMonth } = await supabase
+        .from('sessions')
+        .select('therapist_net, price')
+        .eq('therapist_id', user.id)
+        .eq('status', 'completed')
+        .gte('scheduled_at', monthStart.toISOString())
+      const monthEarnings = (completedThisMonth ?? []).reduce((acc, s) => acc + (s.therapist_net ?? s.price ?? 0), 0)
+
       setSessions(sessionsData ?? [])
       setStats({
         today:    todayCount ?? 0,
         week:     (sessionsData ?? []).length,
         patients: patientsCount ?? 0,
-        earnings: (sessionsData ?? []).reduce((acc, s) => acc + (s.price ?? 0), 0),
+        earnings: monthEarnings,
       })
       setAlerts(alertsData ?? [])
     } catch (err) {
@@ -252,7 +262,7 @@ export default function TherapistDashboard() {
         <StatCard title="Hoy"         value={stats.today}              subtitle="sesiones programadas" icon={<Calendar size={18} />}  color="primary" />
         <StatCard title="Esta semana" value={stats.week}               subtitle="próximas citas"        icon={<Clock size={18} />}     color="calm"    />
         <StatCard title="Pacientes"   value={stats.patients}           subtitle="atendidos en total"    icon={<Users size={18} />}     color="success" />
-        <StatCard title="Ingresos"    value={formatPrice(stats.earnings)} subtitle="sesiones próximas" icon={<DollarSign size={18} />} color="warning" />
+        <StatCard title="Ingresos"    value={formatPrice(stats.earnings)} subtitle="este mes (completadas)" icon={<DollarSign size={18} />} color="warning" />
       </div>
 
       {/* Próximas sesiones */}

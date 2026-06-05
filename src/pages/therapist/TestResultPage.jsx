@@ -88,11 +88,12 @@ export default function TestResultPage() {
     setLoading(true)
     try {
       // 1. Sesión
-      const { data: sess } = await supabase
+      const { data: sess, error: sessErr } = await supabase
         .from('test_sessions')
         .select('id, status, completed_at, respondent_id, assignment_id')
         .eq('id', sessionId)
         .single()
+      if (sessErr || !sess) throw new Error('Sesión no encontrada')
       setSession(sess)
 
       // 2. Asignación y test

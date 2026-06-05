@@ -134,11 +134,21 @@ export default function AICheckin({ userId }) {
   const selectMood = async (mood) => {
     setSelectedMood(mood)
 
-    // Guardar en mood_entries inmediatamente
-    await supabase.from('mood_entries').upsert({
-      patient_id: userId,
-      mood:       mood.value,
-    }, { onConflict: 'patient_id,created_at::date' }).select()
+    // Guardar en mood_entries — upsert del día actual usando DELETE+INSERT
+    // (onConflict con cast no es soportado por el cliente JS; usamos fecha truncada)
+    const today = new Date().toISOString().split('T')[0]
+    const { data: existing } = await supabase
+      .from('mood_entries')
+      .select('id')
+      .eq('patient_id', userId)
+      .gte('created_at', today + 'T00:00:00')
+      .lte('created_at', today + 'T23:59:59')
+      .maybeSingle()
+    if (existing) {
+      await supabase.from('mood_entries').update({ mood: mood.value }).eq('id', existing.id)
+    } else {
+      await supabase.from('mood_entries').insert({ patient_id: userId, mood: mood.value })
+    }
 
     // Actualizar gráfico en tiempo real
     await loadWeekHistory()

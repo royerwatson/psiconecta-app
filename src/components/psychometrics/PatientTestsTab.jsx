@@ -153,7 +153,12 @@ export default function PatientTestsTab({ therapistId, patientId }) {
       ) : (
         <div className="space-y-3">
           {assignments.map(a => {
-            const session   = a.test_sessions?.[0] ?? null
+            // Tomar la sesión completada más reciente (las sesiones no tienen orden garantizado)
+            const session   = (a.test_sessions ?? [])
+              .filter(s => s.status === 'completed')
+              .sort((a, b) => new Date(b.completed_at) - new Date(a.completed_at))[0]
+              ?? a.test_sessions?.[0]
+              ?? null
             const isExpanded = expandedId === a.id
             const cfg       = STATUS_CONFIG[a.status] ?? STATUS_CONFIG.pending
             const results   = session ? (resultsMap[session.id] ?? []) : []

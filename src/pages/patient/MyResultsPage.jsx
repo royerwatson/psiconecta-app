@@ -83,7 +83,7 @@ export default function MyResultsPage() {
     const sessionIds = sessions.map(s => s.id)
     const { data: results } = await supabase
       .from('test_results')
-      .select('id, session_id, raw_score, adjusted_score, severity_label, severity_code, released_to_patient')
+      .select('id, session_id, raw_score, adjusted_score, severity_label, severity_code, released_to_patient, scoring_rules!scoring_rule_id ( subscale_name, display_name )')
       .in('session_id', sessionIds)
       .eq('released_to_patient', true)
 

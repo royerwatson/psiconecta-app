@@ -53,8 +53,8 @@ export default function PatientDetail() {
 
     const [{ data: pat }, { data: sess }, { data: tsk }, { data: chk }] = await Promise.all([
       supabase.from('profiles').select('*').eq('id', patientId).single(),
-      supabase.from('sessions').select('*').eq('patient_id', patientId).order('scheduled_at', { ascending: false }).limit(10),
-      supabase.from('tasks').select('*').eq('patient_id', patientId).eq('therapist_id', user.id).order('created_at', { ascending: false }),
+      supabase.from('sessions').select('*').eq('patient_id', patientId).eq('therapist_id', user.id).order('scheduled_at', { ascending: false }).limit(10),
+      supabase.from('patient_tasks').select('*').eq('patient_id', patientId).eq('therapist_id', user.id).order('created_at', { ascending: false }),
       supabase.from('ai_checkins').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(30),
     ])
 
@@ -100,11 +100,12 @@ export default function PatientDetail() {
       toast.error('El título de la tarea es obligatorio')
       return
     }
-    const { error } = await supabase.from('tasks').insert({
+    const { error } = await supabase.from('patient_tasks').insert({
       patient_id:   patientId,
       therapist_id: user.id,
       ...taskForm,
       title: taskForm.title.trim(),
+      status: 'pending',
     })
     if (error) { toast.error('Error guardando tarea'); return }
     toast.success('Tarea asignada al paciente')
@@ -114,7 +115,7 @@ export default function PatientDetail() {
   }
 
   const toggleTask = async (task) => {
-    await supabase.from('tasks').update({ completed: !task.completed }).eq('id', task.id)
+    await supabase.from('patient_tasks').update({ status: task.completed_at ? 'pending' : 'completed', completed_at: task.completed_at ? null : new Date().toISOString() }).eq('id', task.id)
     fetchAll()
   }
 

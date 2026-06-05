@@ -46,6 +46,7 @@ export default function CompletedTestsSection({ therapistId }) {
         .from('therapeutic_relationships')
         .select('id')
         .eq('therapist_id', therapistId)
+        .eq('status', 'active')
 
       if (relationships && relationships.length > 0) {
         const relIds = new Set(relationships.map(r => r.id))

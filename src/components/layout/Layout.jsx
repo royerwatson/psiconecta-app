@@ -75,7 +75,7 @@ function SideNavItem({ to, icon: Icon, label, unread = 0 }) {
             )}
           </span>
           <span className="flex-1 truncate tracking-[-0.01em]">{label}</span>
-          {unread > 0 && !({} .isActive) && (
+          {unread > 0 && !isActive && (
             <span className="bg-rose-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 shrink-0">
               {unread > 9 ? '9+' : unread}
             </span>
@@ -243,7 +243,7 @@ export default function Layout() {
           </button>
 
           <div className="flex items-center gap-1">
-            {role === 'patient' && <NotificationBell userId={user?.id} />}
+            {role === 'client' && <NotificationBell userId={user?.id} />}
 
             {role === 'therapist' && alertCount > 0 && (
               <button onClick={() => navigate('/therapist/dashboard')}
@@ -395,7 +395,7 @@ export default function Layout() {
       )}
 
       {/* ── Crisis button ── */}
-      {role === 'patient' && (
+      {role === 'client' && (
         <button
           onClick={() => navigate('/patient/crisis')}
           className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 bg-gradient-to-r from-accent-600 to-primary-600 hover:opacity-90 active:scale-95 text-white text-xs font-bold px-4 py-2.5 rounded-full shadow-float transition-all"

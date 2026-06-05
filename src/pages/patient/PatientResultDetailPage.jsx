@@ -166,26 +166,35 @@ export default function PatientResultDetailPage() {
 
       // 3. Historial de sesiones previas del mismo test (para tendencia)
       if (sess?.test_assignments?.tests?.slug) {
-        const { data: hist } = await supabase
-          .from('test_sessions')
-          .select(`
-            id, completed_at,
-            test_results (
-              adjusted_score, raw_score, released_to_patient,
-              scoring_rules ( subscale_name, display_name )
-            ),
-            test_assignments!inner (
-              tests!inner ( slug )
-            )
-          `)
-          .eq('respondent_id', user.id)
-          .eq('status', 'completed')
-          .eq('test_assignments.tests.slug', sess.test_assignments.tests.slug)
-          .neq('id', sessionId)
-          .order('completed_at', { ascending: false })
-          .limit(3)
+        // Obtener test_id del test actual para filtrar por test (no por slug en join)
+        const { data: targetTest } = await supabase
+          .from('tests').select('id').eq('slug', sess.test_assignments.tests.slug).maybeSingle()
 
-        setHistory((hist ?? []).filter(s => s.test_results?.some(r => r.released_to_patient)))
+        if (targetTest) {
+          const { data: hist } = await supabase
+            .from('test_sessions')
+            .select(`
+              id, completed_at,
+              test_results (
+                adjusted_score, raw_score, released_to_patient,
+                scoring_rules!scoring_rule_id ( subscale_name, display_name )
+              ),
+              test_assignments!inner (
+                tests!inner ( id, slug )
+              )
+            `)
+            .eq('respondent_id', user.id)
+            .eq('status', 'completed')
+            .eq('test_assignments.test_id', targetTest.id)
+            .neq('id', sessionId)
+            .order('completed_at', { ascending: false })
+            .limit(3)
+
+          setHistory((hist ?? []).filter(s =>
+            s.test_assignments?.tests?.id === targetTest.id &&
+            s.test_results?.some(r => r.released_to_patient)
+          ))
+        }
       }
     } catch (err) {
       console.error(err)

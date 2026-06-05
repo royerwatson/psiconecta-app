@@ -450,8 +450,8 @@ export default function TakeTestPage() {
         <div className="flex-1 flex flex-col items-center justify-center p-6">
           <div className="w-full max-w-lg">
 
-            {/* Instrucciones de sección (solo si cambia) */}
-            {sectionInstructions && currentIdx === 0 && (
+            {/* Instrucciones de sección (primer ítem de cada sección) */}
+            {sectionInstructions && (currentIdx === 0 || itemSectionChanged) && (
               <div className="bg-primary-50 border border-primary-100 rounded-2xl px-4 py-3 mb-5 text-sm text-primary-800 leading-relaxed">
                 {sectionInstructions}
               </div>
