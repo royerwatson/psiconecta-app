@@ -15,6 +15,7 @@ import StarRating from '@/components/ui/StarRating'
 import { Textarea } from '@/components/ui/Input'
 import toast from 'react-hot-toast'
 import { Play, ChevronRight, Flame, Zap, Sparkles, ClipboardList, Calendar, MessageCircle, Search, Clock, AlertTriangle, Sprout, Star, BarChart2 } from 'lucide-react'
+import ProgressWidget from '@/components/patient/ProgressWidget'
 
 /**
  * Dashboard principal del paciente.
@@ -301,6 +302,9 @@ export default function PatientDashboard() {
           </Button>
         </div>
       )}
+
+      {/* Progreso terapéutico */}
+      <ProgressWidget />
 
       {/* Mood tracker */}
       <MoodTracker userId={user?.id} />

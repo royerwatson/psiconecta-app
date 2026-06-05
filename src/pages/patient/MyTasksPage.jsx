@@ -18,6 +18,7 @@ import Button from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 import { Brain, Waves, Leaf, Focus, Zap, Heart, Wind, PenLine, ClipboardList, RefreshCw, AlertTriangle, Calendar, CheckCircle2 } from 'lucide-react'
+import { sendTaskCompletionNotification } from '@/lib/notifications'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -267,10 +268,13 @@ export default function MyTasksPage() {
     if (error) {
       toast.error('No se pudo actualizar la tarea')
     } else {
+      const completedTask = tasks.find(t => t.id === taskId)
       setTasks(prev => prev.map(t =>
         t.id === taskId ? { ...t, status: 'completed', completed_at: now } : t
       ))
-      toast.success('¡Tarea completada!')
+      toast.success('¡Tarea completada! Sigue adelante con tu proceso.')
+      // Notificación push
+      sendTaskCompletionNotification(completedTask?.title ?? 'Tarea')
     }
   }
 
