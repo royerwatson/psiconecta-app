@@ -304,6 +304,10 @@ export default function TherapistDashboard() {
           ))}
         </div>
       </div>
+
+      {/* Tests completados por pacientes */}
+      <CompletedTestsSection therapistId={user?.id} />
+
     </div>
   )
 }

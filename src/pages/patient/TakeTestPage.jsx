@@ -510,56 +510,43 @@ export default function TakeTestPage() {
     )
   }
 
-  // Pantalla de resultados
+  // Pantalla de agradecimiento (sin mostrar resultados al paciente)
   if (phase === 'results') {
     const hasRisk = results.some(r => r.is_risk_level)
 
     return (
       <div className="min-h-screen bg-gradient-to-br from-primary-50 to-calm-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-3xl shadow-lg p-8 max-w-md w-full">
+        <div className="bg-white rounded-3xl shadow-lg p-8 max-w-md w-full text-center">
 
-          {/* Alerta de riesgo */}
+          {/* Ícono */}
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6
+            bg-gradient-to-br from-primary-500 to-calm-500 shadow-lg">
+            <CheckCircle2 size={40} strokeWidth={1.8} className="text-white" />
+          </div>
+
+          <h2 className="font-serif text-2xl font-bold text-warm-900 mb-3">
+            ¡Gracias por completar el test!
+          </h2>
+
+          <p className="text-warm-600 leading-relaxed mb-4">
+            Tus respuestas han sido enviadas a tu terapeuta. Él o ella revisará los resultados
+            y los compartirá contigo en el momento oportuno.
+          </p>
+
           {hasRisk && (
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-4 mb-6">
-              <p className="text-sm font-semibold text-red-800 mb-1 flex items-center gap-1.5"><AlertCircle size={15} strokeWidth={1.8} /> Tu terapeuta ha sido notificado</p>
-              <p className="text-xs text-red-600 leading-relaxed">
-                Tus respuestas indican que puede ser un momento difícil. Tu terapeuta recibirá esta información y se pondrá en contacto contigo pronto.
+            <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-4">
+              <p className="text-sm text-blue-800 font-medium flex items-center justify-center gap-1.5">
+                <AlertCircle size={14} strokeWidth={1.8} /> Tu terapeuta ha sido notificado
+              </p>
+              <p className="text-xs text-blue-600 mt-1 leading-relaxed">
+                Tus respuestas requieren atención. Tu terapeuta se pondrá en contacto contigo pronto.
               </p>
             </div>
           )}
 
-          <div className="text-center mb-6">
-            <div className="flex justify-center mb-3">
-              {hasRisk
-                ? <Heart size={44} strokeWidth={1.8} className="text-blue-400" fill="currentColor" />
-                : <CheckCircle2 size={44} strokeWidth={1.8} className="text-success" />
-              }
-            </div>
-            <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Test completado</h2>
-            <p className="text-sm text-warm-500">Gracias por responder con honestidad</p>
-          </div>
-
-          {/* Resultados */}
-          <div className="space-y-3 mb-6">
-            {results.map((r, i) => {
-              const rule = scoringRules.find(s => s.id === r.scoring_rule_id)
-              const bg   = SEVERITY_BG[r.severity_code] ?? 'bg-warm-50 border-warm-200 text-warm-800'
-              return (
-                <div key={i} className={`border rounded-2xl px-4 py-3 flex items-center justify-between ${bg}`}>
-                  <div>
-                    <p className="text-sm font-semibold">{rule?.display_name ?? rule?.subscale_name}</p>
-                    {r.severity_label && (
-                      <p className="text-xs opacity-80 mt-0.5">{r.severity_label}</p>
-                    )}
-                  </div>
-                  <p className="text-2xl font-bold">{r.adjusted_score ?? r.raw_score}</p>
-                </div>
-              )
-            })}
-          </div>
-
-          <div className="bg-warm-50 rounded-2xl p-4 mb-6 text-xs text-warm-500 text-center leading-relaxed">
-            Tu terapeuta revisará estos resultados antes de compartirlos contigo. Podrás verlos una vez que los haya liberado.
+          <div className="bg-warm-50 rounded-2xl p-4 mb-6 text-xs text-warm-500 leading-relaxed">
+            Los resultados serán revisados por tu terapeuta antes de ser compartidos contigo.
+            Los encontrarás en la sección <strong>Mis Resultados</strong> cuando estén disponibles.
           </div>
 
           <button
