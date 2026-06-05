@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-04*
+*Última actualización: 2026-06-05*
 
 ---
 
@@ -97,7 +97,9 @@ src/
 | `migration_subscription_update.sql` | Ejecutado |
 | `migration_messages_read_at.sql` | Ejecutado |
 | `migration_anonymity.sql` | Ejecutado |
-| `migration_credentials.sql` | **Ejecutado** |
+| `migration_credentials.sql` | Ejecutado |
+| `migration_fix_results_rls.sql` | **Ejecutado** — política INSERT para paciente en `test_results` |
+| `migration_fix_test_assignment_patient_update.sql` | **Ejecutado** — política UPDATE para paciente en `test_assignments` |
 
 ---
 
@@ -259,17 +261,23 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Badge mensajes no leídos (read_at)
 - [x] Presencia real (Supabase Presence — En línea / Desconectado)
 - [x] Paginación scroll infinito inverso (40 msg/página)
+- [x] Lista de conversaciones al abrir (no auto-abre la última)
+- [x] Indicador "Leído / Enviado" en mensajes propios con actualización realtime
 
 ### Herramientas Clínicas (plan Suscripción)
 - [x] 45+ tests psicométricos con scoring automático
 - [x] Asignación tests + resultados liberados al paciente
+- [x] Botón "Revisado" en vista de resultado de test (terapeuta)
+- [x] Tests completados aparecen en dashboard del terapeuta (CompletedTestsSection)
 - [x] DSM-5-TR y CIE-11 en español
 - [x] Escalas clínicas validadas (PHQ-9, GAD-7, AUDIT, PCL-5)
+- [x] Escalas: botón "Aplicar a paciente" — crea test_assignment directo al paciente (PHQ9→phq9, GAD7→gad7, AUDIT→audit, PCL5→pcl5)
 - [x] Plan de crisis (Safety Planning Intervention)
 - [x] Biblioteca terapéutica (40+ ejercicios)
-- [x] Protocolos terapéuticos
+- [x] Terapeuta asigna ejercicios desde la biblioteca al ver perfil del paciente (tab Tareas → "Desde biblioteca")
+- [x] Protocolos terapéuticos (vista "Todos" corregida)
 - [x] Consulta con colegas (interconsulta)
-- [x] Tareas asignadas al paciente
+- [x] Tareas asignadas al paciente (terapeuta usa `patient_tasks`, paciente las ve en su dashboard)
 
 ### Bienestar del Paciente
 - [x] Check-in diario IA (análisis riesgo, alerta terapeuta)
@@ -301,11 +309,43 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Favicon SVG con logo de Psiconecta
 - [x] 100% sin emojis — Lucide React uniformes (strokeWidth=1.8)
 - [x] Code splitting: lucide-react, datos clínicos, vendor libs
-- [x] Build limpio — 0 errores (3349 módulos)
+- [x] Build limpio — 0 errores (3169 módulos)
 
 ---
 
-## 10. Pendiente / En Cola
+## 10. Bugs Corregidos (sesión 2026-06-05)
+
+### RLS / Base de datos
+- `test_results` — faltaba política INSERT para el paciente (resultados nunca se guardaban)
+- `test_assignments` — faltaba política UPDATE para el paciente (status no cambiaba a 'completed'; tests seguían apareciendo como pendientes)
+- `PatientDetail.jsx` — escribía tareas en tabla `tasks` inexistente en lugar de `patient_tasks`
+
+### Lógica y datos
+- `Layout.jsx` — `role === 'patient'` debía ser `'client'`; NotificationBell y botón de crisis nunca aparecían al paciente
+- `Layout.jsx` — `{} .isActive` siempre `undefined`; badge de no leídos aparecía erróneamente en todos los items
+- `AICheckin.jsx` — `onConflict: 'patient_id,created_at::date'` es sintaxis SQL inválida como columna; creaba entradas duplicadas de humor por día
+- `MyResultsPage.jsx` — `scoring_rules` no incluido en query separado; etiquetas de subescalas siempre en blanco
+- `PatientResultDetailPage.jsx` — filtro `.eq('test_assignments.tests.slug', ...)` ignorado por Supabase JS; gráfica de tendencia mezclaba tests distintos
+- `PatientDetail.jsx` — sesiones sin filtro `therapist_id`; mostraba sesiones de otros terapeutas
+- `CompletedTestsSection.jsx` — relaciones sin filtro `status='active'`; mostraba tests de pacientes inactivos
+- `TherapistDashboard.jsx` — "Ingresos" mostraba sesiones futuras; ahora muestra ingresos reales del mes
+- `TherapistDashboard.jsx` — `CompletedTestsSection` usado pero no importado → dashboard en blanco
+- `PatientTestsTab.jsx` — `test_sessions[0]` sin orden; puede mostrar sesión incorrecta
+- `TakeTestPage.jsx` — instrucciones de sección 2+ nunca se mostraban (`itemSectionChanged` ignorado)
+- `TestResultPage.jsx` — crash silencioso si `sess` es null
+- `Login.jsx` — redirect a suscripción pendiente bloqueaba el dashboard si el token PayPal había expirado (>3h); ahora marca como `failed` y deja pasar
+
+### Nuevas funciones entregadas
+- Chat: lista de conversaciones al entrar (no auto-abre), indicador "Leído/Enviado" en tiempo real
+- Escalas clínicas: botón "Aplicar a paciente" por escala (crea test_assignment)
+- Protocolos: vista "Todos" corregida (bug en `searchProtocols(null)`)
+- Terapeuta → detalle paciente → tab Tareas: botón "Desde biblioteca" para asignar ejercicios terapéuticos
+- Tests: botón "Revisado" en `TestResultPage` (marca `therapist_dismissed_at`)
+- `SubscriptionSuccess`: botón de escape "Ir al dashboard" cuando captura falla
+
+---
+
+## 11. Pendiente / En Cola
 
 ### Configuración externa
 - [ ] Apple OAuth — Apple Developer Console
@@ -316,12 +356,14 @@ VITE_PAYPAL_CLIENT_ID=...
 
 ### Mejoras técnicas
 - [ ] `create-subscription-order` Edge Function — pago $50/mes suscripción terapeuta (no existe aún)
+- [ ] `capture-subscription-payment` Edge Function — falla actualmente; tokens PayPal expirados se marcan como `failed` y se omiten en el login
 - [ ] Paginación chat: scroll infinito funcional, falta test con conversaciones largas reales
 - [ ] VideoCall: botón de reconexión manual testeado, `network-connection` event pendiente de prueba real
+- [ ] Tests: sesiones completadas antes de la migración RLS no tienen `test_results`; el terapeuta debe reasignar el test
 
 ---
 
-## 11. Comandos de Desarrollo
+## 12. Comandos de Desarrollo
 
 ```bash
 npm run dev          # servidor local en localhost:3000
@@ -333,7 +375,7 @@ git add -A && git commit -m "..." && git push origin main
 
 ---
 
-## 12. Convenciones del Código
+## 13. Convenciones del Código
 
 - **Íconos:** solo Lucide React, `strokeWidth={1.8}`, nunca emojis en JSX
 - **Moneda:** `formatPrice(amount)` → `$60.00 USD` | `formatWithLocal()` → `$60.00 USD ≈ RD$3,510`
