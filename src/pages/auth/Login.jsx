@@ -46,10 +46,22 @@ export default function Login() {
           }
 
           if (pendingDb?.paypal_order_id) {
-            toast('Completando tu suscripción...', { duration: 3000 })
-            localStorage.removeItem('psiconecta_pending_sub')
-            navigate(`/payment/subscription-success?token=${pendingDb.paypal_order_id}`, { replace: true })
-            return
+            // Solo redirigir si el pedido tiene menos de 3 horas (tokens PayPal expiran)
+            const ageMs = Date.now() - new Date(pendingDb.created_at).getTime()
+            const threeHours = 3 * 60 * 60 * 1000
+            if (ageMs < threeHours) {
+              toast('Completando tu suscripción...', { duration: 3000 })
+              localStorage.removeItem('psiconecta_pending_sub')
+              navigate(`/payment/subscription-success?token=${pendingDb.paypal_order_id}`, { replace: true })
+              return
+            } else {
+              // Token expirado — marcar como failed y dejar pasar al dashboard
+              await supabase
+                .from('subscription_payments')
+                .update({ status: 'failed' })
+                .eq('paypal_order_id', pendingDb.paypal_order_id)
+              localStorage.removeItem('psiconecta_pending_sub')
+            }
           }
         } catch (e) {
           console.error('[Login] Unexpected error:', e)

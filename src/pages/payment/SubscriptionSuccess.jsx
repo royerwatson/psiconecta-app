@@ -123,6 +123,12 @@ export default function SubscriptionSuccess() {
               <Button variant="outline" fullWidth onClick={() => navigate('/therapist/subscription')}>
                 Volver a suscripciones
               </Button>
+              <button
+                onClick={() => navigate('/therapist/dashboard', { replace: true })}
+                className="text-xs text-warm-400 hover:text-warm-600 underline transition-colors pt-1"
+              >
+                Ir al dashboard de todas formas →
+              </button>
             </div>
             <p className="text-xs text-warm-400 mt-5">
               Soporte: <a href="mailto:soporte@psiconecta.app" className="text-primary-500">soporte@psiconecta.app</a>
