@@ -99,15 +99,32 @@ Deno.serve(async (req) => {
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 30)
 
-    const { error: updateError } = await supabaseAdmin
+    // Usar .select() para verificar que el update afectó filas
+    const { data: updatedRows, error: updateError } = await supabaseAdmin
       .from('therapist_profiles')
       .update({
         subscription_plan: 'pro',
         plan_expires_at:   expiresAt.toISOString(),
       })
       .eq('user_id', therapistId)
+      .select('user_id, subscription_plan')
 
     if (updateError) throw new Error('Error activando plan: ' + updateError.message)
+
+    if (!updatedRows || updatedRows.length === 0) {
+      console.error(`[capture-subscription] WARN: No se actualizó therapist_profiles para user_id=${therapistId}. Verificando si el perfil existe...`)
+      // Intentar insertar si no existe
+      const { error: upsertError } = await supabaseAdmin
+        .from('therapist_profiles')
+        .upsert({
+          user_id:           therapistId,
+          subscription_plan: 'pro',
+          plan_expires_at:   expiresAt.toISOString(),
+        }, { onConflict: 'user_id' })
+      if (upsertError) throw new Error('Error en upsert del plan: ' + upsertError.message)
+    }
+
+    console.log(`[capture-subscription] Plan Pro activado: user_id=${therapistId}, rows=${updatedRows?.length ?? 0}`)
 
     // ── Registrar pago ────────────────────────────────────────────────────
     if (pendingPayment?.id) {
