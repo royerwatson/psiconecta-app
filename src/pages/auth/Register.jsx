@@ -36,8 +36,22 @@ const SPECIALTIES = [
 
 // ─── Sanitización ────────────────────────────────────────────────────────────
 function sanitize(str) {
-  // Elimina caracteres HTML/script para prevenir XSS en campos de texto
   return str.replace(/<[^>]*>/g, '').replace(/[<>"'`]/g, '').trim()
+}
+
+// ─── Fortaleza de contraseña ──────────────────────────────────────────────────
+function getPasswordStrength(pwd) {
+  if (!pwd) return null
+  const passed = [
+    pwd.length >= 8,
+    /[A-Z]/.test(pwd),
+    /[0-9]/.test(pwd),
+    /[^A-Za-z0-9]/.test(pwd),
+  ].filter(Boolean).length
+  if (passed <= 1) return { label: 'Débil',   color: 'bg-red-400',    text: 'text-red-600',    width: 'w-1/4' }
+  if (passed === 2) return { label: 'Regular', color: 'bg-amber-400',  text: 'text-amber-600',  width: 'w-2/4' }
+  if (passed === 3) return { label: 'Buena',   color: 'bg-yellow-400', text: 'text-yellow-600', width: 'w-3/4' }
+  return               { label: 'Fuerte',  color: 'bg-green-500',  text: 'text-green-600',  width: 'w-full' }
 }
 
 const COUNTRIES = [
@@ -355,6 +369,7 @@ export default function Register() {
   const [acceptPrivacy, setAcceptPrivacy] = useState(false)
   const [paypalLinked, setPaypalLinked]   = useState(false)
   const [loading, setLoading] = useState(false)
+  const [emailPendingVerification, setEmailPendingVerification] = useState(false)
 
   const { signUp, updateProfile } = useAuthStore()
   const navigate = useNavigate()
@@ -380,6 +395,18 @@ export default function Register() {
     }
     if (form.password.length < 8) {
       toast.error('La contraseña debe tener al menos 8 caracteres')
+      return
+    }
+    if (!/[A-Z]/.test(form.password)) {
+      toast.error('La contraseña debe tener al menos una letra mayúscula')
+      return
+    }
+    if (!/[0-9]/.test(form.password)) {
+      toast.error('La contraseña debe tener al menos un número')
+      return
+    }
+    if (!/[^A-Za-z0-9]/.test(form.password)) {
+      toast.error('La contraseña debe tener al menos un carácter especial (!@#$...)')
       return
     }
     setStep(3)
@@ -440,13 +467,57 @@ export default function Register() {
         }).eq('id', user.id)
       }
 
-      toast.success('¡Cuenta creada! Revisa tu correo para verificarla.')
+      // Si Supabase requiere confirmación de email, session será null
+      const { data: { session } } = await supabase.auth.getSession()
+      if (!session) {
+        setEmailPendingVerification(true)
+        return
+      }
+      toast.success('¡Cuenta creada!')
       navigate(role === 'therapist' ? '/therapist/dashboard' : '/patient/dashboard')
     } catch (err) {
       toast.error(err.message ?? 'Error al crear la cuenta')
     } finally {
       setLoading(false)
     }
+  }
+
+  // ── Pantalla de verificación de email ────────────────────────────────────────
+  if (emailPendingVerification) {
+    return (
+      <div className="min-h-dvh bg-psiconecta flex items-center justify-center p-4">
+        <div className="w-full max-w-md animate-fade-in">
+          <div className="bg-white rounded-3xl shadow-float p-10 text-center border border-warm-100">
+            <div className="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
+              <svg className="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+                  d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h2 className="font-serif text-xl font-bold text-warm-900 mb-2">Verifica tu correo</h2>
+            <p className="text-warm-500 text-sm leading-relaxed mb-6">
+              Te enviamos un enlace de verificación a <strong>{form.email}</strong>.
+              Revisa tu bandeja de entrada (y carpeta de spam) y haz clic en el enlace para activar tu cuenta.
+            </p>
+            <Button variant="secondary" fullWidth onClick={() => navigate('/login')}>
+              Ir al inicio de sesión
+            </Button>
+            <p className="text-xs text-warm-400 mt-4">
+              ¿No recibiste el correo?{' '}
+              <button
+                className="text-primary-500 hover:underline"
+                onClick={async () => {
+                  await supabase.auth.resend({ type: 'signup', email: form.email })
+                  toast.success('Correo reenviado')
+                }}
+              >
+                Reenviar
+              </button>
+            </p>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   const isPaymentStep = (role === 'therapist' && step === 5) || (role === 'client' && step === 4)
@@ -509,10 +580,22 @@ export default function Register() {
               <Input label="Correo electrónico" name="email" type="email" placeholder="tu@correo.com"
                 value={form.email} onChange={handleChange} required />
 
-              <Input label="Contraseña" name="password" type="password"
-                placeholder="Mínimo 8 caracteres"
-                value={form.password} onChange={handleChange} required
-                hint="Al menos 8 caracteres" />
+              <div className="flex flex-col gap-1">
+                <Input label="Contraseña" name="password" type="password"
+                  placeholder="Mínimo 8 caracteres"
+                  value={form.password} onChange={handleChange} required />
+                {form.password && (() => {
+                  const s = getPasswordStrength(form.password)
+                  return (
+                    <div className="flex flex-col gap-1 mt-0.5">
+                      <div className="h-1.5 w-full bg-warm-100 rounded-full overflow-hidden">
+                        <div className={`h-full rounded-full transition-all duration-300 ${s.color} ${s.width}`} />
+                      </div>
+                      <p className={`text-xs font-medium ${s.text}`}>{s.label} — usa mayúsculas, números y símbolos</p>
+                    </div>
+                  )
+                })()}
+              </div>
 
               <Input label="Confirmar contraseña" name="confirmPassword" type="password"
                 placeholder="Repite tu contraseña"
