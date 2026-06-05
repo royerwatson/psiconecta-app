@@ -100,14 +100,12 @@ export default function SubscriptionSuccess() {
                 </p>
               </div>
             )}
-            <div className="flex flex-col gap-3">
-              <Button fullWidth onClick={() => navigate('/therapist/dashboard')}>
-                Ir al dashboard
-              </Button>
-              <Button variant="secondary" fullWidth onClick={() => navigate('/login')}>
-                Iniciar sesión
-              </Button>
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-xs text-amber-700 text-center">
+              Tu suscripción está activa. Inicia sesión para acceder al dashboard.
             </div>
+            <Button fullWidth onClick={() => navigate('/login')}>
+              Iniciar sesión
+            </Button>
           </div>
         )}
 

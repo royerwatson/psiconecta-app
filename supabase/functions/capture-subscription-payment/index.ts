@@ -1,14 +1,10 @@
 /**
  * capture-subscription-payment
  *
- * Captura el pago de suscripción tras aprobación en PayPal.
- * NO requiere sesión activa del usuario — el orderId de PayPal
- * es suficiente para identificar y verificar el pago.
- *
- * Seguridad:
- *  - PayPal verifica que el pago fue aprobado (status = COMPLETED)
- *  - Buscamos el therapist_id en subscription_payments por orderId
- *  - Unique constraint en paypal_capture_id previene doble captura
+ * Captura el pago y activa el plan Pro.
+ * NO requiere sesión. Identifica al terapeuta de dos formas:
+ *   1. Por subscription_payments.paypal_order_id (si el insert funcionó)
+ *   2. Por el reference_id de la orden PayPal (siempre contiene user_id)
  *
  * Body: { orderId: string }
  */
@@ -19,27 +15,24 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-async function getPayPalAccessToken(): Promise<string> {
-  const clientId     = Deno.env.get('PAYPAL_CLIENT_ID')!
-  const clientSecret = Deno.env.get('PAYPAL_CLIENT_SECRET')!
-  const baseUrl      = Deno.env.get('PAYPAL_BASE_URL') ?? 'https://api-m.sandbox.paypal.com'
+async function getPayPalToken(): Promise<string> {
+  const baseUrl = Deno.env.get('PAYPAL_BASE_URL') ?? 'https://api-m.sandbox.paypal.com'
   const res = await fetch(`${baseUrl}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+      Authorization: `Basic ${btoa(`${Deno.env.get('PAYPAL_CLIENT_ID')}:${Deno.env.get('PAYPAL_CLIENT_SECRET')}`)}`,
     },
     body: 'grant_type=client_credentials',
   })
-  const data = await res.json()
-  if (!data.access_token) throw new Error('No se pudo obtener token de PayPal')
-  return data.access_token
+  const d = await res.json()
+  if (!d.access_token) throw new Error('No se pudo obtener token de PayPal')
+  return d.access_token
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
   try {
     const { orderId } = await req.json()
     if (!orderId) throw new Error('Falta orderId')
@@ -49,34 +42,24 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // ── 1. Buscar el therapist_id asociado a esta orden ───────────────────
-    // create-subscription-order guarda la orden como 'pending' en subscription_payments
-    const { data: pendingPayment } = await supabaseAdmin
+    // ── Verificar si ya fue procesado (idempotencia) ──────────────────────
+    const { data: existing } = await supabaseAdmin
       .from('subscription_payments')
-      .select('id, therapist_id, status')
+      .select('therapist_id, status, period_end')
       .eq('paypal_order_id', orderId)
+      .eq('status', 'completed')
       .single()
 
-    if (!pendingPayment) {
-      throw new Error('Orden no encontrada. Intenta de nuevo o contacta soporte.')
-    }
-
-    if (pendingPayment.status === 'completed') {
-      // Ya fue capturada antes — devolver éxito idempotente
-      const { data: tp } = await supabaseAdmin
-        .from('therapist_profiles')
-        .select('plan_expires_at')
-        .eq('user_id', pendingPayment.therapist_id)
-        .single()
+    if (existing) {
       return new Response(
-        JSON.stringify({ success: true, expiresAt: tp?.plan_expires_at, alreadyActivated: true }),
+        JSON.stringify({ success: true, expiresAt: existing.period_end, alreadyActivated: true }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // ── 2. Capturar el pago en PayPal ─────────────────────────────────────
+    // ── Capturar el pago en PayPal ────────────────────────────────────────
     const baseUrl = Deno.env.get('PAYPAL_BASE_URL') ?? 'https://api-m.sandbox.paypal.com'
-    const token   = await getPayPalAccessToken()
+    const token   = await getPayPalToken()
 
     const captureRes = await fetch(`${baseUrl}/v2/checkout/orders/${orderId}/capture`, {
       method: 'POST',
@@ -85,15 +68,34 @@ Deno.serve(async (req) => {
     const capture = await captureRes.json()
 
     if (capture.status !== 'COMPLETED') {
-      throw new Error('El pago no fue completado: ' + (capture.details?.[0]?.description ?? capture.status))
+      const detail = capture.details?.[0]?.description ?? capture.status ?? 'Error desconocido'
+      throw new Error('El pago no fue completado: ' + detail)
     }
 
-    const captureId  = capture.purchase_units?.[0]?.payments?.captures?.[0]?.id
-    const amountPaid = parseFloat(
+    // ── Obtener therapist_id ──────────────────────────────────────────────
+    // Fuente 1: reference_id en la orden PayPal (siempre contiene user.id)
+    const referenceId = capture.purchase_units?.[0]?.reference_id
+    const captureId   = capture.purchase_units?.[0]?.payments?.captures?.[0]?.id
+    const amountPaid  = parseFloat(
       capture.purchase_units?.[0]?.payments?.captures?.[0]?.amount?.value ?? '50'
     )
 
-    // ── 3. Activar plan Pro del terapeuta (30 días) ───────────────────────
+    // Fuente 2: subscription_payments (si el insert funcionó)
+    const { data: pendingPayment } = await supabaseAdmin
+      .from('subscription_payments')
+      .select('id, therapist_id')
+      .eq('paypal_order_id', orderId)
+      .eq('status', 'pending')
+      .single()
+
+    // Determinar therapist_id — priorizar el de la BD, fallback al reference_id de PayPal
+    const therapistId = pendingPayment?.therapist_id ?? referenceId
+
+    if (!therapistId) {
+      throw new Error('No se pudo identificar al terapeuta asociado a este pago')
+    }
+
+    // ── Activar plan Pro (30 días) ────────────────────────────────────────
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 30)
 
@@ -103,23 +105,37 @@ Deno.serve(async (req) => {
         subscription_plan: 'pro',
         plan_expires_at:   expiresAt.toISOString(),
       })
-      .eq('user_id', pendingPayment.therapist_id)
+      .eq('user_id', therapistId)
 
     if (updateError) throw new Error('Error activando plan: ' + updateError.message)
 
-    // ── 4. Registrar pago completado ──────────────────────────────────────
-    await supabaseAdmin
-      .from('subscription_payments')
-      .update({
-        status:            'completed',
+    // ── Registrar pago ────────────────────────────────────────────────────
+    if (pendingPayment?.id) {
+      await supabaseAdmin
+        .from('subscription_payments')
+        .update({
+          status:            'completed',
+          paypal_capture_id: captureId,
+          amount_usd:        amountPaid,
+          period_end:        expiresAt.toISOString(),
+        })
+        .eq('id', pendingPayment.id)
+    } else {
+      // Si no había registro previo, insertar uno nuevo
+      const periodStart = new Date()
+      await supabaseAdmin.from('subscription_payments').insert({
+        therapist_id:      therapistId,
+        plan:              'pro',
+        amount_usd:        amountPaid,
+        paypal_order_id:   orderId,
         paypal_capture_id: captureId,
-        amount:            amountPaid,
-        paid_at:           new Date().toISOString(),
-        expires_at:        expiresAt.toISOString(),
-      })
-      .eq('paypal_order_id', orderId)
+        status:            'completed',
+        period_start:      periodStart.toISOString(),
+        period_end:        expiresAt.toISOString(),
+      }).then()
+    }
 
-    console.log(`[capture-subscription] Plan Pro activado para therapist ${pendingPayment.therapist_id}`)
+    console.log(`[capture-subscription] Plan Pro activado para therapist ${therapistId}`)
 
     return new Response(
       JSON.stringify({ success: true, expiresAt: expiresAt.toISOString() }),

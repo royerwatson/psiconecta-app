@@ -1,48 +1,33 @@
 /**
  * create-subscription-order
- *
- * Crea una orden de PayPal por $50 USD para la suscripción mensual del terapeuta.
- * Devuelve { approveUrl } para redirigir al terapeuta a PayPal.
+ * Crea una orden PayPal de $50 para la suscripción mensual del terapeuta.
+ * Guarda el registro pendiente en subscription_payments con schema correcto.
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const APP_ORIGIN = Deno.env.get('APP_URL') ?? 'https://psiconecta-app.vercel.app'
-
-function getCorsHeaders(req: Request) {
-  const origin = req.headers.get('Origin') ?? ''
-  // Allow app origin and localhost for development
-  const allowed = origin === APP_ORIGIN
-    || origin.startsWith('http://localhost')
-    || origin.startsWith('https://localhost')
-  return {
-    'Access-Control-Allow-Origin':  allowed ? origin : APP_ORIGIN,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Vary': 'Origin',
-  }
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-async function getPayPalAccessToken(): Promise<string> {
-  const clientId     = Deno.env.get('PAYPAL_CLIENT_ID')!
-  const clientSecret = Deno.env.get('PAYPAL_CLIENT_SECRET')!
-  const baseUrl      = Deno.env.get('PAYPAL_BASE_URL') ?? 'https://api-m.sandbox.paypal.com'
+async function getPayPalToken(): Promise<string> {
+  const baseUrl = Deno.env.get('PAYPAL_BASE_URL') ?? 'https://api-m.sandbox.paypal.com'
   const res = await fetch(`${baseUrl}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
-      Authorization: `Basic ${btoa(`${clientId}:${clientSecret}`)}`,
+      Authorization: `Basic ${btoa(`${Deno.env.get('PAYPAL_CLIENT_ID')}:${Deno.env.get('PAYPAL_CLIENT_SECRET')}`)}`,
     },
     body: 'grant_type=client_credentials',
   })
-  const data = await res.json()
-  if (!data.access_token) throw new Error('No se pudo obtener el token de PayPal')
-  return data.access_token
+  const d = await res.json()
+  if (!d.access_token) throw new Error('No se pudo obtener token de PayPal')
+  return d.access_token
 }
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: getCorsHeaders(req) })
-  }
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
+
   try {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) throw new Error('No authorization header')
@@ -59,13 +44,14 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
+
     const { data: profile } = await supabaseAdmin
       .from('profiles').select('role').eq('id', user.id).single()
     if (profile?.role !== 'therapist') throw new Error('Solo terapeutas pueden suscribirse')
 
     const baseUrl = Deno.env.get('PAYPAL_BASE_URL') ?? 'https://api-m.sandbox.paypal.com'
     const appUrl  = Deno.env.get('APP_URL') ?? 'https://psiconecta-app.vercel.app'
-    const token   = await getPayPalAccessToken()
+    const token   = await getPayPalToken()
 
     const orderRes = await fetch(`${baseUrl}/v2/checkout/orders`, {
       method: 'POST',
@@ -95,27 +81,40 @@ Deno.serve(async (req) => {
     const order = await orderRes.json()
     if (!order.id) throw new Error('Error creando orden PayPal: ' + JSON.stringify(order))
 
-    // Registrar pago pendiente
-    await supabaseAdmin.from('subscription_payments').insert({
-      therapist_id: user.id,
-      amount: 50,
-      currency: 'USD',
-      status: 'pending',
-      paypal_order_id: order.id,
-    })
+    // Guardar en subscription_payments con el schema correcto
+    const periodStart = new Date()
+    const periodEnd   = new Date()
+    periodEnd.setDate(periodEnd.getDate() + 30)
+
+    const { error: insertError } = await supabaseAdmin
+      .from('subscription_payments')
+      .insert({
+        therapist_id:   user.id,
+        plan:           'pro',
+        amount_usd:     50.00,
+        paypal_order_id: order.id,
+        status:         'pending',
+        period_start:   periodStart.toISOString(),
+        period_end:     periodEnd.toISOString(),
+      })
+
+    if (insertError) {
+      // Log el error pero no falla el flujo — la captura puede funcionar sin este registro
+      console.error('[create-subscription-order] subscription_payments insert error:', insertError)
+    }
 
     const approveLink = order.links?.find((l: any) => l.rel === 'approve')
-    if (!approveLink) throw new Error('No se encontro approveUrl de PayPal')
+    if (!approveLink) throw new Error('No se encontró approveUrl de PayPal')
 
     return new Response(
       JSON.stringify({ approveUrl: approveLink.href, orderId: order.id }),
-      { headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   } catch (err) {
     console.error('[create-subscription-order]', err)
     return new Response(
       JSON.stringify({ error: (err as Error).message }),
-      { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
 })
