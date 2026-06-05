@@ -101,12 +101,12 @@ src/
 | `migration_fix_results_rls.sql` | **Ejecutado** — política INSERT para paciente en `test_results` |
 | `migration_fix_test_assignment_patient_update.sql` | **Ejecutado** — política UPDATE para paciente en `test_assignments` |
 | `migration_checkin_reviewed.sql` | **Ejecutado** — columna `therapist_reviewed_at` en `ai_checkins` |
-| `migration_fix_profile_role_escalation.sql` | **⚠️ PENDIENTE** — bloquea auto-escalada de rol + función `admin_set_user_role()` |
-| `migration_fix_profiles_select.sql` | **⚠️ PENDIENTE** — `profiles_select` restrictiva por relación + función `is_admin()` |
-| `migration_fix_sessions_update.sql` | **⚠️ PENDIENTE** — `WITH CHECK` bloquea campos financieros en `sessions` |
-| `migration_fix_credentials_rls.sql` | **⚠️ PENDIENTE** — admin puede leer/aprobar `therapist_credentials` |
-| `migration_fix_progate_server_side.sql` | **⚠️ PENDIENTE** — RLS server-side módulo psicométrico + función `is_pro_therapist()` |
-| `migration_fix_length_constraints.sql` | **⚠️ PENDIENTE** — CHECK constraints longitud en messages, clinical_history, patient_tasks, etc. |
+| `migration_fix_profile_role_escalation.sql` | **Ejecutado** — bloquea auto-escalada de rol + función `admin_set_user_role()` |
+| `migration_fix_profiles_select.sql` | **Ejecutado** — `profiles_select` restrictiva por relación + función `is_admin()` |
+| `migration_fix_sessions_update.sql` | **Ejecutado** — `WITH CHECK` bloquea campos financieros en `sessions` |
+| `migration_fix_credentials_rls.sql` | **Ejecutado** — admin puede leer/aprobar `therapist_credentials` |
+| `migration_fix_progate_server_side.sql` | **Ejecutado** — RLS server-side módulo psicométrico + función `is_pro_therapist()` |
+| `migration_fix_length_constraints.sql` | **Ejecutado** — CHECK constraints longitud en messages, clinical_history, patient_tasks, etc. |
 
 ---
 
@@ -391,13 +391,7 @@ VITE_PAYPAL_CLIENT_ID=...
 
 ## 12. Pendiente / En Cola
 
-### Migraciones SQL de seguridad (ejecutar en Supabase SQL Editor — en este orden)
-- [ ] `migration_fix_profile_role_escalation.sql`
-- [ ] `migration_fix_profiles_select.sql` ← requiere la anterior (usa `is_admin()`)
-- [ ] `migration_fix_sessions_update.sql`
-- [ ] `migration_fix_credentials_rls.sql` ← requiere `is_admin()`
-- [ ] `migration_fix_progate_server_side.sql` ← requiere `is_admin()`
-- [ ] `migration_fix_length_constraints.sql`
+### Migraciones SQL de seguridad ✅ todas ejecutadas (2026-06-05)
 
 ### Configuración externa
 - [ ] Apple OAuth — Apple Developer Console
