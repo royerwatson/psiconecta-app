@@ -27,6 +27,20 @@ export default function Login() {
       await signIn(form)
       toast.success('¡Bienvenido/a de vuelta!')
 
+      // Verificar si hay una suscripción pendiente de PayPal
+      try {
+        const pendingSub = localStorage.getItem('psiconecta_pending_sub')
+        if (pendingSub) {
+          const { orderId, timestamp } = JSON.parse(pendingSub)
+          if (Date.now() - timestamp < 3600000) { // válido por 1 hora
+            localStorage.removeItem('psiconecta_pending_sub')
+            navigate(`/payment/subscription-success?token=${orderId}`, { replace: true })
+            return
+          }
+          localStorage.removeItem('psiconecta_pending_sub')
+        }
+      } catch (e) { localStorage.removeItem('psiconecta_pending_sub') }
+
       // El rol ya está en el store después de signIn → fetchProfile
       const role = useAuthStore.getState().role
       const destination = from ?? (
