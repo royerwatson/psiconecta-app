@@ -11,6 +11,7 @@ import Button from '@/components/ui/Button'
 import Avatar from '@/components/ui/Avatar'
 import { formatSessionDate, formatPrice, canStartVideo, getGreeting, getDisplayName } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
+import CompletedTestsSection from '@/components/psychometrics/CompletedTestsSection'
 import {
   Calendar, Users, DollarSign, Bot, MessageCircle,
   Clock, Star, Video, ClipboardList, Pencil, AlertTriangle,
