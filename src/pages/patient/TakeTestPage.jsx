@@ -233,7 +233,8 @@ export default function TakeTestPage() {
         severity_code:   s.severity_code,
       }))
 
-      await supabase.from('test_results').insert(resultsToInsert)
+      const { error: insertError } = await supabase.from('test_results').insert(resultsToInsert)
+      if (insertError) throw new Error('No se pudieron guardar los resultados: ' + insertError.message)
 
       // Marcar sesión y asignación como completadas
       const now = new Date().toISOString()

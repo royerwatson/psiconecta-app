@@ -38,7 +38,8 @@ export default function PatientTestsTab({ therapistId, patientId }) {
   const [loading, setLoading]               = useState(true)
   const [showAssign, setShowAssign]         = useState(false)
   const [expandedId, setExpandedId]         = useState(null)
-  const [resultsMap, setResultsMap]         = useState({})  // sessionId → results[]
+  const [resultsMap, setResultsMap]         = useState({})  // sessionId → results[] | null (null = fetch error)
+  const [fetchedSessions, setFetchedSessions] = useState(new Set()) // sessionIds ya consultados
   const [loadingResults, setLoadingResults] = useState({})
 
   useEffect(() => { fetchAssignments() }, [therapistId, patientId])
@@ -72,10 +73,10 @@ export default function PatientTestsTab({ therapistId, patientId }) {
   }
 
   const fetchResults = async (sessionId) => {
-    if (resultsMap[sessionId]) return   // ya cargados
+    if (fetchedSessions.has(sessionId)) return   // ya consultado (aunque esté vacío)
     setLoadingResults(prev => ({ ...prev, [sessionId]: true }))
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('test_results')
       .select(`
         id, raw_score, adjusted_score, severity_label, severity_code,
@@ -84,7 +85,9 @@ export default function PatientTestsTab({ therapistId, patientId }) {
       `)
       .eq('session_id', sessionId)
 
+    if (error) console.error('fetchResults error:', error)
     setResultsMap(prev => ({ ...prev, [sessionId]: data ?? [] }))
+    setFetchedSessions(prev => new Set([...prev, sessionId]))
     setLoadingResults(prev => ({ ...prev, [sessionId]: false }))
   }
 
@@ -227,7 +230,13 @@ export default function PatientTestsTab({ therapistId, patientId }) {
                             Cargando resultados...
                           </div>
                         ) : results.length === 0 ? (
-                          <p className="text-sm text-warm-400">Los resultados aún se están procesando</p>
+                          <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 space-y-1">
+                            <p className="text-sm font-medium text-amber-800">No hay resultados guardados</p>
+                            <p className="text-xs text-amber-600">
+                              Los resultados no se guardaron correctamente cuando el paciente completó el test.
+                              Reasigna el test para que el paciente lo tome de nuevo.
+                            </p>
+                          </div>
                         ) : (
                           <>
                             {/* Scores por subescala */}
