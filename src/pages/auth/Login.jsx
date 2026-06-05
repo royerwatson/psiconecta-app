@@ -36,6 +36,7 @@ export default function Login() {
           const { data: pendingDb, error: pendingErr } = await supabase
             .from('subscription_payments')
             .select('paypal_order_id, created_at')
+            .eq('therapist_id', currentUser.id)
             .eq('status', 'pending')
             .order('created_at', { ascending: false })
             .limit(1)
