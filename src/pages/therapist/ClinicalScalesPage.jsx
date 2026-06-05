@@ -10,7 +10,10 @@ import { useAuthStore } from '@/store/authStore'
 import Avatar from '@/components/ui/Avatar'
 import toast from 'react-hot-toast'
 import { cn } from '@/lib/utils'
-import { Frown, HeartPulse, Droplets, Brain, Timer, BarChart2, Lightbulb, Check, X, Search } from 'lucide-react'
+import { Frown, HeartPulse, Droplets, Brain, Timer, BarChart2, Lightbulb, Check, X, Search, Send } from 'lucide-react'
+
+// Mapa escala → slug del test en la BD
+const SCALE_SLUG_MAP = { PHQ9: 'phq9', GAD7: 'gad7', AUDIT: 'audit', PCL5: 'pcl5' }
 
 const SCALE_ICON_MAP = { Frown, HeartPulse, Droplets, Brain }
 function ScaleIcon({ name, size = 22, className = '' }) {
@@ -355,12 +358,123 @@ function SaveModal({ scale, score, answers, therapistId, onClose, onSaved }) {
   )
 }
 
+// ── Modal: aplicar escala a paciente (crea test_assignment) ──────────────────
+function ApplyScaleModal({ scale, therapistId, onClose, onApplied }) {
+  const [patients, setPatients]   = useState([])
+  const [selected, setSelected]   = useState(null)
+  const [reason, setReason]       = useState('')
+  const [dueDate, setDueDate]     = useState('')
+  const [saving, setSaving]       = useState(false)
+  const [loading, setLoading]     = useState(true)
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      const { data } = await supabase
+        .from('therapeutic_relationships')
+        .select('patient_id, id, profiles!therapeutic_relationships_patient_id_fkey(id, full_name, avatar_url)')
+        .eq('therapist_id', therapistId)
+        .eq('status', 'active')
+      setPatients((data ?? []).map(r => ({ ...r.profiles, relId: r.id })))
+      setLoading(false)
+    }
+    fetchPatients()
+  }, [therapistId])
+
+  const handleApply = async () => {
+    if (!selected) return toast.error('Selecciona un paciente')
+    setSaving(true)
+    const slug = SCALE_SLUG_MAP[scale.id]
+    if (!slug) { toast.error('Esta escala no tiene test equivalente en la BD'); setSaving(false); return }
+
+    // Buscar el test por slug
+    const { data: test } = await supabase.from('tests').select('id').eq('slug', slug).maybeSingle()
+    if (!test) { toast.error(`Test "${slug}" no encontrado en la BD`); setSaving(false); return }
+
+    const { error } = await supabase.from('test_assignments').insert({
+      relationship_id:  selected.relId,
+      test_id:          test.id,
+      assignee_user_id: selected.id,
+      status:           'pending',
+      reason:           reason.trim() || null,
+      due_at:           dueDate ? new Date(dueDate).toISOString() : null,
+    })
+
+    setSaving(false)
+    if (error) { console.error(error); toast.error('Error al asignar la escala'); return }
+    toast.success(`${scale.name} asignado a ${selected.full_name}`)
+    onApplied()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-float border border-warm-100" onClick={e => e.stopPropagation()}>
+        <p className="font-serif font-semibold text-warm-900 mb-1">Aplicar a paciente</p>
+        <p className="text-xs text-warm-400 mb-4">{scale.name} · El paciente lo completará desde su dashboard</p>
+
+        <p className="text-xs font-semibold text-warm-600 mb-2">Paciente</p>
+        {loading ? (
+          <div className="h-16 flex items-center justify-center text-sm text-warm-400">Cargando pacientes…</div>
+        ) : patients.length === 0 ? (
+          <p className="text-sm text-warm-400 text-center py-4">No tienes pacientes activos.</p>
+        ) : (
+          <div className="flex flex-col gap-1.5 max-h-36 overflow-y-auto mb-3">
+            {patients.map(p => (
+              <button
+                key={p.id}
+                onClick={() => setSelected(p)}
+                className={cn(
+                  'flex items-center gap-3 px-3 py-2 rounded-xl border text-left transition-all',
+                  selected?.id === p.id ? 'bg-primary-50 border-primary-300' : 'border-warm-100 hover:bg-warm-50',
+                )}
+              >
+                <Avatar name={p.full_name} size="xs" />
+                <span className="text-sm font-medium text-warm-800 flex-1">{p.full_name}</span>
+                {selected?.id === p.id && <Check size={13} strokeWidth={2} className="text-primary-600" />}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="space-y-2 mb-4">
+          <textarea
+            value={reason}
+            onChange={e => setReason(e.target.value)}
+            placeholder="Motivo de la asignación (opcional)…"
+            rows={2}
+            className="w-full text-sm border border-warm-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-300 resize-none"
+          />
+          <input
+            type="date"
+            value={dueDate}
+            onChange={e => setDueDate(e.target.value)}
+            min={new Date().toISOString().split('T')[0]}
+            className="w-full text-sm border border-warm-200 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary-300 text-warm-700"
+          />
+        </div>
+
+        <div className="flex gap-3">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-warm-200 text-sm font-medium text-warm-600 hover:bg-warm-50 transition-colors">Cancelar</button>
+          <button
+            onClick={handleApply}
+            disabled={!selected || saving}
+            className="flex-1 py-2.5 rounded-xl bg-primary-600 text-white text-sm font-semibold hover:bg-primary-700 disabled:opacity-50 transition-colors flex items-center justify-center gap-1.5"
+          >
+            <Send size={14} strokeWidth={1.8} />
+            {saving ? 'Asignando…' : 'Aplicar'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Página principal ──────────────────────────────────────────────────────────
 export default function ClinicalScalesPage() {
   const { user } = useAuthStore()
   const [activeScaleId, setActiveScaleId] = useState(null)
   const [answers, setAnswers]             = useState({})
   const [showSave, setShowSave]           = useState(false)
+  const [applyScale, setApplyScale]       = useState(null) // scale object para modal Aplicar
 
   const scale     = CLINICAL_SCALES.find(s => s.id === activeScaleId) ?? null
   const questions = useMemo(() => scale ? getNormalizedQuestions(scale) : [], [scale])
@@ -407,7 +521,17 @@ export default function ClinicalScalesPage() {
 
         <div className="flex flex-col gap-3">
           {CLINICAL_SCALES.map(s => (
-            <ScaleCard key={s.id} scale={s} onClick={() => handleSelect(s.id)} />
+            <div key={s.id} className="flex flex-col gap-2">
+              <ScaleCard scale={s} onClick={() => handleSelect(s.id)} />
+              {SCALE_SLUG_MAP[s.id] && (
+                <button
+                  onClick={() => setApplyScale(s)}
+                  className="self-end flex items-center gap-1.5 text-xs text-primary-600 hover:text-primary-800 font-medium px-3 py-1.5 rounded-lg hover:bg-primary-50 transition-colors border border-primary-200"
+                >
+                  <Send size={12} strokeWidth={1.8} /> Aplicar a paciente
+                </button>
+              )}
+            </div>
           ))}
         </div>
 
@@ -417,6 +541,15 @@ export default function ClinicalScalesPage() {
           </p>
         </div>
       </div>
+
+      {applyScale && (
+        <ApplyScaleModal
+          scale={applyScale}
+          therapistId={user.id}
+          onClose={() => setApplyScale(null)}
+          onApplied={() => setApplyScale(null)}
+        />
+      )}
     )
   }
 

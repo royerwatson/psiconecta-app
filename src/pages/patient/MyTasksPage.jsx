@@ -17,8 +17,9 @@ import Avatar from '@/components/ui/Avatar'
 import Button from '@/components/ui/Button'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
-import { Brain, Waves, Leaf, Focus, Zap, Heart, Wind, PenLine, ClipboardList, RefreshCw, AlertTriangle, Calendar, CheckCircle2 } from 'lucide-react'
+import { Brain, Waves, Leaf, Focus, Zap, Heart, Wind, PenLine, ClipboardList, RefreshCw, AlertTriangle, Calendar, CheckCircle2, BookOpen, Search, X, ChevronDown } from 'lucide-react'
 import { sendTaskCompletionNotification } from '@/lib/notifications'
+import { LIBRARY, CATEGORIES } from '@/data/therapeuticLibrary'
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
@@ -224,16 +225,131 @@ function TaskCard({ task, onComplete, onSaveNote, expanded, onToggle }) {
   )
 }
 
+// ─── Modal explorador de biblioteca terapéutica ──────────────────────────────
+
+function LibraryPickerModal({ patientId, onClose, onAdded }) {
+  const [query, setQuery]       = useState('')
+  const [catFilter, setCat]     = useState('all')
+  const [adding, setAdding]     = useState(null)  // id del ejercicio en proceso
+
+  const filtered = useMemo(() => {
+    let list = catFilter === 'all' ? LIBRARY : LIBRARY.filter(e => e.category === catFilter)
+    if (!query.trim()) return list
+    const q = query.toLowerCase()
+    return list.filter(e =>
+      e.title.toLowerCase().includes(q) ||
+      e.summary.toLowerCase().includes(q) ||
+      (e.tags ?? []).some(t => t.toLowerCase().includes(q))
+    )
+  }, [query, catFilter])
+
+  const handleAdd = async (exercise) => {
+    setAdding(exercise.id)
+    const { error } = await supabase.from('patient_tasks').insert({
+      patient_id:   patientId,
+      therapist_id: null,
+      title:        exercise.title,
+      description:  exercise.summary,
+      instructions: exercise.instructions,
+      category:     exercise.category,
+      frequency:    exercise.frequency ?? null,
+      status:       'pending',
+    })
+    setAdding(null)
+    if (error) { console.error(error); toast.error('No se pudo agregar el ejercicio'); return }
+    toast.success(`"${exercise.title}" agregado a tus tareas`)
+    onAdded()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fade-in" onClick={onClose}>
+      <div className="bg-white rounded-t-3xl sm:rounded-2xl w-full sm:max-w-lg shadow-float border border-warm-100 max-h-[85vh] flex flex-col" onClick={e => e.stopPropagation()}>
+        {/* Handle móvil */}
+        <div className="w-10 h-1 bg-warm-200 rounded-full mx-auto mt-3 sm:hidden" />
+
+        {/* Header */}
+        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-warm-100">
+          <div>
+            <p className="font-serif font-semibold text-warm-900">Biblioteca terapéutica</p>
+            <p className="text-xs text-warm-400">Selecciona un ejercicio para agregarlo a tus tareas</p>
+          </div>
+          <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-warm-100 transition-colors"><X size={18} strokeWidth={1.8} className="text-warm-500" /></button>
+        </div>
+
+        {/* Búsqueda */}
+        <div className="px-5 pt-3 pb-2 space-y-2">
+          <div className="relative">
+            <Search size={14} strokeWidth={1.8} className="absolute left-3 top-1/2 -translate-y-1/2 text-warm-300 pointer-events-none" />
+            <input
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Buscar ejercicio…"
+              className="w-full pl-9 pr-4 py-2 rounded-xl border border-warm-200 text-sm text-warm-800 placeholder:text-warm-400 outline-none focus:ring-2 focus:ring-primary-300"
+            />
+          </div>
+          {/* Filtro por categoría */}
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+            <button
+              onClick={() => setCat('all')}
+              className={cn('shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all', catFilter === 'all' ? 'bg-warm-800 text-white' : 'bg-warm-100 text-warm-600 hover:bg-warm-200')}
+            >
+              Todos
+            </button>
+            {CATEGORIES.map(c => (
+              <button
+                key={c.id}
+                onClick={() => setCat(c.id)}
+                className={cn('shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-all', catFilter === c.id ? 'bg-primary-600 text-white' : 'bg-warm-100 text-warm-600 hover:bg-warm-200')}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Lista */}
+        <div className="flex-1 overflow-y-auto px-5 pb-5 space-y-2">
+          {filtered.length === 0 ? (
+            <div className="text-center py-10 text-warm-400">
+              <Search size={32} strokeWidth={1.5} className="mx-auto mb-2 text-warm-300" />
+              <p className="text-sm">Sin resultados</p>
+            </div>
+          ) : filtered.map(ex => (
+            <div key={ex.id} className="bg-white border border-warm-100 rounded-xl p-3.5 flex items-start gap-3">
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold text-warm-900 leading-snug">{ex.title}</p>
+                <p className="text-xs text-warm-500 mt-0.5 line-clamp-2">{ex.summary}</p>
+                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                  {ex.duration && <span className="text-[10px] text-warm-400 bg-warm-50 px-2 py-0.5 rounded-full border border-warm-100">{ex.duration}</span>}
+                  {ex.frequency && <span className="text-[10px] text-warm-400 bg-warm-50 px-2 py-0.5 rounded-full border border-warm-100">{ex.frequency}</span>}
+                </div>
+              </div>
+              <button
+                onClick={() => handleAdd(ex)}
+                disabled={adding === ex.id}
+                className="shrink-0 px-3 py-1.5 rounded-lg bg-primary-500 text-white text-xs font-semibold hover:bg-primary-600 disabled:opacity-50 transition-colors"
+              >
+                {adding === ex.id ? '…' : '+ Agregar'}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 export default function MyTasksPage() {
   const { user } = useAuthStore()
   const navigate  = useNavigate()
 
-  const [tasks, setTasks]       = useState([])
-  const [loading, setLoading]   = useState(true)
-  const [filter, setFilter]     = useState('pending') // pending | completed | all
-  const [expandedId, setExpId]  = useState(null)
+  const [tasks, setTasks]         = useState([])
+  const [loading, setLoading]     = useState(true)
+  const [filter, setFilter]       = useState('pending') // pending | completed | all
+  const [expandedId, setExpId]    = useState(null)
+  const [showLibrary, setLibrary] = useState(false)
 
   useEffect(() => { if (user) fetchTasks() }, [user])
 
@@ -308,11 +424,19 @@ export default function MyTasksPage() {
     <div className="max-w-2xl mx-auto animate-fade-in pb-8">
 
       {/* Encabezado */}
-      <div className="mb-6">
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Mis Tareas</h1>
-        <p className="text-warm-500 text-sm mt-1">
-          Actividades y ejercicios asignados por tu terapeuta
-        </p>
+      <div className="flex items-start justify-between gap-3 mb-6">
+        <div>
+          <h1 className="font-serif text-2xl font-bold text-warm-900">Mis Tareas</h1>
+          <p className="text-warm-500 text-sm mt-1">
+            Actividades y ejercicios asignados por tu terapeuta
+          </p>
+        </div>
+        <button
+          onClick={() => setLibrary(true)}
+          className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-xl bg-primary-50 border border-primary-200 text-primary-700 text-xs font-semibold hover:bg-primary-100 transition-colors"
+        >
+          <BookOpen size={14} strokeWidth={1.8} /> Explorar biblioteca
+        </button>
       </div>
 
       {/* Resumen */}
@@ -406,6 +530,14 @@ export default function MyTasksPage() {
           </button>
           {' '}si tienes dudas.
         </p>
+      )}
+
+      {showLibrary && (
+        <LibraryPickerModal
+          patientId={user.id}
+          onClose={() => setLibrary(false)}
+          onAdded={() => { setLibrary(false); fetchTasks() }}
+        />
       )}
     </div>
   )

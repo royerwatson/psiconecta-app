@@ -212,8 +212,7 @@ export default function TherapeuticProtocolsPage() {
   const [openIds, setOpenIds]         = useState(new Set())
 
   const filtered = useMemo(() => {
-    const mod = activeModality === 'all' ? null : activeModality
-    return searchProtocols(query, mod)
+    return searchProtocols(query, activeModality)
   }, [query, activeModality])
 
   const toggleCard = (id) => {
@@ -288,11 +287,11 @@ export default function TherapeuticProtocolsPage() {
             className={cn(
               'px-4 py-1.5 rounded-full text-sm font-medium transition-all',
               activeModality === mod.id
-                ? `${MOD_COLOR[mod.id]?.split(' ')[0]} text-white shadow-sm`
+                ? `${MOD_COLOR[mod.color]?.tab ?? 'bg-warm-800 text-white'} shadow-sm`
                 : 'bg-white border border-warm-200 text-warm-600 hover:border-warm-300'
             )}
           >
-            <ModalityIcon name={mod.icon} size={13} strokeWidth={1.8} className="inline mr-1" />{mod.label} ({PROTOCOLS.filter(p => p.modality === mod.id).length})
+            <ModalityIcon name={mod.icon} size={13} strokeWidth={1.8} className="inline mr-1" />{mod.name} ({PROTOCOLS.filter(p => p.modality === mod.id).length})
           </button>
         ))}
       </div>
@@ -351,7 +350,7 @@ export default function TherapeuticProtocolsPage() {
                 <div className="flex items-center gap-3 mb-3">
                   <ModalityIcon name={mod.icon} size={22} strokeWidth={1.5} className="text-warm-600" />
                   <div>
-                    <h2 className="font-serif font-bold text-warm-800 text-lg">{mod.label}</h2>
+                    <h2 className="font-serif font-bold text-warm-800 text-lg">{mod.fullName}</h2>
                     <p className="text-xs text-warm-400">{mod.description}</p>
                   </div>
                   <div className="flex-1 h-px bg-warm-100 ml-2" />

@@ -135,12 +135,10 @@ export default function ChatPage() {
       setConversations(convs)
       fetchUnreadCounts(convs)
 
-      // Auto-abrir: target desde query param o primera conversación
+      // Auto-abrir solo si viene un query param (?patient=id / ?therapist=id)
       if (targetId) {
         const target = convs.find((c) => c.id === targetId)
         if (target) setActiveConv(target)
-      } else if (convs.length > 0) {
-        setActiveConv(convs[0])
       }
     } catch (err) {
       console.error('Error cargando conversaciones:', err)
@@ -260,6 +258,7 @@ export default function ChatPage() {
 
     const channel = supabase
       .channel(`chat-${user.id}-${conv.id}-${Date.now()}`)
+      // Mensajes nuevos entrantes
       .on(
         'postgres_changes',
         {
@@ -271,7 +270,6 @@ export default function ChatPage() {
         (payload) => {
           const senderId = payload.new.sender_id
           if (senderId === conv.id) {
-            // Mensaje del interlocutor activo: mostrar directamente
             setMessages((prev) => {
               if (prev.some((m) => m.id === payload.new.id)) return prev
               return [...prev, payload.new]
@@ -282,11 +280,27 @@ export default function ChatPage() {
               .eq('id', payload.new.id)
               .then()
           } else {
-            // Mensaje de otra conversación: incrementar badge
             setUnreadCounts((prev) => ({
               ...prev,
               [senderId]: (prev[senderId] ?? 0) + 1,
             }))
+          }
+        }
+      )
+      // Actualizaciones de read_at en mensajes enviados por mí (confirmación de lectura)
+      .on(
+        'postgres_changes',
+        {
+          event:  'UPDATE',
+          schema: 'public',
+          table:  'messages',
+          filter: `sender_id=eq.${user.id}`,
+        },
+        (payload) => {
+          if (payload.new.read_at) {
+            setMessages((prev) =>
+              prev.map((m) => m.id === payload.new.id ? { ...m, read_at: payload.new.read_at } : m)
+            )
           }
         }
       )
@@ -526,8 +540,13 @@ export default function ChatPage() {
                     }`}>
                       {msg.content}
                     </div>
-                    <p className="text-xs text-warm-400 px-1">
+                    <p className="text-xs text-warm-400 px-1 flex items-center gap-1">
                       {isTemp ? 'Enviando...' : formatRelative(msg.created_at)}
+                      {isOwn && !isTemp && (
+                        msg.read_at
+                          ? <span className="text-primary-400 font-medium">· Leído</span>
+                          : <span className="text-warm-300">· Enviado</span>
+                      )}
                     </p>
                   </div>
                 </div>
