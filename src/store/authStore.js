@@ -124,10 +124,11 @@ export const useAuthStore = create(
     }),
     {
       name: 'psiconecta-auth',
+      // Solo persistir el user (contiene el JWT de Supabase).
+      // role y profile se cargan frescos desde la BD en cada initialize(),
+      // eliminando el riesgo de que un atacante manipule el rol en localStorage.
       partialize: (state) => ({
         user: state.user,
-        profile: state.profile,
-        role: state.role,
       }),
     }
   )

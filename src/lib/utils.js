@@ -137,3 +137,14 @@ export const getDisplayName = (profile, isSelf = false) => {
  * isAnonymous — Indica si un perfil tiene el anonimato activado.
  */
 export const isAnonymous = (profile) => profile?.is_anonymous === true
+
+/**
+ * sanitize — Elimina etiquetas HTML y caracteres peligrosos para prevenir XSS.
+ * Usar antes de enviar cualquier input de texto libre a Supabase.
+ * Preserva saltos de línea (\n) para campos multilinea (notas, descripciones).
+ */
+export const sanitize = (str = '') =>
+  String(str)
+    .replace(/<[^>]*>/g, '')      // elimina etiquetas HTML
+    .replace(/[<>"'`]/g, '')      // elimina caracteres peligrosos
+    .trim()

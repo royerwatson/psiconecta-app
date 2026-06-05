@@ -8,7 +8,7 @@ import Button from '@/components/ui/Button'
 import Badge from '@/components/ui/Badge'
 import Modal from '@/components/ui/Modal'
 import Input, { Textarea, Select } from '@/components/ui/Input'
-import { formatDate, formatDateTime, formatPrice } from '@/lib/utils'
+import { formatDate, formatDateTime, formatPrice, sanitize } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 import PatientTestsTab from '@/components/psychometrics/PatientTestsTab'
@@ -92,7 +92,10 @@ export default function PatientDetail() {
     const { error } = await supabase.from('clinical_history').insert({
       patient_id:   patientId,
       therapist_id: user.id,
-      ...historyForm,
+      diagnosis:      sanitize(historyForm.diagnosis),
+      treatment_plan: sanitize(historyForm.treatment_plan),
+      session_notes:  sanitize(historyForm.session_notes),
+      risk_level:     historyForm.risk_level,
     })
     if (error) { toast.error('Error guardando nota clínica'); return }
     toast.success('Nota clínica guardada')
@@ -109,9 +112,10 @@ export default function PatientDetail() {
     const { error } = await supabase.from('patient_tasks').insert({
       patient_id:   patientId,
       therapist_id: user.id,
-      ...taskForm,
-      title: taskForm.title.trim(),
-      status: 'pending',
+      title:       sanitize(taskForm.title),
+      description: sanitize(taskForm.description),
+      due_date:    taskForm.due_date,
+      status:      'pending',
     })
     if (error) { toast.error('Error guardando tarea'); return }
     toast.success('Tarea asignada al paciente')
@@ -161,7 +165,7 @@ export default function PatientDetail() {
     const next = !currentReleased
     const { error } = await supabase
       .from('clinical_history')
-      .update({ is_released: next, released_notes: next ? releasedNotes : null })
+      .update({ is_released: next, released_notes: next ? sanitize(releasedNotes) : null })
       .eq('id', histId)
     if (error) { toast.error('No se pudo actualizar'); return }
     toast.success(next ? 'Notas compartidas con el paciente' : 'Notas retiradas del paciente')
