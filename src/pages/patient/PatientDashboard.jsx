@@ -145,42 +145,45 @@ export default function PatientDashboard() {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
         <AlertTriangle size={48} strokeWidth={1.5} className="text-warm-300" />
-        <p className="font-medium text-warm-800">{error}</p>
+        <p className="font-medium text-slate-700">{error}</p>
         <Button onClick={fetchData} size="sm">Reintentar</Button>
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-6 animate-fade-in">
-      {/* ── Bienvenida ── */}
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="text-xs font-semibold text-warm-400 uppercase tracking-widest mb-1">
-            {getGreeting()}
-          </p>
-          <h1 className="text-2xl font-bold text-warm-900 tracking-tight leading-tight">
-            {profile?.full_name?.split(' ')[0]}
-          </h1>
-          <p className="text-warm-400 text-sm mt-1">¿Cómo te sientes hoy?</p>
-        </div>
-        {streak > 0 && (
-          <div className="flex flex-col items-center bg-gradient-to-br from-orange-50 to-amber-50 border border-orange-100 rounded-2xl px-3 py-2.5 min-w-[60px] shrink-0">
-            {streak >= 7
-              ? <Flame size={22} className="text-orange-500" strokeWidth={2} />
-              : streak >= 3
-              ? <Zap size={22} className="text-amber-500" strokeWidth={2} />
-              : <Sparkles size={22} className="text-amber-400" strokeWidth={2} />
-            }
-            <span className="text-lg font-bold text-orange-600 leading-tight mt-0.5">{streak}</span>
-            <span className="text-[10px] text-orange-400 font-semibold">{streak === 1 ? 'día' : 'días'}</span>
+    <div className="flex flex-col gap-5 animate-fade-in pb-safe">
+      {/* ── Hero header ── */}
+      <div className="relative overflow-hidden rounded-3xl p-5 gradient-brand text-white shadow-[0_8px_32px_rgba(79,70,229,0.30)]">
+        {/* Glow orbs */}
+        <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-purple-500/20 blur-2xl pointer-events-none" />
+
+        <div className="relative flex items-start justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold text-indigo-200 uppercase tracking-widest mb-1">
+              {getGreeting()}
+            </p>
+            <h1 className="text-2xl font-bold leading-tight tracking-tight">
+              {profile?.full_name?.split(' ')[0]} 👋
+            </h1>
+            <p className="text-indigo-200 text-sm mt-1">¿Cómo te sientes hoy?</p>
           </div>
-        )}
+          {streak > 0 && (
+            <div className="flex flex-col items-center bg-white/15 backdrop-blur-sm rounded-2xl px-3.5 py-2.5 shrink-0 border border-white/20">
+              {streak >= 7 ? <Flame size={20} className="text-orange-300" strokeWidth={2} />
+               : streak >= 3 ? <Zap size={20} className="text-yellow-300" strokeWidth={2} />
+               : <Sparkles size={20} className="text-white/80" strokeWidth={2} />}
+              <span className="text-xl font-bold leading-tight mt-0.5">{streak}</span>
+              <span className="text-[10px] text-indigo-200 font-semibold">{streak === 1 ? 'día' : 'días'}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Banner perfil incompleto */}
       {profile && !profile.avatar_url && (
-        <div className="bg-primary-50 border border-primary-100 rounded-2xl p-4 flex gap-3 items-center">
+        <div className="rounded-3xl p-4 flex gap-3 items-center bg-indigo-50 border border-indigo-100/80 shadow-[0_2px_12px_rgba(99,102,241,0.08)]">
           <Sprout size={20} strokeWidth={1.8} className="shrink-0 text-primary-600" />
           <div className="flex-1 min-w-0">
             <p className="font-medium text-primary-800 text-sm">Personaliza tu perfil</p>
@@ -194,7 +197,7 @@ export default function PatientDashboard() {
 
       {/* Prompt de reseña post-sesión */}
       {pendingReview && !reviewDismissed && (
-        <div className="bg-gradient-to-r from-violet-50 to-primary-50 border border-violet-200 rounded-2xl p-4">
+        <div className="rounded-3xl p-5 bg-white card-elevated border border-violet-100">
           <div className="flex items-start justify-between mb-3">
             <div>
               <p className="font-semibold text-warm-900 text-sm flex items-center gap-1.5"><Star size={14} strokeWidth={1.8} className="shrink-0" /> ¿Cómo fue tu sesión?</p>
@@ -229,7 +232,7 @@ export default function PatientDashboard() {
       {loading ? (
         <Skeleton className="h-32" />
       ) : nextSession ? (
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-primary-600 via-primary-700 to-accent-700 p-5 text-white shadow-float">
+        <div className="relative overflow-hidden rounded-3xl gradient-brand p-5 text-white shadow-[0_8px_32px_rgba(79,70,229,0.30)]">
           {/* Círculos decorativos */}
           <div className="absolute -top-8 -right-8 w-36 h-36 rounded-full bg-white/10" />
           <div className="absolute -bottom-10 -left-6 w-28 h-28 rounded-full bg-accent-500/20" />
@@ -291,13 +294,13 @@ export default function PatientDashboard() {
           </div>
         </div>
       ) : (
-        <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-warm-200 bg-white p-6 text-center">
-          <div className="w-12 h-12 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-            <Calendar size={22} className="text-primary-500" />
+        <div className="relative overflow-hidden rounded-3xl bg-white p-6 text-center card hover-lift">
+          <div className="w-14 h-14 gradient-calm rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_4px_14px_rgba(99,102,241,0.3)]">
+            <Calendar size={24} strokeWidth={1.8} className="text-white" />
           </div>
-          <p className="font-semibold text-warm-700 mb-1">Sin sesiones próximas</p>
-          <p className="text-sm text-warm-400 mb-4">Encuentra un terapeuta y agenda tu primera sesión</p>
-          <Button size="sm" onClick={() => navigate('/patient/find')}>
+          <p className="font-bold text-slate-800 mb-1 tracking-tight">Sin sesiones próximas</p>
+          <p className="text-sm text-slate-400 mb-5 leading-relaxed">Encuentra un terapeuta y agenda tu primera sesión</p>
+          <Button onClick={() => navigate('/patient/find')}>
             Buscar terapeuta
           </Button>
         </div>
@@ -315,12 +318,12 @@ export default function PatientDashboard() {
       {/* Acceso rápido a resultados liberados */}
       <button
         onClick={() => navigate('/patient/my-results')}
-        className="w-full flex items-center justify-between bg-white border border-warm-100 rounded-2xl px-4 py-3.5 shadow-sm hover:bg-warm-50 active:scale-[0.99] transition-all"
+        className="w-full flex items-center justify-between card hover-lift px-4 py-4"
       >
         <div className="flex items-center gap-3">
           <BarChart2 size={20} strokeWidth={1.8} className="text-warm-600" />
           <div className="text-left">
-            <p className="text-sm font-semibold text-warm-900">Mis resultados</p>
+            <p className="text-sm font-semibold text-slate-900">Mis resultados</p>
             <p className="text-xs text-warm-400 mt-0.5">Ver evaluaciones psicométricas disponibles</p>
           </div>
         </div>
@@ -333,7 +336,7 @@ export default function PatientDashboard() {
       {tasks.length > 0 && (
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="font-serif text-lg font-semibold text-warm-900">
+            <h2 className="text-base font-bold text-slate-900 tracking-tight">
               Mis tareas pendientes
             </h2>
             <button
@@ -345,7 +348,7 @@ export default function PatientDashboard() {
           </div>
           <div className="flex flex-col gap-2">
             {tasks.map((task) => (
-              <Card key={task.id} className="flex items-center gap-3 py-3 px-4">
+              <div key={task.id} className="card flex items-center gap-3 py-3.5 px-4 hover-lift">
                 <button
                   onClick={() => markTaskDone(task.id)}
                   className="w-5 h-5 rounded-full border-2 border-warm-300 hover:border-success hover:bg-green-50 transition-colors shrink-0 flex items-center justify-center"
@@ -355,7 +358,7 @@ export default function PatientDashboard() {
                   <p className="text-sm font-medium text-warm-800 truncate">{task.title}</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     {task.category && (
-                      <span className="text-xs text-warm-400">{task.category}</span>
+                      <span className="text-xs text-slate-400">{task.category}</span>
                     )}
                     {task.due_date && (
                       <span className={`text-xs ${
@@ -377,7 +380,7 @@ export default function PatientDashboard() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </button>
-              </Card>
+              </div>
             ))}
           </div>
         </div>
@@ -385,20 +388,20 @@ export default function PatientDashboard() {
 
       {/* ── Accesos rápidos ── */}
       <div>
-        <h2 className="text-base font-bold text-warm-900 mb-3">¿Qué necesitas hoy?</h2>
+        <h2 className="text-base font-bold text-slate-900 mb-3 tracking-tight">¿Qué necesitas hoy?</h2>
         <div className="grid grid-cols-2 gap-3">
           {[
-            { icon: Search,         label: 'Buscar terapeuta', to: '/patient/find',         bg: 'bg-primary-600',  light: 'bg-primary-50 text-primary-600' },
-            { icon: Calendar,       label: 'Mis citas',         to: '/patient/appointments', bg: 'bg-accent-600',   light: 'bg-accent-50 text-accent-600'   },
-            { icon: ClipboardList,  label: 'Mis tareas',         to: '/patient/tasks',        bg: 'bg-orange-500',   light: 'bg-orange-50 text-orange-600'   },
-            { icon: MessageCircle,  label: 'Mensajes',           to: '/patient/chat',         bg: 'bg-green-600',    light: 'bg-green-50 text-green-600'     },
-          ].map(({ icon: Icon, label, to, light }) => (
+            { icon: Search,        label: 'Buscar terapeuta', to: '/patient/find',         gradient: 'gradient-brand',   shadow: 'shadow-[0_4px_12px_rgba(79,70,229,0.30)]'   },
+            { icon: Calendar,      label: 'Mis citas',         to: '/patient/appointments', gradient: 'gradient-aurora',  shadow: 'shadow-[0_4px_12px_rgba(168,85,247,0.25)]'  },
+            { icon: ClipboardList, label: 'Mis tareas',        to: '/patient/tasks',        gradient: 'gradient-warm',    shadow: 'shadow-[0_4px_12px_rgba(249,115,22,0.25)]'  },
+            { icon: MessageCircle, label: 'Mensajes',          to: '/patient/chat',         gradient: 'gradient-mint',    shadow: 'shadow-[0_4px_12px_rgba(16,185,129,0.25)]'  },
+          ].map(({ icon: Icon, label, to, gradient, shadow }) => (
             <button key={to} onClick={() => navigate(to)}
-              className="bg-white border border-warm-100 rounded-2xl p-4 flex items-center gap-3 hover:shadow-card hover:border-warm-200 active:scale-[0.97] transition-all text-left">
-              <span className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${light}`}>
-                <Icon size={18} strokeWidth={2} />
+              className="card hover-lift p-4 flex items-center gap-3 text-left">
+              <span className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 text-white ${gradient} ${shadow}`}>
+                <Icon size={19} strokeWidth={2} />
               </span>
-              <span className="text-sm font-semibold text-warm-800 leading-tight">{label}</span>
+              <span className="text-sm font-bold text-slate-800 leading-tight tracking-tight">{label}</span>
             </button>
           ))}
         </div>

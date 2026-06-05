@@ -9,55 +9,45 @@ const Input = forwardRef(({
   suffix,
   className = '',
   containerClassName = '',
+  type = 'text',
+  required,
   ...props
 }, ref) => {
   return (
     <div className={cn('flex flex-col gap-1.5', containerClassName)}>
       {label && (
-        <label className="text-sm font-medium text-warm-700">
+        <label className="text-xs font-semibold text-slate-600 tracking-wide">
           {label}
-          {props.required && <span className="text-red-400 ml-1">*</span>}
+          {required && <span className="text-rose-400 ml-0.5">*</span>}
         </label>
       )}
-      <div className="relative flex items-center">
+      <div className="relative">
         {prefix && (
-          <div className="absolute left-3 text-warm-400 pointer-events-none">
+          <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
             {prefix}
           </div>
         )}
         <input
           ref={ref}
+          type={type}
+          required={required}
           className={cn(
-            'w-full rounded-xl border bg-white py-2.5 text-sm text-warm-800 placeholder:text-warm-400',
-            'transition-all duration-150 outline-none',
-            'focus:ring-2 focus:ring-primary-400 focus:ring-offset-0 focus:border-primary-400',
-            'disabled:bg-warm-50 disabled:text-warm-400 disabled:cursor-not-allowed',
-            error
-              ? 'border-red-300 focus:ring-red-400 focus:border-red-400'
-              : 'border-warm-200 hover:border-warm-300',
-            prefix ? 'pl-10' : 'pl-4',
-            suffix ? 'pr-10' : 'pr-4',
+            'input-premium',
+            prefix && 'pl-10',
+            suffix && 'pr-10',
+            error && 'border-rose-300 bg-rose-50/50 focus:border-rose-400 focus:shadow-[0_0_0_4px_rgba(244,63,94,0.08)]',
             className,
           )}
           {...props}
         />
         {suffix && (
-          <div className="absolute right-3 text-warm-400">
+          <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">
             {suffix}
           </div>
         )}
       </div>
-      {error && (
-        <p className="text-xs text-red-500 flex items-center gap-1">
-          <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-          </svg>
-          {error}
-        </p>
-      )}
-      {hint && !error && (
-        <p className="text-xs text-warm-400">{hint}</p>
-      )}
+      {error && <p className="text-xs text-rose-500 font-medium">{error}</p>}
+      {hint && !error && <p className="text-xs text-slate-400">{hint}</p>}
     </div>
   )
 })
@@ -65,61 +55,51 @@ const Input = forwardRef(({
 Input.displayName = 'Input'
 export default Input
 
-// Textarea
-export const Textarea = forwardRef(({
-  label, error, hint, className = '', containerClassName = '', rows = 4, ...props
-}, ref) => (
-  <div className={cn('flex flex-col gap-1.5', containerClassName)}>
-    {label && (
-      <label className="text-sm font-medium text-warm-700">
-        {label}
-        {props.required && <span className="text-red-400 ml-1">*</span>}
-      </label>
-    )}
-    <textarea
-      ref={ref}
-      rows={rows}
-      className={cn(
-        'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-warm-800 placeholder:text-warm-400 resize-none',
-        'transition-all duration-150 outline-none',
-        'focus:ring-2 focus:ring-primary-400 focus:border-primary-400',
-        error ? 'border-red-300' : 'border-warm-200 hover:border-warm-300',
-        className,
+export function Select({ label, children, className = '', containerClassName = '', required, error, ...props }) {
+  return (
+    <div className={cn('flex flex-col gap-1.5', containerClassName)}>
+      {label && (
+        <label className="text-xs font-semibold text-slate-600 tracking-wide">
+          {label}
+          {required && <span className="text-rose-400 ml-0.5">*</span>}
+        </label>
       )}
-      {...props}
-    />
-    {error && <p className="text-xs text-red-500">{error}</p>}
-    {hint && !error && <p className="text-xs text-warm-400">{hint}</p>}
-  </div>
-))
-Textarea.displayName = 'Textarea'
+      <select
+        required={required}
+        className={cn(
+          'input-premium appearance-none cursor-pointer',
+          error && 'border-rose-300 bg-rose-50/50',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </select>
+      {error && <p className="text-xs text-rose-500 font-medium">{error}</p>}
+    </div>
+  )
+}
 
-// Select
-export const Select = forwardRef(({
-  label, error, hint, className = '', containerClassName = '', children, ...props
-}, ref) => (
-  <div className={cn('flex flex-col gap-1.5', containerClassName)}>
-    {label && (
-      <label className="text-sm font-medium text-warm-700">
-        {label}
-        {props.required && <span className="text-red-400 ml-1">*</span>}
-      </label>
-    )}
-    <select
-      ref={ref}
-      className={cn(
-        'w-full rounded-xl border bg-white px-4 py-2.5 text-sm text-warm-800',
-        'transition-all duration-150 outline-none appearance-none cursor-pointer',
-        'focus:ring-2 focus:ring-primary-400 focus:border-primary-400',
-        error ? 'border-red-300' : 'border-warm-200 hover:border-warm-300',
-        className,
+export function Textarea({ label, hint, error, className = '', containerClassName = '', required, ...props }) {
+  return (
+    <div className={cn('flex flex-col gap-1.5', containerClassName)}>
+      {label && (
+        <label className="text-xs font-semibold text-slate-600 tracking-wide">
+          {label}
+          {required && <span className="text-rose-400 ml-0.5">*</span>}
+        </label>
       )}
-      {...props}
-    >
-      {children}
-    </select>
-    {error && <p className="text-xs text-red-500">{error}</p>}
-    {hint && !error && <p className="text-xs text-warm-400">{hint}</p>}
-  </div>
-))
-Select.displayName = 'Select'
+      <textarea
+        required={required}
+        className={cn(
+          'input-premium resize-none',
+          error && 'border-rose-300 bg-rose-50/50',
+          className,
+        )}
+        {...props}
+      />
+      {error && <p className="text-xs text-rose-500 font-medium">{error}</p>}
+      {hint && !error && <p className="text-xs text-slate-400">{hint}</p>}
+    </div>
+  )
+}

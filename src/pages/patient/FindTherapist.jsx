@@ -105,7 +105,7 @@ export default function FindTherapist() {
     <div className="flex flex-col gap-6 animate-fade-in">
       <div>
         <h1 className="font-serif text-2xl font-bold text-warm-900">Encontrar terapeuta</h1>
-        <p className="text-warm-500 text-sm mt-1">Profesionales verificados listos para ayudarte</p>
+        <p className="text-slate-500 text-sm mt-1">Profesionales verificados listos para ayudarte</p>
       </div>
 
       {/* Filtros */}
@@ -119,18 +119,18 @@ export default function FindTherapist() {
             {SPECIALTIES.map((s) => <option key={s}>{s}</option>)}
           </Select>
           <button onClick={() => setShowPriceFilter(!showPriceFilter)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border-[1.5px] text-sm font-semibold transition-all ${
               (priceMin || priceMax)
                 ? 'bg-primary-100 border-primary-300 text-primary-700'
-                : 'bg-white border-warm-200 text-warm-600 hover:border-warm-300'
+                : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
             }`}>
             <DollarSign size={14} strokeWidth={1.8} className="mr-1" />Precio
           </button>
           <button onClick={() => setIsUrgent(!isUrgent)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border-[1.5px] text-sm font-semibold transition-all ${
               isUrgent
-                ? 'bg-orange-100 border-orange-300 text-orange-700'
-                : 'bg-white border-warm-200 text-warm-600 hover:border-warm-300'
+                ? 'bg-orange-50 border-orange-300 text-orange-700 shadow-sm'
+                : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300'
             }`}>
             <Zap size={14} strokeWidth={1.8} className="mr-1" />Urgente
           </button>
@@ -155,7 +155,7 @@ export default function FindTherapist() {
       </div>
 
       {isUrgent && (
-        <div className="bg-orange-50 border border-orange-200 rounded-2xl p-4">
+        <div className="rounded-3xl p-4 bg-amber-50 border border-amber-200">
           <p className="text-sm font-medium text-orange-800 flex items-center gap-1.5"><Zap size={14} strokeWidth={1.8} />Modo cita urgente (&lt;24 horas)</p>
           <p className="text-xs text-orange-600 mt-1">
             Se muestran terapeutas con disponibilidad inmediata. Se aplica un cargo adicional del 30% por urgencia.
@@ -174,61 +174,85 @@ export default function FindTherapist() {
         </Card>
       ) : filteredTherapists.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-16 h-16 bg-primary-50 rounded-full flex items-center justify-center mb-4">
-            <Search size={28} strokeWidth={1.5} className="text-primary-400" />
+          <div className="w-16 h-16 gradient-calm rounded-3xl flex items-center justify-center mb-5 shadow-[0_4px_14px_rgba(99,102,241,0.25)]">
+            <Search size={28} strokeWidth={1.5} className="text-white" />
           </div>
-          <p className="font-semibold text-warm-800 mb-1">Sin terapeutas disponibles</p>
-          <p className="text-sm text-warm-400 max-w-xs leading-relaxed">
+          <p className="font-bold text-slate-800 mb-1 tracking-tight">Sin terapeutas disponibles</p>
+          <p className="text-sm text-slate-400 max-w-xs leading-relaxed">
             No encontramos terapeutas con esos filtros. Prueba cambiando la especialidad o la fecha.
           </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-3 stagger-children">
+        <div className="flex flex-col gap-4 stagger">
           {filteredTherapists.map((t) => (
-            <Card key={t.id} hover onClick={() => navigate(`/patient/therapist/${t.user_id}`)}>
-              <div className="flex items-start gap-4">
-                <Avatar name={t.profile?.full_name ?? ''} size="lg" />
+            <div key={t.id}
+              className="card hover-lift cursor-pointer group"
+              onClick={() => navigate(`/patient/therapist/${t.user_id}`)}>
+
+              {/* Top section */}
+              <div className="flex items-start gap-4 p-5">
+                {/* Avatar with ring */}
+                <div className="relative shrink-0">
+                  <div className={t.subscription_plan === 'pro' || t.subscription_plan === 'premium'
+                    ? 'avatar-ring-pro rounded-full' : 'avatar-ring rounded-full'}>
+                    <Avatar name={t.profile?.full_name ?? ''} size="lg" />
+                  </div>
+                  <span className="absolute -bottom-0.5 -right-0.5 status-online" />
+                </div>
+
                 <div className="flex-1 min-w-0">
+                  {/* Name + badges */}
                   <div className="flex items-start justify-between gap-2">
-                    <div>
+                    <div className="min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
-                        <p className="font-semibold text-warm-900">{t.profile?.full_name}</p>
-                        {t.subscription_plan === 'premium' && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 flex items-center gap-1">
-                            <Crown size={9} strokeWidth={2} />Premium
-                          </span>
-                        )}
-                        {t.subscription_plan === 'pro' && (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-primary-100 text-primary-700 flex items-center gap-1">
-                            <Star size={9} strokeWidth={2} />Pro
+                        <p className="font-bold text-slate-900 tracking-tight">{t.profile?.full_name}</p>
+                        {(t.subscription_plan === 'pro' || t.subscription_plan === 'premium') && (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 flex items-center gap-1 shrink-0">
+                            <Star size={9} strokeWidth={2.5} fill="currentColor" />Pro
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-warm-500">{t.specialty}</p>
+                      <p className="text-sm text-slate-500 mt-0.5">{t.specialty}</p>
                     </div>
-                    <VerificationBadge status="verified" />
+                    <div className="shrink-0">
+                      <VerificationBadge status="verified" />
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3 mt-2">
+
+                  {/* Rating + price */}
+                  <div className="flex items-center justify-between mt-2.5 gap-2">
                     <RatingDisplay value={t.avg_rating} reviews={t.review_count} />
-                    <span className="text-sm font-medium text-primary-700">
-                      <span>{formatWithLocal(t.price_per_session)}</span>
-                      <span className="text-warm-400">/sesión</span>
-                    </span>
+                    <div className="text-right">
+                      <span className="text-base font-bold text-indigo-600 tracking-tight">
+                        {formatWithLocal(t.price_per_session).split('≈')[0].trim()}
+                      </span>
+                      <span className="text-xs text-slate-400">/sesión</span>
+                    </div>
                   </div>
-                  {t.bio && <p className="text-xs text-warm-500 mt-2 line-clamp-2">{t.bio}</p>}
                 </div>
               </div>
-              <div className="flex gap-2 mt-4">
-                <Button size="sm" variant="secondary" fullWidth
+
+              {/* Bio */}
+              {t.bio && (
+                <p className="text-sm text-slate-500 px-5 pb-4 line-clamp-2 leading-relaxed -mt-1">
+                  {t.bio}
+                </p>
+              )}
+
+              {/* Actions */}
+              <div className="flex gap-2.5 px-5 pb-5">
+                <button
+                  className="flex-1 py-2.5 rounded-2xl text-sm font-semibold border-[1.5px] border-indigo-200 text-indigo-600 hover:bg-indigo-50 transition-colors"
                   onClick={(e) => { e.stopPropagation(); navigate(`/patient/therapist/${t.user_id}`) }}>
                   Ver perfil
-                </Button>
-                <Button size="sm" fullWidth
+                </button>
+                <button
+                  className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white gradient-brand shadow-[0_4px_12px_rgba(79,70,229,0.30)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.40)] active:scale-[0.97] transition-all"
                   onClick={(e) => { e.stopPropagation(); setSelectedTherapist(t) }}>
                   Agendar
-                </Button>
+                </button>
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}
@@ -242,7 +266,7 @@ export default function FindTherapist() {
             {/* ── PASO 1: Formulario ── */}
             {bookingStep === 'form' && (
               <>
-                <div className="flex items-center gap-3 bg-warm-50 rounded-xl p-3">
+                <div className="flex items-center gap-3 bg-slate-50 rounded-2xl p-3.5 border border-slate-100">
                   <Avatar name={selectedTherapist.profile?.full_name ?? ''} size="md" />
                   <div>
                     <p className="font-semibold text-warm-900">{selectedTherapist.profile?.full_name}</p>
@@ -299,8 +323,8 @@ export default function FindTherapist() {
               return (
                 <>
                   {/* Resumen de la cita */}
-                  <div className="bg-warm-50 rounded-xl p-4 text-sm">
-                    <p className="font-semibold text-warm-800 mb-2">Resumen de tu cita</p>
+                  <div className="rounded-2xl p-4 text-sm bg-slate-50 border border-slate-100">
+                    <p className="font-bold text-slate-800 mb-3 tracking-tight">Resumen de tu cita</p>
                     <div className="flex justify-between text-warm-600">
                       <span>Terapeuta</span>
                       <span className="font-medium">{selectedTherapist.profile?.full_name}</span>
@@ -359,7 +383,7 @@ export default function FindTherapist() {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
-                <h3 className="font-serif text-lg font-bold text-warm-900 mb-1">¡Pago exitoso!</h3>
+                <h3 className="text-xl font-bold text-slate-900 mb-1 tracking-tight">¡Pago exitoso!</h3>
                 <p className="text-sm text-warm-500 mb-6">
                   Tu cita con <strong>{selectedTherapist.profile?.full_name}</strong> está confirmada.
                   La verás en tu agenda de citas.

@@ -58,25 +58,25 @@ function SideNavItem({ to, icon: Icon, label, unread = 0 }) {
   return (
     <NavLink to={to}
       className={({ isActive }) => cn(
-        'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200',
+        'flex items-center gap-3 px-3.5 py-2.5 rounded-2xl text-sm font-semibold transition-all duration-200',
         isActive
-          ? 'bg-primary-600 text-white shadow-calm'
-          : 'text-warm-500 hover:bg-warm-50 hover:text-warm-800',
+          ? 'gradient-brand text-white shadow-[0_4px_12px_rgba(79,70,229,0.35)]'
+          : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800',
       )}
     >
       {({ isActive }) => (
         <>
           <span className="relative shrink-0">
-            <Icon size={17} strokeWidth={isActive ? 2.5 : 2} />
+            <Icon size={17} strokeWidth={isActive ? 2.5 : 1.8} />
             {unread > 0 && (
-              <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-0.5">
+              <span className="absolute -top-1.5 -right-1.5 bg-rose-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-0.5">
                 {unread > 9 ? '9+' : unread}
               </span>
             )}
           </span>
-          <span className="flex-1 truncate">{label}</span>
-          {unread > 0 && (
-            <span className="bg-red-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 shrink-0">
+          <span className="flex-1 truncate tracking-[-0.01em]">{label}</span>
+          {unread > 0 && !({} .isActive) && (
+            <span className="bg-rose-500 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5 shrink-0">
               {unread > 9 ? '9+' : unread}
             </span>
           )}
@@ -94,25 +94,27 @@ function TabItem({ to, icon: Icon, label, unread = 0 }) {
 
   return (
     <NavLink to={to}
-      className="relative flex-1 flex flex-col items-center justify-center gap-0.5 pt-2 pb-1 min-w-0"
+      className="relative flex-1 flex flex-col items-center justify-center gap-1 pt-2 pb-1 min-w-0"
     >
       <span className="relative">
         <span className={cn(
-          'flex items-center justify-center w-9 h-9 rounded-xl transition-all duration-200',
-          isActive && 'bg-primary-600 shadow-calm scale-105',
+          'flex items-center justify-center w-10 h-10 rounded-2xl transition-all duration-300',
+          isActive
+            ? 'gradient-brand shadow-[0_4px_12px_rgba(79,70,229,0.40)] scale-110'
+            : 'hover:bg-slate-100',
         )}>
-          <Icon size={19} strokeWidth={isActive ? 2.5 : 1.8}
-            className={isActive ? 'text-white' : 'text-warm-400'} />
+          <Icon size={20} strokeWidth={isActive ? 2.5 : 1.8}
+            className={isActive ? 'text-white' : 'text-slate-400'} />
         </span>
         {unread > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-0.5">
+          <span className="absolute -top-0.5 -right-0.5 bg-rose-500 text-white text-[9px] font-bold rounded-full min-w-[14px] h-3.5 flex items-center justify-center px-0.5 ring-2 ring-white">
             {unread > 9 ? '9+' : unread}
           </span>
         )}
       </span>
       <span className={cn(
-        'text-[10px] font-semibold truncate leading-none',
-        isActive ? 'text-primary-600' : 'text-warm-400',
+        'text-[10px] font-bold tracking-tight truncate leading-none transition-colors',
+        isActive ? 'text-indigo-600' : 'text-slate-400',
       )}>
         {label}
       </span>
@@ -275,7 +277,7 @@ export default function Layout() {
 
           {/* Sidebar desktop */}
           <aside className="hidden sm:block w-52 shrink-0">
-            <nav className="sticky top-20 flex flex-col gap-0.5 bg-white rounded-2xl shadow-card border border-warm-100/60 p-2 max-h-[calc(100dvh-6rem)] overflow-y-auto scrollbar-none">
+            <nav className="sticky top-20 flex flex-col gap-0.5 bg-white/90 rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.06)] border border-slate-100/60 p-2 max-h-[calc(100dvh-6rem)] overflow-y-auto scrollbar-none">
               {primaryNav.map(({ to, icon, label, badge }) => (
                 <SideNavItem key={to} to={to} icon={icon} label={label}
                   unread={badge === 'chat' ? unreadCount : 0} />
@@ -311,7 +313,7 @@ export default function Layout() {
 
       {/* ── Tab bar móvil ── */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-warm-100/80 sm:hidden"
+        className="fixed bottom-0 left-0 right-0 z-30 nav-glass sm:hidden"
         style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
       >
         <div className="flex items-stretch h-16">

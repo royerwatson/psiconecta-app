@@ -140,65 +140,63 @@ export default function TherapistProfileView() {
         ← Volver
       </Button>
 
-      {/* ── Card principal ── */}
-      <Card>
-        <div className="flex items-start gap-4">
-          <Avatar name={therapist.profile?.full_name ?? ''} size="xl" />
+      {/* ── Hero Card ── */}
+      <div className="relative overflow-hidden rounded-3xl gradient-brand text-white p-6 shadow-[0_8px_32px_rgba(79,70,229,0.30)]">
+        {/* Orbs */}
+        <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-8 -left-8 w-32 h-32 rounded-full bg-purple-400/20 blur-2xl pointer-events-none" />
+
+        <div className="relative flex items-start gap-4">
+          <div className={`shrink-0 ${(therapist.subscription_plan === 'pro' || therapist.subscription_plan === 'premium') ? 'avatar-ring-pro' : 'ring-2 ring-white/40'} rounded-full`}>
+            <Avatar name={therapist.profile?.full_name ?? ''} size="xl" />
+          </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-start justify-between gap-2 flex-wrap">
-              <h1 className="font-serif text-xl font-bold text-warm-900 leading-tight">
+            <div className="flex items-start gap-2 flex-wrap">
+              <h1 className="text-xl font-bold leading-tight tracking-tight">
                 {therapist.profile?.full_name}
               </h1>
-              {/* Badge de plan destacado */}
-              {therapist.subscription_plan === 'premium' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-400 to-amber-500 text-white text-xs font-bold shadow-sm shrink-0">
-                  <Crown size={11} strokeWidth={2.5} />Premium
-                </span>
-              )}
-              {therapist.subscription_plan === 'pro' && (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary-500 to-primary-600 text-white text-xs font-bold shadow-sm shrink-0">
-                  <Star size={11} strokeWidth={2.5} />Pro
+              {(therapist.subscription_plan === 'pro' || therapist.subscription_plan === 'premium') && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/20 text-white text-[10px] font-bold shrink-0 border border-white/30">
+                  <Star size={9} strokeWidth={2.5} fill="currentColor" />Pro
                 </span>
               )}
             </div>
-            <p className="text-warm-500 text-sm mt-0.5">{therapist.specialty}</p>
+            <p className="text-indigo-200 text-sm mt-0.5">{therapist.specialty}</p>
             <div className="flex items-center gap-2 mt-2 flex-wrap">
               <VerificationBadge status={therapist.verified ? 'verified' : 'pending'} />
-              {reviews.length > 0 && (
-                <RatingDisplay value={avgRating} reviews={reviews.length} />
-              )}
+              {reviews.length > 0 && <RatingDisplay value={avgRating} reviews={reviews.length} />}
             </div>
-            <p className="text-primary-600 font-bold text-lg mt-2">
-              {formatWithLocal(therapist.price_per_session)}
-              <span className="text-sm font-normal text-warm-500">/sesión</span>
+            <p className="font-bold text-xl mt-2 tracking-tight">
+              {formatWithLocal(therapist.price_per_session).split('≈')[0].trim()}
+              <span className="text-sm font-normal text-indigo-200">/sesión</span>
             </p>
           </div>
         </div>
 
         {therapist.bio && (
-          <div className="mt-4 pt-4 border-t border-warm-100">
-            <p className="text-sm text-warm-700 leading-relaxed">{therapist.bio}</p>
-          </div>
+          <p className="relative text-sm text-indigo-100 leading-relaxed mt-4 line-clamp-3">{therapist.bio}</p>
         )}
 
-        {/* Botones de acción */}
-        <div className="grid grid-cols-2 gap-3 mt-4">
-          <Button
-            variant="secondary"
+        {/* Action buttons */}
+        <div className="relative grid grid-cols-2 gap-3 mt-5">
+          <button
             onClick={() => navigate(`/patient/chat?therapist=${therapistId}`)}
-            className="flex items-center justify-center gap-1.5"
+            className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-white/15 hover:bg-white/25 text-white text-sm font-semibold transition-all border border-white/20 active:scale-[0.97]"
           >
-            <MessageCircle size={15} strokeWidth={1.8} /> Escribir
-          </Button>
-          <Button onClick={() => setShowBook(true)} className="flex items-center justify-center gap-1.5">
-            <Calendar size={15} strokeWidth={1.8} /> Agendar
-          </Button>
+            <MessageCircle size={15} strokeWidth={2} /> Escribir
+          </button>
+          <button
+            onClick={() => setShowBook(true)}
+            className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-white hover:bg-white/90 text-indigo-700 text-sm font-bold transition-all shadow-lg active:scale-[0.97]"
+          >
+            <Calendar size={15} strokeWidth={2} /> Agendar
+          </button>
         </div>
-      </Card>
+      </div>
 
       {/* ── Sección de reseñas ── */}
       <div>
-        <h2 className="font-serif text-lg font-semibold text-warm-900 mb-3">
+        <h2 className="text-base font-bold text-slate-900 tracking-tight mb-3">
           Reseñas {reviews.length > 0 && <span className="text-warm-400 font-normal text-base">({reviews.length})</span>}
         </h2>
 
@@ -213,11 +211,11 @@ export default function TherapistProfileView() {
         ) : (
           <>
             {/* Resumen de rating */}
-            <Card className="mb-3">
+            <div className="card p-5 mb-3">
               <div className="flex items-center gap-6">
                 {/* Promedio grande */}
                 <div className="flex flex-col items-center shrink-0">
-                  <span className="text-4xl font-bold text-warm-900">{avgRating.toFixed(1)}</span>
+                  <span className="text-5xl font-bold text-slate-900 tracking-tight">{avgRating.toFixed(1)}</span>
                   <div className="flex gap-0.5 mt-1">
                     {[1,2,3,4,5].map((s) => (
                       <Star key={s} size={14} strokeWidth={1.8} className={s <= Math.round(avgRating) ? 'text-amber-400' : 'text-warm-200'} fill="currentColor" />
