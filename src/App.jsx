@@ -70,6 +70,7 @@ import PatientResultDetailPage   from '@/pages/patient/PatientResultDetailPage'
 // Pagos
 import PaymentSuccess from '@/pages/payment/PaymentSuccess'
 import PaymentCancel  from '@/pages/payment/PaymentCancel'
+import SubscriptionSuccess from '@/pages/payment/SubscriptionSuccess'
 
 // Suscripciones y precios
 import SubscriptionPage from '@/pages/therapist/SubscriptionPage'
@@ -132,6 +133,9 @@ export default function App() {
         <Route path="/payment/cancel" element={
           <ProtectedRoute><PaymentCancel /></ProtectedRoute>
         } />
+        {/* Sin ProtectedRoute: el componente maneja su propia auth para evitar
+            redirección al login tras el full-page reload del retorno de PayPal */}
+        <Route path="/payment/subscription-success" element={<SubscriptionSuccess />} />
 
         {/* App con Layout */}
         <Route element={<ProtectedRoute><Layout /></ProtectedRoute>}>

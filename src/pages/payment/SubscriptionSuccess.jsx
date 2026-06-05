@@ -2,36 +2,70 @@
  * SubscriptionSuccess — Página de retorno tras pago de suscripción PayPal.
  *
  * PayPal redirige a: /payment/subscription-success?token=<order_token>
- * Esta página captura el pago y activa el plan Pro del terapeuta.
+ *
+ * IMPORTANTE: Esta página NO usa ProtectedRoute para evitar el problema de
+ * redirección al login tras el full-page reload del retorno de PayPal.
+ * La autenticación se verifica directamente con supabase.auth.getSession().
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import Button from '@/components/ui/Button'
 import toast from 'react-hot-toast'
-import { Loader2, Star, CheckCircle, XCircle } from 'lucide-react'
+import { Loader2, Star, XCircle, RefreshCw } from 'lucide-react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 
 export default function SubscriptionSuccess() {
-  const [searchParams] = useSearchParams()
-  const { user, fetchProfile } = useAuthStore()
-  const navigate = useNavigate()
-  const [status, setStatus] = useState('capturing') // capturing | success | error
+  const [searchParams]  = useSearchParams()
+  const { fetchProfile } = useAuthStore()
+  const navigate         = useNavigate()
+  const [status, setStatus]   = useState('capturing')
   const [errorMsg, setErrorMsg] = useState('')
   const [expiresAt, setExpiresAt] = useState(null)
+  const hasCaptured = useRef(false)           // evitar doble captura en StrictMode
 
-  const orderId = searchParams.get('token') // PayPal usa 'token' en la URL de retorno
+  // PayPal envía el order ID como ?token= en la URL de retorno
+  const orderId = searchParams.get('token')
 
   useEffect(() => {
-    if (orderId && user) capturePayment()
-  }, [orderId, user])
+    if (!orderId) {
+      setErrorMsg('No se encontró el token de pago. Vuelve a intentarlo.')
+      setStatus('error')
+      return
+    }
+    if (!hasCaptured.current) {
+      hasCaptured.current = true
+      capturePayment()
+    }
+  }, [orderId])
 
   const capturePayment = async () => {
+    setStatus('capturing')
     try {
-      const { data: { session: authSession } } = await supabase.auth.getSession()
-      const token = authSession?.access_token
-      if (!token) throw new Error('Sesión expirada, inicia sesión de nuevo')
+      // Obtener sesión directamente de Supabase (no depende del store de Zustand)
+      // Esto es crítico: tras el full-page redirect de PayPal, el store puede no
+      // estar hidratado aún, pero la sesión SÍ está en localStorage.
+      let authToken = null
+      let authUser  = null
+
+      // Intentar hasta 3 veces con pequeño delay por si el session refresh está en curso
+      for (let i = 0; i < 3; i++) {
+        const { data: { session } } = await supabase.auth.getSession()
+        if (session?.access_token) {
+          authToken = session.access_token
+          authUser  = session.user
+          break
+        }
+        // Esperar 800ms y reintentar
+        await new Promise(r => setTimeout(r, 800))
+      }
+
+      if (!authToken) {
+        // Sesión no encontrada — redirigir al login preservando la URL de retorno
+        navigate('/login?redirect=/therapist/subscription&msg=session', { replace: true })
+        return
+      }
 
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-subscription-payment`,
@@ -39,7 +73,7 @@ export default function SubscriptionSuccess() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${authToken}`,
           },
           body: JSON.stringify({ orderId }),
         }
@@ -48,15 +82,17 @@ export default function SubscriptionSuccess() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al capturar el pago')
 
-      // Refrescar perfil en el store para que ProGate se actualice
-      await fetchProfile(user)
+      // Refrescar perfil en el store para que ProGate se actualice inmediatamente
+      if (authUser) {
+        await fetchProfile(authUser).catch(() => {})
+      }
 
       setExpiresAt(data.expiresAt)
       setStatus('success')
       toast.success('¡Suscripción activada! Bienvenido al Plan Pro.')
     } catch (err) {
-      console.error(err)
-      setErrorMsg(err.message ?? 'Error desconocido')
+      console.error('[SubscriptionSuccess] Error:', err)
+      setErrorMsg(err.message ?? 'Error desconocido. Si ya se realizó el cargo, contacta soporte.')
       setStatus('error')
     }
   }
@@ -133,21 +169,19 @@ export default function SubscriptionSuccess() {
               Error al procesar
             </h2>
             <p className="text-warm-500 text-sm mb-2">
-              {errorMsg || 'No se pudo activar la suscripción. Si ya se realizó el cargo, contacta soporte.'}
+              {errorMsg}
             </p>
             <div className="flex flex-col gap-3 mt-6">
-              <Button fullWidth onClick={capturePayment}>
-                Reintentar
+              <Button fullWidth loading={status === 'capturing'}
+                onClick={() => { hasCaptured.current = false; capturePayment() }}>
+                <RefreshCw size={15} strokeWidth={2} /> Reintentar
               </Button>
               <Button variant="outline" fullWidth onClick={() => navigate('/therapist/subscription')}>
                 Volver a suscripciones
               </Button>
             </div>
             <p className="text-xs text-warm-400 mt-5">
-              Soporte:{' '}
-              <a href="mailto:soporte@psiconecta.app" className="text-primary-500">
-                soporte@psiconecta.app
-              </a>
+              Soporte: <a href="mailto:soporte@psiconecta.app" className="text-primary-500">soporte@psiconecta.app</a>
             </p>
           </div>
         )}
