@@ -7,8 +7,10 @@
  */
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import Button from '@/components/ui/Button'
+import PayPalSubscriptionButton from '@/components/payment/PayPalSubscriptionButton'
 import toast from 'react-hot-toast'
 import { Check, Zap, Star, AlertCircle, Lock, FlaskConical,
   BookOpen, BookMarked, LayoutDashboard, Shield, Library,
@@ -74,6 +76,8 @@ export default function SubscriptionPage() {
   const [planExpires, setPlanExpires] = useState(null)
   const [loading, setLoading]         = useState(true)
   const [upgrading, setUpgrading]     = useState(false)
+  const [showPayPal, setShowPayPal]   = useState(false)
+  const navigate = useNavigate()
 
   useEffect(() => { fetchPlan() }, [user])
 
@@ -91,27 +95,19 @@ export default function SubscriptionPage() {
     setLoading(false)
   }
 
-  const handleUpgrade = async () => {
-    setUpgrading(true)
-    try {
-      const { data: { session: authSession } } = await supabase.auth.getSession()
-      const token = authSession?.access_token
-      const res = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-subscription-order`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ plan: 'pro', amount: 50 }),
-        }
-      )
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      window.location.href = data.approveUrl
-    } catch (err) {
-      toast.error(err.message ?? 'Error iniciando el pago')
-    } finally {
-      setUpgrading(false)
-    }
+  const handleSubscriptionSuccess = async (expiresAt) => {
+    // Actualizar estado local inmediatamente
+    setCurrentPlan('pro')
+    setPlanExpires(expiresAt ?? null)
+    setShowPayPal(false)
+    // Refrescar perfil completo desde la BD
+    await fetchPlan()
+    toast.success('¡Plan Pro activado! Bienvenido a todas las herramientas clínicas.')
+  }
+
+  const handleSubscriptionError = (msg) => {
+    toast.error(msg ?? 'Error procesando el pago')
+    setShowPayPal(false)
   }
 
   const handleDowngrade = async () => {
@@ -236,9 +232,24 @@ export default function SubscriptionPage() {
                   Plan actual
                 </div>
               ) : plan.id === 'pro' ? (
-                <Button fullWidth loading={upgrading} onClick={handleUpgrade}>
-                  Suscribirme por $50/mes
-                </Button>
+                !showPayPal ? (
+                  <Button fullWidth onClick={() => setShowPayPal(true)}>
+                    Suscribirme por $50/mes
+                  </Button>
+                ) : (
+                  <div className="space-y-2">
+                    <PayPalSubscriptionButton
+                      onSuccess={handleSubscriptionSuccess}
+                      onError={handleSubscriptionError}
+                    />
+                    <button
+                      onClick={() => setShowPayPal(false)}
+                      className="w-full text-xs text-warm-400 hover:text-warm-600 py-1 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                )
               ) : (
                 <Button fullWidth variant="outline" onClick={handleDowngrade}>
                   Cambiar a Gratuito
