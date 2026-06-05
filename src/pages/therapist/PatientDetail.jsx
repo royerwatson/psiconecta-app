@@ -61,7 +61,7 @@ export default function PatientDetail() {
       supabase.from('profiles').select('*').eq('id', patientId).single(),
       supabase.from('sessions').select('*').eq('patient_id', patientId).eq('therapist_id', user.id).order('scheduled_at', { ascending: false }).limit(10),
       supabase.from('patient_tasks').select('*').eq('patient_id', patientId).eq('therapist_id', user.id).order('created_at', { ascending: false }),
-      supabase.from('ai_checkins').select('*').eq('patient_id', patientId).order('created_at', { ascending: false }).limit(30),
+      supabase.from('ai_checkins').select('*').eq('patient_id', patientId).eq('therapist_id', user.id).order('created_at', { ascending: false }).limit(30),
     ])
 
     // El historial clínico solo se carga si hay acceso
