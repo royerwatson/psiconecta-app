@@ -63,29 +63,41 @@ export default function MyResultsPage() {
   const fetchResults = async () => {
     setLoading(true)
 
-    // Traer sesiones completadas donde al menos 1 resultado fue liberado
-    const { data } = await supabase
+    // Traer sesiones completadas
+    const { data: sessions, error: sessErr } = await supabase
       .from('test_sessions')
       .select(`
         id, completed_at, status,
         test_assignments (
           id,
           tests ( id, slug, name, category, estimated_minutes )
-        ),
-        test_results (
-          id, raw_score, adjusted_score, severity_label, severity_code,
-          released_to_patient,
-          scoring_rules ( subscale_name, display_name )
         )
       `)
       .eq('respondent_id', user.id)
       .eq('status', 'completed')
       .order('completed_at', { ascending: false })
 
-    // Filtrar: solo sesiones con al menos 1 resultado liberado
-    const released = (data ?? []).filter(s =>
-      s.test_results?.some(r => r.released_to_patient)
-    )
+    if (sessErr || !sessions?.length) { setGroups({}); setLoading(false); return }
+
+    // Traer resultados liberados (query separado, sin embed scoring_rules para evitar fallos)
+    const sessionIds = sessions.map(s => s.id)
+    const { data: results } = await supabase
+      .from('test_results')
+      .select('id, session_id, raw_score, adjusted_score, severity_label, severity_code, released_to_patient')
+      .in('session_id', sessionIds)
+      .eq('released_to_patient', true)
+
+    // Mapear resultados a las sesiones
+    const resultsMap = {}
+    ;(results ?? []).forEach(r => {
+      if (!resultsMap[r.session_id]) resultsMap[r.session_id] = []
+      resultsMap[r.session_id].push(r)
+    })
+
+    // Filtrar solo sesiones con al menos 1 resultado liberado
+    const released = sessions
+      .map(s => ({ ...s, test_results: resultsMap[s.id] ?? [] }))
+      .filter(s => s.test_results.length > 0)
 
     setGroups(groupByTest(released))
     setLoading(false)

@@ -78,6 +78,8 @@ export default function TestResultPage() {
   const [savingOpinion, setSavingOpinion] = useState(false)
   const [releasing, setReleasing]   = useState(false)
   const [allReleased, setAllReleased] = useState(false)
+  const [isReviewed, setIsReviewed] = useState(false)
+  const [markingReviewed, setMarkingReviewed] = useState(false)
   const [activeTab, setActiveTab]   = useState('scores')  // 'scores' | 'items' | 'opinion'
 
   useEffect(() => { loadAll() }, [sessionId])
@@ -96,7 +98,7 @@ export default function TestResultPage() {
       // 2. Asignación y test
       const { data: assign } = await supabase
         .from('test_assignments')
-        .select('id, reason, relationship_id, tests(id, slug, name, description, estimated_minutes)')
+        .select('id, reason, relationship_id, therapist_dismissed_at, tests(id, slug, name, description, estimated_minutes)')
         .eq('id', sess.assignment_id)
         .single()
       setAssignment(assign)
@@ -155,6 +157,9 @@ export default function TestResultPage() {
         .maybeSingle()
       if (op) { setSavedOpinion(op); setOpinion(op.opinion_text) }
 
+      // 8. Estado revisado (therapist_dismissed_at != null)
+      setIsReviewed(!!assign?.therapist_dismissed_at)
+
     } catch (err) {
       console.error(err)
     } finally {
@@ -201,6 +206,19 @@ export default function TestResultPage() {
     setResults(prev => prev.map(r => ({ ...r, released_to_patient: true })))
     toast.success('Resultados liberados al paciente')
     setReleasing(false)
+  }
+
+  const markAsReviewed = async () => {
+    if (!assignment?.id) return
+    setMarkingReviewed(true)
+    const { error } = await supabase
+      .from('test_assignments')
+      .update({ therapist_dismissed_at: new Date().toISOString() })
+      .eq('id', assignment.id)
+    if (error) { toast.error('Error al marcar como revisado'); setMarkingReviewed(false); return }
+    setIsReviewed(true)
+    toast.success('Test marcado como revisado')
+    setMarkingReviewed(false)
   }
 
   const acknowledgeAlert = async (alertId) => {
@@ -487,6 +505,22 @@ export default function TestResultPage() {
           ) : (
             <div className="w-full py-3 rounded-xl bg-green-100 text-green-700 font-semibold text-sm text-center">
               Resultado ya liberado al paciente
+            </div>
+          )}
+
+          {/* Marcar como revisado */}
+          {!isReviewed ? (
+            <button
+              onClick={markAsReviewed}
+              disabled={markingReviewed}
+              className="w-full py-3 rounded-xl border-2 border-emerald-400 text-emerald-700 font-semibold text-sm hover:bg-emerald-50 disabled:opacity-60 transition-colors flex items-center justify-center gap-2"
+            >
+              <CheckCircle2 size={16} strokeWidth={1.8} />
+              {markingReviewed ? 'Marcando…' : 'Marcar como revisado'}
+            </button>
+          ) : (
+            <div className="w-full py-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold text-sm text-center flex items-center justify-center gap-2">
+              <CheckCircle2 size={16} strokeWidth={1.8} /> Test revisado
             </div>
           )}
 
