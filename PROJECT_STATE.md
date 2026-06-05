@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-05*
+*Última actualización: 2026-06-05 (auditoría de seguridad completa)*
 
 ---
 
@@ -100,6 +100,13 @@ src/
 | `migration_credentials.sql` | Ejecutado |
 | `migration_fix_results_rls.sql` | **Ejecutado** — política INSERT para paciente en `test_results` |
 | `migration_fix_test_assignment_patient_update.sql` | **Ejecutado** — política UPDATE para paciente en `test_assignments` |
+| `migration_checkin_reviewed.sql` | **Ejecutado** — columna `therapist_reviewed_at` en `ai_checkins` |
+| `migration_fix_profile_role_escalation.sql` | **⚠️ PENDIENTE** — bloquea auto-escalada de rol + función `admin_set_user_role()` |
+| `migration_fix_profiles_select.sql` | **⚠️ PENDIENTE** — `profiles_select` restrictiva por relación + función `is_admin()` |
+| `migration_fix_sessions_update.sql` | **⚠️ PENDIENTE** — `WITH CHECK` bloquea campos financieros en `sessions` |
+| `migration_fix_credentials_rls.sql` | **⚠️ PENDIENTE** — admin puede leer/aprobar `therapist_credentials` |
+| `migration_fix_progate_server_side.sql` | **⚠️ PENDIENTE** — RLS server-side módulo psicométrico + función `is_pro_therapist()` |
+| `migration_fix_length_constraints.sql` | **⚠️ PENDIENTE** — CHECK constraints longitud en messages, clinical_history, patient_tasks, etc. |
 
 ---
 
@@ -209,7 +216,7 @@ Flujo: terapeuta sube docs → admin aprueba/rechaza cada uno con motivo → cua
 
 ### Secrets configurados en Supabase
 ```
-DAILY_API_KEY          ✅ configurado
+DAILY_API_KEY          ✅ rotado y actualizado (2026-06-05)
 PAYPAL_CLIENT_ID       — pendiente configurar en producción
 PAYPAL_CLIENT_SECRET   — pendiente
 PAYPAL_BASE_URL        — pendiente (sandbox: https://api-m.sandbox.paypal.com)
@@ -313,7 +320,44 @@ VITE_PAYPAL_CLIENT_ID=...
 
 ---
 
-## 10. Bugs Corregidos (sesión 2026-06-05)
+## 10. Auditoría de Seguridad (sesión 2026-06-05)
+
+### Vulnerabilidades corregidas en código
+
+| Severidad | Archivo | Corrección |
+|-----------|---------|------------|
+| CRÍTICO | `authStore.js` | `role` y `profile` eliminados del `partialize` de localStorage — solo persiste el JWT |
+| CRÍTICO | `.env.example` | Eliminadas `VITE_DAILY_API_KEY` y `VITE_ANTHROPIC_API_KEY`; documentado que van en Supabase Secrets |
+| ALTO | `Login.jsx` | Query de `subscription_payments` ahora filtra `.eq('therapist_id', currentUser.id)` |
+| MEDIO | `PatientDetail.jsx` | Query de `ai_checkins` ahora filtra `.eq('therapist_id', user.id)` |
+| MEDIO | `PatientDetail.jsx` | `sanitize()` aplicada en historial clínico, tareas y notas liberadas |
+| MEDIO | `utils.js` | `sanitize()` exportada como utilidad global |
+| BAJO | `Register.jsx` | Validación de complejidad de contraseña (mayúscula + número + carácter especial) |
+| BAJO | `Register.jsx` | Indicador visual de fortaleza de contraseña |
+| BAJO | `Register.jsx` | Pantalla de verificación de email post-registro (detecta `session === null`) |
+| INFO | `TherapistDashboard.jsx` | Check-ins verificados se eliminan del dashboard (`therapist_reviewed_at`) |
+
+### Migraciones SQL de seguridad (ver §3 — pendientes de ejecutar)
+- `migration_fix_profile_role_escalation.sql` — previene auto-escalada de rol
+- `migration_fix_profiles_select.sql` — privacidad de perfiles de pacientes
+- `migration_fix_sessions_update.sql` — campos financieros inmutables desde el cliente
+- `migration_fix_credentials_rls.sql` — admin puede gestionar credenciales
+- `migration_fix_progate_server_side.sql` — ProGate reforzado en BD (is_pro_therapist)
+- `migration_fix_length_constraints.sql` — límites de longitud en campos de texto
+
+### Funciones de base de datos creadas
+- `is_admin()` — SECURITY DEFINER, verifica rol admin sin recursión RLS
+- `is_pro_therapist()` — SECURITY DEFINER, verifica plan pro/premium
+- `admin_set_user_role()` — única vía segura para cambiar el rol de un usuario
+
+### Historial de Git
+- **Daily.co API key rotada** — clave comprometida en commit `3ca2f41` invalidada
+- **Historial limpiado** con `git-filter-repo` — `.env`, `.env.production`, `.env.production.save` eliminados de todos los commits
+- **Force push** ejecutado — historial remoto reescrito
+
+---
+
+## 11. Bugs Corregidos (sesión 2026-06-05)
 
 ### RLS / Base de datos
 - `test_results` — faltaba política INSERT para el paciente (resultados nunca se guardaban)
@@ -345,7 +389,15 @@ VITE_PAYPAL_CLIENT_ID=...
 
 ---
 
-## 11. Pendiente / En Cola
+## 12. Pendiente / En Cola
+
+### Migraciones SQL de seguridad (ejecutar en Supabase SQL Editor — en este orden)
+- [ ] `migration_fix_profile_role_escalation.sql`
+- [ ] `migration_fix_profiles_select.sql` ← requiere la anterior (usa `is_admin()`)
+- [ ] `migration_fix_sessions_update.sql`
+- [ ] `migration_fix_credentials_rls.sql` ← requiere `is_admin()`
+- [ ] `migration_fix_progate_server_side.sql` ← requiere `is_admin()`
+- [ ] `migration_fix_length_constraints.sql`
 
 ### Configuración externa
 - [ ] Apple OAuth — Apple Developer Console
@@ -353,6 +405,7 @@ VITE_PAYPAL_CLIENT_ID=...
 - [ ] PayPal producción — Client ID/Secret en Supabase Secrets
 - [ ] Resend API Key — emails transaccionales
 - [ ] Anthropic API Key — Edge Function ai-checkin
+- [ ] Supabase Rate Limiting — verificar configuración en Settings > Auth > Rate Limits
 
 ### Mejoras técnicas
 - [ ] `create-subscription-order` Edge Function — pago $50/mes suscripción terapeuta (no existe aún)
@@ -360,10 +413,13 @@ VITE_PAYPAL_CLIENT_ID=...
 - [ ] Paginación chat: scroll infinito funcional, falta test con conversaciones largas reales
 - [ ] VideoCall: botón de reconexión manual testeado, `network-connection` event pendiente de prueba real
 - [ ] Tests: sesiones completadas antes de la migración RLS no tienen `test_results`; el terapeuta debe reasignar el test
+- [ ] DSM, CIE, escalas, biblioteca y protocolos en archivos estáticos JS — para protección real mover a Edge Functions
+- [ ] Contacto de emergencia — mover a tabla separada `patient_emergency_contacts` con RLS estricta
+- [ ] Flujo RGPD — implementar Edge Function `delete_user_data` y panel admin para solicitudes
 
 ---
 
-## 12. Comandos de Desarrollo
+## 13. Comandos de Desarrollo
 
 ```bash
 npm run dev          # servidor local en localhost:3000
@@ -375,7 +431,7 @@ git add -A && git commit -m "..." && git push origin main
 
 ---
 
-## 13. Convenciones del Código
+## 14. Convenciones del Código
 
 - **Íconos:** solo Lucide React, `strokeWidth={1.8}`, nunca emojis en JSX
 - **Moneda:** `formatPrice(amount)` → `$60.00 USD` | `formatWithLocal()` → `$60.00 USD ≈ RD$3,510`
