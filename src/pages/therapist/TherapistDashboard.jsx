@@ -15,7 +15,7 @@ import CompletedTestsSection from '@/components/psychometrics/CompletedTestsSect
 import {
   Calendar, Users, DollarSign, Bot, MessageCircle,
   Clock, Star, Video, ClipboardList, Pencil, AlertTriangle,
-  ChevronDown, ChevronUp,
+  ChevronDown, ChevronUp, CheckCircle,
 } from 'lucide-react'
 
 const QUICK_LINKS = [
@@ -74,6 +74,7 @@ export default function TherapistDashboard() {
         .select('*, patient:profiles!ai_checkins_patient_id_fkey(id, full_name, avatar_url)')
         .eq('therapist_id', user.id)
         .in('risk_level', ['high', 'medium'])
+        .is('therapist_reviewed_at', null)
         .order('created_at', { ascending: false })
         .limit(5)
 
@@ -101,6 +102,15 @@ export default function TherapistDashboard() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleReviewAlert = async (alertId) => {
+    await supabase
+      .from('ai_checkins')
+      .update({ therapist_reviewed_at: new Date().toISOString() })
+      .eq('id', alertId)
+    setAlerts(prev => prev.filter(a => a.id !== alertId))
+    if (expandedAlert === alertId) setExpandedAlert(null)
   }
 
   const therapist = profile?.therapist_profiles?.[0]
@@ -233,6 +243,14 @@ export default function TherapistDashboard() {
                       onClick={() => navigate(`/therapist/patients/${alert.patient?.id}`)}
                     >
                       Ver paciente →
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleReviewAlert(alert.id)}
+                      className="flex items-center gap-1.5 !border-green-300 !text-green-700 hover:!bg-green-50"
+                    >
+                      <CheckCircle size={14} /> Verificado
                     </Button>
                   </div>
                 </div>
