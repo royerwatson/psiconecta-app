@@ -123,11 +123,41 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { patient_id, questions_answers } = await req.json()
+    // ── FIX SEGURIDAD: verificar JWT antes de procesar ─────────────────────
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'No authorization header' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
 
-    if (!patient_id || !questions_answers) {
+    const supabaseUserClient = createClient(
+      SUPABASE_URL,
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    )
+    const { data: { user }, error: authError } = await supabaseUserClient.auth.getUser()
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: 'No autorizado' }),
+        { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    const body = await req.json()
+    const { questions_answers } = body
+
+    // SEGURIDAD: ignorar patient_id del body — usar el del token JWT
+    const patient_id = user.id
+
+    if (!questions_answers || typeof questions_answers !== 'string') {
       return new Response(
-        JSON.stringify({ error: 'patient_id and questions_answers are required' }),
+        JSON.stringify({ error: 'questions_answers es requerido' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Validar longitud máxima para prevenir abuso
+    if (questions_answers.length > 8000) {
+      return new Response(
+        JSON.stringify({ error: 'Contenido demasiado largo' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }

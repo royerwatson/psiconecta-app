@@ -1,8 +1,20 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { checkRateLimit } from '../_shared/rateLimit.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+const APP_ORIGIN = Deno.env.get('APP_URL') ?? 'https://psiconecta-app.vercel.app'
+
+function getCorsHeaders(req: Request) {
+  const origin = req.headers.get('Origin') ?? ''
+  // Allow app origin and localhost for development
+  const allowed = origin === APP_ORIGIN
+    || origin.startsWith('http://localhost')
+    || origin.startsWith('https://localhost')
+  return {
+    'Access-Control-Allow-Origin':  allowed ? origin : APP_ORIGIN,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Vary': 'Origin',
+  }
 }
 
 // Obtener token de acceso de PayPal
@@ -26,7 +38,7 @@ async function getPayPalAccessToken(): Promise<string> {
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: getCorsHeaders(req) })
   }
 
   try {
@@ -41,6 +53,23 @@ Deno.serve(async (req) => {
     )
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) throw new Error('Unauthorized')
+
+    // Rate limiting: máx. 10 órdenes por usuario por hora
+    const supabaseAdmin2 = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    )
+    const rl = await checkRateLimit(supabaseAdmin2, user.id, {
+      maxRequests: 10,
+      windowSeconds: 3600,
+      functionName: 'create-paypal-order',
+    })
+    if (!rl.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Demasiadas peticiones. Intenta en unos minutos.' }),
+        { status: 429, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      )
+    }
 
     // Leer datos de la petición
     const { therapistId, scheduledAt, isUrgent, priceBase, therapistName } = await req.json()
@@ -123,13 +152,13 @@ Deno.serve(async (req) => {
 
     return new Response(
       JSON.stringify({ orderId: order.id, bookingId: session.id }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   } catch (err) {
     console.error(err)
     return new Response(
       JSON.stringify({ error: err.message }),
-      { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { status: 400, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
     )
   }
 })
