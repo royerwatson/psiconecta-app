@@ -446,7 +446,7 @@ VITE_PAYPAL_CLIENT_ID=...
 - [ ] Modo oscuro — CSS variables + toggle en perfil
 - [ ] Filtros de búsqueda ampliados — idioma, modalidad, género del terapeuta
 - [ ] Chat con archivos adjuntos — bucket Storage + componente upload
-- [ ] Consentimiento informado digital — modal + firma + PDF descargable
+- [x] Consentimiento informado digital — modal antes de primera sesión, firma en BD (`consent_signatures`), página imprimible `/patient/consent/:id`
 - [ ] Landing page pública con SEO — página / con hero, beneficios y CTA
 - [ ] Paginación chat: scroll infinito funcional, falta test con conversaciones largas reales
 - [ ] VideoCall: `network-connection` event pendiente de prueba real
