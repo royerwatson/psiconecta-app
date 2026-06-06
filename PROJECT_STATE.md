@@ -413,6 +413,12 @@ VITE_PAYPAL_CLIENT_ID=...
 - [ ] Verificar dominio `psiconecta.app` en Resend para enviar desde FROM_EMAIL configurado
 - [ ] Registrar eventos en PayPal webhook: `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`
 
+### Sistema de reembolsos ✅ (2026-06-05)
+- Edge Function `process-refund` — llama PayPal Refunds API con política temporal
+- `MyAppointments.jsx` — botón Cancelar muestra % de reembolso antes de confirmar
+- Tabla `refunds` con RLS — historial completo por paciente
+- Panel admin `/admin/refunds` — gestión de reembolsos fallidos y disputas
+
 ### Mejoras técnicas
 - [x] `create-subscription-order` — ✅ funcional, crea orden $50 con PayPal Orders API
 - [x] `capture-subscription-payment` — ✅ captura pago, activa plan Pro, envía email de confirmación
