@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-05 (auditoría de seguridad completa)*
+*Última actualización: 2026-06-05 (sistema de emails, reembolsos, suscripciones y seguridad completos)*
 
 ---
 
@@ -297,20 +297,23 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Tareas asignadas al paciente (terapeuta usa `patient_tasks`, paciente las ve en su dashboard)
 
 ### Bienestar del Paciente
-- [x] Check-in diario IA (análisis riesgo, alerta terapeuta)
+- [x] Check-in diario IA (análisis riesgo, alerta terapeuta) — Claude Haiku activo, email de alerta directo al terapeuta para riesgo alto/medio
 - [x] Widget estado de ánimo + gráfica semanal
 - [x] Diario personal con prompts terapéuticos
 - [x] Página de crisis con recursos por país
 - [x] Modo anónimo (iniciales en lugar de nombre completo)
+- [x] Check-ins verificados se eliminan del dashboard del terapeuta (`therapist_reviewed_at`)
 
 ### Pagos y Negocio
 - [x] Pago sesiones PayPal (flujo completo)
 - [x] Comisión 10% automática sobre cada sesión
-- [x] Plan Suscripción $50/mes (ProGate bloquea plan Gratuito)
+- [x] Plan Suscripción $50/mes — Edge Functions create/capture funcionando, email confirmación, downgrade automático
 - [x] Liquidaciones a terapeutas (AdminPayouts)
 - [x] Conversión USD → DOP en tiempo real
 - [x] Landing pública de precios (/pricing)
 - [x] Panel admin de suscripciones + MRR
+- [x] Sistema de reembolsos — política temporal (>24h=100%, 2-24h=50%, <2h=bloqueado), Edge Function process-refund, panel admin `/admin/refunds`
+- [x] Política de cancelación con motivo — campo de motivo en modal, email al terapeuta con razón incluida
 
 ### Verificación de Terapeutas
 - [x] 3 documentos obligatorios: Título / Exequátur / Colegio Psicológico
@@ -320,6 +323,18 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Botón "Completar verificación" aparece solo cuando los 3 están aprobados
 - [x] Al completar, terapeuta queda activo y visible para pacientes
 
+### Emails Transaccionales (Resend — activo, dominio en verificación)
+- [x] Bienvenida al registrarse (`notify-welcome`)
+- [x] Confirmación de cita — paciente y terapeuta (`capture-paypal-order`)
+- [x] Cancelación con motivo — paciente y terapeuta (`notify-cancellation`)
+- [x] Recordatorio 24h antes de sesión (`send-reminders` cron hourly)
+- [x] Recordatorio 1h antes de sesión (`send-reminders` cron hourly)
+- [x] Alerta riesgo alto/medio al terapeuta (`ai-checkin`)
+- [x] Resultado de test disponible al paciente (`notify-test-result`)
+- [x] Plan Pro activado (`capture-subscription-payment`)
+- [x] Vencimiento suscripción 7 días antes (`send-reminders`)
+- [x] Downgrade automático al vencer suscripción (`send-reminders`)
+
 ### UX/UI y Performance
 - [x] Design system: Plus Jakarta Sans + Lora, paleta azul
 - [x] Logo oficial SVG: dos arcos + nodo central (PsiconectaLogo)
@@ -327,6 +342,8 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] 100% sin emojis — Lucide React uniformes (strokeWidth=1.8)
 - [x] Code splitting: lucide-react, datos clínicos, vendor libs
 - [x] Build limpio — 0 errores (3169 módulos)
+- [x] Política de contraseña con complejidad + indicador visual de fortaleza
+- [x] Pantalla de verificación de email post-registro
 
 ---
 
@@ -406,11 +423,11 @@ VITE_PAYPAL_CLIENT_ID=...
 ### Configuración externa
 - [ ] Apple OAuth — Apple Developer Console
 - [ ] Facebook OAuth — Meta for Developers
-- [ ] PayPal producción — cambiar PAYPAL_BASE_URL de sandbox a producción cuando esté listo
-- [ ] `PAYPAL_WEBHOOK_ID` — reemplazar PAYPAL_WEBHOOK_SANDBOX_ID por el ID de producción
-- [x] Cron job `send-reminders-hourly` — ✅ activo en pg_cron, corre cada hora (`0 * * * *`)
+- [ ] PayPal producción — crear cuenta Business, obtener credenciales live, actualizar Supabase Secrets y Vercel
+- [ ] `PAYPAL_WEBHOOK_ID` — reemplazar `PAYPAL_WEBHOOK_SANDBOX_ID` por el ID de producción
+- [x] Cron job `send-reminders-hourly` — ✅ activo en pg_cron, cada hora (`0 * * * *`)
 - [ ] `CRON_SECRET` en Supabase Secrets — protege el endpoint de send-reminders
-- [ ] Verificar dominio `psiconecta.app` en Resend para enviar desde FROM_EMAIL configurado
+- [ ] Dominio `psiconecta.app` en Resend — DNS agregado en Namecheap, en propagación
 - [ ] Registrar eventos en PayPal webhook: `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`
 
 ### Sistema de reembolsos ✅ (2026-06-05)
@@ -419,17 +436,24 @@ VITE_PAYPAL_CLIENT_ID=...
 - Tabla `refunds` con RLS — historial completo por paciente
 - Panel admin `/admin/refunds` — gestión de reembolsos fallidos y disputas
 
-### Mejoras técnicas
-- [x] `create-subscription-order` — ✅ funcional, crea orden $50 con PayPal Orders API
-- [x] `capture-subscription-payment` — ✅ captura pago, activa plan Pro, envía email de confirmación
-- [x] `paypal-webhook` — ✅ maneja CAPTURE.COMPLETED, CAPTURE.DENIED, SUBSCRIPTION.CANCELLED/EXPIRED; columnas corregidas
-- [x] `send-reminders` — ✅ recordatorios de sesión + aviso vencimiento suscripción 7 días antes + downgrade automático
+### Roadmap pendiente
+- [ ] Calendario de disponibilidad en booking — reemplazar input manual fecha/hora por slots del terapeuta
+- [ ] Reagendamiento de citas — modal para mover cita a otra fecha sin cancelar
+- [ ] Onboarding guiado para terapeutas nuevos — checklist de activación con progreso
+- [ ] Match automático terapeuta-paciente — cuestionario inicial + algoritmo de scoring
+- [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
+- [ ] 2FA para terapeutas y admins — Supabase Auth TOTP
+- [ ] Modo oscuro — CSS variables + toggle en perfil
+- [ ] Filtros de búsqueda ampliados — idioma, modalidad, género del terapeuta
+- [ ] Chat con archivos adjuntos — bucket Storage + componente upload
+- [ ] Consentimiento informado digital — modal + firma + PDF descargable
+- [ ] Landing page pública con SEO — página / con hero, beneficios y CTA
 - [ ] Paginación chat: scroll infinito funcional, falta test con conversaciones largas reales
-- [ ] VideoCall: botón de reconexión manual testeado, `network-connection` event pendiente de prueba real
-- [ ] Tests: sesiones completadas antes de la migración RLS no tienen `test_results`; el terapeuta debe reasignar el test
-- [ ] DSM, CIE, escalas, biblioteca y protocolos en archivos estáticos JS — para protección real mover a Edge Functions
-- [ ] Contacto de emergencia — mover a tabla separada `patient_emergency_contacts` con RLS estricta
-- [ ] Flujo RGPD — implementar Edge Function `delete_user_data` y panel admin para solicitudes
+- [ ] VideoCall: `network-connection` event pendiente de prueba real
+- [ ] Tests: sesiones previas a migración RLS sin `test_results` — terapeuta debe reasignar
+- [ ] DSM, CIE, escalas, biblioteca, protocolos — mover a Edge Functions para protección server-side real
+- [ ] Contacto de emergencia — mover a tabla separada con RLS estricta
+- [ ] Flujo RGPD — Edge Function `delete_user_data` + panel admin
 
 ---
 
