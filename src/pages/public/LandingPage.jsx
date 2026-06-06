@@ -126,6 +126,7 @@ export default function LandingPage() {
               <a href="#beneficios"    className="hover:text-primary-600 transition-colors">Beneficios</a>
               <a href="#como-funciona" className="hover:text-primary-600 transition-colors">Cómo funciona</a>
               <Link to="/terapeutas"   className="hover:text-primary-600 transition-colors">Terapeutas</Link>
+              <Link to="/blog"         className="hover:text-primary-600 transition-colors">Blog</Link>
               <Link to="/pricing"      className="hover:text-primary-600 transition-colors">Planes</Link>
             </nav>
 
@@ -479,10 +480,11 @@ export default function LandingPage() {
             </div>
 
             <FooterColumn title="Pacientes" links={[
-              { label: 'Cómo funciona',        href: '#como-funciona' },
-              { label: 'Ver terapeutas',        href: '/terapeutas' },
-              { label: 'Planes y precios',      href: '/pricing' },
-              { label: 'Recursos de crisis',    href: '/patient/crisis' },
+              { label: 'Cómo funciona',         href: '#como-funciona' },
+              { label: 'Ver terapeutas',         href: '/terapeutas' },
+              { label: 'Blog de salud mental',   href: '/blog' },
+              { label: 'Planes y precios',       href: '/pricing' },
+              { label: 'Recursos de crisis',     href: '/patient/crisis' },
             ]} />
 
             <FooterColumn title="Terapeutas" links={[

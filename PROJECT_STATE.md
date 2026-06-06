@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (landing page v3 — hero emocional, quiz de matching, copywriting premium)*
+*Última actualización: 2026-06-06 (landing page v4 — dark mode, directorio público /terapeutas)*
 
 ---
 
@@ -63,7 +63,7 @@ src/
     ├── therapist/  14 páginas (ver §4)
     ├── shared/     ChatPage, VideoCall
     ├── payment/    PaymentSuccess, PaymentCancel
-    └── public/     LandingPage, PricingPage, SEOHead
+    └── public/     LandingPage, PricingPage, SEOHead, TherapistDirectoryPage
 ```
 
 ---
@@ -170,6 +170,7 @@ src/
 | Ruta | Página |
 |------|--------|
 | `/` | LandingPage pública (hero, beneficios, pasos, terapeutas, FAQ, confianza) |
+| `/terapeutas` | Directorio público de terapeutas verificados (indexable por Google) |
 | `/video-call/:id` | VideoCall Daily.co (reconexión automática) |
 | `/pricing` | Landing pública de planes |
 | `/auth/callback` | Callback OAuth (Google/Apple/Facebook) |
@@ -452,6 +453,11 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Hero emocional — copy estilo Apple: "Ese paso que llevas tiempo posponiendo." Línea emocional + línea funcional separadas
 - [x] Sección quiz de matching — preview de las 4 preguntas del algoritmo, CTA → `/register` → `/patient/match`
 - [x] Claims honestos — sin cobertura LATAM falsa, sin stats inventados, cobertura solo RD
+- [x] Hero emocional — copy estilo Apple: "Ese paso que llevas tiempo posponiendo."
+- [x] Sección quiz de matching — preview de las 4 preguntas del algoritmo, CTA → `/register` → `/patient/match`
+- [x] Modo oscuro en landing — variantes `dark:` Tailwind en todos los componentes; coherente con el resto de la app
+- [x] Directorio público `/terapeutas` — `TherapistDirectoryPage.jsx`, búsqueda + filtros por especialidad, cards con rating/precio/badge Pro, SEO title/description propios, sin auth requerida
+- [x] Link "Terapeutas" en navbar y footer de la landing
 - [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP
