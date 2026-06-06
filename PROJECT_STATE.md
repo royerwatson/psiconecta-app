@@ -408,7 +408,7 @@ VITE_PAYPAL_CLIENT_ID=...
 - [ ] Facebook OAuth — Meta for Developers
 - [ ] PayPal producción — cambiar PAYPAL_BASE_URL de sandbox a producción cuando esté listo
 - [ ] `PAYPAL_WEBHOOK_ID` — reemplazar PAYPAL_WEBHOOK_SANDBOX_ID por el ID de producción
-- [ ] Cron job para `send-reminders` — configurar en Supabase Scheduled Functions (cada hora)
+- [x] Cron job `send-reminders-hourly` — ✅ activo en pg_cron, corre cada hora (`0 * * * *`)
 - [ ] `CRON_SECRET` en Supabase Secrets — protege el endpoint de send-reminders
 - [ ] Verificar dominio `psiconecta.app` en Resend para enviar desde FROM_EMAIL configurado
 - [ ] Registrar eventos en PayPal webhook: `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`
