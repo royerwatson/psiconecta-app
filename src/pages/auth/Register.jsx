@@ -444,7 +444,8 @@ export default function Register() {
     setLoading(true)
     try {
       const now = new Date().toISOString()
-      await signUp({
+      // signUp retorna { user, session } — user siempre viene aunque session sea null
+      const signUpData = await signUp({
         email:        form.email,
         password:     form.password,
         fullName:     form.fullName,
@@ -452,10 +453,10 @@ export default function Register() {
         specialty:    form.specialty,
         licenseNumber: form.licenseNumber,
       })
+      const newUserId = signUpData?.user?.id
 
-      // Actualizar campos extendidos del perfil
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user) {
+      // Actualizar campos extendidos del perfil (service role via authStore)
+      if (newUserId) {
         await supabase.from('profiles').update({
           city:                sanitize(form.city),
           country:             form.country,
@@ -464,15 +465,14 @@ export default function Register() {
           emergency_phone:     role === 'client' ? sanitize(form.emergencyPhone)   : null,
           terms_accepted_at:   now,
           privacy_accepted_at: now,
-        }).eq('id', user.id)
+        }).eq('id', newUserId)
       }
 
-      // Enviar email de bienvenida — funciona con o sin sesión activa
-      // notify-welcome acepta { user_id } y usa service role internamente
-      const { data: { user: signedUser } } = await supabase.auth.getUser()
-      if (signedUser) {
+      // Enviar email de bienvenida usando el user_id del signup
+      // (no depende de sesión activa — notify-welcome usa service role)
+      if (newUserId) {
         supabase.functions.invoke('notify-welcome', {
-          body: { user_id: signedUser.id },
+          body: { user_id: newUserId },
         }).catch(() => {})
       }
 
