@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (v11 — favicon corregido, kit de logos brand/)*
+*Última actualización: 2026-06-06 (v12 — auditoría de vulnerabilidades + security fixes)*
 
 ---
 
@@ -354,7 +354,7 @@ VITE_PAYPAL_CLIENT_ID=...
 
 ---
 
-## 10. Auditoría de Seguridad (sesión 2026-06-05)
+## 10. Auditoría de Seguridad (sesión 2026-06-05 + 2026-06-06)
 
 ### Vulnerabilidades corregidas en código
 
@@ -378,6 +378,15 @@ VITE_PAYPAL_CLIENT_ID=...
 - `migration_fix_credentials_rls.sql` — admin puede gestionar credenciales
 - `migration_fix_progate_server_side.sql` — ProGate reforzado en BD (is_pro_therapist)
 - `migration_fix_length_constraints.sql` — límites de longitud en campos de texto
+
+### Vulnerabilidades corregidas (2026-06-06)
+
+| Severidad | Área | Corrección |
+|-----------|------|------------|
+| MEDIA | `supabase/functions/_shared/cors.ts` + 14 funciones individuales | CORS cambiado de `*` a `https://psiconecta.app` |
+| MEDIA | `vercel.json` CSP | GA4/GTM añadidos a `script-src` y `connect-src` |
+| BAJA | `BlogPostPage.jsx` `parseBold()` | DOMPurify sanitiza HTML antes de `dangerouslySetInnerHTML` |
+| COSMÉTICO | `index.html` | `theme-color` corregido de `#1a527d` a `#4f46e5` (indigo de marca) |
 
 ### Funciones de base de datos creadas
 - `is_admin()` — SECURITY DEFINER, verifica rol admin sin recursión RLS
