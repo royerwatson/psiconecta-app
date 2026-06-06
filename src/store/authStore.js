@@ -89,11 +89,12 @@ export const useAuthStore = create(
 
         const { data: existingProfile } = await supabase
           .from('profiles')
-          .select('id')
+          .select('id, full_name')
           .eq('id', data.user.id)
           .single()
 
         if (!existingProfile) {
+          // Trigger silently failed — create profile manually
           const { error: profileError } = await supabase.from('profiles').insert({
             id: data.user.id,
             full_name: fullName,
@@ -101,6 +102,14 @@ export const useAuthStore = create(
             role,
           })
           if (profileError) throw profileError
+        } else {
+          // Trigger ran — but may have saved a default name ('Usuario') if
+          // raw_user_meta_data wasn't ready. Always overwrite with the real values.
+          await supabase.from('profiles').update({
+            full_name: fullName,
+            role,
+          }).eq('id', data.user.id)
+          // Silently ignored if RLS blocks (e.g. email confirmation pending with no session)
         }
 
         // Si es terapeuta, crear perfil extendido

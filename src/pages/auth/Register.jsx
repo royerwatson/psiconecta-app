@@ -484,7 +484,14 @@ export default function Register() {
       }
 
       toast.success('¡Cuenta creada!')
-      navigate(role === 'therapist' ? '/therapist/dashboard' : '/patient/dashboard')
+      // Use the store role (populated by fetchProfile inside signUp) — more
+      // reliable than the local form state which can be stale after async ops.
+      const storeRole = useAuthStore.getState().role
+      navigate(
+        storeRole === 'therapist' ? '/therapist/dashboard' :
+        storeRole === 'admin'     ? '/admin/dashboard' :
+        '/patient/dashboard'
+      )
     } catch (err) {
       toast.error(err.message ?? 'Error al crear la cuenta')
     } finally {

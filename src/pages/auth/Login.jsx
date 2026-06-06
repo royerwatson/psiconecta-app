@@ -78,7 +78,17 @@ export default function Login() {
       )
       navigate(destination, { replace: true })
     } catch (err) {
-      toast.error(err.message ?? 'Error al iniciar sesión. Verifica tus datos.')
+      const msg = err.message ?? ''
+      if (msg.toLowerCase().includes('email not confirmed')) {
+        // Resend the confirmation email automatically and inform the user
+        await supabase.auth.resend({ type: 'signup', email: form.email }).catch(() => {})
+        toast.error(
+          'Debes confirmar tu correo antes de entrar. Te reenviamos el enlace de verificación.',
+          { duration: 7000 }
+        )
+      } else {
+        toast.error(msg || 'Error al iniciar sesión. Verifica tus datos.')
+      }
     } finally {
       setLoading(false)
     }
