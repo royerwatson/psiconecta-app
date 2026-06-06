@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (landing page pública completa con SEO, confianza, FAQ y animaciones)*
+*Última actualización: 2026-06-06 (landing page v3 — hero emocional, quiz de matching, copywriting premium)*
 
 ---
 
@@ -449,6 +449,9 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] FAQ accordion — 6 preguntas expandibles (confidencialidad, precio, cancelación, verificación, apps, anonimato)
 - [x] Animaciones on-scroll — `IntersectionObserver` CSS puro, fade-in en beneficios, pasos y testimonios
 - [x] `react-helmet-async` integrado en `main.jsx` con `HelmetProvider`
+- [x] Hero emocional — copy estilo Apple: "Ese paso que llevas tiempo posponiendo." Línea emocional + línea funcional separadas
+- [x] Sección quiz de matching — preview de las 4 preguntas del algoritmo, CTA → `/register` → `/patient/match`
+- [x] Claims honestos — sin cobertura LATAM falsa, sin stats inventados, cobertura solo RD
 - [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP

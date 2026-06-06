@@ -108,24 +108,24 @@ export default function LandingPage() {
     <>
       <SEOHead />
 
-      <div className="min-h-screen bg-white text-slate-800">
+      <div className="min-h-screen bg-white dark:bg-[#0f1117] text-slate-800 dark:text-slate-200">
 
         {/* ── NAVBAR ─────────────────────────────── */}
-        <header className="fixed top-0 inset-x-0 z-50 glass border-b border-white/60">
+        <header className="fixed top-0 inset-x-0 z-50 glass dark:bg-slate-900/80 border-b border-white/60 dark:border-slate-700/60">
           <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5">
               <div className="w-9 h-9 bg-gradient-brand rounded-xl flex items-center justify-center shadow-sm">
                 <PsiconectaLogo size={22} color="white" />
               </div>
-              <span className="font-bold text-slate-900 text-lg tracking-tight">
+              <span className="font-bold text-slate-900 dark:text-white text-lg tracking-tight">
                 Psico<span className="text-primary-600">necta</span>
               </span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-500">
+            <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-500 dark:text-slate-400">
               <a href="#beneficios"    className="hover:text-primary-600 transition-colors">Beneficios</a>
               <a href="#como-funciona" className="hover:text-primary-600 transition-colors">Cómo funciona</a>
-              <a href="#terapeutas"    className="hover:text-primary-600 transition-colors">Para terapeutas</a>
+              <Link to="/terapeutas"   className="hover:text-primary-600 transition-colors">Terapeutas</Link>
               <Link to="/pricing"      className="hover:text-primary-600 transition-colors">Planes</Link>
             </nav>
 
@@ -147,7 +147,7 @@ export default function LandingPage() {
 
             {/* Texto */}
             <div>
-              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-[1.1] tracking-tight mb-5">
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white leading-[1.1] tracking-tight mb-5">
                 Ese paso que llevas<br />
                 tiempo{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-brand">
@@ -155,10 +155,10 @@ export default function LandingPage() {
                 </span>
               </h1>
 
-              <p className="text-lg text-slate-500 mb-3 leading-relaxed font-medium max-w-lg">
+              <p className="text-lg text-slate-500 dark:text-slate-300 mb-3 leading-relaxed font-medium max-w-lg">
                 Hablar con alguien de confianza cambia todo.
               </p>
-              <p className="text-base text-slate-400 mb-8 leading-relaxed max-w-lg">
+              <p className="text-base text-slate-400 dark:text-slate-400 mb-8 leading-relaxed max-w-lg">
                 Conéctate con un psicólogo verificado en República Dominicana.
                 Sin salas de espera. Sin estigma. Desde donde estés.
               </p>
@@ -180,7 +180,7 @@ export default function LandingPage() {
                   { icon: EyeOff,      label: 'Modo anónimo' },
                   { icon: CreditCard,  label: 'Pago seguro vía PayPal' },
                 ].map(({ icon: Icon, label }) => (
-                  <div key={label} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 shadow-sm text-sm font-medium text-slate-700">
+                  <div key={label} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm text-sm font-medium text-slate-700 dark:text-slate-300">
                     <Icon size={15} strokeWidth={1.8} className="text-primary-500" />
                     {label}
                   </div>
@@ -197,7 +197,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── BENEFICIOS ─────────────────────────── */}
-        <section id="beneficios" className="py-20 px-4">
+        <section id="beneficios" className="py-20 px-4 dark:bg-[#0f1117]">
           <div className="max-w-6xl mx-auto">
             <SectionHeader
               title="Todo lo que necesitas para cuidar tu salud mental"
@@ -207,11 +207,11 @@ export default function LandingPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
               {BENEFITS.map(({ icon: Icon, title, desc }) => (
                 <div key={title} className="fade-in card p-6 hover:shadow-lg transition-shadow group">
-                  <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary-50 group-hover:bg-primary-100 transition-colors mb-4">
+                  <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary-50 dark:bg-primary-900/30 group-hover:bg-primary-100 transition-colors mb-4">
                     <Icon size={20} strokeWidth={1.8} className="text-primary-600" />
                   </div>
-                  <h3 className="font-bold text-slate-900 mb-2 text-base">{title}</h3>
-                  <p className="text-sm text-slate-500 leading-relaxed">{desc}</p>
+                  <h3 className="font-bold text-slate-900 dark:text-white mb-2 text-base">{title}</h3>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
@@ -231,12 +231,12 @@ export default function LandingPage() {
 
               {STEPS.map(({ number, icon: Icon, title, desc }) => (
                 <div key={number} className="fade-in relative z-10 flex flex-col items-center text-center card p-6">
-                  <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-primary-50 mb-3">
+                  <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-primary-50 dark:bg-primary-900/30 mb-3">
                     <Icon size={22} strokeWidth={1.8} className="text-primary-600" />
                   </div>
                   <span className="text-xs font-bold text-primary-400 tracking-widest mb-1">{number}</span>
-                  <h3 className="font-bold text-slate-900 mb-2 text-sm">{title}</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
+                  <h3 className="font-bold text-slate-900 dark:text-white mb-2 text-sm">{title}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
@@ -251,7 +251,7 @@ export default function LandingPage() {
         </section>
 
         {/* ── TESTIMONIOS ────────────────────────── */}
-        <section className="py-20 px-4">
+        <section className="py-20 px-4 dark:bg-[#0f1117]">
           <div className="max-w-6xl mx-auto">
             <SectionHeader
               title="Lo que dicen quienes ya dan el paso"
@@ -265,14 +265,14 @@ export default function LandingPage() {
                       <Star key={i} size={14} strokeWidth={0} className="fill-accent-400 text-accent-400" />
                     ))}
                   </div>
-                  <p className="text-slate-600 text-sm leading-relaxed mb-5">"{text}"</p>
+                  <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-5">"{text}"</p>
                   <div className="flex items-center gap-3">
                     <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}>
                       <span className="text-white font-bold text-xs">{initials}</span>
                     </div>
                     <div>
-                      <p className="font-bold text-slate-900 text-sm">{name}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{role}</p>
+                      <p className="font-bold text-slate-900 dark:text-white text-sm">{name}</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{role}</p>
                     </div>
                   </div>
                 </div>
@@ -297,17 +297,17 @@ export default function LandingPage() {
                 <span className="inline-block px-3 py-1.5 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold mb-4">
                   Para profesionales
                 </span>
-                <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight mb-4">
+                <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
                   Todo lo que un terapeuta necesita, en un solo lugar
                 </h2>
-                <p className="text-slate-500 leading-relaxed mb-8 font-medium">
+                <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-8 font-medium">
                   Publica tu perfil, gestiona tu agenda y accede a herramientas clínicas avanzadas.
                   El plan gratuito incluye lo esencial; el plan Pro desbloquea el conjunto completo.
                 </p>
 
                 <ul className="space-y-3 mb-8">
                   {THERAPIST_TOOLS.map(({ icon: Icon, label }) => (
-                    <li key={label} className="flex items-center gap-3 text-sm text-slate-700 font-medium">
+                    <li key={label} className="flex items-center gap-3 text-sm text-slate-700 dark:text-slate-300 font-medium">
                       <Icon size={16} strokeWidth={1.8} className="text-primary-500 shrink-0" />
                       {label}
                     </li>
@@ -350,10 +350,10 @@ export default function LandingPage() {
               <div className="w-12 h-12 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-5">
                 <BrainCircuit size={24} strokeWidth={1.8} className="text-white" />
               </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
                 ¿No sabes por dónde empezar?
               </h2>
-              <p className="text-slate-500 font-medium mb-8 max-w-xl mx-auto leading-relaxed">
+              <p className="text-slate-500 dark:text-slate-400 font-medium mb-8 max-w-xl mx-auto leading-relaxed">
                 Responde 4 preguntas y nuestro algoritmo te conecta con los terapeutas
                 que mejor se ajustan a lo que necesitas.
               </p>
@@ -366,9 +366,9 @@ export default function LandingPage() {
                   { num: '3', label: 'Urgencia para comenzar' },
                   { num: '4', label: 'Preferencia de terapeuta' },
                 ].map(({ num, label }) => (
-                  <div key={num} className="bg-primary-50 border border-primary-100 rounded-xl p-3">
+                  <div key={num} className="bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 rounded-xl p-3">
                     <span className="text-xs font-bold text-primary-400 tracking-widest block mb-1">{num}</span>
-                    <span className="text-xs font-semibold text-primary-800 leading-tight">{label}</span>
+                    <span className="text-xs font-semibold text-primary-800 dark:text-primary-300 leading-tight">{label}</span>
                   </div>
                 ))}
               </div>
@@ -380,7 +380,7 @@ export default function LandingPage() {
                 Hacer el test gratis
                 <ArrowRight size={18} strokeWidth={1.8} />
               </Link>
-              <p className="text-xs text-slate-400 mt-4">
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
                 Menos de 2 minutos · Sin compromisos
               </p>
             </div>
@@ -388,9 +388,9 @@ export default function LandingPage() {
         </section>
 
         {/* ── CONFIANZA Y SEGURIDAD ──────────────── */}
-        <section className="py-16 px-4 border-t border-slate-100">
+        <section className="py-16 px-4 border-t border-slate-100 dark:border-slate-800 dark:bg-[#0f1117]">
           <div className="max-w-6xl mx-auto">
-            <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">
+            <p className="text-center text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-8">
               Tu privacidad y seguridad, garantizadas
             </p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -400,12 +400,12 @@ export default function LandingPage() {
                 { icon: RefreshCw,   title: 'Cancela cuando quieras',    desc: 'Sin permanencia ni penalizaciones. Política de reembolso clara.' },
                 { icon: BadgeCheck,  title: 'Terapeutas verificados',    desc: 'Título, exequátur y Colegio Psicológico revisados por nuestro equipo.' },
               ].map(({ icon: Icon, title, desc }) => (
-                <div key={title} className="fade-in flex flex-col items-center text-center p-5 rounded-2xl bg-slate-50 border border-slate-100">
-                  <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 mb-3 shadow-sm">
+                <div key={title} className="fade-in flex flex-col items-center text-center p-5 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
+                  <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 mb-3 shadow-sm">
                     <Icon size={18} strokeWidth={1.8} className="text-primary-600" />
                   </div>
-                  <p className="font-bold text-slate-900 text-sm mb-1">{title}</p>
-                  <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
+                  <p className="font-bold text-slate-900 dark:text-white text-sm mb-1">{title}</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{desc}</p>
                 </div>
               ))}
             </div>
@@ -424,7 +424,7 @@ export default function LandingPage() {
                 <FAQItem key={i} question={item.q} answer={item.a} />
               ))}
             </div>
-            <p className="text-center mt-8 text-sm text-slate-500">
+            <p className="text-center mt-8 text-sm text-slate-500 dark:text-slate-400">
               ¿Tienes otra pregunta?{' '}
               <a href="mailto:hola@psiconecta.app" className="text-primary-600 font-semibold hover:underline">
                 Escríbenos
@@ -479,10 +479,10 @@ export default function LandingPage() {
             </div>
 
             <FooterColumn title="Pacientes" links={[
-              { label: 'Cómo funciona',    href: '#como-funciona' },
-              { label: 'Buscar terapeuta', href: '/register' },
-              { label: 'Planes y precios', href: '/pricing' },
-              { label: 'Recursos de crisis', href: '/patient/crisis' },
+              { label: 'Cómo funciona',        href: '#como-funciona' },
+              { label: 'Ver terapeutas',        href: '/terapeutas' },
+              { label: 'Planes y precios',      href: '/pricing' },
+              { label: 'Recursos de crisis',    href: '/patient/crisis' },
             ]} />
 
             <FooterColumn title="Terapeutas" links={[
@@ -513,25 +513,25 @@ export default function LandingPage() {
 function SectionHeader({ title, subtitle }) {
   return (
     <div className="text-center max-w-2xl mx-auto">
-      <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight mb-3">
+      <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-3">
         {title}
       </h2>
-      {subtitle && <p className="text-slate-500 leading-relaxed font-medium">{subtitle}</p>}
+      {subtitle && <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">{subtitle}</p>}
     </div>
   )
 }
 
 function PlanCard({ name, price, features, highlight = false }) {
   return (
-    <div className={`rounded-2xl p-5 ${highlight ? 'bg-primary-50 border border-primary-200' : 'bg-slate-50'}`}>
+    <div className={`rounded-2xl p-5 ${highlight ? 'bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800' : 'bg-slate-50 dark:bg-slate-800/50'}`}>
       <div className="flex items-center justify-between mb-3">
-        <span className={`font-bold text-sm ${highlight ? 'text-primary-700' : 'text-slate-700'}`}>{name}</span>
-        <span className={`font-extrabold text-base ${highlight ? 'text-primary-700' : 'text-slate-900'}`}>{price}</span>
+        <span className={`font-bold text-sm ${highlight ? 'text-primary-700 dark:text-primary-400' : 'text-slate-700 dark:text-slate-300'}`}>{name}</span>
+        <span className={`font-extrabold text-base ${highlight ? 'text-primary-700 dark:text-primary-400' : 'text-slate-900 dark:text-white'}`}>{price}</span>
       </div>
       <ul className="space-y-2">
         {features.map((f) => (
-          <li key={f} className="flex items-start gap-2 text-sm text-slate-600">
-            <ShieldCheck size={14} strokeWidth={2} className={`mt-0.5 shrink-0 ${highlight ? 'text-primary-500' : 'text-slate-400'}`} />
+          <li key={f} className="flex items-start gap-2 text-sm text-slate-600 dark:text-slate-400">
+            <ShieldCheck size={14} strokeWidth={2} className={`mt-0.5 shrink-0 ${highlight ? 'text-primary-500' : 'text-slate-400 dark:text-slate-500'}`} />
             {f}
           </li>
         ))}
@@ -701,7 +701,7 @@ function FAQItem({ question, answer }) {
         className="w-full flex items-center justify-between px-5 py-4 text-left gap-4"
         aria-expanded={open}
       >
-        <span className="font-semibold text-slate-900 text-sm">{question}</span>
+        <span className="font-semibold text-slate-900 dark:text-white text-sm">{question}</span>
         <ChevronDown
           size={18}
           strokeWidth={1.8}
@@ -709,8 +709,8 @@ function FAQItem({ question, answer }) {
         />
       </button>
       {open && (
-        <div className="px-5 pb-4 border-t border-slate-100">
-          <p className="text-sm text-slate-500 leading-relaxed pt-3">{answer}</p>
+        <div className="px-5 pb-4 border-t border-slate-100 dark:border-slate-700">
+          <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed pt-3">{answer}</p>
         </div>
       )}
     </div>
