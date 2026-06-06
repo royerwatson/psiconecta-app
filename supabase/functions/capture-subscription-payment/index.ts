@@ -9,6 +9,7 @@
  * Body: { orderId: string }
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail, subscriptionActivatedEmail } from '../_shared/email.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -153,6 +154,27 @@ Deno.serve(async (req) => {
     }
 
     console.log(`[capture-subscription] Plan Pro activado para therapist ${therapistId}`)
+
+    // ── Enviar email de confirmación ──────────────────────────────────────────
+    try {
+      const { data: therapistAuth } = await supabaseAdmin.auth.admin.getUserById(therapistId)
+      const { data: therapistProfile } = await supabaseAdmin
+        .from('profiles').select('full_name').eq('id', therapistId).single()
+
+      if (therapistAuth?.user?.email && therapistProfile?.full_name) {
+        await sendEmail({
+          to: therapistAuth.user.email,
+          subject: '¡Tu Plan Pro de Psiconecta está activo!',
+          html: subscriptionActivatedEmail({
+            therapistName: therapistProfile.full_name,
+            expiresAt: expiresAt.toISOString(),
+          }),
+        })
+      }
+    } catch (emailErr) {
+      // El email falla silenciosamente — no bloquea la activación del plan
+      console.error('[capture-subscription] Email error:', emailErr)
+    }
 
     return new Response(
       JSON.stringify({ success: true, expiresAt: expiresAt.toISOString() }),

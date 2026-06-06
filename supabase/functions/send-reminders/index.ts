@@ -1,5 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { sendEmail, reminderEmail } from '../_shared/email.ts'
+import { sendEmail, reminderEmail, subscriptionExpiryReminderEmail } from '../_shared/email.ts'
 
 // Esta función se ejecuta diariamente (configurar en Supabase como cron job)
 // Busca sesiones programadas para las próximas 24-25 horas y envía recordatorios
@@ -89,8 +89,59 @@ Deno.serve(async (req) => {
       sent += emails.length
     }
 
+    // ── Recordatorios de vencimiento de suscripción (7 días antes) ────────────
+    const in7days     = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+    const in7daysFrom = new Date(in7days); in7daysFrom.setHours(0, 0, 0, 0)
+    const in7daysTo   = new Date(in7days); in7daysTo.setHours(23, 59, 59, 999)
+
+    const { data: expiringTherapists } = await supabaseAdmin
+      .from('therapist_profiles')
+      .select('user_id, plan_expires_at, profile:profiles!therapist_profiles_user_id_fkey(full_name)')
+      .eq('subscription_plan', 'pro')
+      .gte('plan_expires_at', in7daysFrom.toISOString())
+      .lte('plan_expires_at', in7daysTo.toISOString())
+
+    for (const t of expiringTherapists ?? []) {
+      try {
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(t.user_id)
+        if (!authUser?.user?.email) continue
+
+        const daysLeft = Math.ceil(
+          (new Date(t.plan_expires_at).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+        )
+
+        await sendEmail({
+          to: authUser.user.email,
+          subject: `Tu Plan Pro de Psiconecta vence en ${daysLeft} días`,
+          html: subscriptionExpiryReminderEmail({
+            therapistName: (t.profile as any)?.full_name ?? 'Terapeuta',
+            expiresAt: t.plan_expires_at,
+            daysLeft,
+          }),
+        })
+        sent++
+      } catch (err) {
+        console.error(`Error enviando recordatorio de vencimiento a ${t.user_id}:`, err)
+      }
+    }
+
+    // ── Downgrade automático de planes vencidos ───────────────────────────────
+    const { data: expiredTherapists } = await supabaseAdmin
+      .from('therapist_profiles')
+      .select('user_id')
+      .eq('subscription_plan', 'pro')
+      .lt('plan_expires_at', new Date().toISOString())
+
+    for (const t of expiredTherapists ?? []) {
+      await supabaseAdmin.from('therapist_profiles').update({
+        subscription_plan: 'basic',
+        plan_expires_at:   null,
+      }).eq('user_id', t.user_id)
+      console.log(`Plan expirado → downgrade a basic: ${t.user_id}`)
+    }
+
     console.log(`Recordatorios enviados: ${sent}`)
-    return new Response(JSON.stringify({ sent }), { status: 200 })
+    return new Response(JSON.stringify({ sent, expired: expiredTherapists?.length ?? 0 }), { status: 200 })
   } catch (err) {
     console.error(err)
     return new Response(JSON.stringify({ error: err.message }), { status: 500 })

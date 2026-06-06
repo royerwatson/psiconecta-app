@@ -9,6 +9,7 @@
  * Secret requerido: PAYPAL_WEBHOOK_ID (ID del webhook en PayPal Developer Console)
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail, subscriptionActivatedEmail } from '../_shared/email.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -86,11 +87,11 @@ async function handleCaptureCompleted(
     const expiresAt = new Date()
     expiresAt.setDate(expiresAt.getDate() + 30)
 
+    // Corregido: usar columnas reales de la BD (period_end, no expires_at)
     await supabase.from('subscription_payments').update({
       status:            'completed',
       paypal_capture_id: captureId,
-      paid_at:           new Date().toISOString(),
-      expires_at:        expiresAt.toISOString(),
+      period_end:        expiresAt.toISOString(),
     }).eq('id', subPayment.id)
 
     // Activar plan Pro del terapeuta
@@ -98,6 +99,26 @@ async function handleCaptureCompleted(
       subscription_plan: 'pro',
       plan_expires_at:   expiresAt.toISOString(),
     }).eq('user_id', subPayment.therapist_id)
+
+    // Enviar email de confirmación
+    try {
+      const { data: therapistAuth } = await supabase.auth.admin.getUserById(subPayment.therapist_id)
+      const { data: therapistProfile } = await supabase
+        .from('profiles').select('full_name').eq('id', subPayment.therapist_id).single()
+
+      if (therapistAuth?.user?.email && therapistProfile?.full_name) {
+        await sendEmail({
+          to: therapistAuth.user.email,
+          subject: '¡Tu Plan Pro de Psiconecta está activo!',
+          html: subscriptionActivatedEmail({
+            therapistName: therapistProfile.full_name,
+            expiresAt: expiresAt.toISOString(),
+          }),
+        })
+      }
+    } catch (emailErr) {
+      console.error('[webhook] Email error:', emailErr)
+    }
 
     console.log(`Suscripción activada para terapeuta ${subPayment.therapist_id}`)
     return
@@ -136,6 +157,33 @@ async function handleCaptureDenied(
     .eq('paypal_order_id', orderId).eq('status', 'pending')
 
   console.log(`Pago denegado para orden ${orderId}`)
+}
+
+async function handleSubscriptionCancelled(
+  supabase: ReturnType<typeof createClient>,
+  resource: any
+) {
+  // El resource.custom_id o resource.subscriber contiene el user_id
+  // En nuestro caso usamos reference_id del purchase_unit = user_id del terapeuta
+  const therapistId = resource.custom_id ?? resource.subscriber?.payer_id
+
+  if (!therapistId) {
+    console.warn('[webhook] Cancelación sin therapistId identificable:', JSON.stringify(resource))
+    return
+  }
+
+  // Downgrade a basic
+  await supabase.from('therapist_profiles').update({
+    subscription_plan: 'basic',
+    plan_expires_at:   null,
+  }).eq('user_id', therapistId)
+
+  // Marcar pago activo como cancelado
+  await supabase.from('subscription_payments').update({ status: 'cancelled' })
+    .eq('therapist_id', therapistId)
+    .eq('status', 'completed')
+
+  console.log(`Plan downgraded a basic para terapeuta ${therapistId}`)
 }
 
 // ── Handler principal ─────────────────────────────────────────────────────────
@@ -181,6 +229,10 @@ Deno.serve(async (req) => {
       case 'PAYMENT.CAPTURE.DENIED':
       case 'PAYMENT.CAPTURE.REVERSED':
         await handleCaptureDenied(supabase, resource)
+        break
+      case 'BILLING.SUBSCRIPTION.CANCELLED':
+      case 'BILLING.SUBSCRIPTION.EXPIRED':
+        await handleSubscriptionCancelled(supabase, resource)
         break
       default:
         console.log(`Evento no manejado: ${eventType}`)

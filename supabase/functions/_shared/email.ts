@@ -320,6 +320,83 @@ export function therapistChangedNotifyEmail({
   `)
 }
 
+export function subscriptionActivatedEmail({
+  therapistName,
+  expiresAt,
+}: {
+  therapistName: string
+  expiresAt: string
+}) {
+  const expiry = new Date(expiresAt).toLocaleDateString('es-DO', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
+  return baseLayout(`
+    <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">¡Plan Pro activado! ⭐</p>
+    <p style="margin:0 0 28px;font-size:15px;color:#64748b;">
+      Hola ${therapistName}, tu suscripción mensual ha sido procesada exitosamente.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+      <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow('Plan', 'Suscripción Pro')}
+          ${infoRow('Monto', '$50.00 USD')}
+          ${infoRow('Válido hasta', expiry)}
+          ${infoRow('Renovación', 'Manual — recibirás un aviso 7 días antes')}
+        </table>
+      </td></tr>
+    </table>
+
+    <p style="font-size:14px;color:#64748b;margin:0 0 16px;">
+      Ahora tienes acceso completo a todas las herramientas clínicas:
+      tests psicométricos, DSM-5-TR, CIE-11, escalas clínicas, plan de crisis,
+      biblioteca terapéutica, consulta con colegas y protocolos terapéuticos.
+    </p>
+
+    <div style="text-align:center;">
+      ${btn('Ir al dashboard', `${APP_URL}/therapist/dashboard`)}
+    </div>
+  `)
+}
+
+export function subscriptionExpiryReminderEmail({
+  therapistName,
+  expiresAt,
+  daysLeft,
+}: {
+  therapistName: string
+  expiresAt: string
+  daysLeft: number
+}) {
+  const expiry = new Date(expiresAt).toLocaleDateString('es-DO', {
+    day: 'numeric', month: 'long', year: 'numeric',
+  })
+  return baseLayout(`
+    <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">Tu suscripción vence pronto ⚠️</p>
+    <p style="margin:0 0 28px;font-size:15px;color:#64748b;">
+      Hola ${therapistName}, tu Plan Pro vence en <strong>${daysLeft} día${daysLeft === 1 ? '' : 's'}</strong>.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fef9e7;border:1px solid #fde68a;border-radius:14px;padding:20px;margin-bottom:28px;">
+      <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow('Vencimiento', expiry)}
+          ${infoRow('Plan', 'Suscripción Pro — $50.00 USD/mes')}
+        </table>
+      </td></tr>
+    </table>
+
+    <p style="font-size:14px;color:#64748b;margin:0 0 20px;">
+      Renueva tu plan para seguir accediendo a las herramientas clínicas sin interrupciones.
+      Si no renuevas, tu cuenta pasará al plan Gratuito automáticamente al vencer.
+    </p>
+
+    <div style="text-align:center;">
+      ${btn('Renovar ahora', `${APP_URL}/therapist/subscription`, '#d97706')}
+    </div>
+  `)
+}
+
 export function newMessageEmail({
   recipientName,
   senderName,
