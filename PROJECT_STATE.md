@@ -438,7 +438,7 @@ VITE_PAYPAL_CLIENT_ID=...
 
 ### Roadmap pendiente
 - [ ] Calendario de disponibilidad en booking — reemplazar input manual fecha/hora por slots del terapeuta
-- [ ] Reagendamiento de citas — modal para mover cita a otra fecha sin cancelar
+- [x] Reagendamiento de citas — modal con slots del terapeuta, actualiza sesión, notifica ambas partes
 - [ ] Onboarding guiado para terapeutas nuevos — checklist de activación con progreso
 - [ ] Match automático terapeuta-paciente — cuestionario inicial + algoritmo de scoring
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
