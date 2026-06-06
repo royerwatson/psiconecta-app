@@ -15,7 +15,14 @@ import {
   HeartPulse,
   ArrowRight,
   ChevronRight,
+  Lock,
+  RefreshCw,
+  MessageCircle,
+  ChevronDown,
+  BadgeCheck,
+  FileText,
 } from 'lucide-react'
+import { useEffect, useRef, useState } from 'react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 
@@ -80,6 +87,23 @@ const THERAPIST_TOOLS = [
    Página principal
 ───────────────────────────────────────────── */
 export default function LandingPage() {
+  /* IntersectionObserver: fade-in en scroll para elementos .fade-in */
+  useEffect(() => {
+    const style = document.createElement('style')
+    style.textContent = `
+      .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
+      .fade-in.visible { opacity: 1; transform: translateY(0); }
+    `
+    document.head.appendChild(style)
+
+    const observer = new IntersectionObserver(
+      (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) } }),
+      { threshold: 0.12 }
+    )
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el))
+    return () => { observer.disconnect(); document.head.removeChild(style) }
+  }, [])
+
   return (
     <>
       <SEOHead />
@@ -179,7 +203,7 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-12">
               {BENEFITS.map(({ icon: Icon, title, desc }) => (
-                <div key={title} className="card p-6 hover:shadow-lg transition-shadow group">
+                <div key={title} className="fade-in card p-6 hover:shadow-lg transition-shadow group">
                   <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-primary-50 group-hover:bg-primary-100 transition-colors mb-4">
                     <Icon size={20} strokeWidth={1.8} className="text-primary-600" />
                   </div>
@@ -203,7 +227,7 @@ export default function LandingPage() {
               <div className="hidden lg:block absolute top-10 left-[calc(12.5%+20px)] right-[calc(12.5%+20px)] h-px bg-primary-100 z-0" />
 
               {STEPS.map(({ number, icon: Icon, title, desc }) => (
-                <div key={number} className="relative z-10 flex flex-col items-center text-center card p-6">
+                <div key={number} className="fade-in relative z-10 flex flex-col items-center text-center card p-6">
                   <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-primary-50 mb-3">
                     <Icon size={22} strokeWidth={1.8} className="text-primary-600" />
                   </div>
@@ -232,7 +256,7 @@ export default function LandingPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-12">
               {TESTIMONIALS.map(({ id, name, role, initials, color, rating, text }) => (
-                <div key={id} className="card p-6">
+                <div key={id} className="fade-in card p-6">
                   <div className="flex items-center gap-0.5 mb-4">
                     {Array.from({ length: rating }).map((_, i) => (
                       <Star key={i} size={14} strokeWidth={0} className="fill-accent-400 text-accent-400" />
@@ -313,6 +337,52 @@ export default function LandingPage() {
                 </div>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* ── CONFIANZA Y SEGURIDAD ──────────────── */}
+        <section className="py-16 px-4 border-t border-slate-100">
+          <div className="max-w-6xl mx-auto">
+            <p className="text-center text-xs font-bold text-slate-400 uppercase tracking-widest mb-8">
+              Tu privacidad y seguridad, garantizadas
+            </p>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { icon: Lock,        title: 'Cifrado extremo a extremo', desc: 'Todas las sesiones y mensajes viajan cifrados. Nadie más puede acceder.' },
+                { icon: EyeOff,      title: 'Modo anónimo disponible',   desc: 'Tu terapeuta solo ve tus iniciales hasta que decidas identificarte.' },
+                { icon: RefreshCw,   title: 'Cancela cuando quieras',    desc: 'Sin permanencia ni penalizaciones. Política de reembolso clara.' },
+                { icon: BadgeCheck,  title: 'Terapeutas verificados',    desc: 'Título, exequátur y Colegio Psicológico revisados por nuestro equipo.' },
+              ].map(({ icon: Icon, title, desc }) => (
+                <div key={title} className="fade-in flex flex-col items-center text-center p-5 rounded-2xl bg-slate-50 border border-slate-100">
+                  <div className="w-10 h-10 flex items-center justify-center rounded-xl bg-white border border-slate-200 mb-3 shadow-sm">
+                    <Icon size={18} strokeWidth={1.8} className="text-primary-600" />
+                  </div>
+                  <p className="font-bold text-slate-900 text-sm mb-1">{title}</p>
+                  <p className="text-xs text-slate-500 leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── FAQ ────────────────────────────────── */}
+        <section className="py-20 px-4 bg-psiconecta">
+          <div className="max-w-3xl mx-auto">
+            <SectionHeader
+              title="Preguntas frecuentes"
+              subtitle="Resolvemos las dudas más comunes antes de que empieces."
+            />
+            <div className="mt-10 space-y-2">
+              {FAQ_ITEMS.map((item, i) => (
+                <FAQItem key={i} question={item.q} answer={item.a} />
+              ))}
+            </div>
+            <p className="text-center mt-8 text-sm text-slate-500">
+              ¿Tienes otra pregunta?{' '}
+              <a href="mailto:hola@psiconecta.app" className="text-primary-600 font-semibold hover:underline">
+                Escríbenos
+              </a>
+            </p>
           </div>
         </section>
 
@@ -542,6 +612,60 @@ function TherapistMockup() {
           <span className="text-white font-bold text-sm">Iniciar videollamada</span>
         </div>
       </div>
+    </div>
+  )
+}
+
+/* ─── FAQ data ────────────────────────────────── */
+const FAQ_ITEMS = [
+  {
+    q: '¿Es confidencial lo que hablo con mi terapeuta?',
+    a: 'Sí. Toda la comunicación dentro de Psiconecta — videollamadas, chat y notas — viaja cifrada. Tu terapeuta está sujeto al secreto profesional. Nadie más tiene acceso a tu información.',
+  },
+  {
+    q: '¿Cuánto cuesta una sesión?',
+    a: 'Cada terapeuta define su propia tarifa. Puedes filtrar por precio al buscar. El pago se procesa de forma segura vía PayPal antes de cada sesión.',
+  },
+  {
+    q: '¿Puedo usar la plataforma de forma anónima?',
+    a: 'Sí. Al activar el modo anónimo en tu perfil, tu terapeuta solo verá tus iniciales y nunca tu nombre completo ni foto, hasta que decidas desactivarlo.',
+  },
+  {
+    q: '¿Qué pasa si necesito cancelar una cita?',
+    a: 'Puedes cancelar desde tu panel en cualquier momento. Si lo haces con más de 24 horas de anticipación recibes el 100 % de reembolso; entre 2 y 24 horas, el 50 %. Menos de 2 horas no aplica reembolso.',
+  },
+  {
+    q: '¿Cómo sé que el terapeuta está realmente verificado?',
+    a: 'Cada terapeuta sube tres documentos obligatorios: título profesional, exequátur y acreditación del Colegio Psicológico. Nuestro equipo los revisa individualmente antes de activar el perfil.',
+  },
+  {
+    q: '¿Necesito instalar alguna aplicación?',
+    a: 'No. Las videollamadas funcionan directamente desde el navegador web en cualquier dispositivo. Tampoco necesitas cuenta de Zoom ni ninguna app externa.',
+  },
+]
+
+/* ─── FAQ accordion item ───────────────────────── */
+function FAQItem({ question, answer }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <div className={`card overflow-hidden transition-shadow ${open ? 'shadow-md' : ''}`}>
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between px-5 py-4 text-left gap-4"
+        aria-expanded={open}
+      >
+        <span className="font-semibold text-slate-900 text-sm">{question}</span>
+        <ChevronDown
+          size={18}
+          strokeWidth={1.8}
+          className={`text-primary-500 shrink-0 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
+      {open && (
+        <div className="px-5 pb-4 border-t border-slate-100">
+          <p className="text-sm text-slate-500 leading-relaxed pt-3">{answer}</p>
+        </div>
+      )}
     </div>
   )
 }
