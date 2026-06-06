@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (v13 — auditoría seguridad, kit logos, scrollbar brand)*
+*Última actualización: 2026-06-06 (v14 — análisis procesos, email brand colors, limpieza funciones, secrets)*
 
 ---
 
@@ -238,7 +238,12 @@ CLINICAL_ENCRYPTION_KEY    ✅ configurado
 **Pendientes en Supabase Secrets:**
 ```
 PAYPAL_WEBHOOK_ID   — para producción (actualmente solo existe PAYPAL_WEBHOOK_SANDBOX_ID)
-CRON_SECRET         — para proteger el endpoint de send-reminders
+```
+
+**Secrets configurados (2026-06-06):**
+```
+APP_URL     ✅ actualizado a https://psiconecta.app
+CRON_SECRET ✅ configurado — protege endpoint send-reminders
 ```
 
 ---
@@ -442,7 +447,7 @@ VITE_PAYPAL_CLIENT_ID=...
 - [ ] PayPal producción — crear cuenta Business, obtener credenciales live, actualizar Supabase Secrets y Vercel
 - [ ] `PAYPAL_WEBHOOK_ID` — reemplazar `PAYPAL_WEBHOOK_SANDBOX_ID` por el ID de producción
 - [x] Cron job `send-reminders-hourly` — ✅ activo en pg_cron, cada hora (`0 * * * *`)
-- [ ] `CRON_SECRET` en Supabase Secrets — protege el endpoint de send-reminders
+- [x] `CRON_SECRET` en Supabase Secrets — ✅ configurado 2026-06-06
 - [ ] Dominio `psiconecta.app` en Resend — DNS agregado en Namecheap, en propagación
 - [ ] Registrar eventos en PayPal webhook: `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`
 
