@@ -165,6 +165,35 @@ Deno.serve(async (req) => {
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
+    // ── Rate limiting: máx 1 check-in con IA por paciente por día ─────────────
+    // Si ya existe un check-in hoy, devolver el resultado cacheado sin llamar a Claude
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const todayEnd = new Date()
+    todayEnd.setHours(23, 59, 59, 999)
+
+    const { data: existingToday } = await supabase
+      .from('ai_checkins')
+      .select('risk_level, ai_message')
+      .eq('patient_id', patient_id)
+      .gte('created_at', todayStart.toISOString())
+      .lte('created_at', todayEnd.toISOString())
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    if (existingToday) {
+      console.log(`[ai-checkin] Rate limit: paciente ${patient_id} ya completó check-in hoy, devolviendo resultado cacheado`)
+      return new Response(
+        JSON.stringify({
+          risk_level: existingToday.risk_level,
+          message:    existingToday.ai_message,
+          cached:     true,
+        }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Analizar con IA (Claude) o fallback
     let analysis: { risk_level: string; message: string }
     if (ANTHROPIC_API_KEY) {

@@ -297,7 +297,7 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Tareas asignadas al paciente (terapeuta usa `patient_tasks`, paciente las ve en su dashboard)
 
 ### Bienestar del Paciente
-- [x] Check-in diario IA (análisis riesgo, alerta terapeuta) — Claude Haiku activo, email de alerta directo al terapeuta para riesgo alto/medio
+- [x] Check-in diario IA (análisis riesgo, alerta terapeuta) — Claude Haiku activo, email de alerta directo al terapeuta para riesgo alto/medio, rate limit 1/día server-side con resultado cacheado
 - [x] Widget estado de ánimo + gráfica semanal
 - [x] Diario personal con prompts terapéuticos
 - [x] Página de crisis con recursos por país
