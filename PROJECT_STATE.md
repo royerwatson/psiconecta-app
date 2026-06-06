@@ -400,10 +400,15 @@ VITE_PAYPAL_CLIENT_ID=...
 - [ ] Resend API Key — emails transaccionales
 - [ ] Anthropic API Key — Edge Function ai-checkin
 - [ ] Supabase Rate Limiting — verificar configuración en Settings > Auth > Rate Limits
+- [ ] `PAYPAL_WEBHOOK_ID` en Supabase Secrets — ID del webhook en PayPal Developer Console
+- [ ] Cron job diario para `send-reminders` — vía pg_cron o Supabase Scheduled Functions
+- [ ] Registrar eventos en PayPal webhook: `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`
 
 ### Mejoras técnicas
-- [ ] `create-subscription-order` Edge Function — pago $50/mes suscripción terapeuta (no existe aún)
-- [ ] `capture-subscription-payment` Edge Function — falla actualmente; tokens PayPal expirados se marcan como `failed` y se omiten en el login
+- [x] `create-subscription-order` — ✅ funcional, crea orden $50 con PayPal Orders API
+- [x] `capture-subscription-payment` — ✅ captura pago, activa plan Pro, envía email de confirmación
+- [x] `paypal-webhook` — ✅ maneja CAPTURE.COMPLETED, CAPTURE.DENIED, SUBSCRIPTION.CANCELLED/EXPIRED; columnas corregidas
+- [x] `send-reminders` — ✅ recordatorios de sesión + aviso vencimiento suscripción 7 días antes + downgrade automático
 - [ ] Paginación chat: scroll infinito funcional, falta test con conversaciones largas reales
 - [ ] VideoCall: botón de reconexión manual testeado, `network-connection` event pendiente de prueba real
 - [ ] Tests: sesiones completadas antes de la migración RLS no tienen `test_results`; el terapeuta debe reasignar el test
