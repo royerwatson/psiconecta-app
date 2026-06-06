@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (landing page v5 — blog con 5 artículos SEO, /terapeutas, dark mode)*
+*Última actualización: 2026-06-06 (landing page v6 — blog visual premium, portadas SVG, pull quotes)*
 
 ---
 
@@ -465,6 +465,12 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] `BlogPostPage.jsx` — layout editorial, soporte **negrita** y listas, CTA integrado, artículos relacionados
 - [x] Rutas `/blog` y `/blog/:slug` registradas en App.jsx
 - [x] Link "Blog" en navbar y footer de la landing
+- [x] Blog visual mejorado — portadas con patrón SVG + icono Lucide por artículo (sin imágenes externas)
+- [x] Artículo destacado en layout horizontal (imagen izq / texto der)
+- [x] Extracto del artículo sobre gradiente de color del post
+- [x] Pull quotes en secciones pares, separadores decorativos entre secciones
+- [x] Headings con chip de icono en gradiente, CTA integrado en color del artículo
+- [x] Cards de artículos relacionados con mini-portada SVG
 - [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP
