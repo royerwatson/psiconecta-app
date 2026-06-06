@@ -81,6 +81,9 @@ import LandingPage              from '@/pages/public/LandingPage'
 import TherapistDirectoryPage   from '@/pages/public/TherapistDirectoryPage'
 import BlogListPage              from '@/pages/public/BlogListPage'
 import BlogPostPage              from '@/pages/public/BlogPostPage'
+import TermsPage                 from '@/pages/public/TermsPage'
+import PrivacyPage               from '@/pages/public/PrivacyPage'
+import RefundPage                from '@/pages/public/RefundPage'
 import TherapistMatchPage  from '@/pages/patient/TherapistMatchPage'
 import StatsPage        from '@/pages/therapist/StatsPage'
 import ProGate         from '@/components/layout/ProGate'
@@ -115,6 +118,9 @@ export default function App() {
         <Route path="/terapeutas"      element={<TherapistDirectoryPage />} />
         <Route path="/blog"            element={<BlogListPage />} />
         <Route path="/blog/:slug"      element={<BlogPostPage />} />
+        <Route path="/terminos"        element={<TermsPage />} />
+        <Route path="/privacidad"      element={<PrivacyPage />} />
+        <Route path="/reembolsos"      element={<RefundPage />} />
         <Route path="/pricing"         element={<PricingPage />} />
         <Route path="/auth/callback"   element={<AuthCallback />} />
 

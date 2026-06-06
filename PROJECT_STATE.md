@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (landing page v6 — blog visual premium, portadas SVG, pull quotes)*
+*Última actualización: 2026-06-06 (landing page v7 — páginas legales, sitemap, robots.txt)*
 
 ---
 

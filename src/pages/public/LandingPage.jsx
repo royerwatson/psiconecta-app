@@ -494,9 +494,9 @@ export default function LandingPage() {
             ]} />
 
             <FooterColumn title="Legal" links={[
-              { label: 'Términos de uso',        href: '#' },
-              { label: 'Privacidad',             href: '#' },
-              { label: 'Política de reembolsos', href: '#' },
+              { label: 'Términos de uso',        href: '/terminos' },
+              { label: 'Privacidad',             href: '/privacidad' },
+              { label: 'Política de reembolsos', href: '/reembolsos' },
             ]} />
           </div>
 
