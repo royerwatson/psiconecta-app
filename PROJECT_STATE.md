@@ -437,17 +437,17 @@ VITE_PAYPAL_CLIENT_ID=...
 - Panel admin `/admin/refunds` — gestión de reembolsos fallidos y disputas
 
 ### Roadmap pendiente
-- [ ] Calendario de disponibilidad en booking — reemplazar input manual fecha/hora por slots del terapeuta
+- [x] Calendario de disponibilidad en booking — slot picker con slots reales del terapeuta en FindTherapist
 - [x] Reagendamiento de citas — modal con slots del terapeuta, actualiza sesión, notifica ambas partes
-- [ ] Onboarding guiado para terapeutas nuevos — checklist de activación con progreso
-- [ ] Match automático terapeuta-paciente — cuestionario inicial + algoritmo de scoring
+- [x] Onboarding guiado para terapeutas nuevos — checklist 5 pasos con barra de progreso en dashboard
+- [x] Match automático terapeuta-paciente — cuestionario 4 preguntas + scoring en `/patient/match`
+- [x] Consentimiento informado digital — modal antes de primera sesión, firma en BD, PDF descargable
+- [x] Landing page pública — ruta `/` con hero, features, pasos, sección terapeutas y footer
+- [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP
-- [ ] Modo oscuro — CSS variables + toggle en perfil
 - [ ] Filtros de búsqueda ampliados — idioma, modalidad, género del terapeuta
 - [ ] Chat con archivos adjuntos — bucket Storage + componente upload
-- [x] Consentimiento informado digital — modal antes de primera sesión, firma en BD (`consent_signatures`), página imprimible `/patient/consent/:id`
-- [ ] Landing page pública con SEO — página / con hero, beneficios y CTA
 - [ ] Paginación chat: scroll infinito funcional, falta test con conversaciones largas reales
 - [ ] VideoCall: `network-connection` event pendiente de prueba real
 - [ ] Tests: sesiones previas a migración RLS sin `test_results` — terapeuta debe reasignar
