@@ -19,12 +19,25 @@ import {
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 
-/* ─── Testimonios (placeholder — conectar a tabla `reviews`) ─── */
+/* ─── Imágenes Unsplash ─────────────────────
+   Todas son free-to-use, sin atribución requerida en Unsplash.
+   Cambiar por fotos propias cuando estén disponibles.
+───────────────────────────────────────────── */
+const IMG = {
+  hero:       'https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=900&q=80&fit=crop',
+  therapist:  'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=700&q=80&fit=crop',
+  avatar1:    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=80&fit=crop&crop=face',
+  avatar2:    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80&fit=crop&crop=face',
+  avatar3:    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80&fit=crop&crop=face',
+}
+
+/* ─── Testimonios ───────────────────────────── */
 const TESTIMONIALS = [
   {
     id: 1,
     name: 'María G.',
     role: 'Paciente',
+    avatar: IMG.avatar1,
     rating: 5,
     text: 'Encontré a mi terapeuta en menos de 10 minutos. La videollamada fue fluida y el proceso de pago súper fácil. No imaginé que la terapia online podía sentirse tan cercana.',
   },
@@ -32,6 +45,7 @@ const TESTIMONIALS = [
     id: 2,
     name: 'Dr. Carlos M.',
     role: 'Terapeuta verificado',
+    avatar: IMG.avatar2,
     rating: 5,
     text: 'La plataforma me da todas las herramientas que necesito: tests, escalas clínicas, protocolos. Mis pacientes llegan mejor preparados y yo puedo enfocarme en el trabajo terapéutico.',
   },
@@ -39,58 +53,35 @@ const TESTIMONIALS = [
     id: 3,
     name: 'Sofía R.',
     role: 'Paciente',
+    avatar: IMG.avatar3,
     rating: 5,
     text: 'El modo anónimo me dio la confianza para dar el primer paso. Nadie en mi entorno sabe que voy a terapia, y eso fue clave para decidirme.',
   },
 ]
 
 const BENEFITS = [
-  {
-    icon: ShieldCheck,
-    title: 'Terapeutas verificados',
-    desc: 'Cada terapeuta presenta título profesional, exequátur y acreditación del Colegio Psicológico antes de atender pacientes.',
-  },
-  {
-    icon: Video,
-    title: 'Videollamadas seguras',
-    desc: 'Sesiones cifradas, accesibles desde cualquier dispositivo sin instalar nada.',
-  },
-  {
-    icon: BrainCircuit,
-    title: 'Check-in diario con IA',
-    desc: 'Monitoreo continuo de tu estado emocional. Si detectamos señales de alerta, tu terapeuta es notificado de inmediato.',
-  },
-  {
-    icon: EyeOff,
-    title: 'Modo anónimo',
-    desc: 'Inicia tu proceso terapéutico de forma anónima. Tu terapeuta solo verá tus iniciales hasta que decidas compartir más.',
-  },
-  {
-    icon: CreditCard,
-    title: 'Pagos seguros',
-    desc: 'Cada sesión se procesa vía PayPal. Reembolso hasta el 100 % si cancelas con más de 24 horas de anticipación.',
-  },
-  {
-    icon: CalendarCheck,
-    title: 'Agenda flexible',
-    desc: 'Reserva, cambia o cancela citas desde tu panel. Citas urgentes disponibles en menos de 24 horas.',
-  },
+  { icon: ShieldCheck, title: 'Terapeutas verificados',   desc: 'Cada terapeuta presenta título profesional, exequátur y acreditación del Colegio Psicológico antes de atender pacientes.' },
+  { icon: Video,        title: 'Videollamadas seguras',    desc: 'Sesiones cifradas, accesibles desde cualquier dispositivo sin instalar nada.' },
+  { icon: BrainCircuit, title: 'Check-in diario con IA',  desc: 'Monitoreo continuo de tu estado emocional. Si detectamos señales de alerta, tu terapeuta es notificado de inmediato.' },
+  { icon: EyeOff,       title: 'Modo anónimo',            desc: 'Inicia tu proceso terapéutico de forma anónima. Tu terapeuta solo verá tus iniciales hasta que decidas compartir más.' },
+  { icon: CreditCard,   title: 'Pagos seguros',           desc: 'Cada sesión se procesa vía PayPal. Reembolso hasta el 100 % si cancelas con más de 24 horas de anticipación.' },
+  { icon: CalendarCheck,title: 'Agenda flexible',         desc: 'Reserva, cambia o cancela citas desde tu panel. Citas urgentes disponibles en menos de 24 horas.' },
 ]
 
 const STEPS = [
-  { number: '01', icon: UserCheck, title: 'Crea tu cuenta', desc: 'Regístrate gratis en minutos con email o Google.' },
-  { number: '02', icon: Search, title: 'Encuentra tu terapeuta', desc: 'Filtra por especialidad, precio o disponibilidad. Consulta perfiles y reseñas.' },
-  { number: '03', icon: CreditCard, title: 'Agenda y paga', desc: 'Selecciona el horario y completa el pago seguro vía PayPal.' },
-  { number: '04', icon: Video, title: 'Comienza tu terapia', desc: 'Entra a la videollamada desde el navegador, sin apps adicionales.' },
+  { number: '01', icon: UserCheck,   title: 'Crea tu cuenta',          desc: 'Regístrate gratis en minutos con email o Google.' },
+  { number: '02', icon: Search,      title: 'Encuentra tu terapeuta',  desc: 'Filtra por especialidad, precio o disponibilidad.' },
+  { number: '03', icon: CreditCard,  title: 'Agenda y paga',           desc: 'Selecciona el horario y completa el pago seguro vía PayPal.' },
+  { number: '04', icon: Video,       title: 'Comienza tu terapia',     desc: 'Entra a la videollamada desde el navegador, sin apps adicionales.' },
 ]
 
 const THERAPIST_TOOLS = [
   { icon: ClipboardList, label: '45+ tests psicométricos con scoring automático' },
-  { icon: BookOpen, label: 'DSM-5-TR y CIE-11 en español' },
-  { icon: HeartPulse, label: 'Escalas clínicas validadas (PHQ-9, GAD-7, AUDIT, PCL-5)' },
-  { icon: Users, label: 'Terapia grupal multi-participante' },
-  { icon: BrainCircuit, label: 'Alertas de riesgo IA en tiempo real' },
-  { icon: ShieldCheck, label: 'Protocolos TCC, DBT, ACT, EMDR' },
+  { icon: BookOpen,      label: 'DSM-5-TR y CIE-11 en español' },
+  { icon: HeartPulse,    label: 'Escalas clínicas validadas (PHQ-9, GAD-7, AUDIT, PCL-5)' },
+  { icon: Users,         label: 'Terapia grupal multi-participante' },
+  { icon: BrainCircuit,  label: 'Alertas de riesgo IA en tiempo real' },
+  { icon: ShieldCheck,   label: 'Protocolos TCC, DBT, ACT, EMDR' },
 ]
 
 /* ─────────────────────────────────────────────
@@ -116,23 +107,17 @@ export default function LandingPage() {
             </Link>
 
             <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-500">
-              <a href="#beneficios" className="hover:text-primary-600 transition-colors">Beneficios</a>
+              <a href="#beneficios"    className="hover:text-primary-600 transition-colors">Beneficios</a>
               <a href="#como-funciona" className="hover:text-primary-600 transition-colors">Cómo funciona</a>
-              <a href="#terapeutas" className="hover:text-primary-600 transition-colors">Para terapeutas</a>
-              <Link to="/pricing" className="hover:text-primary-600 transition-colors">Planes</Link>
+              <a href="#terapeutas"    className="hover:text-primary-600 transition-colors">Para terapeutas</a>
+              <Link to="/pricing"      className="hover:text-primary-600 transition-colors">Planes</Link>
             </nav>
 
             <div className="flex items-center gap-2">
-              <Link
-                to="/login"
-                className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-primary-600 hover:bg-primary-50 rounded-xl transition-colors"
-              >
+              <Link to="/login" className="hidden sm:inline-flex px-4 py-2 text-sm font-semibold text-primary-600 hover:bg-primary-50 rounded-xl transition-colors">
                 Iniciar sesión
               </Link>
-              <Link
-                to="/register"
-                className="btn-premium btn-primary-premium text-sm px-4 py-2"
-              >
+              <Link to="/register" className="btn-premium btn-primary-premium text-sm px-4 py-2">
                 Comenzar gratis
                 <ChevronRight size={15} strokeWidth={2} />
               </Link>
@@ -140,46 +125,77 @@ export default function LandingPage() {
           </div>
         </header>
 
-        {/* ── HERO ───────────────────────────────── */}
-        <section className="pt-32 pb-24 px-4 bg-psiconecta">
-          <div className="max-w-4xl mx-auto text-center">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 text-primary-700 text-xs font-semibold mb-6">
-              <ShieldCheck size={13} strokeWidth={2} />
-              Terapeutas verificados en RD y Latinoamérica
-            </span>
+        {/* ── HERO: split layout ─────────────────── */}
+        <section className="pt-20 min-h-[90vh] flex items-center bg-psiconecta overflow-hidden">
+          <div className="max-w-6xl mx-auto px-4 w-full grid grid-cols-1 lg:grid-cols-2 gap-12 items-center py-16">
 
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 leading-[1.1] tracking-tight mb-6">
-              Tu bienestar mental,{' '}
-              <span className="text-transparent bg-clip-text bg-gradient-brand">
-                accesible desde donde estés
-              </span>
-            </h1>
+            {/* Texto */}
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-[1.1] tracking-tight mb-6">
+                Tu bienestar mental,{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-brand">
+                  accesible desde donde estés
+                </span>
+              </h1>
 
-            <p className="text-lg sm:text-xl text-slate-500 max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-              Conecta con psicólogos y terapeutas verificados. Agenda sesiones de
-              videollamada, recibe seguimiento continuo con IA y empieza tu proceso
-              hoy — de forma anónima si lo prefieres.
-            </p>
+              <p className="text-lg text-slate-500 mb-8 leading-relaxed font-medium max-w-lg">
+                Conecta con psicólogos y terapeutas verificados. Agenda sesiones de
+                videollamada, recibe seguimiento continuo con IA y empieza tu proceso
+                hoy — de forma anónima si lo prefieres.
+              </p>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link
-                to="/register"
-                className="btn-premium btn-primary-premium w-full sm:w-auto text-base px-8 py-3.5"
-              >
-                Encuentra tu terapeuta
-                <ArrowRight size={18} strokeWidth={1.8} />
-              </Link>
-              <Link
-                to="/register?role=therapist"
-                className="btn-premium btn-secondary-premium w-full sm:w-auto text-base px-8 py-3.5"
-              >
-                Soy terapeuta
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-3 mb-8">
+                <Link to="/register" className="btn-premium btn-primary-premium text-base px-7 py-3.5">
+                  Encuentra tu terapeuta
+                  <ArrowRight size={18} strokeWidth={1.8} />
+                </Link>
+                <Link to="/register?role=therapist" className="btn-premium btn-secondary-premium text-base px-7 py-3.5">
+                  Soy terapeuta
+                </Link>
+              </div>
+
+              {/* Stats */}
+              <div className="flex items-center gap-6 text-sm">
+                <div>
+                  <p className="font-extrabold text-slate-900 text-xl">+100</p>
+                  <p className="text-slate-400 font-medium">Terapeutas verificados</p>
+                </div>
+                <div className="w-px h-10 bg-slate-200" />
+                <div>
+                  <p className="font-extrabold text-slate-900 text-xl">4.9★</p>
+                  <p className="text-slate-400 font-medium">Valoración media</p>
+                </div>
+                <div className="w-px h-10 bg-slate-200" />
+                <div>
+                  <p className="font-extrabold text-slate-900 text-xl">RD · LATAM</p>
+                  <p className="text-slate-400 font-medium">Cobertura regional</p>
+                </div>
+              </div>
             </div>
 
-            <p className="mt-7 text-sm text-slate-400 font-medium">
-              Sin tarjeta de crédito · Registro gratuito · Cancela cuando quieras
-            </p>
+            {/* Imagen hero */}
+            <div className="relative hidden lg:block">
+              {/* Blob decorativo */}
+              <div className="absolute -inset-4 bg-gradient-brand opacity-10 rounded-[60px] blur-3xl" />
+              <div className="relative rounded-[32px] overflow-hidden shadow-2xl ring-1 ring-black/5">
+                <img
+                  src={IMG.hero}
+                  alt="Sesión de terapia online"
+                  className="w-full h-[500px] object-cover"
+                  loading="eager"
+                />
+                {/* Badge flotante */}
+                <div className="absolute bottom-6 left-6 right-6 glass rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-brand rounded-xl flex items-center justify-center shrink-0">
+                    <ShieldCheck size={18} strokeWidth={2} className="text-white" />
+                  </div>
+                  <div>
+                    <p className="font-bold text-slate-900 text-sm">Terapeuta verificado</p>
+                    <p className="text-xs text-slate-500">Credenciales revisadas por nuestro equipo</p>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </section>
 
@@ -187,7 +203,6 @@ export default function LandingPage() {
         <section id="beneficios" className="py-20 px-4">
           <div className="max-w-6xl mx-auto">
             <SectionHeader
-              tag="Por qué Psiconecta"
               title="Todo lo que necesitas para cuidar tu salud mental"
               subtitle="Una plataforma diseñada con el paciente en el centro, respaldada por profesionales verificados."
             />
@@ -210,7 +225,6 @@ export default function LandingPage() {
         <section id="como-funciona" className="py-20 px-4 bg-psiconecta">
           <div className="max-w-6xl mx-auto">
             <SectionHeader
-              tag="El proceso"
               title="Empieza en cuatro pasos simples"
               subtitle="Desde el registro hasta tu primera sesión, todo está diseñado para ser rápido y sin fricciones."
             />
@@ -231,10 +245,7 @@ export default function LandingPage() {
             </div>
 
             <div className="mt-12 text-center">
-              <Link
-                to="/register"
-                className="btn-premium btn-primary-premium text-base px-8 py-3.5"
-              >
+              <Link to="/register" className="btn-premium btn-primary-premium text-base px-8 py-3.5">
                 Crear mi cuenta gratis
                 <ArrowRight size={18} strokeWidth={1.8} />
               </Link>
@@ -246,12 +257,11 @@ export default function LandingPage() {
         <section className="py-20 px-4">
           <div className="max-w-6xl mx-auto">
             <SectionHeader
-              tag="Testimonios"
               title="Lo que dicen quienes ya dan el paso"
             />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-12">
-              {TESTIMONIALS.map(({ id, name, role, rating, text }) => (
+              {TESTIMONIALS.map(({ id, name, role, avatar, rating, text }) => (
                 <div key={id} className="card p-6">
                   <div className="flex items-center gap-0.5 mb-4">
                     {Array.from({ length: rating }).map((_, i) => (
@@ -259,9 +269,16 @@ export default function LandingPage() {
                     ))}
                   </div>
                   <p className="text-slate-600 text-sm leading-relaxed mb-5">"{text}"</p>
-                  <div>
-                    <p className="font-bold text-slate-900 text-sm">{name}</p>
-                    <p className="text-xs text-slate-400 mt-0.5">{role}</p>
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={avatar}
+                      alt={name}
+                      className="w-10 h-10 rounded-full object-cover ring-2 ring-primary-100"
+                    />
+                    <div>
+                      <p className="font-bold text-slate-900 text-sm">{name}</p>
+                      <p className="text-xs text-slate-400 mt-0.5">{role}</p>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -273,6 +290,26 @@ export default function LandingPage() {
         <section id="terapeutas" className="py-20 px-4 bg-psiconecta">
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
+              {/* Imagen terapeuta */}
+              <div className="relative hidden lg:block order-last lg:order-first">
+                <div className="absolute -inset-4 bg-accent-200 opacity-20 rounded-[60px] blur-3xl" />
+                <div className="relative rounded-[32px] overflow-hidden shadow-2xl ring-1 ring-black/5">
+                  <img
+                    src={IMG.therapist}
+                    alt="Terapeuta profesional"
+                    className="w-full h-[520px] object-cover"
+                    loading="lazy"
+                  />
+                  {/* Badge flotante */}
+                  <div className="absolute top-6 left-6 glass rounded-2xl px-4 py-3 flex items-center gap-2">
+                    <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse" />
+                    <p className="font-semibold text-slate-800 text-sm">Disponible hoy</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Texto + planes */}
               <div>
                 <span className="inline-block px-3 py-1.5 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold mb-4">
                   Para profesionales
@@ -294,49 +331,30 @@ export default function LandingPage() {
                   ))}
                 </ul>
 
+                <div className="card p-5 mb-6 space-y-4">
+                  <PlanCard
+                    name="Plan Gratuito"
+                    price="$0/mes"
+                    features={['Perfil público verificado', 'Gestión de agenda', 'Videollamadas ilimitadas', 'Chat con pacientes', 'Comisión del 10 % por sesión']}
+                  />
+                  <div className="border-t border-dashed border-slate-100" />
+                  <PlanCard
+                    name="Plan Pro"
+                    price="$50/mes"
+                    highlight
+                    features={['Todo lo del plan gratuito', '45+ tests psicométricos', 'DSM-5-TR y CIE-11 en español', 'Escalas clínicas con scoring automático', 'Protocolos TCC, DBT, ACT, EMDR', 'Estadísticas avanzadas']}
+                  />
+                </div>
+
                 <div className="flex flex-col sm:flex-row gap-3">
-                  <Link
-                    to="/register?role=therapist"
-                    className="btn-premium btn-primary-premium text-sm px-6 py-3"
-                  >
+                  <Link to="/register?role=therapist" className="btn-premium btn-primary-premium text-sm px-6 py-3">
                     Registrarme como terapeuta
                     <ArrowRight size={16} strokeWidth={1.8} />
                   </Link>
-                  <Link
-                    to="/pricing"
-                    className="btn-premium btn-secondary-premium text-sm px-6 py-3"
-                  >
+                  <Link to="/pricing" className="btn-premium btn-secondary-premium text-sm px-6 py-3">
                     Ver planes y precios
                   </Link>
                 </div>
-              </div>
-
-              <div className="card p-6 space-y-4">
-                <PlanCard
-                  name="Plan Gratuito"
-                  price="$0/mes"
-                  features={[
-                    'Perfil público verificado',
-                    'Gestión de agenda',
-                    'Videollamadas ilimitadas',
-                    'Chat con pacientes',
-                    'Comisión del 10 % por sesión',
-                  ]}
-                />
-                <div className="border-t border-dashed border-slate-100" />
-                <PlanCard
-                  name="Plan Pro"
-                  price="$50/mes"
-                  highlight
-                  features={[
-                    'Todo lo del plan gratuito',
-                    '45+ tests psicométricos',
-                    'DSM-5-TR y CIE-11 en español',
-                    'Escalas clínicas con scoring automático',
-                    'Protocolos TCC, DBT, ACT, EMDR',
-                    'Estadísticas avanzadas de pacientes',
-                  ]}
-                />
               </div>
             </div>
           </div>
@@ -388,21 +406,21 @@ export default function LandingPage() {
             </div>
 
             <FooterColumn title="Pacientes" links={[
-              { label: 'Cómo funciona', href: '#como-funciona' },
+              { label: 'Cómo funciona',    href: '#como-funciona' },
               { label: 'Buscar terapeuta', href: '/register' },
               { label: 'Planes y precios', href: '/pricing' },
               { label: 'Recursos de crisis', href: '/patient/crisis' },
             ]} />
 
             <FooterColumn title="Terapeutas" links={[
-              { label: 'Unirme como terapeuta', href: '/register?role=therapist' },
-              { label: 'Plan Pro', href: '/pricing' },
-              { label: 'Proceso de verificación', href: '#terapeutas' },
+              { label: 'Unirme como terapeuta',    href: '/register?role=therapist' },
+              { label: 'Plan Pro',                 href: '/pricing' },
+              { label: 'Proceso de verificación',  href: '#terapeutas' },
             ]} />
 
             <FooterColumn title="Legal" links={[
-              { label: 'Términos de uso', href: '#' },
-              { label: 'Privacidad', href: '#' },
+              { label: 'Términos de uso',        href: '#' },
+              { label: 'Privacidad',             href: '#' },
               { label: 'Política de reembolsos', href: '#' },
             ]} />
           </div>
@@ -419,14 +437,9 @@ export default function LandingPage() {
 
 /* ─── Sub-componentes ─────────────────────── */
 
-function SectionHeader({ tag, title, subtitle }) {
+function SectionHeader({ title, subtitle }) {
   return (
     <div className="text-center max-w-2xl mx-auto">
-      {tag && (
-        <span className="inline-block px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 text-primary-700 text-xs font-semibold mb-3">
-          {tag}
-        </span>
-      )}
       <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight mb-3">
         {title}
       </h2>
