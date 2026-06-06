@@ -13,6 +13,7 @@ import { formatPrice } from '@/lib/utils'
 import { useAuthStore } from '@/store/authStore'
 import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
+import ConsentModal from '@/components/patient/ConsentModal'
 import toast from 'react-hot-toast'
 import { DollarSign, Zap, AlertTriangle, Search, Calendar, Crown, Star } from 'lucide-react'
 import { useCurrencyContext } from '@/context/CurrencyContext'
@@ -36,7 +37,8 @@ export default function FindTherapist() {
   const [fetchError, setFetchError] = useState(null)
   const [selectedTherapist, setSelectedTherapist] = useState(null)
   const [bookingForm, setBookingForm] = useState({ date: '', time: '' })
-  const [bookingStep, setBookingStep] = useState('form') // 'form' | 'payment' | 'success'
+  const [bookingStep, setBookingStep] = useState('form') // 'consent' | 'form' | 'payment' | 'success'
+  const [signingConsent, setSigningConsent] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { fetchTherapists() }, [specialty, isUrgent])
@@ -89,6 +91,36 @@ export default function FindTherapist() {
   const handleCloseBooking = () => {
     setSelectedTherapist(null)
     setBookingForm({ date: '', time: '' })
+    setBookingStep('form')
+  }
+
+  const openBooking = async (therapist) => {
+    setSelectedTherapist(therapist)
+    if (!user) { setBookingStep('form'); return }
+
+    // Verificar si ya firmó el consentimiento con este terapeuta
+    const { data: existing } = await supabase
+      .from('consent_signatures')
+      .select('id')
+      .eq('patient_id', user.id)
+      .eq('therapist_id', therapist.profile?.id ?? therapist.user_id)
+      .maybeSingle()
+
+    setBookingStep(existing ? 'form' : 'consent')
+  }
+
+  const handleSignConsent = async () => {
+    if (!user || !selectedTherapist) return
+    setSigningConsent(true)
+    const { error } = await supabase.from('consent_signatures').insert({
+      patient_id:   user.id,
+      therapist_id: selectedTherapist.profile?.id ?? selectedTherapist.user_id,
+    })
+    setSigningConsent(false)
+    if (error && error.code !== '23505') { // 23505 = unique violation (ya firmó)
+      toast.error('Error al guardar el consentimiento')
+      return
+    }
     setBookingStep('form')
   }
 
@@ -248,7 +280,7 @@ export default function FindTherapist() {
                 </button>
                 <button
                   className="flex-1 py-2.5 rounded-2xl text-sm font-bold text-white gradient-brand shadow-[0_4px_12px_rgba(79,70,229,0.30)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.40)] active:scale-[0.97] transition-all"
-                  onClick={(e) => { e.stopPropagation(); setSelectedTherapist(t) }}>
+                  onClick={(e) => { e.stopPropagation(); openBooking(t) }}>
                   Agendar
                 </button>
               </div>
@@ -259,9 +291,22 @@ export default function FindTherapist() {
 
       {/* Modal agendar */}
       <Modal isOpen={!!selectedTherapist} onClose={handleCloseBooking}
-        title={bookingStep === 'success' ? '¡Cita confirmada!' : 'Agendar sesión'}>
+        title={
+          bookingStep === 'consent'  ? 'Consentimiento informado' :
+          bookingStep === 'success'  ? '¡Cita confirmada!' : 'Agendar sesión'
+        }>
         {selectedTherapist && (
           <div className="flex flex-col gap-4">
+
+            {/* ── PASO 0: Consentimiento ── */}
+            {bookingStep === 'consent' && (
+              <ConsentModal
+                therapistName={selectedTherapist.profile?.full_name ?? 'el terapeuta'}
+                onAccept={handleSignConsent}
+                onClose={handleCloseBooking}
+                loading={signingConsent}
+              />
+            )}
 
             {/* ── PASO 1: Formulario ── */}
             {bookingStep === 'form' && (

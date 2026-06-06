@@ -14,7 +14,7 @@ import { Textarea } from '@/components/ui/Input'
 import { differenceInHours, parseISO, addDays, format, getISODay, isToday, isBefore, startOfDay } from 'date-fns'
 import { es } from 'date-fns/locale'
 import toast from 'react-hot-toast'
-import { AlertTriangle, Calendar, BookOpen, Zap, Video, RefreshCw, Star, MessageCircle, Check, RotateCcw } from 'lucide-react'
+import { AlertTriangle, Calendar, BookOpen, Zap, Video, RefreshCw, Star, MessageCircle, Check, RotateCcw, ScrollText } from 'lucide-react'
 
 // ── Política de reembolso ─────────────────────────────────────────────────────
 function getRefundPolicy(scheduledAt) {
@@ -40,6 +40,7 @@ export default function MyAppointments() {
   const [confirmModal, setConfirmModal] = useState(null) // { type: 'cancel'|'change', session }
   const [cancelling, setCancelling] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
+  const [consentSigs, setConsentSigs] = useState({}) // { therapistId: signatureId }
   const [rescheduleModal, setRescheduleModal] = useState(null)  // session
   const [availSlots, setAvailSlots] = useState({})              // { 'YYYY-MM-DD': ['09:00','10:00',...] }
   const [selectedDate, setSelectedDate] = useState(null)
@@ -48,7 +49,17 @@ export default function MyAppointments() {
   const [rescheduling, setRescheduling] = useState(false)
   const navigate = useNavigate()
 
-  useEffect(() => { if (user) fetchSessions() }, [user])
+  useEffect(() => { if (user) { fetchSessions(); fetchConsents() } }, [user])
+
+  const fetchConsents = async () => {
+    const { data } = await supabase
+      .from('consent_signatures')
+      .select('id, therapist_id')
+      .eq('patient_id', user.id)
+    const map = {}
+    ;(data ?? []).forEach(s => { map[s.therapist_id] = s.id })
+    setConsentSigs(map)
+  }
 
   const fetchSessions = async () => {
     setLoading(true)
@@ -437,6 +448,11 @@ export default function MyAppointments() {
                   {session.status === 'completed' && (
                     <Button size="sm" variant="ghost" onClick={() => navigate(`/patient/chat?therapist=${session.therapist?.id}`)}>
                       <MessageCircle size={14} strokeWidth={1.8} className="inline mr-1" />Chat
+                    </Button>
+                  )}
+                  {consentSigs[session.therapist?.id] && (
+                    <Button size="sm" variant="ghost" onClick={() => navigate(`/patient/consent/${consentSigs[session.therapist?.id]}`)}>
+                      <ScrollText size={14} strokeWidth={1.8} className="inline mr-1" />Consentimiento
                     </Button>
                   )}
                 </div>

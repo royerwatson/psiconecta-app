@@ -50,7 +50,8 @@ import TherapeuticProtocolsPage    from '@/pages/therapist/TherapeuticProtocolsP
 // Paciente
 import PatientDashboard from '@/pages/patient/PatientDashboard'
 import FindTherapist    from '@/pages/patient/FindTherapist'
-import MyAppointments   from '@/pages/patient/MyAppointments'
+import MyAppointments        from '@/pages/patient/MyAppointments'
+import ConsentDocumentPage   from '@/pages/patient/ConsentDocumentPage'
 import GroupSessions    from '@/pages/patient/GroupSessions'
 import PatientProfile   from '@/pages/patient/PatientProfile'
 import MyTasksPage     from '@/pages/patient/MyTasksPage'
@@ -207,6 +208,9 @@ export default function App() {
           } />
           <Route path="/patient/appointments" element={
             <ClientRoute><MyAppointments /></ClientRoute>
+          } />
+          <Route path="/patient/consent/:signatureId" element={
+            <ClientRoute><ConsentDocumentPage /></ClientRoute>
           } />
           <Route path="/patient/groups" element={
             <ClientRoute><GroupSessions /></ClientRoute>
