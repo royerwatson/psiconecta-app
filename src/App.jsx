@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { useAuthStore } from '@/store/authStore'
+import { usePageTracking } from '@/hooks/usePageTracking'
 
 // Layout
 import Layout from '@/components/layout/Layout'
@@ -88,6 +89,12 @@ import TherapistMatchPage  from '@/pages/patient/TherapistMatchPage'
 import StatsPage        from '@/pages/therapist/StatsPage'
 import ProGate         from '@/components/layout/ProGate'
 
+/* Componente interno — necesita estar dentro de BrowserRouter para usar useLocation */
+function AppRoutes() {
+  usePageTracking()
+  return null
+}
+
 export default function App() {
   const { initialize, initialized } = useAuthStore()
 
@@ -97,6 +104,7 @@ export default function App() {
 
   return (
     <BrowserRouter>
+      <AppRoutes />
       <Toaster
         position="top-center"
         toastOptions={{
