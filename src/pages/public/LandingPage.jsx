@@ -147,22 +147,25 @@ export default function LandingPage() {
 
             {/* Texto */}
             <div>
-              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-[1.1] tracking-tight mb-6">
-                Tu bienestar mental,{' '}
+              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 leading-[1.1] tracking-tight mb-5">
+                Ese paso que llevas<br />
+                tiempo{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-brand">
-                  accesible desde donde estés
+                  posponiendo.
                 </span>
               </h1>
 
-              <p className="text-lg text-slate-500 mb-8 leading-relaxed font-medium max-w-lg">
-                Conecta con psicólogos y terapeutas verificados. Agenda sesiones de
-                videollamada, recibe seguimiento continuo con IA y empieza tu proceso
-                hoy — de forma anónima si lo prefieres.
+              <p className="text-lg text-slate-500 mb-3 leading-relaxed font-medium max-w-lg">
+                Hablar con alguien de confianza cambia todo.
+              </p>
+              <p className="text-base text-slate-400 mb-8 leading-relaxed max-w-lg">
+                Conéctate con un psicólogo verificado en República Dominicana.
+                Sin salas de espera. Sin estigma. Desde donde estés.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-8">
                 <Link to="/register" className="btn-premium btn-primary-premium text-base px-7 py-3.5">
-                  Encuentra tu terapeuta
+                  Comenzar ahora
                   <ArrowRight size={18} strokeWidth={1.8} />
                 </Link>
                 <Link to="/register?role=therapist" className="btn-premium btn-secondary-premium text-base px-7 py-3.5">
@@ -336,6 +339,50 @@ export default function LandingPage() {
                   </Link>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── QUIZ DE MATCHING ───────────────────── */}
+        <section className="py-20 px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="card-elevated p-8 sm:p-12 text-center">
+              <div className="w-12 h-12 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-5">
+                <BrainCircuit size={24} strokeWidth={1.8} className="text-white" />
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mb-3">
+                ¿No sabes por dónde empezar?
+              </h2>
+              <p className="text-slate-500 font-medium mb-8 max-w-xl mx-auto leading-relaxed">
+                Responde 4 preguntas y nuestro algoritmo te conecta con los terapeutas
+                que mejor se ajustan a lo que necesitas.
+              </p>
+
+              {/* Preview de las 4 preguntas */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                {[
+                  { num: '1', label: 'Motivo de consulta' },
+                  { num: '2', label: 'Presupuesto por sesión' },
+                  { num: '3', label: 'Urgencia para comenzar' },
+                  { num: '4', label: 'Preferencia de terapeuta' },
+                ].map(({ num, label }) => (
+                  <div key={num} className="bg-primary-50 border border-primary-100 rounded-xl p-3">
+                    <span className="text-xs font-bold text-primary-400 tracking-widest block mb-1">{num}</span>
+                    <span className="text-xs font-semibold text-primary-800 leading-tight">{label}</span>
+                  </div>
+                ))}
+              </div>
+
+              <Link
+                to="/register"
+                className="btn-premium btn-primary-premium text-base px-8 py-3.5 mx-auto"
+              >
+                Hacer el test gratis
+                <ArrowRight size={18} strokeWidth={1.8} />
+              </Link>
+              <p className="text-xs text-slate-400 mt-4">
+                Menos de 2 minutos · Sin compromisos
+              </p>
             </div>
           </div>
         </section>

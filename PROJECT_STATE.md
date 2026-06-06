@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-05 (sistema de emails, reembolsos, suscripciones y seguridad completos)*
+*Última actualización: 2026-06-06 (landing page pública completa con SEO, confianza, FAQ y animaciones)*
 
 ---
 
@@ -63,7 +63,7 @@ src/
     ├── therapist/  14 páginas (ver §4)
     ├── shared/     ChatPage, VideoCall
     ├── payment/    PaymentSuccess, PaymentCancel
-    └── public/     PricingPage
+    └── public/     LandingPage, PricingPage, SEOHead
 ```
 
 ---
@@ -169,6 +169,7 @@ src/
 ### Compartidas / Públicas
 | Ruta | Página |
 |------|--------|
+| `/` | LandingPage pública (hero, beneficios, pasos, terapeutas, FAQ, confianza) |
 | `/video-call/:id` | VideoCall Daily.co (reconexión automática) |
 | `/pricing` | Landing pública de planes |
 | `/auth/callback` | Callback OAuth (Google/Apple/Facebook) |
@@ -442,7 +443,12 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Onboarding guiado para terapeutas nuevos — checklist 5 pasos con barra de progreso en dashboard
 - [x] Match automático terapeuta-paciente — cuestionario 4 preguntas + scoring en `/patient/match`
 - [x] Consentimiento informado digital — modal antes de primera sesión, firma en BD, PDF descargable
-- [x] Landing page pública — ruta `/` con hero, features, pasos, sección terapeutas y footer
+- [x] Landing page pública — ruta `/` con hero split, mockups UI, beneficios, pasos, terapeutas, testimonios y footer
+- [x] SEO landing page — `SEOHead.jsx` con meta tags, OpenGraph, Twitter Card, schema.org `MedicalBusiness` + `WebSite`, helper `therapistSchema()`
+- [x] Sección de confianza y seguridad — 4 garantías: cifrado, anónimo, cancelación, verificación
+- [x] FAQ accordion — 6 preguntas expandibles (confidencialidad, precio, cancelación, verificación, apps, anonimato)
+- [x] Animaciones on-scroll — `IntersectionObserver` CSS puro, fade-in en beneficios, pasos y testimonios
+- [x] `react-helmet-async` integrado en `main.jsx` con `HelmetProvider`
 - [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP
