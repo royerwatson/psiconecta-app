@@ -19,17 +19,6 @@ import {
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 
-/* ─── Imágenes Unsplash ─────────────────────
-   Todas son free-to-use, sin atribución requerida en Unsplash.
-   Cambiar por fotos propias cuando estén disponibles.
-───────────────────────────────────────────── */
-const IMG = {
-  hero:      'https://picsum.photos/id/1059/900/500',
-  therapist: 'https://picsum.photos/id/1005/700/520',
-  avatar1:   'https://i.pravatar.cc/80?img=5',
-  avatar2:   'https://i.pravatar.cc/80?img=11',
-  avatar3:   'https://i.pravatar.cc/80?img=9',
-}
 
 /* ─── Testimonios ───────────────────────────── */
 const TESTIMONIALS = [
@@ -37,7 +26,8 @@ const TESTIMONIALS = [
     id: 1,
     name: 'María G.',
     role: 'Paciente',
-    avatar: IMG.avatar1,
+    initials: 'MG',
+    color: 'from-primary-400 to-accent-500',
     rating: 5,
     text: 'Encontré a mi terapeuta en menos de 10 minutos. La videollamada fue fluida y el proceso de pago súper fácil. No imaginé que la terapia online podía sentirse tan cercana.',
   },
@@ -45,7 +35,8 @@ const TESTIMONIALS = [
     id: 2,
     name: 'Dr. Carlos M.',
     role: 'Terapeuta verificado',
-    avatar: IMG.avatar2,
+    initials: 'CM',
+    color: 'from-accent-400 to-primary-600',
     rating: 5,
     text: 'La plataforma me da todas las herramientas que necesito: tests, escalas clínicas, protocolos. Mis pacientes llegan mejor preparados y yo puedo enfocarme en el trabajo terapéutico.',
   },
@@ -53,7 +44,8 @@ const TESTIMONIALS = [
     id: 3,
     name: 'Sofía R.',
     role: 'Paciente',
-    avatar: IMG.avatar3,
+    initials: 'SR',
+    color: 'from-primary-500 to-accent-400',
     rating: 5,
     text: 'El modo anónimo me dio la confianza para dar el primer paso. Nadie en mi entorno sabe que voy a terapia, y eso fue clave para decidirme.',
   },
@@ -173,28 +165,10 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Imagen hero */}
+            {/* Mockup hero */}
             <div className="relative hidden lg:block">
-              {/* Blob decorativo */}
               <div className="absolute -inset-4 bg-gradient-brand opacity-10 rounded-[60px] blur-3xl" />
-              <div className="relative rounded-[32px] overflow-hidden shadow-2xl ring-1 ring-black/5">
-                <img
-                  src={IMG.hero}
-                  alt="Sesión de terapia online"
-                  className="w-full h-[500px] object-cover"
-                  loading="eager"
-                />
-                {/* Badge flotante */}
-                <div className="absolute bottom-6 left-6 right-6 glass rounded-2xl p-4 flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-brand rounded-xl flex items-center justify-center shrink-0">
-                    <ShieldCheck size={18} strokeWidth={2} className="text-white" />
-                  </div>
-                  <div>
-                    <p className="font-bold text-slate-900 text-sm">Terapeuta verificado</p>
-                    <p className="text-xs text-slate-500">Credenciales revisadas por nuestro equipo</p>
-                  </div>
-                </div>
-              </div>
+              <HeroMockup />
             </div>
           </div>
         </section>
@@ -261,7 +235,7 @@ export default function LandingPage() {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-12">
-              {TESTIMONIALS.map(({ id, name, role, avatar, rating, text }) => (
+              {TESTIMONIALS.map(({ id, name, role, initials, color, rating, text }) => (
                 <div key={id} className="card p-6">
                   <div className="flex items-center gap-0.5 mb-4">
                     {Array.from({ length: rating }).map((_, i) => (
@@ -270,11 +244,9 @@ export default function LandingPage() {
                   </div>
                   <p className="text-slate-600 text-sm leading-relaxed mb-5">"{text}"</p>
                   <div className="flex items-center gap-3">
-                    <img
-                      src={avatar}
-                      alt={name}
-                      className="w-10 h-10 rounded-full object-cover ring-2 ring-primary-100"
-                    />
+                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}>
+                      <span className="text-white font-bold text-xs">{initials}</span>
+                    </div>
                     <div>
                       <p className="font-bold text-slate-900 text-sm">{name}</p>
                       <p className="text-xs text-slate-400 mt-0.5">{role}</p>
@@ -291,22 +263,10 @@ export default function LandingPage() {
           <div className="max-w-6xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-              {/* Imagen terapeuta */}
+              {/* Mockup terapeutas */}
               <div className="relative hidden lg:block order-last lg:order-first">
                 <div className="absolute -inset-4 bg-accent-200 opacity-20 rounded-[60px] blur-3xl" />
-                <div className="relative rounded-[32px] overflow-hidden shadow-2xl ring-1 ring-black/5">
-                  <img
-                    src={IMG.therapist}
-                    alt="Terapeuta profesional"
-                    className="w-full h-[520px] object-cover"
-                    loading="lazy"
-                  />
-                  {/* Badge flotante */}
-                  <div className="absolute top-6 left-6 glass rounded-2xl px-4 py-3 flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 bg-green-400 rounded-full animate-pulse" />
-                    <p className="font-semibold text-slate-800 text-sm">Disponible hoy</p>
-                  </div>
-                </div>
+                <TherapistMockup />
               </div>
 
               {/* Texto + planes */}
@@ -463,6 +423,129 @@ function PlanCard({ name, price, features, highlight = false }) {
           </li>
         ))}
       </ul>
+    </div>
+  )
+}
+
+/* ─── Mockup hero: simula la UI de videollamada ─── */
+function HeroMockup() {
+  return (
+    <div className="relative rounded-[32px] overflow-hidden shadow-2xl ring-1 ring-black/5 bg-white">
+      {/* Barra superior */}
+      <div className="bg-slate-900 px-5 py-3 flex items-center gap-2">
+        <div className="w-3 h-3 rounded-full bg-red-400" />
+        <div className="w-3 h-3 rounded-full bg-yellow-400" />
+        <div className="w-3 h-3 rounded-full bg-green-400" />
+        <div className="ml-4 flex-1 bg-slate-700 rounded-full h-5 px-3 flex items-center">
+          <span className="text-slate-400 text-[10px]">psiconecta.app/video-call</span>
+        </div>
+      </div>
+
+      {/* Área de videollamada */}
+      <div className="relative bg-slate-800 h-72 flex items-center justify-center overflow-hidden">
+        {/* Fondo gradiente */}
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-900 via-slate-800 to-accent-900 opacity-80" />
+
+        {/* Avatar terapeuta (grande) */}
+        <div className="relative z-10 flex flex-col items-center gap-3">
+          <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary-400 to-accent-600 flex items-center justify-center shadow-xl ring-4 ring-white/10">
+            <span className="text-white font-bold text-2xl">DL</span>
+          </div>
+          <div className="glass-dark rounded-full px-4 py-1.5">
+            <span className="text-white text-xs font-semibold">Dra. Laura Pérez</span>
+          </div>
+        </div>
+
+        {/* Mini-vista del paciente */}
+        <div className="absolute bottom-4 right-4 w-24 h-16 rounded-2xl bg-gradient-to-br from-primary-500 to-accent-500 ring-2 ring-white/20 flex items-center justify-center shadow-lg">
+          <span className="text-white font-bold text-sm">Tú</span>
+        </div>
+
+        {/* Barra de controles */}
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-3">
+          {[Video, Users, HeartPulse].map((Icon, i) => (
+            <div key={i} className={`w-10 h-10 rounded-full flex items-center justify-center shadow-lg ${i === 0 ? 'bg-red-500' : 'bg-white/20 backdrop-blur'}`}>
+              <Icon size={16} strokeWidth={2} className="text-white" />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Panel inferior: info sesión */}
+      <div className="bg-white px-5 py-4 flex items-center justify-between">
+        <div>
+          <p className="font-bold text-slate-900 text-sm">Sesión en progreso</p>
+          <p className="text-xs text-slate-400 mt-0.5">Consulta individual · 50 min</p>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
+          <span className="text-xs font-semibold text-green-600">Conectado</span>
+        </div>
+      </div>
+
+      {/* Badge flotante */}
+      <div className="absolute top-16 left-4 glass rounded-2xl px-3 py-2 flex items-center gap-2 shadow-sm">
+        <div className="w-7 h-7 bg-gradient-brand rounded-lg flex items-center justify-center">
+          <ShieldCheck size={14} strokeWidth={2} className="text-white" />
+        </div>
+        <div>
+          <p className="font-bold text-slate-900 text-[11px]">Terapeuta verificada</p>
+          <p className="text-[10px] text-slate-500">Credenciales aprobadas</p>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+/* ─── Mockup terapeutas: panel clínico ─────────── */
+function TherapistMockup() {
+  const tools = [
+    { icon: ClipboardList, label: 'PHQ-9 — Depresión',      score: '14/27', color: 'text-orange-500', bg: 'bg-orange-50' },
+    { icon: HeartPulse,    label: 'GAD-7 — Ansiedad',       score: '10/21', color: 'text-primary-600', bg: 'bg-primary-50' },
+    { icon: BookOpen,      label: 'DSM-5-TR',                score: 'F41.1',  color: 'text-accent-600', bg: 'bg-accent-50' },
+    { icon: BrainCircuit,  label: 'Check-in IA',             score: 'Bajo riesgo', color: 'text-green-600', bg: 'bg-green-50' },
+  ]
+
+  return (
+    <div className="relative rounded-[32px] overflow-hidden shadow-2xl ring-1 ring-black/5 bg-white">
+      {/* Header del panel */}
+      <div className="bg-gradient-brand px-5 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
+            <span className="text-white font-bold text-sm">AP</span>
+          </div>
+          <div>
+            <p className="font-bold text-white text-sm">Ana P. — Paciente</p>
+            <p className="text-indigo-200 text-xs">Próxima sesión: hoy, 3:00 PM</p>
+          </div>
+        </div>
+        <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-3 py-1">
+          <div className="w-1.5 h-1.5 bg-green-300 rounded-full animate-pulse" />
+          <span className="text-white text-xs font-semibold">En línea</span>
+        </div>
+      </div>
+
+      {/* Herramientas clínicas */}
+      <div className="p-5 space-y-3">
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">Evaluaciones recientes</p>
+        {tools.map(({ icon: Icon, label, score, color, bg }) => (
+          <div key={label} className="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-100">
+            <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center shrink-0`}>
+              <Icon size={15} strokeWidth={1.8} className={color} />
+            </div>
+            <span className="text-sm text-slate-700 font-medium flex-1">{label}</span>
+            <span className={`text-xs font-bold ${color}`}>{score}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Footer */}
+      <div className="px-5 pb-5">
+        <div className="w-full bg-gradient-brand rounded-xl py-3 flex items-center justify-center gap-2">
+          <Video size={16} strokeWidth={2} className="text-white" />
+          <span className="text-white font-bold text-sm">Iniciar videollamada</span>
+        </div>
+      </div>
     </div>
   )
 }
