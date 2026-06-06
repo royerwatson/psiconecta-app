@@ -38,6 +38,7 @@ export default function MyAppointments() {
   const [changing, setChanging] = useState(false)
   const [confirmModal, setConfirmModal] = useState(null) // { type: 'cancel'|'change', session }
   const [cancelling, setCancelling] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
   const navigate = useNavigate()
 
   useEffect(() => { if (user) fetchSessions() }, [user])
@@ -75,6 +76,7 @@ export default function MyAppointments() {
       toast.error('No se puede cancelar con menos de 2 horas de anticipación')
       return
     }
+    setCancelReason('')
     setConfirmModal({ type: 'cancel', session, policy })
   }
 
@@ -94,7 +96,7 @@ export default function MyAppointments() {
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ sessionId: session.id }),
+            body: JSON.stringify({ sessionId: session.id, reason: cancelReason.trim() || null }),
           }
         )
         const data = await res.json()
@@ -117,7 +119,7 @@ export default function MyAppointments() {
         fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-cancellation`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ sessionId: session.id }),
+          body: JSON.stringify({ sessionId: session.id, reason: cancelReason.trim() || null }),
         }).catch(() => {})
       }
     } catch (err) {
@@ -405,15 +407,36 @@ export default function MyAppointments() {
           <div className="flex flex-col gap-4">
             <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-sm text-red-700">
               {confirmModal.type === 'cancel' ? (
-                <>
-                  <p className="font-semibold mb-1">Esta acción no se puede deshacer.</p>
-                  <p className="mb-2">Se cancelará tu sesión con <strong>{confirmModal.session.therapist?.full_name}</strong>.</p>
+                <div className="flex flex-col gap-3">
+                  <p className="text-sm text-red-700">
+                    Se cancelará tu sesión con <strong>{confirmModal.session.therapist?.full_name}</strong>.
+                    Esta acción no se puede deshacer.
+                  </p>
                   {confirmModal.policy && (
-                    <p className={`font-semibold text-sm ${confirmModal.policy.color}`}>
-                      Reembolso: {confirmModal.policy.label} ({confirmModal.policy.pct}% de {formatPrice(confirmModal.session.price ?? 0)})
-                    </p>
+                    <div className={`rounded-xl px-4 py-3 text-sm font-semibold ${
+                      confirmModal.policy.pct === 100 ? 'bg-green-50 text-green-700' :
+                      confirmModal.policy.pct === 50  ? 'bg-amber-50 text-amber-700' :
+                      'bg-red-50 text-red-700'
+                    }`}>
+                      {confirmModal.policy.pct === 100
+                        ? `Recibirás un reembolso completo de ${formatPrice(confirmModal.session.price ?? 0)}.`
+                        : confirmModal.policy.pct === 50
+                        ? `Recibirás un reembolso del 50% — ${formatPrice((confirmModal.session.price ?? 0) * 0.5)} de ${formatPrice(confirmModal.session.price ?? 0)}.`
+                        : 'No aplica reembolso por cancelar con menos de 2 horas.'}
+                    </div>
                   )}
-                </>
+                  <div className="flex flex-col gap-1">
+                    <label className="text-xs font-medium text-warm-700">Motivo de cancelación <span className="text-warm-400">(opcional)</span></label>
+                    <textarea
+                      value={cancelReason}
+                      onChange={e => setCancelReason(e.target.value)}
+                      placeholder="Cuéntanos por qué cancelas para mejorar el servicio..."
+                      rows={2}
+                      maxLength={300}
+                      className="w-full rounded-xl border border-warm-200 bg-warm-50 px-3 py-2.5 text-sm text-warm-800 resize-none outline-none focus:ring-2 focus:ring-primary-300 focus:border-primary-300"
+                    />
+                  </div>
+                </div>
               ) : (
                 <>
                   <p className="font-semibold mb-1">Confirma el cambio de terapeuta.</p>

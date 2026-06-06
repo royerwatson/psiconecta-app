@@ -210,12 +210,14 @@ export function cancellationEmail({
   role,
   date,
   time,
+  reason,
 }: {
   recipientName: string
   otherPersonName: string
   role: 'patient' | 'therapist'
   date: string
   time: string
+  reason?: string
 }) {
   return baseLayout(`
     <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">Sesión cancelada</p>
@@ -239,7 +241,17 @@ export function cancellationEmail({
     </p>
     <div style="text-align:center;">
       ${btn('Buscar terapeuta', `${APP_URL}/patient/find`, '#dc2626')}
-    </div>` : ''}
+    </div>` : reason ? `
+    <div style="background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin-bottom:20px;">
+      <p style="margin:0 0 4px;font-size:12px;font-weight:600;color:#92400e;">Motivo indicado por el paciente:</p>
+      <p style="margin:0;font-size:14px;color:#78350f;font-style:italic;">"${reason}"</p>
+    </div>
+    <div style="text-align:center;">
+      ${btn('Ver mi agenda', `${APP_URL}/therapist/schedule`, '#64748b')}
+    </div>` : `
+    <div style="text-align:center;">
+      ${btn('Ver mi agenda', `${APP_URL}/therapist/schedule`, '#64748b')}
+    </div>`}
   `)
 }
 

@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) throw new Error('Unauthorized')
 
-    const { sessionId } = await req.json()
+    const { sessionId, reason } = await req.json()
     if (!sessionId) throw new Error('Falta sessionId')
 
     const supabaseAdmin = createClient(
@@ -80,9 +80,10 @@ Deno.serve(async (req) => {
         to: therapistAuth.user.email,
         subject: 'Una sesión ha sido cancelada',
         html: cancellationEmail({
-          recipientName:  session.therapist?.full_name ?? 'Terapeuta',
+          recipientName:   session.therapist?.full_name ?? 'Terapeuta',
           otherPersonName: session.patient?.full_name ?? 'Paciente',
           role: 'therapist', date, time,
+          reason: reason ?? undefined,
         }),
       }))
     }
