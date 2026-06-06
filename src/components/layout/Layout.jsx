@@ -12,9 +12,10 @@ import {
   Users, ClipboardList, BookOpen, Clock, Heart,
   LayoutDashboard, TestTube, Shield, Library,
   BookMarked, Stethoscope, FolderOpen, MoreHorizontal,
-  X, Zap, Bell, ChevronRight, LogOut, Crown, TrendingUp, Lock,
+  X, Zap, Bell, ChevronRight, LogOut, Crown, TrendingUp, Lock, Moon, Sun,
 } from 'lucide-react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
+import { useDarkMode } from '@/hooks/useDarkMode'
 
 // ─── Navegación ────────────────────────────────────────────────────────────────
 
@@ -133,6 +134,7 @@ const PRO_ROUTES = new Set([
 
 export default function Layout() {
   const { profile, role, user, signOut } = useAuthStore()
+  const { isDark, toggle: toggleDark } = useDarkMode()
   const navigate  = useNavigate()
   const location  = useLocation()
 
@@ -243,6 +245,13 @@ export default function Layout() {
           </button>
 
           <div className="flex items-center gap-1">
+            <button onClick={toggleDark}
+              className="p-2 rounded-xl hover:bg-warm-100 transition-colors"
+              title={isDark ? 'Modo claro' : 'Modo oscuro'}>
+              {isDark
+                ? <Sun size={18} strokeWidth={1.8} className="text-warm-500" />
+                : <Moon size={18} strokeWidth={1.8} className="text-warm-500" />}
+            </button>
             {role === 'client' && <NotificationBell userId={user?.id} />}
 
             {role === 'therapist' && alertCount > 0 && (

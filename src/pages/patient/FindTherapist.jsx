@@ -15,8 +15,10 @@ import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
 import ConsentModal from '@/components/patient/ConsentModal'
 import toast from 'react-hot-toast'
-import { DollarSign, Zap, AlertTriangle, Search, Calendar, Crown, Star } from 'lucide-react'
+import { DollarSign, Zap, AlertTriangle, Search, Calendar, Crown, Star, Clock } from 'lucide-react'
 import { useCurrencyContext } from '@/context/CurrencyContext'
+import { addDays, format, getISODay } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 const SPECIALTIES = [
   'Todas', 'Psicología clínica', 'Psicología cognitivo-conductual', 'Psicoanálisis',
@@ -39,6 +41,9 @@ export default function FindTherapist() {
   const [bookingForm, setBookingForm] = useState({ date: '', time: '' })
   const [bookingStep, setBookingStep] = useState('form') // 'consent' | 'form' | 'payment' | 'success'
   const [signingConsent, setSigningConsent] = useState(false)
+  const [availSlots, setAvailSlots]     = useState({})
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [loadingSlots, setLoadingSlots] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { fetchTherapists() }, [specialty, isUrgent])
@@ -92,6 +97,52 @@ export default function FindTherapist() {
     setSelectedTherapist(null)
     setBookingForm({ date: '', time: '' })
     setBookingStep('form')
+    setAvailSlots({})
+    setSelectedDate(null)
+  }
+
+  const loadSlots = async (therapist) => {
+    setLoadingSlots(true)
+    setAvailSlots({})
+    setSelectedDate(null)
+    const therapistId = therapist.user_id
+    const today = new Date()
+    const in28  = addDays(today, 28)
+
+    const [{ data: avail }, { data: blocked }, { data: occupied }] = await Promise.all([
+      supabase.from('therapist_availability').select('*').eq('therapist_id', therapistId),
+      supabase.from('therapist_blocked_dates').select('blocked_date').eq('therapist_id', therapistId)
+        .gte('blocked_date', format(today, 'yyyy-MM-dd')),
+      supabase.from('sessions').select('scheduled_at').eq('therapist_id', therapistId)
+        .in('status', ['scheduled', 'in_progress'])
+        .gte('scheduled_at', today.toISOString())
+        .lte('scheduled_at', in28.toISOString()),
+    ])
+
+    const blockedSet  = new Set((blocked ?? []).map(b => b.blocked_date))
+    const occupiedSet = new Set((occupied ?? []).map(s => s.scheduled_at.slice(0, 16)))
+
+    const slots = {}
+    for (let i = 0; i <= 28; i++) {
+      const day     = addDays(today, i)
+      const dateKey = format(day, 'yyyy-MM-dd')
+      if (blockedSet.has(dateKey)) continue
+      const isoDay   = getISODay(day)
+      const dayAvail = (avail ?? []).filter(a => a.day_of_week === isoDay)
+      if (!dayAvail.length) continue
+      const daySlots = []
+      for (const a of dayAvail) {
+        const [sh] = a.start_time.split(':').map(Number)
+        const [eh] = a.end_time.split(':').map(Number)
+        for (let h = sh; h < eh; h++) {
+          const slotKey = `${dateKey}T${String(h).padStart(2,'0')}:00`
+          if (!occupiedSet.has(slotKey)) daySlots.push(`${String(h).padStart(2,'0')}:00`)
+        }
+      }
+      if (daySlots.length) slots[dateKey] = daySlots
+    }
+    setAvailSlots(slots)
+    setLoadingSlots(false)
   }
 
   const openBooking = async (therapist) => {
@@ -106,7 +157,12 @@ export default function FindTherapist() {
       .eq('therapist_id', therapist.profile?.id ?? therapist.user_id)
       .maybeSingle()
 
-    setBookingStep(existing ? 'form' : 'consent')
+    if (existing) {
+      setBookingStep('form')
+      loadSlots(therapist)
+    } else {
+      setBookingStep('consent')
+    }
   }
 
   const handleSignConsent = async () => {
@@ -122,6 +178,7 @@ export default function FindTherapist() {
       return
     }
     setBookingStep('form')
+    loadSlots(selectedTherapist)
   }
 
   const handlePaymentSuccess = () => {
@@ -319,11 +376,55 @@ export default function FindTherapist() {
                   </div>
                 </div>
 
-                <Input label="Fecha" type="date" value={bookingForm.date}
-                  onChange={(e) => setBookingForm(f => ({ ...f, date: e.target.value }))}
-                  min={new Date().toISOString().split('T')[0]} required />
-                <Input label="Hora" type="time" value={bookingForm.time}
-                  onChange={(e) => setBookingForm(f => ({ ...f, time: e.target.value }))} required />
+                {/* ── Selector de slots ── */}
+                {loadingSlots ? (
+                  <div className="flex flex-col gap-2">
+                    {[1,2,3].map(i => <div key={i} className="h-10 bg-warm-100 rounded-xl animate-pulse" />)}
+                  </div>
+                ) : Object.keys(availSlots).length === 0 ? (
+                  <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 text-center">
+                    Este terapeuta no tiene disponibilidad en los próximos 28 días.
+                    Puedes contactarlo por chat para coordinar.
+                  </div>
+                ) : (
+                  <>
+                    <div>
+                      <p className="text-xs font-semibold text-warm-600 mb-2">Selecciona una fecha</p>
+                      <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1">
+                        {Object.keys(availSlots).map(dateKey => (
+                          <button key={dateKey}
+                            onClick={() => { setSelectedDate(dateKey); setBookingForm(f => ({ ...f, date: dateKey, time: '' })) }}
+                            className={`py-2.5 px-2 rounded-xl border text-xs font-medium transition-all ${
+                              selectedDate === dateKey
+                                ? 'border-primary-400 bg-primary-50 text-primary-700'
+                                : 'border-warm-200 hover:border-warm-300 text-warm-700'
+                            }`}>
+                            {format(new Date(dateKey + 'T12:00'), "EEE d MMM", { locale: es })}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {selectedDate && availSlots[selectedDate] && (
+                      <div>
+                        <p className="text-xs font-semibold text-warm-600 mb-2">Selecciona una hora</p>
+                        <div className="flex flex-wrap gap-2">
+                          {availSlots[selectedDate].map(time => (
+                            <button key={time}
+                              onClick={() => setBookingForm(f => ({ ...f, time }))}
+                              className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all flex items-center gap-1.5 ${
+                                bookingForm.time === time
+                                  ? 'border-primary-400 bg-primary-50 text-primary-700'
+                                  : 'border-warm-200 hover:border-warm-300 text-warm-700'
+                              }`}>
+                              <Clock size={12} strokeWidth={1.8} />{time}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                )}
 
                 {bookingForm.date && bookingForm.time && (() => {
                   const scheduledAt = new Date(`${bookingForm.date}T${bookingForm.time}`)

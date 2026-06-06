@@ -115,6 +115,17 @@ export default function TherapistDashboard() {
 
   const therapist = profile?.therapist_profiles?.[0]
 
+  // Checklist de activación para terapeutas nuevos
+  const onboardingSteps = therapist ? [
+    { id: 'avatar',    label: 'Agrega tu foto de perfil',        done: !!profile?.avatar_url,                     to: '/therapist/profile' },
+    { id: 'bio',       label: 'Escribe tu biografía profesional', done: !!therapist.bio,                           to: '/therapist/profile' },
+    { id: 'price',     label: 'Configura tu precio por sesión',   done: (therapist.price_per_session ?? 0) > 0,    to: '/therapist/profile' },
+    { id: 'docs',      label: 'Sube tus 3 documentos de credencial', done: therapist.verification_status === 'verified', to: '/therapist/profile' },
+    { id: 'schedule',  label: 'Configura tu disponibilidad horaria',  done: false,                                 to: '/therapist/schedule' },
+  ] : []
+  const onboardingDone = onboardingSteps.filter(s => s.done).length
+  const showOnboarding = therapist && onboardingDone < onboardingSteps.length
+
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center gap-4 py-20">
@@ -169,6 +180,54 @@ export default function TherapistDashboard() {
             </p>
           </div>
           <Button size="sm" onClick={() => navigate('/therapist/profile')}>Completar</Button>
+        </div>
+      )}
+
+      {/* Checklist de activación */}
+      {showOnboarding && (
+        <div className="bg-white border border-warm-100 rounded-2xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="font-semibold text-warm-900 text-sm">Activa tu perfil</h2>
+              <p className="text-xs text-warm-500 mt-0.5">{onboardingDone} de {onboardingSteps.length} pasos completados</p>
+            </div>
+            <span className="text-xs font-bold text-primary-600 bg-primary-50 px-2.5 py-1 rounded-full">
+              {Math.round((onboardingDone / onboardingSteps.length) * 100)}%
+            </span>
+          </div>
+          {/* Barra de progreso */}
+          <div className="h-1.5 bg-warm-100 rounded-full overflow-hidden mb-4">
+            <div
+              className="h-full bg-primary-500 rounded-full transition-all duration-500"
+              style={{ width: `${(onboardingDone / onboardingSteps.length) * 100}%` }}
+            />
+          </div>
+          <div className="flex flex-col gap-2">
+            {onboardingSteps.map(step => (
+              <button key={step.id} onClick={() => navigate(step.to)}
+                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-left transition-colors ${
+                  step.done ? 'bg-green-50 border border-green-100' : 'bg-warm-50 border border-warm-100 hover:bg-primary-50 hover:border-primary-100'
+                }`}>
+                <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                  step.done ? 'bg-green-500' : 'border-2 border-warm-300'
+                }`}>
+                  {step.done && (
+                    <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                  )}
+                </div>
+                <span className={`text-sm font-medium ${step.done ? 'text-green-700 line-through opacity-60' : 'text-warm-700'}`}>
+                  {step.label}
+                </span>
+                {!step.done && (
+                  <svg className="w-4 h-4 text-warm-300 ml-auto shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

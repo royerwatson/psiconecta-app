@@ -76,7 +76,9 @@ import SubscriptionSuccess from '@/pages/payment/SubscriptionSuccess'
 
 // Suscripciones y precios
 import SubscriptionPage from '@/pages/therapist/SubscriptionPage'
-import PricingPage      from '@/pages/public/PricingPage'
+import PricingPage         from '@/pages/public/PricingPage'
+import LandingPage         from '@/pages/public/LandingPage'
+import TherapistMatchPage  from '@/pages/patient/TherapistMatchPage'
 import StatsPage        from '@/pages/therapist/StatsPage'
 import ProGate         from '@/components/layout/ProGate'
 
@@ -106,6 +108,7 @@ export default function App() {
 
       <Routes>
         {/* Páginas públicas */}
+        <Route path="/"                element={<LandingPage />} />
         <Route path="/pricing"         element={<PricingPage />} />
         <Route path="/auth/callback"   element={<AuthCallback />} />
 
@@ -202,6 +205,9 @@ export default function App() {
           } />
           <Route path="/patient/find" element={
             <ClientRoute><FindTherapist /></ClientRoute>
+          } />
+          <Route path="/patient/match" element={
+            <ClientRoute><TherapistMatchPage /></ClientRoute>
           } />
           <Route path="/patient/therapist/:therapistId" element={
             <ClientRoute><TherapistProfileView /></ClientRoute>
