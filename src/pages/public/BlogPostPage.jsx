@@ -8,6 +8,7 @@ import {
   HeartPulse, Users, Video, BrainCircuit, CalendarCheck,
 } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
+import DOMPurify from 'dompurify'
 
 const ICON_MAP = { HeartPulse, Users, Video, BrainCircuit, CalendarCheck }
 
@@ -92,7 +93,8 @@ function SectionBody({ text, index }) {
 }
 
 function parseBold(text) {
-  return text.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-slate-800 dark:text-slate-200">$1</strong>')
+  const html = text.replace(/\*\*(.+?)\*\*/g, '<strong class="font-semibold text-slate-800 dark:text-slate-200">$1</strong>')
+  return DOMPurify.sanitize(html, { ALLOWED_TAGS: ['strong'], ALLOWED_ATTR: ['class'] })
 }
 
 export default function BlogPostPage() {
