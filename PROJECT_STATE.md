@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (v14 — análisis procesos, email brand colors, limpieza funciones, secrets)*
+*Última actualización: 2026-06-06 (v15 — fix registro de usuarios, trigger RLS, fallback perfil)*
 
 ---
 
@@ -405,7 +405,41 @@ VITE_PAYPAL_CLIENT_ID=...
 
 ---
 
-## 11. Bugs Corregidos (sesión 2026-06-05)
+## 11. Bugs Corregidos
+
+### Sesión 2026-06-06 — Registro de usuarios
+
+| Severidad | Área | Corrección |
+|-----------|------|------------|
+| CRÍTICO | `handle_new_user()` trigger | Agregado `SET search_path = public` — sin esto, en el contexto del schema `auth` el trigger no encontraba la tabla `profiles`. Causa raíz del error "database error saving new user" en registros nuevos. |
+| CRÍTICO | `handle_new_user()` trigger | Tabla calificada como `public.profiles` (nombre completo) |
+| CRÍTICO | `handle_new_user()` trigger | Agregado bloque `EXCEPTION WHEN OTHERS THEN RETURN NEW` — el trigger nunca bloquea la creación del usuario aunque falle la inserción del perfil |
+| ALTO | `profiles_insert` RLS policy | Actualizada a `auth.uid() = id OR auth.uid() IS NULL` para permitir el contexto del trigger (sin JWT activo) |
+| MEDIO | `authStore.js` → `signUp()` | Fallback: si el trigger no crea el perfil, el frontend lo inserta directamente antes de continuar |
+
+**SQL ejecutado en Supabase (2026-06-06):**
+```sql
+-- Trigger con search_path explícito + exception handler
+CREATE OR REPLACE FUNCTION handle_new_user()
+RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
+BEGIN
+  INSERT INTO public.profiles (id, full_name, email, role)
+  VALUES (NEW.id, COALESCE(NEW.raw_user_meta_data->>'full_name','Usuario'),
+          NEW.email, COALESCE(NEW.raw_user_meta_data->>'role','client'))
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  RAISE LOG 'handle_new_user() error for user %: % (%)', NEW.id, SQLERRM, SQLSTATE;
+  RETURN NEW;
+END; $$;
+
+-- RLS INSERT policy actualizada
+DROP POLICY IF EXISTS "profiles_insert" ON profiles;
+CREATE POLICY "profiles_insert" ON profiles FOR INSERT
+  WITH CHECK (auth.uid() = id OR auth.uid() IS NULL);
+```
+
+### Sesión 2026-06-05
 
 ### RLS / Base de datos
 - `test_results` — faltaba política INSERT para el paciente (resultados nunca se guardaban)

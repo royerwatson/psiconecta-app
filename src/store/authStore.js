@@ -82,10 +82,26 @@ export const useAuthStore = create(
         })
         if (error) throw error
 
-        // El trigger handle_new_user crea el perfil base automáticamente
-        // usando los metadatos (full_name, role) que pasamos arriba.
-        // Esperamos a que el trigger termine antes de continuar.
+        // El trigger handle_new_user crea el perfil base automáticamente.
+        // Esperamos brevemente y luego verificamos; si el trigger falló
+        // silenciosamente, creamos el perfil como fallback.
         await new Promise((resolve) => setTimeout(resolve, 1500))
+
+        const { data: existingProfile } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('id', data.user.id)
+          .single()
+
+        if (!existingProfile) {
+          const { error: profileError } = await supabase.from('profiles').insert({
+            id: data.user.id,
+            full_name: fullName,
+            email,
+            role,
+          })
+          if (profileError) throw profileError
+        }
 
         // Si es terapeuta, crear perfil extendido
         if (role === 'therapist') {
