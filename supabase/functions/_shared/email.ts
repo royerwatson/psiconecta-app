@@ -470,6 +470,49 @@ export function testResultAvailableEmail({
   `)
 }
 
+export function rescheduleEmail({
+  recipientName,
+  otherPersonName,
+  role,
+  oldDate,
+  oldTime,
+  newDate,
+  newTime,
+}: {
+  recipientName: string
+  otherPersonName: string
+  role: 'patient' | 'therapist'
+  oldDate: string
+  oldTime: string
+  newDate: string
+  newTime: string
+}) {
+  const dashUrl = role === 'therapist'
+    ? `${APP_URL}/therapist/schedule`
+    : `${APP_URL}/patient/appointments`
+
+  return baseLayout(`
+    <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">Sesion reagendada 🔄</p>
+    <p style="margin:0 0 28px;font-size:15px;color:#64748b;">
+      Hola ${recipientName}, tu sesion con <strong>${otherPersonName}</strong> ha sido movida a una nueva fecha.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+      <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow('Fecha anterior', `${oldDate} a las ${oldTime}`)}
+          ${infoRow('Nueva fecha', `${newDate} a las ${newTime}`)}
+          ${infoRow(role === 'patient' ? 'Terapeuta' : 'Paciente', otherPersonName)}
+        </table>
+      </td></tr>
+    </table>
+
+    <div style="text-align:center;">
+      ${btn(role === 'patient' ? 'Ver mis citas' : 'Ver mi agenda', dashUrl)}
+    </div>
+  `)
+}
+
 export function subscriptionActivatedEmail({
   therapistName,
   expiresAt,

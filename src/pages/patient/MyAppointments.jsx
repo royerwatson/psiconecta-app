@@ -11,7 +11,8 @@ import { formatSessionDate, formatPrice, canStartVideo } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import StarRating from '@/components/ui/StarRating'
 import { Textarea } from '@/components/ui/Input'
-import { differenceInHours, parseISO } from 'date-fns'
+import { differenceInHours, parseISO, addDays, format, getISODay, isToday, isBefore, startOfDay } from 'date-fns'
+import { es } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 import { AlertTriangle, Calendar, BookOpen, Zap, Video, RefreshCw, Star, MessageCircle, Check, RotateCcw } from 'lucide-react'
 
@@ -39,6 +40,12 @@ export default function MyAppointments() {
   const [confirmModal, setConfirmModal] = useState(null) // { type: 'cancel'|'change', session }
   const [cancelling, setCancelling] = useState(false)
   const [cancelReason, setCancelReason] = useState('')
+  const [rescheduleModal, setRescheduleModal] = useState(null)  // session
+  const [availSlots, setAvailSlots] = useState({})              // { 'YYYY-MM-DD': ['09:00','10:00',...] }
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [selectedTime, setSelectedTime] = useState(null)
+  const [loadingSlots, setLoadingSlots] = useState(false)
+  const [rescheduling, setRescheduling] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { if (user) fetchSessions() }, [user])
@@ -68,6 +75,91 @@ export default function MyAppointments() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const openReschedule = async (session) => {
+    setRescheduleModal(session)
+    setSelectedDate(null)
+    setSelectedTime(null)
+    setLoadingSlots(true)
+
+    const therapistId = session.therapist_id
+    const today = new Date()
+    const in28 = addDays(today, 28)
+    const minDate = addDays(today, 1) // mínimo mañana (>24h)
+
+    const [{ data: avail }, { data: blocked }, { data: occupied }] = await Promise.all([
+      supabase.from('therapist_availability').select('*').eq('therapist_id', therapistId),
+      supabase.from('therapist_blocked_dates').select('blocked_date').eq('therapist_id', therapistId)
+        .gte('blocked_date', format(today, 'yyyy-MM-dd')),
+      supabase.from('sessions').select('scheduled_at').eq('therapist_id', therapistId)
+        .in('status', ['scheduled', 'in_progress'])
+        .gte('scheduled_at', today.toISOString())
+        .lte('scheduled_at', in28.toISOString()),
+    ])
+
+    const blockedSet  = new Set((blocked ?? []).map(b => b.blocked_date))
+    const occupiedSet = new Set((occupied ?? []).map(s => s.scheduled_at.slice(0, 16))) // YYYY-MM-DDTHH:mm
+
+    const slots = {}
+    for (let i = 1; i <= 28; i++) {
+      const day     = addDays(today, i)
+      const dateKey = format(day, 'yyyy-MM-dd')
+      if (blockedSet.has(dateKey)) continue
+
+      const isoDay  = getISODay(day) // 1=Mon … 7=Sun
+      const dayAvail = (avail ?? []).filter(a => a.day_of_week === isoDay)
+      if (!dayAvail.length) continue
+
+      const daySlots = []
+      for (const a of dayAvail) {
+        const [sh, sm] = a.start_time.split(':').map(Number)
+        const [eh, em] = a.end_time.split(':').map(Number)
+        let hour = sh, min = sm
+        while (hour < eh || (hour === eh && min < em)) {
+          const slotKey = `${dateKey}T${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}`
+          if (!occupiedSet.has(slotKey)) {
+            daySlots.push(`${String(hour).padStart(2,'0')}:${String(min).padStart(2,'0')}`)
+          }
+          min += 60
+          if (min >= 60) { hour += Math.floor(min / 60); min = min % 60 }
+        }
+      }
+      if (daySlots.length) slots[dateKey] = daySlots
+    }
+
+    setAvailSlots(slots)
+    setLoadingSlots(false)
+  }
+
+  const confirmReschedule = async () => {
+    if (!selectedDate || !selectedTime || !rescheduleModal) return
+    setRescheduling(true)
+
+    const oldScheduledAt = rescheduleModal.scheduled_at
+    const newScheduledAt = `${selectedDate}T${selectedTime}:00`
+
+    const { error } = await supabase
+      .from('sessions')
+      .update({ scheduled_at: newScheduledAt })
+      .eq('id', rescheduleModal.id)
+
+    if (error) { toast.error('Error al reagendar la sesión'); setRescheduling(false); return }
+
+    toast.success('Sesión reagendada correctamente')
+    setRescheduleModal(null)
+    setRescheduling(false)
+    fetchSessions()
+
+    // Notificar a ambas partes (best-effort)
+    supabase.auth.getSession().then(({ data: { session: authSession } }) => {
+      if (!authSession?.access_token) return
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-reschedule`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authSession.access_token}` },
+        body: JSON.stringify({ sessionId: rescheduleModal.id, oldScheduledAt }),
+      }).catch(() => {})
+    })
   }
 
   const cancelSession = (session) => {
@@ -288,6 +380,7 @@ export default function MyAppointments() {
             const hasReview = (session.reviews ?? []).length > 0
             const hoursUntil = differenceInHours(parseISO(session.scheduled_at), new Date())
             const canChange = hoursUntil >= 48 && session.status === 'scheduled'
+            const canReschedule = hoursUntil > 24 && session.status === 'scheduled'
 
             return (
               <Card key={session.id}>
@@ -319,6 +412,11 @@ export default function MyAppointments() {
                   {canVideo && (
                     <Button size="sm" variant="calm" onClick={() => navigate(`/video-call/${session.id}`)}>
                       <Video size={14} strokeWidth={1.8} className="inline mr-1" />Unirse
+                    </Button>
+                  )}
+                  {canReschedule && (
+                    <Button size="sm" variant="secondary" onClick={() => openReschedule(session)}>
+                      <RotateCcw size={14} strokeWidth={1.8} className="inline mr-1" />Reagendar
                     </Button>
                   )}
                   {canChange && (
@@ -451,6 +549,81 @@ export default function MyAppointments() {
               <Button variant="danger" fullWidth loading={cancelling}
                 onClick={confirmModal.type === 'cancel' ? confirmCancel : confirmTherapistChange}>
                 {confirmModal.type === 'cancel' ? 'Sí, cancelar sesión' : 'Sí, cambiar terapeuta'}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
+
+      {/* Modal reagendamiento */}
+      <Modal isOpen={!!rescheduleModal} onClose={() => setRescheduleModal(null)} title="Reagendar sesión">
+        {rescheduleModal && (
+          <div className="flex flex-col gap-4">
+            <div className="bg-primary-50 border border-primary-100 rounded-xl p-3 text-sm text-primary-800">
+              Solo puedes reagendar con más de 24 horas de anticipación. La sesión mantendrá el mismo terapeuta.
+            </div>
+
+            {loadingSlots ? (
+              <div className="flex flex-col gap-2">{[1,2,3].map(i => <Skeleton key={i} className="h-10" />)}</div>
+            ) : Object.keys(availSlots).length === 0 ? (
+              <p className="text-center text-warm-500 py-6 text-sm">
+                Tu terapeuta no tiene disponibilidad en los próximos 28 días.
+              </p>
+            ) : (
+              <>
+                {/* Selector de fecha */}
+                <div>
+                  <p className="text-xs font-semibold text-warm-600 mb-2">Selecciona una fecha</p>
+                  <div className="grid grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
+                    {Object.keys(availSlots).map(dateKey => {
+                      const d = parseISO(dateKey)
+                      const label = format(d, "EEE d MMM", { locale: es })
+                      return (
+                        <button key={dateKey} onClick={() => { setSelectedDate(dateKey); setSelectedTime(null) }}
+                          className={`py-2.5 px-2 rounded-xl border text-xs font-medium transition-all ${
+                            selectedDate === dateKey
+                              ? 'border-primary-400 bg-primary-50 text-primary-700'
+                              : 'border-warm-200 hover:border-warm-300 text-warm-700'
+                          }`}>
+                          {label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+
+                {/* Selector de hora */}
+                {selectedDate && availSlots[selectedDate] && (
+                  <div>
+                    <p className="text-xs font-semibold text-warm-600 mb-2">Selecciona una hora</p>
+                    <div className="flex flex-wrap gap-2">
+                      {availSlots[selectedDate].map(time => (
+                        <button key={time} onClick={() => setSelectedTime(time)}
+                          className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all ${
+                            selectedTime === time
+                              ? 'border-primary-400 bg-primary-50 text-primary-700'
+                              : 'border-warm-200 hover:border-warm-300 text-warm-700'
+                          }`}>
+                          {time}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Resumen */}
+                {selectedDate && selectedTime && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 text-sm text-green-800 font-medium">
+                    Nueva fecha: {format(parseISO(selectedDate), "EEEE d 'de' MMMM", { locale: es })} a las {selectedTime}
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="flex gap-2">
+              <Button variant="outline" fullWidth onClick={() => setRescheduleModal(null)}>Cancelar</Button>
+              <Button fullWidth disabled={!selectedDate || !selectedTime} loading={rescheduling} onClick={confirmReschedule}>
+                Confirmar cambio
               </Button>
             </div>
           </div>
