@@ -1,0 +1,16 @@
+User-agent: *
+Allow: /
+Allow: /blog
+Allow: /blog/
+Allow: /terapeutas
+Allow: /pricing
+
+# No indexar páginas privadas
+Disallow: /patient/
+Disallow: /therapist/
+Disallow: /admin/
+Disallow: /video-call/
+Disallow: /payment/
+Disallow: /auth/
+
+Sitemap: https://psiconecta.app/sitemap.xml

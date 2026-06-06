@@ -471,6 +471,9 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Pull quotes en secciones pares, separadores decorativos entre secciones
 - [x] Headings con chip de icono en gradiente, CTA integrado en color del artículo
 - [x] Cards de artículos relacionados con mini-portada SVG
+- [x] `public/sitemap.xml` — todas las rutas públicas con priority y changefreq correctos
+- [x] `public/robots.txt` — Allow rutas públicas, Disallow rutas privadas, apunta al sitemap
+- [x] `index.html` — meta description, OG tags y link rel="sitemap" mejorados
 - [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP
