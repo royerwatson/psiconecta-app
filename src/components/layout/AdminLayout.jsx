@@ -2,7 +2,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import {
   LayoutDashboard, Bot, Stethoscope, Users, Calendar,
-  UsersRound, TrendingUp, Wallet, ArrowDownToLine,
+  UsersRound, TrendingUp, Wallet, ArrowDownToLine, RotateCcw,
   ClipboardList, Star, Crown, LogOut,
 } from 'lucide-react'
 
@@ -16,6 +16,7 @@ const NAV = [
   { to: '/admin/stats',         Icon: TrendingUp,       label: 'Estadísticas'   },
   { to: '/admin/financial',     Icon: Wallet,           label: 'Finanzas'       },
   { to: '/admin/payouts',       Icon: ArrowDownToLine,  label: 'Pagos'          },
+  { to: '/admin/refunds',       Icon: RotateCcw,        label: 'Reembolsos'     },
   { to: '/admin/subscriptions', Icon: Crown,            label: 'Suscripciones'  },
   { to: '/admin/activity',      Icon: ClipboardList,    label: 'Actividad'      },
   { to: '/admin/reviews',       Icon: Star,             label: 'Reseñas'        },

@@ -473,6 +473,10 @@ export default function Register() {
         setEmailPendingVerification(true)
         return
       }
+
+      // Enviar email de bienvenida (best-effort, no bloquea el flujo)
+      supabase.functions.invoke('notify-welcome').catch(() => {})
+
       toast.success('¡Cuenta creada!')
       navigate(role === 'therapist' ? '/therapist/dashboard' : '/patient/dashboard')
     } catch (err) {

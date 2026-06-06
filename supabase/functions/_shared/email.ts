@@ -320,6 +320,144 @@ export function therapistChangedNotifyEmail({
   `)
 }
 
+export function welcomeEmail({
+  name,
+  role,
+}: {
+  name: string
+  role: 'therapist' | 'client'
+}) {
+  const isTherapist = role === 'therapist'
+  const dashUrl = isTherapist ? `${APP_URL}/therapist/dashboard` : `${APP_URL}/patient/dashboard`
+
+  return baseLayout(`
+    <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">
+      Bienvenido/a a Psiconecta, ${name} 👋
+    </p>
+    <p style="margin:0 0 28px;font-size:15px;color:#64748b;">
+      Tu cuenta ha sido creada exitosamente. ${isTherapist
+        ? 'Estamos procesando la verificación de tus credenciales.'
+        : 'Ya puedes comenzar a buscar un terapeuta.'}
+    </p>
+
+    ${isTherapist ? `
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+      <tr><td>
+        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#1e3a5f;">Primeros pasos:</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow('1.', 'Completa tu perfil con foto y biografía')}
+          ${infoRow('2.', 'Sube tus 3 documentos de credencial')}
+          ${infoRow('3.', 'Configura tu disponibilidad y precio por sesión')}
+          ${infoRow('4.', 'Espera la verificación (24-48 h) para aparecer en el directorio')}
+        </table>
+      </td></tr>
+    </table>` : `
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+      <tr><td>
+        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#1e3a5f;">Para comenzar:</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow('1.', 'Completa tu perfil')}
+          ${infoRow('2.', 'Busca un terapeuta por especialidad o disponibilidad')}
+          ${infoRow('3.', 'Agenda tu primera sesión')}
+        </table>
+      </td></tr>
+    </table>`}
+
+    <div style="text-align:center;">
+      ${btn('Ir a mi dashboard', dashUrl)}
+    </div>
+  `)
+}
+
+export function riskAlertEmail({
+  therapistName,
+  patientName,
+  riskLevel,
+  aiMessage,
+  checkinDate,
+}: {
+  therapistName: string
+  patientName: string
+  riskLevel: 'high' | 'medium'
+  aiMessage: string
+  checkinDate: string
+}) {
+  const isHigh = riskLevel === 'high'
+  const color  = isHigh ? '#dc2626' : '#d97706'
+  const bgColor = isHigh ? '#fff5f5' : '#fffbeb'
+  const borderColor = isHigh ? '#fecaca' : '#fde68a'
+  const date = new Date(checkinDate).toLocaleDateString('es-DO', {
+    weekday: 'long', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit',
+  })
+
+  return baseLayout(`
+    <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">
+      ${isHigh ? '⚠️ Alerta de riesgo alto' : '⚡ Alerta de riesgo moderado'}
+    </p>
+    <p style="margin:0 0 24px;font-size:15px;color:#64748b;">
+      Hola ${therapistName}, tu paciente <strong>${patientName}</strong> completó su check-in de bienestar y presenta señales de ${isHigh ? 'riesgo alto' : 'malestar moderado'}.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0"
+      style="background:${bgColor};border:1px solid ${borderColor};border-radius:14px;padding:20px;margin-bottom:24px;">
+      <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow('Paciente', patientName)}
+          ${infoRow('Nivel de riesgo', isHigh ? 'ALTO' : 'MODERADO')}
+          ${infoRow('Fecha', date)}
+        </table>
+        <div style="margin-top:12px;padding:12px 16px;background:#ffffff;border-radius:10px;border-left:3px solid ${color};">
+          <p style="margin:0;font-size:13px;color:#475569;font-style:italic;">"${aiMessage}"</p>
+        </div>
+      </td></tr>
+    </table>
+
+    <p style="font-size:14px;color:#64748b;margin:0 0 20px;">
+      ${isHigh
+        ? 'Se recomienda contactar a tu paciente a la brevedad posible.'
+        : 'Considera revisar el check-in completo de tu paciente.'}
+    </p>
+
+    <div style="text-align:center;">
+      ${btn('Ver perfil del paciente', `${APP_URL}/therapist/patients`, color)}
+    </div>
+  `)
+}
+
+export function testResultAvailableEmail({
+  patientName,
+  testName,
+  therapistName,
+}: {
+  patientName: string
+  testName: string
+  therapistName: string
+}) {
+  return baseLayout(`
+    <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">Resultado disponible 📊</p>
+    <p style="margin:0 0 28px;font-size:15px;color:#64748b;">
+      Hola ${patientName}, tu terapeuta <strong>${therapistName}</strong> ha compartido contigo el resultado de una evaluación.
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+      <tr><td>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          ${infoRow('Evaluación', testName)}
+          ${infoRow('Compartido por', therapistName)}
+        </table>
+      </td></tr>
+    </table>
+
+    <p style="font-size:14px;color:#64748b;margin:0 0 20px;">
+      Puedes ver tu resultado completo, incluyendo las puntuaciones y las notas de tu terapeuta, directamente en la app.
+    </p>
+
+    <div style="text-align:center;">
+      ${btn('Ver mis resultados', `${APP_URL}/patient/my-results`)}
+    </div>
+  `)
+}
+
 export function subscriptionActivatedEmail({
   therapistName,
   expiresAt,

@@ -18,6 +18,7 @@ import AdminGroupSessions  from '@/pages/admin/AdminGroupSessions'
 import AdminAIAlerts       from '@/pages/admin/AdminAIAlerts'
 import AdminFinancial      from '@/pages/admin/AdminFinancial'
 import AdminPayouts        from '@/pages/admin/AdminPayouts'
+import AdminRefunds        from '@/pages/admin/AdminRefunds'
 import AdminSubscriptions  from '@/pages/admin/AdminSubscriptions'
 import AdminActivityLog    from '@/pages/admin/AdminActivityLog'
 import AdminReviews        from '@/pages/admin/AdminReviews'
@@ -249,6 +250,7 @@ export default function App() {
           <Route path="stats"      element={<AdminStats />} />
           <Route path="financial"      element={<AdminFinancial />} />
           <Route path="payouts"        element={<AdminPayouts />} />
+          <Route path="refunds"        element={<AdminRefunds />} />
           <Route path="subscriptions"  element={<AdminSubscriptions />} />
           <Route path="activity"   element={<AdminActivityLog />} />
           <Route path="reviews"    element={<AdminReviews />} />

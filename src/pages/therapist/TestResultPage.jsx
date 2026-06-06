@@ -207,6 +207,13 @@ export default function TestResultPage() {
     setResults(prev => prev.map(r => ({ ...r, released_to_patient: true })))
     toast.success('Resultados liberados al paciente')
     setReleasing(false)
+
+    // Notificar al paciente por email (best-effort)
+    if (patient?.id && test?.name) {
+      supabase.functions.invoke('notify-test-result', {
+        body: { patientId: patient.id, testName: test.name },
+      }).catch(() => {})
+    }
   }
 
   const markAsReviewed = async () => {

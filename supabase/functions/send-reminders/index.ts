@@ -29,28 +29,10 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Sesiones en las próximas 24-25 horas
-    const from = new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString()
-    const to   = new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString()
-
-    const { data: sessions } = await supabaseAdmin
-      .from('sessions')
-      .select(`
-        id, scheduled_at,
-        patient:profiles!sessions_patient_id_fkey(id, full_name),
-        therapist:profiles!sessions_therapist_id_fkey(id, full_name)
-      `)
-      .eq('status', 'scheduled')
-      .gte('scheduled_at', from)
-      .lte('scheduled_at', to)
-
-    if (!sessions?.length) {
-      return new Response(JSON.stringify({ sent: 0 }), { status: 200 })
-    }
-
     let sent = 0
 
-    for (const session of sessions) {
+    // ── Helper para enviar recordatorio a ambas partes ────────────────────────
+    async function sendSessionReminder(session: any, label: string) {
       const date = formatDate(session.scheduled_at)
       const time = formatTime(session.scheduled_at)
 
@@ -59,14 +41,14 @@ Deno.serve(async (req) => {
         supabaseAdmin.auth.admin.getUserById(session.therapist?.id),
       ])
 
-      const emails = []
+      const emails: Promise<any>[] = []
 
       if (patientAuth.data?.user?.email) {
         emails.push(sendEmail({
           to: patientAuth.data.user.email,
-          subject: '⏰ Recordatorio: tienes una sesión mañana',
+          subject: `⏰ Recordatorio: tienes una sesión ${label}`,
           html: reminderEmail({
-            recipientName:  session.patient?.full_name ?? 'Paciente',
+            recipientName:   session.patient?.full_name ?? 'Paciente',
             otherPersonName: session.therapist?.full_name ?? 'Terapeuta',
             role: 'patient', date, time,
           }),
@@ -76,9 +58,9 @@ Deno.serve(async (req) => {
       if (therapistAuth.data?.user?.email) {
         emails.push(sendEmail({
           to: therapistAuth.data.user.email,
-          subject: '⏰ Recordatorio: tienes una sesión mañana',
+          subject: `⏰ Recordatorio: tienes una sesión ${label}`,
           html: reminderEmail({
-            recipientName:  session.therapist?.full_name ?? 'Terapeuta',
+            recipientName:   session.therapist?.full_name ?? 'Terapeuta',
             otherPersonName: session.patient?.full_name ?? 'Paciente',
             role: 'therapist', date, time,
           }),
@@ -87,6 +69,44 @@ Deno.serve(async (req) => {
 
       await Promise.all(emails)
       sent += emails.length
+    }
+
+    // ── Recordatorios 24 horas antes ──────────────────────────────────────────
+    const from24 = new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString()
+    const to24   = new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString()
+
+    const { data: sessions24 } = await supabaseAdmin
+      .from('sessions')
+      .select(`
+        id, scheduled_at,
+        patient:profiles!sessions_patient_id_fkey(id, full_name),
+        therapist:profiles!sessions_therapist_id_fkey(id, full_name)
+      `)
+      .eq('status', 'scheduled')
+      .gte('scheduled_at', from24)
+      .lte('scheduled_at', to24)
+
+    for (const session of sessions24 ?? []) {
+      await sendSessionReminder(session, 'mañana')
+    }
+
+    // ── Recordatorios 1 hora antes ────────────────────────────────────────────
+    const from1h = new Date(Date.now() + 50 * 60 * 1000).toISOString()
+    const to1h   = new Date(Date.now() + 70 * 60 * 1000).toISOString()
+
+    const { data: sessions1h } = await supabaseAdmin
+      .from('sessions')
+      .select(`
+        id, scheduled_at,
+        patient:profiles!sessions_patient_id_fkey(id, full_name),
+        therapist:profiles!sessions_therapist_id_fkey(id, full_name)
+      `)
+      .eq('status', 'scheduled')
+      .gte('scheduled_at', from1h)
+      .lte('scheduled_at', to1h)
+
+    for (const session of sessions1h ?? []) {
+      await sendSessionReminder(session, 'en 1 hora')
     }
 
     // ── Recordatorios de vencimiento de suscripción (7 días antes) ────────────

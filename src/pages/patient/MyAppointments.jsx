@@ -13,7 +13,15 @@ import StarRating from '@/components/ui/StarRating'
 import { Textarea } from '@/components/ui/Input'
 import { differenceInHours, parseISO } from 'date-fns'
 import toast from 'react-hot-toast'
-import { AlertTriangle, Calendar, BookOpen, Zap, Video, RefreshCw, Star, MessageCircle, Check } from 'lucide-react'
+import { AlertTriangle, Calendar, BookOpen, Zap, Video, RefreshCw, Star, MessageCircle, Check, RotateCcw } from 'lucide-react'
+
+// ── Política de reembolso ─────────────────────────────────────────────────────
+function getRefundPolicy(scheduledAt) {
+  const hoursUntil = differenceInHours(parseISO(scheduledAt), new Date())
+  if (hoursUntil < 2)  return { pct: 0,   label: 'Sin reembolso',      canCancel: false, color: 'text-red-600'   }
+  if (hoursUntil < 24) return { pct: 50,  label: '50% de reembolso',   canCancel: true,  color: 'text-amber-600' }
+  return                      { pct: 100, label: 'Reembolso completo', canCancel: true,  color: 'text-green-600' }
+}
 
 export default function MyAppointments() {
   const { user } = useAuthStore()
@@ -29,6 +37,7 @@ export default function MyAppointments() {
   const [selectedTherapist, setSelectedTherapist] = useState(null)
   const [changing, setChanging] = useState(false)
   const [confirmModal, setConfirmModal] = useState(null) // { type: 'cancel'|'change', session }
+  const [cancelling, setCancelling] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { if (user) fetchSessions() }, [user])
@@ -60,34 +69,62 @@ export default function MyAppointments() {
     }
   }
 
-  const cancelSession = async (session) => {
-    const hoursUntil = differenceInHours(parseISO(session.scheduled_at), new Date())
-    if (hoursUntil < 48) {
-      toast.error('No puedes cancelar con menos de 48 horas de anticipación')
+  const cancelSession = (session) => {
+    const policy = getRefundPolicy(session.scheduled_at)
+    if (!policy.canCancel) {
+      toast.error('No se puede cancelar con menos de 2 horas de anticipación')
       return
     }
-    setConfirmModal({ type: 'cancel', session })
+    setConfirmModal({ type: 'cancel', session, policy })
   }
 
   const confirmCancel = async () => {
     const session = confirmModal.session
+    setCancelling(true)
     setConfirmModal(null)
-    await supabase.from('sessions').update({ status: 'cancelled' }).eq('id', session.id)
-    toast.success('Sesión cancelada')
-    fetchSessions()
 
-    // Enviar emails de cancelación (best-effort)
-    supabase.auth.getSession().then(({ data: { session: authSession } }) => {
-      if (!authSession?.access_token) return
-      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-cancellation`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${authSession.access_token}`,
-        },
-        body: JSON.stringify({ sessionId: session.id }),
-      }).catch(() => {})
-    })
+    try {
+      const { data: { session: authSession } } = await supabase.auth.getSession()
+      const token = authSession?.access_token
+
+      if (token && session.payment_intent_id) {
+        // Cancelar con reembolso vía Edge Function
+        const res = await fetch(
+          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-refund`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ sessionId: session.id }),
+          }
+        )
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error ?? 'Error procesando el reembolso')
+
+        const msg = data.refundAmount > 0
+          ? `Sesión cancelada. Reembolso de ${formatPrice(data.refundAmount)} en camino.`
+          : 'Sesión cancelada.'
+        toast.success(msg, { duration: 5000 })
+      } else {
+        // Sin pago registrado — cancelar directamente
+        await supabase.from('sessions').update({ status: 'cancelled' }).eq('id', session.id)
+        toast.success('Sesión cancelada')
+      }
+
+      fetchSessions()
+
+      // Email de cancelación (best-effort)
+      if (token) {
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-cancellation`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ sessionId: session.id }),
+        }).catch(() => {})
+      }
+    } catch (err) {
+      toast.error(err.message ?? 'Error al cancelar la sesión')
+    } finally {
+      setCancelling(false)
+    }
   }
 
   const openChangeModal = async (session) => {
@@ -370,7 +407,12 @@ export default function MyAppointments() {
               {confirmModal.type === 'cancel' ? (
                 <>
                   <p className="font-semibold mb-1">Esta acción no se puede deshacer.</p>
-                  <p>Se cancelará tu sesión con <strong>{confirmModal.session.therapist?.full_name}</strong>. No se realizará ningún reembolso automático.</p>
+                  <p className="mb-2">Se cancelará tu sesión con <strong>{confirmModal.session.therapist?.full_name}</strong>.</p>
+                  {confirmModal.policy && (
+                    <p className={`font-semibold text-sm ${confirmModal.policy.color}`}>
+                      Reembolso: {confirmModal.policy.label} ({confirmModal.policy.pct}% de {formatPrice(confirmModal.session.price ?? 0)})
+                    </p>
+                  )}
                 </>
               ) : (
                 <>
@@ -383,7 +425,7 @@ export default function MyAppointments() {
               <Button variant="outline" fullWidth onClick={() => setConfirmModal(null)}>
                 Cancelar
               </Button>
-              <Button variant="danger" fullWidth
+              <Button variant="danger" fullWidth loading={cancelling}
                 onClick={confirmModal.type === 'cancel' ? confirmCancel : confirmTherapistChange}>
                 {confirmModal.type === 'cancel' ? 'Sí, cancelar sesión' : 'Sí, cambiar terapeuta'}
               </Button>

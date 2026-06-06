@@ -17,6 +17,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendEmail, riskAlertEmail } from '../_shared/email.ts'
 
 const ANTHROPIC_API_KEY      = Deno.env.get('ANTHROPIC_API_KEY') ?? ''
 const SUPABASE_URL           = Deno.env.get('SUPABASE_URL') ?? ''
@@ -196,29 +197,39 @@ Deno.serve(async (req) => {
       console.error('Insert error:', insertError)
     }
 
-    // Si riesgo alto → enviar notificación al terapeuta (best-effort)
-    if (analysis.risk_level === 'high' && therapistId) {
+    // Si riesgo alto o medio → enviar email de alerta al terapeuta (best-effort)
+    if ((analysis.risk_level === 'high' || analysis.risk_level === 'medium') && therapistId) {
       try {
-        const { data: therapist } = await supabase
-          .from('profiles')
-          .select('email, full_name')
-          .eq('id', therapistId)
-          .single()
+        const [therapistAuth, therapistProfile, patientProfile] = await Promise.all([
+          supabase.auth.admin.getUserById(therapistId),
+          supabase.from('profiles').select('full_name').eq('id', therapistId).single(),
+          supabase.from('profiles').select('full_name').eq('id', patient_id).single(),
+        ])
 
-        const { data: patient } = await supabase
-          .from('profiles')
-          .select('full_name')
-          .eq('id', patient_id)
-          .single()
-
-        if (therapist?.email) {
-          await supabase.functions.invoke('notify-new-message', {
-            body: {
-              recipientId:    therapistId,
-              messagePreview: `⚠️ Alerta de bienestar: ${patient?.full_name ?? 'Tu paciente'} completó su check-in diario con señales de riesgo alto. Revísalo en Psiconecta.`,
-            },
-          }).catch(() => {}) // silenciar errores de notificación
+        const therapistEmail = therapistAuth.data?.user?.email
+        if (therapistEmail && therapistProfile.data?.full_name) {
+          await sendEmail({
+            to: therapistEmail,
+            subject: analysis.risk_level === 'high'
+              ? `⚠️ Alerta de riesgo alto — ${patientProfile.data?.full_name ?? 'Tu paciente'}`
+              : `⚡ Alerta de riesgo moderado — ${patientProfile.data?.full_name ?? 'Tu paciente'}`,
+            html: riskAlertEmail({
+              therapistName: therapistProfile.data.full_name,
+              patientName:   patientProfile.data?.full_name ?? 'Tu paciente',
+              riskLevel:     analysis.risk_level as 'high' | 'medium',
+              aiMessage:     analysis.message,
+              checkinDate:   new Date().toISOString(),
+            }),
+          })
         }
+
+        // Marcar notificado en BD
+        await supabase.from('ai_checkins')
+          .update({ notified: true })
+          .eq('patient_id', patient_id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+
       } catch (notifErr) {
         console.error('Notification error (non-blocking):', notifErr)
       }
