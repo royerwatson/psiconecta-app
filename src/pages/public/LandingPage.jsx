@@ -24,11 +24,11 @@ import SEOHead from './SEOHead'
    Cambiar por fotos propias cuando estén disponibles.
 ───────────────────────────────────────────── */
 const IMG = {
-  hero:       'https://images.unsplash.com/photo-1588196749597-9ff075ee6b5b?w=900&q=80&fit=crop',
-  therapist:  'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=700&q=80&fit=crop',
-  avatar1:    'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80&q=80&fit=crop&crop=face',
-  avatar2:    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80&fit=crop&crop=face',
-  avatar3:    'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&q=80&fit=crop&crop=face',
+  hero:      'https://picsum.photos/id/1059/900/500',
+  therapist: 'https://picsum.photos/id/1005/700/520',
+  avatar1:   'https://i.pravatar.cc/80?img=5',
+  avatar2:   'https://i.pravatar.cc/80?img=11',
+  avatar3:   'https://i.pravatar.cc/80?img=9',
 }
 
 /* ─── Testimonios ───────────────────────────── */
