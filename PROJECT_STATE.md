@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (v15 — fix registro de usuarios, trigger RLS, fallback perfil)*
+*Última actualización: 2026-06-06 (v16 — fix registro, trigger RLS, Resend integrado con Supabase Auth)*
 
 ---
 
@@ -335,7 +335,7 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Botón "Completar verificación" aparece solo cuando los 3 están aprobados
 - [x] Al completar, terapeuta queda activo y visible para pacientes
 
-### Emails Transaccionales (Resend — activo, dominio en verificación)
+### Emails Transaccionales (Resend — activo, dominio verificado ✅)
 - [x] Bienvenida al registrarse (`notify-welcome`)
 - [x] Confirmación de cita — paciente y terapeuta (`capture-paypal-order`)
 - [x] Cancelación con motivo — paciente y terapeuta (`notify-cancellation`)
@@ -482,7 +482,8 @@ CREATE POLICY "profiles_insert" ON profiles FOR INSERT
 - [ ] `PAYPAL_WEBHOOK_ID` — reemplazar `PAYPAL_WEBHOOK_SANDBOX_ID` por el ID de producción
 - [x] Cron job `send-reminders-hourly` — ✅ activo en pg_cron, cada hora (`0 * * * *`)
 - [x] `CRON_SECRET` en Supabase Secrets — ✅ configurado 2026-06-06
-- [ ] Dominio `psiconecta.app` en Resend — DNS agregado en Namecheap, en propagación
+- [x] Dominio `psiconecta.app` en Resend — DKIM + SPF verificados ✅
+- [x] Resend integrado como proveedor SMTP de Supabase Auth — emails de verificación y reset de contraseña salen de `@psiconecta.app` en lugar del dominio genérico de Supabase ✅
 - [ ] Registrar eventos en PayPal webhook: `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`
 
 ### Sistema de reembolsos ✅ (2026-06-05)
