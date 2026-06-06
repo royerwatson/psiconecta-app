@@ -467,15 +467,21 @@ export default function Register() {
         }).eq('id', user.id)
       }
 
+      // Enviar email de bienvenida — funciona con o sin sesión activa
+      // notify-welcome acepta { user_id } y usa service role internamente
+      const { data: { user: signedUser } } = await supabase.auth.getUser()
+      if (signedUser) {
+        supabase.functions.invoke('notify-welcome', {
+          body: { user_id: signedUser.id },
+        }).catch(() => {})
+      }
+
       // Si Supabase requiere confirmación de email, session será null
       const { data: { session } } = await supabase.auth.getSession()
       if (!session) {
         setEmailPendingVerification(true)
         return
       }
-
-      // Enviar email de bienvenida (best-effort, no bloquea el flujo)
-      supabase.functions.invoke('notify-welcome').catch(() => {})
 
       toast.success('¡Cuenta creada!')
       navigate(role === 'therapist' ? '/therapist/dashboard' : '/patient/dashboard')
