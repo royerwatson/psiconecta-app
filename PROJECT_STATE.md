@@ -216,12 +216,22 @@ Flujo: terapeuta sube docs → admin aprueba/rechaza cada uno con motivo → cua
 
 ### Secrets configurados en Supabase
 ```
-DAILY_API_KEY          ✅ rotado y actualizado (2026-06-05)
-PAYPAL_CLIENT_ID       — pendiente configurar en producción
-PAYPAL_CLIENT_SECRET   — pendiente
-PAYPAL_BASE_URL        — pendiente (sandbox: https://api-m.sandbox.paypal.com)
-RESEND_API_KEY         — pendiente
-ANTHROPIC_API_KEY      — pendiente
+DAILY_API_KEY              ✅ rotado 2026-06-05
+PAYPAL_CLIENT_ID           ✅ configurado
+PAYPAL_CLIENT_SECRET       ✅ configurado
+PAYPAL_BASE_URL            ✅ configurado (sandbox actualmente)
+PAYPAL_WEBHOOK_SANDBOX_ID  ✅ configurado
+APP_URL                    ✅ configurado
+RESEND_API_KEY             ✅ configurado
+FROM_EMAIL                 ✅ configurado
+ANTHROPIC_API_KEY          ✅ configurado — IA de check-ins activa
+CLINICAL_ENCRYPTION_KEY    ✅ configurado
+```
+
+**Pendientes en Supabase Secrets:**
+```
+PAYPAL_WEBHOOK_ID   — para producción (actualmente solo existe PAYPAL_WEBHOOK_SANDBOX_ID)
+CRON_SECRET         — para proteger el endpoint de send-reminders
 ```
 
 ---
@@ -396,12 +406,11 @@ VITE_PAYPAL_CLIENT_ID=...
 ### Configuración externa
 - [ ] Apple OAuth — Apple Developer Console
 - [ ] Facebook OAuth — Meta for Developers
-- [ ] PayPal producción — Client ID/Secret en Supabase Secrets
-- [ ] Resend API Key — emails transaccionales
-- [ ] Anthropic API Key — Edge Function ai-checkin
-- [ ] Supabase Rate Limiting — verificar configuración en Settings > Auth > Rate Limits
-- [ ] `PAYPAL_WEBHOOK_ID` en Supabase Secrets — ID del webhook en PayPal Developer Console
-- [ ] Cron job diario para `send-reminders` — vía pg_cron o Supabase Scheduled Functions
+- [ ] PayPal producción — cambiar PAYPAL_BASE_URL de sandbox a producción cuando esté listo
+- [ ] `PAYPAL_WEBHOOK_ID` — reemplazar PAYPAL_WEBHOOK_SANDBOX_ID por el ID de producción
+- [ ] Cron job para `send-reminders` — configurar en Supabase Scheduled Functions (cada hora)
+- [ ] `CRON_SECRET` en Supabase Secrets — protege el endpoint de send-reminders
+- [ ] Verificar dominio `psiconecta.app` en Resend para enviar desde FROM_EMAIL configurado
 - [ ] Registrar eventos en PayPal webhook: `BILLING.SUBSCRIPTION.CANCELLED`, `BILLING.SUBSCRIPTION.EXPIRED`
 
 ### Mejoras técnicas
