@@ -63,7 +63,7 @@ src/
     ├── therapist/  14 páginas (ver §4)
     ├── shared/     ChatPage, VideoCall
     ├── payment/    PaymentSuccess, PaymentCancel
-    └── public/     LandingPage, PricingPage, SEOHead, TherapistDirectoryPage, BlogListPage, BlogPostPage
+    └── public/     LandingPage, PricingPage, SEOHead, TherapistDirectoryPage, BlogListPage, BlogPostPage, LegalPage, TermsPage, PrivacyPage, RefundPage
 ```
 
 ---
@@ -173,6 +173,9 @@ src/
 | `/terapeutas` | Directorio público de terapeutas verificados (indexable por Google) |
 | `/blog` | Listado de artículos de salud mental |
 | `/blog/:slug` | Artículo individual con SEO, artículos relacionados y CTA |
+| `/terminos` | Términos de uso (12 secciones, ley RD 172-13) |
+| `/privacidad` | Política de privacidad (datos de salud, terceros, derechos) |
+| `/reembolsos` | Política de reembolsos (100%/50%/0%, urgentes, Pro) |
 | `/video-call/:id` | VideoCall Daily.co (reconexión automática) |
 | `/pricing` | Landing pública de planes |
 | `/auth/callback` | Callback OAuth (Google/Apple/Facebook) |
@@ -474,6 +477,12 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] `public/sitemap.xml` — todas las rutas públicas con priority y changefreq correctos
 - [x] `public/robots.txt` — Allow rutas públicas, Disallow rutas privadas, apunta al sitemap
 - [x] `index.html` — meta description, OG tags y link rel="sitemap" mejorados
+- [x] `TermsPage.jsx` — Términos de uso, 12 secciones, referencia Ley 172-13 RD
+- [x] `PrivacyPage.jsx` — Política de privacidad con énfasis en datos de salud mental
+- [x] `RefundPage.jsx` — Política de reembolsos con tarjetas visuales 100%/50%/0%
+- [x] `LegalPage.jsx` — Layout compartido con componentes Section, P, Ul, Highlight
+- [x] Footer de landing apunta a rutas reales (antes apuntaban a #)
+- [x] Sitemap actualizado con rutas /terminos, /privacidad, /reembolsos
 - [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP
