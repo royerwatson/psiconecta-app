@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (landing page v4 — dark mode, directorio público /terapeutas)*
+*Última actualización: 2026-06-06 (landing page v5 — blog con 5 artículos SEO, /terapeutas, dark mode)*
 
 ---
 
@@ -63,7 +63,7 @@ src/
     ├── therapist/  14 páginas (ver §4)
     ├── shared/     ChatPage, VideoCall
     ├── payment/    PaymentSuccess, PaymentCancel
-    └── public/     LandingPage, PricingPage, SEOHead, TherapistDirectoryPage
+    └── public/     LandingPage, PricingPage, SEOHead, TherapistDirectoryPage, BlogListPage, BlogPostPage
 ```
 
 ---
@@ -171,6 +171,8 @@ src/
 |------|--------|
 | `/` | LandingPage pública (hero, beneficios, pasos, terapeutas, FAQ, confianza) |
 | `/terapeutas` | Directorio público de terapeutas verificados (indexable por Google) |
+| `/blog` | Listado de artículos de salud mental |
+| `/blog/:slug` | Artículo individual con SEO, artículos relacionados y CTA |
 | `/video-call/:id` | VideoCall Daily.co (reconexión automática) |
 | `/pricing` | Landing pública de planes |
 | `/auth/callback` | Callback OAuth (Google/Apple/Facebook) |
@@ -458,6 +460,11 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Modo oscuro en landing — variantes `dark:` Tailwind en todos los componentes; coherente con el resto de la app
 - [x] Directorio público `/terapeutas` — `TherapistDirectoryPage.jsx`, búsqueda + filtros por especialidad, cards con rating/precio/badge Pro, SEO title/description propios, sin auth requerida
 - [x] Link "Terapeutas" en navbar y footer de la landing
+- [x] Blog de salud mental — `src/data/blogPosts.js` con 5 artículos SEO para RD
+- [x] `BlogListPage.jsx` — listado con artículo destacado + grid, categorías con color, tiempo de lectura
+- [x] `BlogPostPage.jsx` — layout editorial, soporte **negrita** y listas, CTA integrado, artículos relacionados
+- [x] Rutas `/blog` y `/blog/:slug` registradas en App.jsx
+- [x] Link "Blog" en navbar y footer de la landing
 - [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP

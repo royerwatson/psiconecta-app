@@ -7,6 +7,7 @@
 export const BLOG_POSTS = [
   {
     slug: 'como-saber-si-necesito-terapia',
+    icon: 'HeartPulse',
     title: '¿Cómo saber si necesito ir a terapia?',
     excerpt:
       'Muchas personas dudan mucho antes de buscar ayuda psicológica. En este artículo te explicamos las señales que indican que hablar con un profesional puede marcar la diferencia.',
@@ -36,6 +37,7 @@ export const BLOG_POSTS = [
 
   {
     slug: 'psicologo-psiquiatra-coach-diferencias',
+    icon: 'Users',
     title: 'Psicólogo, psiquiatra o coach: ¿cuál necesito?',
     excerpt:
       'Tres profesiones que trabajan con el bienestar mental, pero con roles muy distintos. Te explicamos las diferencias para que puedas elegir con criterio.',
@@ -69,6 +71,7 @@ export const BLOG_POSTS = [
 
   {
     slug: 'terapia-online-vs-presencial',
+    icon: 'Video',
     title: 'Terapia online vs. presencial: ¿cuál es mejor para ti?',
     excerpt:
       'La terapia online creció enormemente en los últimos años. ¿Es igual de efectiva? ¿Para quién funciona mejor? Resolvemos las preguntas más frecuentes.',
@@ -102,6 +105,7 @@ export const BLOG_POSTS = [
 
   {
     slug: 'ansiedad-signos-y-que-hacer',
+    icon: 'BrainCircuit',
     title: 'Ansiedad: señales que no debes ignorar y qué puedes hacer',
     excerpt:
       'La ansiedad es la condición de salud mental más frecuente en el mundo. Conocer sus señales y saber cuándo buscar ayuda puede marcar una gran diferencia.',
@@ -135,6 +139,7 @@ export const BLOG_POSTS = [
 
   {
     slug: 'como-prepararte-para-primera-sesion',
+    icon: 'CalendarCheck',
     title: 'Cómo prepararte para tu primera sesión de terapia',
     excerpt:
       'La primera cita con un psicólogo puede generar nervios. Con estas claves, llegarás más tranquilo y sacarás más provecho desde el primer encuentro.',

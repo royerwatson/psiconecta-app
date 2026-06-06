@@ -2,37 +2,87 @@ import { Link, useParams, Navigate } from 'react-router-dom'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 import { getBlogPost, getRelatedPosts } from '@/data/blogPosts'
-import { ArrowRight, ChevronRight, Clock, ArrowLeft } from 'lucide-react'
+import {
+  ArrowRight, ChevronRight, Clock, ArrowLeft,
+  HeartPulse, Users, Video, BrainCircuit, CalendarCheck,
+} from 'lucide-react'
+
+const ICON_MAP = { HeartPulse, Users, Video, BrainCircuit, CalendarCheck }
 
 const CATEGORY_COLORS = {
-  'Bienestar':    'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400',
-  'Guías':        'bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400',
+  'Bienestar':    'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300',
+  'Guías':        'bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300',
   'Salud mental': 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400',
   'Consejos':     'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400',
 }
 
-function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })
 }
 
-/* Renderiza el body de una sección: soporta **negrita** y saltos de línea */
-function SectionBody({ text }) {
+/* Portada con patrón SVG decorativo */
+function PostCover({ gradient, iconName, large = false }) {
+  const Icon = ICON_MAP[iconName]
   return (
-    <div className="space-y-4">
-      {text.split('\n\n').map((para, i) => {
-        // Detectar listas con -
+    <div className={`relative overflow-hidden bg-gradient-to-br ${gradient} ${large ? 'h-64 sm:h-96' : 'h-32'}`}>
+      <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 800 400" preserveAspectRatio="xMidYMid slice">
+        <circle cx="650" cy="-60" r="300" fill="white" />
+        <circle cx="-50" cy="350" r="220" fill="white" />
+        <circle cx="400" cy="200" r="80" fill="white" />
+      </svg>
+      <svg className="absolute inset-0 w-full h-full opacity-[0.07]" viewBox="0 0 40 40" preserveAspectRatio="repeat">
+        <circle cx="5" cy="5" r="1.5" fill="white" />
+        <circle cx="20" cy="5" r="1.5" fill="white" />
+        <circle cx="35" cy="5" r="1.5" fill="white" />
+        <circle cx="5" cy="20" r="1.5" fill="white" />
+        <circle cx="20" cy="20" r="1.5" fill="white" />
+        <circle cx="35" cy="20" r="1.5" fill="white" />
+        <circle cx="5" cy="35" r="1.5" fill="white" />
+        <circle cx="20" cy="35" r="1.5" fill="white" />
+        <circle cx="35" cy="35" r="1.5" fill="white" />
+      </svg>
+      {Icon && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className={`bg-white/20 backdrop-blur-sm rounded-3xl flex items-center justify-center ${large ? 'w-24 h-24' : 'w-14 h-14'}`}>
+            <Icon size={large ? 48 : 26} strokeWidth={1.4} className="text-white" />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* Renderiza el body soportando **negrita**, listas y párrafos */
+function SectionBody({ text, index }) {
+  const paras = text.split('\n\n')
+  return (
+    <div className="space-y-5">
+      {paras.map((para, i) => {
         if (para.startsWith('- ')) {
           const items = para.split('\n').filter(l => l.startsWith('- ')).map(l => l.slice(2))
           return (
-            <ul key={i} className="space-y-1.5 pl-4">
+            <ul key={i} className="space-y-2 pl-1">
               {items.map((item, j) => (
-                <li key={j} className="text-slate-600 dark:text-slate-400 leading-relaxed text-base list-disc" dangerouslySetInnerHTML={{ __html: parseBold(item) }} />
+                <li key={j} className="flex items-start gap-3 text-slate-600 dark:text-slate-400 leading-relaxed text-base">
+                  <span className="mt-2 w-1.5 h-1.5 rounded-full bg-primary-400 shrink-0" />
+                  <span dangerouslySetInnerHTML={{ __html: parseBold(item) }} />
+                </li>
               ))}
             </ul>
           )
         }
+        /* Pull quote: primer párrafo de secciones pares */
+        if (i === 0 && index > 0 && index % 2 === 0) {
+          return (
+            <blockquote key={i} className="border-l-4 border-primary-400 pl-5 py-1 bg-primary-50 dark:bg-primary-900/20 rounded-r-xl">
+              <p className="text-slate-700 dark:text-slate-300 leading-relaxed text-base italic font-medium"
+                dangerouslySetInnerHTML={{ __html: parseBold(para) }} />
+            </blockquote>
+          )
+        }
         return (
-          <p key={i} className="text-slate-600 dark:text-slate-400 leading-relaxed text-base" dangerouslySetInnerHTML={{ __html: parseBold(para) }} />
+          <p key={i} className="text-slate-600 dark:text-slate-400 leading-relaxed text-base"
+            dangerouslySetInnerHTML={{ __html: parseBold(para) }} />
         )
       })}
     </div>
@@ -50,6 +100,8 @@ export default function BlogPostPage() {
 
   if (!post) return <Navigate to="/blog" replace />
 
+  const Icon = ICON_MAP[post.icon]
+
   return (
     <>
       <SEOHead
@@ -61,7 +113,7 @@ export default function BlogPostPage() {
 
       <div className="min-h-screen bg-white dark:bg-[#0f1117] text-slate-800 dark:text-slate-200">
 
-        {/* ── NAVBAR ─────────────────────────────── */}
+        {/* NAVBAR */}
         <header className="fixed top-0 inset-x-0 z-50 glass dark:bg-slate-900/80 border-b border-white/60 dark:border-slate-700/60">
           <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5">
@@ -83,10 +135,12 @@ export default function BlogPostPage() {
           </div>
         </header>
 
-        {/* ── COVER ──────────────────────────────── */}
-        <div className={`pt-16 h-56 sm:h-72 bg-gradient-to-br ${post.coverGradient}`} />
+        {/* PORTADA */}
+        <div className="pt-16">
+          <PostCover gradient={post.coverGradient} iconName={post.icon} large />
+        </div>
 
-        {/* ── ARTÍCULO ───────────────────────────── */}
+        {/* ARTÍCULO */}
         <div className="max-w-2xl mx-auto px-4 pb-20">
 
           {/* Breadcrumb */}
@@ -95,12 +149,12 @@ export default function BlogPostPage() {
               <ArrowLeft size={12} strokeWidth={2} /> Blog
             </Link>
             <span>/</span>
-            <span className="truncate">{post.title}</span>
+            <span className="truncate text-slate-500 dark:text-slate-400">{post.title}</span>
           </div>
 
-          {/* Meta */}
-          <div className="flex items-center gap-3 mb-4">
-            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${CATEGORY_COLORS[post.category] ?? 'bg-slate-100 text-slate-600'}`}>
+          {/* Meta badges */}
+          <div className="flex items-center gap-2 mb-5 flex-wrap">
+            <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${CATEGORY_COLORS[post.category] ?? ''}`}>
               {post.category}
             </span>
             <span className="flex items-center gap-1 text-xs text-slate-400 dark:text-slate-500">
@@ -110,41 +164,55 @@ export default function BlogPostPage() {
           </div>
 
           {/* Título */}
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-4">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-5">
             {post.title}
           </h1>
 
-          {/* Extracto */}
-          <p className="text-lg text-slate-500 dark:text-slate-400 leading-relaxed mb-8 font-medium border-l-4 border-primary-300 pl-4">
-            {post.excerpt}
-          </p>
-
-          <div className="border-t border-slate-100 dark:border-slate-800 mb-8" />
+          {/* Extracto destacado */}
+          <div className={`rounded-2xl bg-gradient-to-br ${post.coverGradient} p-5 mb-8`}>
+            <p className="text-white font-medium leading-relaxed text-sm sm:text-base">
+              {post.excerpt}
+            </p>
+          </div>
 
           {/* Contenido */}
-          <div className="space-y-8">
+          <div className="space-y-10">
             {post.sections.map((section, i) => (
               <div key={i}>
                 {section.heading && (
-                  <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
-                    {section.heading}
-                  </h2>
+                  <div className="flex items-center gap-3 mb-4">
+                    {Icon && i > 0 && (
+                      <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${post.coverGradient} flex items-center justify-center shrink-0`}>
+                        <Icon size={16} strokeWidth={1.8} className="text-white" />
+                      </div>
+                    )}
+                    <h2 className="text-lg font-extrabold text-slate-900 dark:text-white tracking-tight">
+                      {section.heading}
+                    </h2>
+                  </div>
                 )}
-                <SectionBody text={section.body} />
+                <SectionBody text={section.body} index={i} />
+                {i < post.sections.length - 1 && (
+                  <div className="mt-10 flex items-center gap-3">
+                    <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
+                    <div className={`w-2 h-2 rounded-full bg-gradient-to-br ${post.coverGradient}`} />
+                    <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
+                  </div>
+                )}
               </div>
             ))}
           </div>
 
-          {/* CTA en línea */}
-          <div className="mt-12 card p-6 text-center">
-            <div className="w-10 h-10 bg-gradient-brand rounded-xl flex items-center justify-center mx-auto mb-3">
+          {/* CTA integrado */}
+          <div className={`mt-12 rounded-2xl bg-gradient-to-br ${post.coverGradient} p-6 text-center`}>
+            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-3">
               <PsiconectaLogo size={20} color="white" />
             </div>
-            <p className="font-bold text-slate-900 dark:text-white mb-1">¿Quieres hablar con un profesional?</p>
-            <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
+            <p className="font-bold text-white mb-1">¿Quieres hablar con un profesional?</p>
+            <p className="text-white/80 text-sm mb-4">
               Conecta con un psicólogo verificado en República Dominicana. Primera sesión sin compromisos.
             </p>
-            <Link to="/register" className="btn-premium btn-primary-premium text-sm px-6 py-2.5 mx-auto">
+            <Link to="/register" className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-primary-700 font-bold rounded-xl hover:bg-primary-50 transition-colors text-sm">
               Encontrar mi terapeuta <ArrowRight size={15} strokeWidth={2} />
             </Link>
           </div>
@@ -152,25 +220,40 @@ export default function BlogPostPage() {
           {/* Artículos relacionados */}
           {related.length > 0 && (
             <div className="mt-12">
-              <h3 className="font-bold text-slate-900 dark:text-white mb-4 text-base">También te puede interesar</h3>
+              <h3 className="font-bold text-slate-900 dark:text-white mb-5 text-base">También te puede interesar</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {related.map(r => (
-                  <Link key={r.slug} to={`/blog/${r.slug}`} className="group card p-4 hover:shadow-md transition-shadow flex gap-3 items-start">
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${r.coverGradient} shrink-0`} />
-                    <div>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{r.category}</p>
-                      <p className="font-semibold text-slate-900 dark:text-white text-sm leading-snug group-hover:text-primary-600 transition-colors">
-                        {r.title}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
+                {related.map(r => {
+                  const RelIcon = ICON_MAP[r.icon]
+                  return (
+                    <Link key={r.slug} to={`/blog/${r.slug}`} className="group card overflow-hidden hover:shadow-md transition-shadow flex flex-col">
+                      <div className={`h-24 relative overflow-hidden bg-gradient-to-br ${r.coverGradient}`}>
+                        <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 200 100" preserveAspectRatio="xMidYMid slice">
+                          <circle cx="160" cy="-20" r="100" fill="white" />
+                          <circle cx="-10" cy="90" r="70" fill="white" />
+                        </svg>
+                        {RelIcon && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                              <RelIcon size={20} strokeWidth={1.6} className="text-white" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4">
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mb-1">{r.category} · {r.readTime} min</p>
+                        <p className="font-semibold text-slate-900 dark:text-white text-sm leading-snug group-hover:text-primary-600 transition-colors">
+                          {r.title}
+                        </p>
+                      </div>
+                    </Link>
+                  )
+                })}
               </div>
             </div>
           )}
         </div>
 
-        {/* ── CTA FINAL ──────────────────────────── */}
+        {/* CTA FINAL */}
         <section className="py-16 px-4 bg-gradient-brand">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-extrabold text-white mb-3">Da el primer paso hoy</h2>

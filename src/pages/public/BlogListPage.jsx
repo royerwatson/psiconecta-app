@@ -2,17 +2,57 @@ import { Link } from 'react-router-dom'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 import { BLOG_POSTS } from '@/data/blogPosts'
-import { ArrowRight, ChevronRight, Clock } from 'lucide-react'
+import {
+  ArrowRight, ChevronRight, Clock,
+  HeartPulse, Users, Video, BrainCircuit, CalendarCheck,
+} from 'lucide-react'
+
+const ICON_MAP = { HeartPulse, Users, Video, BrainCircuit, CalendarCheck }
 
 const CATEGORY_COLORS = {
-  'Bienestar':     'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400',
-  'Guías':         'bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-400',
-  'Salud mental':  'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400',
-  'Consejos':      'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400',
+  'Bienestar':    'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300',
+  'Guías':        'bg-accent-50 dark:bg-accent-900/30 text-accent-700 dark:text-accent-300',
+  'Salud mental': 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400',
+  'Consejos':     'bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-400',
 }
 
-function formatDate(dateStr) {
-  return new Date(dateStr).toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })
+function formatDate(d) {
+  return new Date(d).toLocaleDateString('es-DO', { day: 'numeric', month: 'long', year: 'numeric' })
+}
+
+/* Portada con patrón SVG decorativo */
+function PostCover({ gradient, iconName, large = false }) {
+  const Icon = ICON_MAP[iconName]
+  return (
+    <div className={`relative overflow-hidden bg-gradient-to-br ${gradient} ${large ? 'h-64 sm:h-80' : 'h-36'}`}>
+      {/* Círculos decorativos */}
+      <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice">
+        <circle cx="320" cy="-40" r="180" fill="white" />
+        <circle cx="-30" cy="220" r="140" fill="white" />
+        <circle cx="200" cy="150" r="60" fill="white" />
+      </svg>
+      {/* Patrón de puntos */}
+      <svg className="absolute inset-0 w-full h-full opacity-10" viewBox="0 0 40 40" preserveAspectRatio="repeat">
+        <circle cx="5" cy="5" r="1.5" fill="white" />
+        <circle cx="20" cy="5" r="1.5" fill="white" />
+        <circle cx="35" cy="5" r="1.5" fill="white" />
+        <circle cx="5" cy="20" r="1.5" fill="white" />
+        <circle cx="20" cy="20" r="1.5" fill="white" />
+        <circle cx="35" cy="20" r="1.5" fill="white" />
+        <circle cx="5" cy="35" r="1.5" fill="white" />
+        <circle cx="20" cy="35" r="1.5" fill="white" />
+        <circle cx="35" cy="35" r="1.5" fill="white" />
+      </svg>
+      {/* Icono central */}
+      {Icon && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className={`bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center ${large ? 'w-20 h-20' : 'w-14 h-14'}`}>
+            <Icon size={large ? 40 : 26} strokeWidth={1.5} className="text-white" />
+          </div>
+        </div>
+      )}
+    </div>
+  )
 }
 
 export default function BlogListPage() {
@@ -28,7 +68,7 @@ export default function BlogListPage() {
 
       <div className="min-h-screen bg-white dark:bg-[#0f1117] text-slate-800 dark:text-slate-200">
 
-        {/* ── NAVBAR ─────────────────────────────── */}
+        {/* NAVBAR */}
         <header className="fixed top-0 inset-x-0 z-50 glass dark:bg-slate-900/80 border-b border-white/60 dark:border-slate-700/60">
           <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
             <Link to="/" className="flex items-center gap-2.5">
@@ -50,8 +90,8 @@ export default function BlogListPage() {
           </div>
         </header>
 
-        {/* ── HERO ───────────────────────────────── */}
-        <section className="pt-28 pb-12 px-4 bg-psiconecta dark:bg-[#0f1117]">
+        {/* HERO */}
+        <section className="pt-28 pb-10 px-4 bg-psiconecta dark:bg-[#0f1117]">
           <div className="max-w-3xl mx-auto text-center">
             <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
               Recursos de{' '}
@@ -65,62 +105,69 @@ export default function BlogListPage() {
 
         <div className="max-w-6xl mx-auto px-4 pb-20">
 
-          {/* ── ARTÍCULO DESTACADO ─────────────────── */}
-          <Link
-            to={`/blog/${featured.slug}`}
-            className="group block card p-0 overflow-hidden mb-10 hover:shadow-xl transition-shadow"
-          >
-            <div className={`h-48 sm:h-64 bg-gradient-to-br ${featured.coverGradient} flex items-end p-6`}>
-              <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${CATEGORY_COLORS[featured.category] ?? 'bg-white/20 text-white'} bg-white/20 text-white`}>
-                {featured.category}
-              </span>
-            </div>
-            <div className="p-6 sm:p-8">
-              <div className="flex items-center gap-3 text-xs text-slate-400 dark:text-slate-500 mb-3">
-                <span>{formatDate(featured.date)}</span>
-                <span>·</span>
-                <span className="flex items-center gap-1"><Clock size={12} strokeWidth={1.8} />{featured.readTime} min de lectura</span>
+          {/* ARTÍCULO DESTACADO */}
+          <Link to={`/blog/${featured.slug}`} className="group block card-elevated overflow-hidden mb-10 hover:shadow-2xl transition-all duration-300">
+            <div className="grid grid-cols-1 lg:grid-cols-2">
+              <PostCover gradient={featured.coverGradient} iconName={featured.icon} large />
+              <div className="p-7 sm:p-10 flex flex-col justify-center">
+                <div className="flex items-center gap-2 mb-4">
+                  <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${CATEGORY_COLORS[featured.category] ?? ''}`}>
+                    {featured.category}
+                  </span>
+                  <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
+                    <Clock size={11} strokeWidth={1.8} /> {featured.readTime} min
+                  </span>
+                </div>
+                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors leading-snug">
+                  {featured.title}
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-5 text-sm">
+                  {featured.excerpt}
+                </p>
+                <span className="inline-flex items-center gap-1.5 text-primary-600 font-semibold text-sm group-hover:gap-3 transition-all">
+                  Leer artículo <ArrowRight size={16} strokeWidth={2} />
+                </span>
               </div>
-              <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-2 group-hover:text-primary-600 transition-colors">
-                {featured.title}
-              </h2>
-              <p className="text-slate-500 dark:text-slate-400 leading-relaxed mb-4">{featured.excerpt}</p>
-              <span className="inline-flex items-center gap-1.5 text-primary-600 font-semibold text-sm group-hover:gap-3 transition-all">
-                Leer artículo <ArrowRight size={16} strokeWidth={2} />
-              </span>
             </div>
           </Link>
 
-          {/* ── GRID DE ARTÍCULOS ──────────────────── */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* GRID */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {rest.map(post => (
-              <Link key={post.slug} to={`/blog/${post.slug}`} className="group card p-0 overflow-hidden hover:shadow-lg transition-shadow flex flex-col">
-                <div className={`h-32 bg-gradient-to-br ${post.coverGradient}`} />
+              <Link
+                key={post.slug}
+                to={`/blog/${post.slug}`}
+                className="group card overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col"
+              >
+                <PostCover gradient={post.coverGradient} iconName={post.icon} />
                 <div className="p-5 flex flex-col flex-1">
                   <div className="flex items-center justify-between mb-3">
                     <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${CATEGORY_COLORS[post.category] ?? 'bg-slate-100 text-slate-600'}`}>
                       {post.category}
                     </span>
                     <span className="flex items-center gap-1 text-[10px] text-slate-400 dark:text-slate-500">
-                      <Clock size={10} strokeWidth={1.8} />{post.readTime} min
+                      <Clock size={10} strokeWidth={1.8} /> {post.readTime} min
                     </span>
                   </div>
-                  <h3 className="font-bold text-slate-900 dark:text-white text-sm leading-snug mb-2 group-hover:text-primary-600 transition-colors flex-1">
+                  <h3 className="font-bold text-slate-900 dark:text-white text-sm leading-snug mb-2 group-hover:text-primary-600 dark:group-hover:text-primary-400 transition-colors flex-1">
                     {post.title}
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed line-clamp-2 mb-4">
                     {post.excerpt}
                   </p>
-                  <span className="inline-flex items-center gap-1 text-primary-600 font-semibold text-xs group-hover:gap-2 transition-all mt-auto">
-                    Leer <ArrowRight size={13} strokeWidth={2} />
-                  </span>
+                  <div className="flex items-center justify-between mt-auto pt-3 border-t border-slate-100 dark:border-slate-700">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">{formatDate(post.date)}</span>
+                    <span className="inline-flex items-center gap-1 text-primary-600 font-semibold text-xs group-hover:gap-2 transition-all">
+                      Leer <ArrowRight size={12} strokeWidth={2} />
+                    </span>
+                  </div>
                 </div>
               </Link>
             ))}
           </div>
         </div>
 
-        {/* ── CTA ────────────────────────────────── */}
+        {/* CTA */}
         <section className="py-16 px-4 bg-gradient-brand">
           <div className="max-w-2xl mx-auto text-center">
             <h2 className="text-2xl font-extrabold text-white mb-3">¿Listo para dar el paso?</h2>
