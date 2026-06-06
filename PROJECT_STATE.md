@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (landing page v10 — OG image, 404, eventos GA, Analytics completo)*
+*Última actualización: 2026-06-06 (v11 — favicon corregido, kit de logos brand/)*
 
 ---
 
@@ -492,7 +492,9 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Ruta catch-all `*` en App.jsx apunta a NotFoundPage (antes redirigía a /login)
 - [x] Eventos GA conectados al UI: hero CTAs, quiz matching, FAQ accordion, blog posts, directorio terapeutas
 - [x] `public/og-image.png` — 1200×630 px, gradiente indigo/violeta, logo + tagline + pills, generada con cairosvg
+- [x] `public/favicon.svg` — gradiente corregido a indigo/violeta (#4f46e5→#7e22ce), alineado con brand
 - [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
+- [x] Kit de logos `brand/` — 4 versiones PNG para redes sociales: icono gradiente (1080×1080), horizontal con texto (2200×500), icono sobre blanco (1080×1080), icono transparente (1080×1080)
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP
 - [ ] Filtros de búsqueda ampliados — idioma, modalidad, género del terapeuta
