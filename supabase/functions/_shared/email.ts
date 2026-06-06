@@ -1,6 +1,6 @@
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')!
 const FROM_EMAIL     = Deno.env.get('FROM_EMAIL') ?? 'Psiconecta <noreply@psiconecta.app>'
-const APP_URL        = Deno.env.get('APP_URL')    ?? 'https://psiconecta-app.vercel.app'
+const APP_URL        = Deno.env.get('APP_URL')    ?? 'https://psiconecta.app'
 
 export async function sendEmail({
   to,
@@ -39,11 +39,11 @@ function baseLayout(content: string) {
       <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
         <!-- Header -->
         <tr>
-          <td style="background:linear-gradient(135deg,#1e3a5f 0%,#2d6a9f 100%);padding:32px 40px;text-align:center;">
+          <td style="background:linear-gradient(135deg,#4f46e5 0%,#7e22ce 100%);padding:32px 40px;text-align:center;">
             <p style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">
-              Psico<span style="color:#7ec8e3;">necta</span>
+              Psico<span style="color:#a78bfa;">necta</span>
             </p>
-            <p style="margin:6px 0 0;font-size:13px;color:#a8d4ec;">Tu espacio de bienestar mental</p>
+            <p style="margin:6px 0 0;font-size:13px;color:#c4b5fd;">Tu espacio de bienestar mental</p>
           </td>
         </tr>
         <!-- Content -->
@@ -59,7 +59,7 @@ function baseLayout(content: string) {
               © 2026 Psiconecta · Tu privacidad es nuestra prioridad
             </p>
             <p style="margin:6px 0 0;font-size:12px;color:#94a3b8;">
-              <a href="${APP_URL}" style="color:#2d6a9f;text-decoration:none;">Abrir la app</a>
+              <a href="${APP_URL}" style="color:#4f46e5;text-decoration:none;">Abrir la app</a>
             </p>
           </td>
         </tr>
@@ -70,7 +70,7 @@ function baseLayout(content: string) {
 </html>`
 }
 
-function btn(text: string, url: string, color = '#2d6a9f') {
+function btn(text: string, url: string, color = '#4f46e5') {
   return `<a href="${url}" style="display:inline-block;background:${color};color:#ffffff;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;text-decoration:none;margin-top:8px;">${text}</a>`
 }
 
@@ -102,7 +102,7 @@ export function bookingConfirmationPatient({
     <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">¡Cita confirmada! 🎉</p>
     <p style="margin:0 0 28px;font-size:15px;color:#64748b;">Hola ${patientName}, tu sesión quedó reservada exitosamente.</p>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:14px;padding:20px;margin-bottom:28px;">
       <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('Terapeuta', therapistName)}
@@ -143,7 +143,7 @@ export function bookingNotificationTherapist({
     <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">Nueva cita agendada 📅</p>
     <p style="margin:0 0 28px;font-size:15px;color:#64748b;">Hola ${therapistName}, tienes una nueva sesión programada.</p>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:14px;padding:20px;margin-bottom:28px;">
       <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('Paciente', patientName)}
@@ -274,7 +274,7 @@ export function therapistChangedPatientEmail({
       Hola ${patientName}, tu cambio de terapeuta ha sido procesado exitosamente.
     </p>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:14px;padding:20px;margin-bottom:28px;">
       <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('Terapeuta anterior', oldTherapistName)}
@@ -308,7 +308,7 @@ export function therapistChangedNotifyEmail({
   time: string
   isNew: boolean
 }) {
-  const color = isNew ? '#2d6a9f' : '#94a3b8'
+  const color = isNew ? '#4f46e5' : '#94a3b8'
   const title = isNew ? 'Nueva sesión asignada 📅' : 'Sesión reasignada'
   const subtitle = isNew
     ? `Hola ${therapistName}, un paciente te ha seleccionado como su nuevo terapeuta.`
@@ -318,7 +318,7 @@ export function therapistChangedNotifyEmail({
     <p style="margin:0 0 4px;font-size:22px;font-weight:700;color:#1e293b;">${title}</p>
     <p style="margin:0 0 28px;font-size:15px;color:#64748b;">${subtitle}</p>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:14px;padding:20px;margin-bottom:28px;">
       <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('Paciente', patientName)}
@@ -353,9 +353,9 @@ export function welcomeEmail({
     </p>
 
     ${isTherapist ? `
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:14px;padding:20px;margin-bottom:28px;">
       <tr><td>
-        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#1e3a5f;">Primeros pasos:</p>
+        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#4f46e5;">Primeros pasos:</p>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('1.', 'Completa tu perfil con foto y biografía')}
           ${infoRow('2.', 'Sube tus 3 documentos de credencial')}
@@ -364,9 +364,9 @@ export function welcomeEmail({
         </table>
       </td></tr>
     </table>` : `
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:14px;padding:20px;margin-bottom:28px;">
       <tr><td>
-        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#1e3a5f;">Para comenzar:</p>
+        <p style="margin:0 0 8px;font-size:14px;font-weight:700;color:#4f46e5;">Para comenzar:</p>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('1.', 'Completa tu perfil')}
           ${infoRow('2.', 'Busca un terapeuta por especialidad o disponibilidad')}
@@ -451,7 +451,7 @@ export function testResultAvailableEmail({
       Hola ${patientName}, tu terapeuta <strong>${therapistName}</strong> ha compartido contigo el resultado de una evaluación.
     </p>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:14px;padding:20px;margin-bottom:28px;">
       <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('Evaluación', testName)}
@@ -497,7 +497,7 @@ export function rescheduleEmail({
       Hola ${recipientName}, tu sesion con <strong>${otherPersonName}</strong> ha sido movida a una nueva fecha.
     </p>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:14px;padding:20px;margin-bottom:28px;">
       <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('Fecha anterior', `${oldDate} a las ${oldTime}`)}
@@ -529,7 +529,7 @@ export function subscriptionActivatedEmail({
       Hola ${therapistName}, tu suscripción mensual ha sido procesada exitosamente.
     </p>
 
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#f0f7ff;border-radius:14px;padding:20px;margin-bottom:28px;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#eef2ff;border-radius:14px;padding:20px;margin-bottom:28px;">
       <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('Plan', 'Suscripción Pro')}
@@ -611,7 +611,7 @@ export function newMessageEmail({
       Hola ${recipientName}, <strong>${senderName}</strong> te envió un mensaje.
     </p>
 
-    <div style="background:#f0f7ff;border-left:4px solid #2d6a9f;border-radius:8px;padding:16px 20px;margin-bottom:28px;">
+    <div style="background:#eef2ff;border-left:4px solid #4f46e5;border-radius:8px;padding:16px 20px;margin-bottom:28px;">
       <p style="margin:0;font-size:15px;color:#334155;font-style:italic;">"${preview}"</p>
     </div>
 
