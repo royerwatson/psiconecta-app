@@ -146,22 +146,18 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              {/* Stats */}
-              <div className="flex items-center gap-6 text-sm">
-                <div>
-                  <p className="font-extrabold text-slate-900 text-xl">+100</p>
-                  <p className="text-slate-400 font-medium">Terapeutas verificados</p>
-                </div>
-                <div className="w-px h-10 bg-slate-200" />
-                <div>
-                  <p className="font-extrabold text-slate-900 text-xl">4.9★</p>
-                  <p className="text-slate-400 font-medium">Valoración media</p>
-                </div>
-                <div className="w-px h-10 bg-slate-200" />
-                <div>
-                  <p className="font-extrabold text-slate-900 text-xl">RD · LATAM</p>
-                  <p className="text-slate-400 font-medium">Cobertura regional</p>
-                </div>
+              {/* Propuesta de valor */}
+              <div className="flex flex-wrap items-center gap-3">
+                {[
+                  { icon: ShieldCheck, label: 'Terapeutas verificados' },
+                  { icon: EyeOff,      label: 'Modo anónimo' },
+                  { icon: CreditCard,  label: 'Pago seguro vía PayPal' },
+                ].map(({ icon: Icon, label }) => (
+                  <div key={label} className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white border border-slate-200 shadow-sm text-sm font-medium text-slate-700">
+                    <Icon size={15} strokeWidth={1.8} className="text-primary-500" />
+                    {label}
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -361,7 +357,7 @@ export default function LandingPage() {
                 </span>
               </div>
               <p className="leading-relaxed text-slate-500 text-xs">
-                Psicoterapia online con terapeutas verificados para toda Latinoamérica.
+                Psicoterapia online con terapeutas verificados en República Dominicana.
               </p>
             </div>
 
@@ -387,7 +383,7 @@ export default function LandingPage() {
 
           <div className="max-w-6xl mx-auto mt-10 pt-6 border-t border-slate-800 flex flex-col sm:flex-row justify-between items-center gap-2 text-xs text-slate-600">
             <p>© {new Date().getFullYear()} Psiconecta. Todos los derechos reservados.</p>
-            <p>Hecho con cuidado para el bienestar mental de Latinoamérica.</p>
+            <p>Hecho con cuidado para el bienestar mental de República Dominicana.</p>
           </div>
         </footer>
       </div>
@@ -512,10 +508,10 @@ function TherapistMockup() {
       <div className="bg-gradient-brand px-5 py-4 flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center">
-            <span className="text-white font-bold text-sm">AP</span>
+            <span className="text-white font-bold text-sm">P</span>
           </div>
           <div>
-            <p className="font-bold text-white text-sm">Ana P. — Paciente</p>
+            <p className="font-bold text-white text-sm">Paciente Demo</p>
             <p className="text-indigo-200 text-xs">Próxima sesión: hoy, 3:00 PM</p>
           </div>
         </div>
