@@ -12,6 +12,7 @@ import {
   ShieldCheck, Star, ChevronRight, Search,
   MapPin, ArrowRight, Crown,
 } from 'lucide-react'
+import { analytics } from '@/lib/analytics'
 
 const SPECIALTIES = [
   'Todas',
@@ -270,6 +271,7 @@ function TherapistCard({ therapist, isPro }) {
 
       <Link
         to="/register"
+        onClick={() => analytics.bookTherapist(therapist.user_id)}
         className="btn-premium btn-primary-premium text-xs py-2.5 w-full justify-center"
       >
         Agendar sesión

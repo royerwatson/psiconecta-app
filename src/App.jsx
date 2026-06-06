@@ -85,6 +85,7 @@ import BlogPostPage              from '@/pages/public/BlogPostPage'
 import TermsPage                 from '@/pages/public/TermsPage'
 import PrivacyPage               from '@/pages/public/PrivacyPage'
 import RefundPage                from '@/pages/public/RefundPage'
+import NotFoundPage              from '@/pages/public/NotFoundPage'
 import TherapistMatchPage  from '@/pages/patient/TherapistMatchPage'
 import StatsPage        from '@/pages/therapist/StatsPage'
 import ProGate         from '@/components/layout/ProGate'
@@ -288,7 +289,7 @@ export default function App() {
 
         {/* Redireccionamiento raíz */}
         <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="*" element={<Navigate to="/login" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )

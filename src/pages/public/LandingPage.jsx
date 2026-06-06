@@ -23,6 +23,7 @@ import {
   FileText,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { analytics } from '@/lib/analytics'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 
@@ -165,11 +166,11 @@ export default function LandingPage() {
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 mb-8">
-                <Link to="/register" className="btn-premium btn-primary-premium text-base px-7 py-3.5">
+                <Link to="/register" onClick={() => analytics.clickHeroCTA('patient')} className="btn-premium btn-primary-premium text-base px-7 py-3.5">
                   Comenzar ahora
                   <ArrowRight size={18} strokeWidth={1.8} />
                 </Link>
-                <Link to="/register?role=therapist" className="btn-premium btn-secondary-premium text-base px-7 py-3.5">
+                <Link to="/register?role=therapist" onClick={() => analytics.clickHeroCTA('therapist')} className="btn-premium btn-secondary-premium text-base px-7 py-3.5">
                   Soy terapeuta
                 </Link>
               </div>
@@ -376,6 +377,7 @@ export default function LandingPage() {
 
               <Link
                 to="/register"
+                onClick={() => analytics.clickMatchQuiz()}
                 className="btn-premium btn-primary-premium text-base px-8 py-3.5 mx-auto"
               >
                 Hacer el test gratis
@@ -699,7 +701,7 @@ function FAQItem({ question, answer }) {
   return (
     <div className={`card overflow-hidden transition-shadow ${open ? 'shadow-md' : ''}`}>
       <button
-        onClick={() => setOpen(!open)}
+        onClick={() => { setOpen(!open); if (!open) analytics.openFAQ(question) }}
         className="w-full flex items-center justify-between px-5 py-4 text-left gap-4"
         aria-expanded={open}
       >

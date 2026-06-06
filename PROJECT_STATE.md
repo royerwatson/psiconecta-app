@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (landing page v7 — páginas legales, sitemap, robots.txt)*
+*Última actualización: 2026-06-06 (landing page v8 — Google Analytics 4, páginas legales, sitemap)*
 
 ---
 
@@ -483,6 +483,11 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] `LegalPage.jsx` — Layout compartido con componentes Section, P, Ul, Highlight
 - [x] Footer de landing apunta a rutas reales (antes apuntaban a #)
 - [x] Sitemap actualizado con rutas /terminos, /privacidad, /reembolsos
+- [x] Google Analytics 4 — `src/lib/analytics.js` wrapper con trackPageview y trackEvent
+- [x] `src/hooks/usePageTracking.js` — pageview automático en cada cambio de ruta (SPA)
+- [x] `AppRoutes` componente interno en App.jsx para usar useLocation dentro de BrowserRouter
+- [x] `VITE_GA_MEASUREMENT_ID` en .env y Vercel Environment Variables
+- [x] Eventos listos: clickHeroCTA, viewBlogPost, startRegister, viewTherapist, bookTherapist, openFAQ
 - [x] Modo oscuro — toggle luna/sol en header, CSS variables, localStorage + prefers-color-scheme
 - [ ] Reporte de progreso PDF del paciente — Edge Function generate-report
 - [ ] 2FA para terapeutas y admins — Supabase Auth TOTP

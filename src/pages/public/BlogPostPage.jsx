@@ -1,4 +1,5 @@
 import { Link, useParams, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 import { getBlogPost, getRelatedPosts } from '@/data/blogPosts'
@@ -6,6 +7,7 @@ import {
   ArrowRight, ChevronRight, Clock, ArrowLeft,
   HeartPulse, Users, Video, BrainCircuit, CalendarCheck,
 } from 'lucide-react'
+import { analytics } from '@/lib/analytics'
 
 const ICON_MAP = { HeartPulse, Users, Video, BrainCircuit, CalendarCheck }
 
@@ -101,6 +103,8 @@ export default function BlogPostPage() {
   if (!post) return <Navigate to="/blog" replace />
 
   const Icon = ICON_MAP[post.icon]
+
+  useEffect(() => { analytics.viewBlogPost(slug) }, [slug])
 
   return (
     <>
@@ -212,7 +216,7 @@ export default function BlogPostPage() {
             <p className="text-white/80 text-sm mb-4">
               Conecta con un psicólogo verificado en República Dominicana. Primera sesión sin compromisos.
             </p>
-            <Link to="/register" className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-primary-700 font-bold rounded-xl hover:bg-primary-50 transition-colors text-sm">
+            <Link to="/register" onClick={() => analytics.clickBlogCTA(slug)} className="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-primary-700 font-bold rounded-xl hover:bg-primary-50 transition-colors text-sm">
               Encontrar mi terapeuta <ArrowRight size={15} strokeWidth={2} />
             </Link>
           </div>
