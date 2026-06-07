@@ -567,6 +567,7 @@ export default function ChatPage() {
               onKeyDown={handleKeyDown}
               placeholder="Escribe un mensaje... (Enter para enviar)"
               disabled={sending}
+              maxLength={2000}
               className="flex-1 rounded-xl border border-warm-200 bg-white px-4 py-2.5 text-sm text-warm-800 placeholder:text-warm-400 outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 disabled:opacity-60 transition-all"
             />
             <Button

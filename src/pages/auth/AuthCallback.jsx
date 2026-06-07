@@ -30,6 +30,9 @@ export default function AuthCallback() {
         .eq('id', session.user.id)
         .single()
 
+      // Actualizar el store con la sesión OAuth (no hay onAuthStateChange)
+      await fetchProfile(session.user)
+
       if (!profile?.role) {
         // Usuario nuevo — necesita elegir rol
         navigate('/register?social=true')

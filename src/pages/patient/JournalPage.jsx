@@ -209,6 +209,7 @@ function JournalEditor({ entry, onSave, onCancel }) {
         value={title}
         onChange={e => setTitle(e.target.value)}
         placeholder="Título (opcional)"
+        maxLength={200}
         className="w-full font-serif text-lg font-semibold text-warm-900 placeholder:text-warm-300 bg-transparent border-b border-warm-100 pb-2 outline-none focus:border-primary-300 transition-colors"
       />
 
@@ -219,6 +220,7 @@ function JournalEditor({ entry, onSave, onCancel }) {
         onChange={e => setContent(e.target.value)}
         placeholder="Escribe libremente... este es tu espacio privado."
         rows={10}
+        maxLength={10000}
         className="w-full bg-white border border-warm-200 rounded-xl px-4 py-3 text-sm text-warm-800 placeholder:text-warm-300 leading-relaxed outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 resize-none transition-all"
       />
 

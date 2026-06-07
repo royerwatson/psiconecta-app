@@ -31,6 +31,26 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
+    // SEGURIDAD: verificar que el sender realmente envió un mensaje reciente al recipient.
+    // Sin esto, cualquier usuario autenticado podría usar esta función para enviar
+    // emails arbitrarios a otros usuarios de la plataforma (spam/phishing vector).
+    const { data: recentMsg } = await supabaseAdmin
+      .from('messages')
+      .select('id')
+      .eq('sender_id', user.id)
+      .eq('receiver_id', recipientId)
+      .gte('created_at', new Date(Date.now() - 90 * 1000).toISOString()) // últimos 90s
+      .limit(1)
+      .maybeSingle()
+
+    if (!recentMsg) {
+      // No hay mensaje reciente — rechazar silenciosamente sin revelar datos del recipient
+      return new Response(
+        JSON.stringify({ success: true }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
     // Datos del remitente y destinatario
     const [senderData, recipientData, recipientAuth] = await Promise.all([
       supabaseAdmin.from('profiles').select('full_name, role').eq('id', user.id).single(),

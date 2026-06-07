@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (v17 — fix fetchProfile 500, profile name, navegación post-registro, loop de redirección)*
+*Última actualización: 2026-06-07 (v20 — SQL migration ejecutada: reviews UNIQUE + RLS + therapist_profiles split)*
 
 ---
 
@@ -261,9 +261,13 @@ VITE_PAYPAL_CLIENT_ID=...
 ## 8. Auth y Login Social
 - Email + password (nativo Supabase)
 - **Google OAuth** ✅ configurado y funcionando
-- **Apple OAuth** — pendiente configurar en Apple Developer
-- **Facebook OAuth** — pendiente configurar en Meta for Developers
-- Callback: `/auth/callback` — detecta si es usuario nuevo → `/register`
+- **Apple OAuth** — requiere membresía Apple Developer ($99/año) — bloqueado
+- **Facebook OAuth** ✅ configurado y funcionando
+  - App ID: `1117610634776862` (Psiconecta.app en Meta for Developers)
+  - URI de callback: `https://kudldawuehduidhipvmn.supabase.co/auth/v1/callback`
+  - Permisos: `email`, `public_profile`, `user_age_range`, `user_birthday`, `user_gender`
+  - App en modo desarrollo (publicar requiere revisión de Meta)
+- Callback: `/auth/callback` — detecta si es usuario nuevo (sin role) → `/register?social=true`
 
 ---
 
@@ -335,7 +339,7 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Botón "Completar verificación" aparece solo cuando los 3 están aprobados
 - [x] Al completar, terapeuta queda activo y visible para pacientes
 
-### Emails Transaccionales (Resend — activo, dominio verificado ✅)
+### Emails Transaccionales (Resend — activo, dominio psiconecta.app verificado ✅ SPF + MX 2026-06-07)
 - [x] Bienvenida al registrarse (`notify-welcome`)
 - [x] Confirmación de cita — paciente y terapeuta (`capture-paypal-order`)
 - [x] Cancelación con motivo — paciente y terapeuta (`notify-cancellation`)
@@ -406,6 +410,43 @@ VITE_PAYPAL_CLIENT_ID=...
 ---
 
 ## 11. Bugs Corregidos
+
+### Sesión 2026-06-07 (v19) — Auditoría completa de plataforma
+
+| Severidad | Área | Corrección |
+|-----------|------|------------|
+| ALTO | `admin-toggle-user/index.ts` | CORS `Access-Control-Allow-Origin: *` → `https://psiconecta.app`. La función de banear/desbanear usuarios era accesible desde cualquier origen. |
+| ALTO | `ai-checkin/index.ts` | CORS `*` → `https://psiconecta.app`. Inconsistente con las demás funciones aunque tiene validación JWT. |
+| ALTO | `notify-new-message/index.ts` | Sin validación de relación sender-recipient — cualquier usuario autenticado podía usarla para enviar emails con contenido arbitrario a cualquier usuario de la plataforma (spam/phishing vector). Fix: verifica que exista un mensaje real del sender al recipient en los últimos 90 segundos antes de enviar. |
+| ALTO | `reviews` — RLS INSERT | La política solo verificaba `auth.uid() = patient_id`, permitiendo a cualquier paciente reseñar a cualquier terapeuta sin sesión real. Fix: WITH CHECK requiere sesión `completed` entre el paciente y el terapeuta para esa sesión específica. |
+| ALTO | `reviews` — Sin UNIQUE constraint | Sin `UNIQUE(session_id)`, un paciente podía dejar múltiples reseñas inflando el rating artificialmente. Fix: `migration_fix_reviews_and_tp_security.sql`. |
+| ALTO | `FindTherapist.jsx` + `TherapistMatchPage.jsx` | Hacían `SELECT *` en `therapist_profiles`, exponiendo `paypal_email`, `bank_account_number`, `bank_routing`, `commission_rate` a cualquier paciente autenticado. Fix: SELECT explícito solo de campos públicos. |
+| MEDIO | `PaymentSuccess.jsx` | Llamaba a `verify-payment` (Edge Function de Stripe) que ya no existe en el flujo. Psiconecta usa PayPal — el flujo real navega directamente desde `capture-paypal-order`. Página convertida a success genérico sin llamadas externas. |
+| BAJO | `ChatPage.jsx` | Input de mensajes sin `maxLength`. Fix: `maxLength={2000}`. |
+| BAJO | `JournalPage.jsx` | Título sin `maxLength={200}`, textarea sin `maxLength={10000}`. |
+| BAJO | `MyAppointments.jsx` / `SessionHistoryPage.jsx` | Textareas de reseña y reflexión sin `maxLength`. |
+
+**SQL ejecutado en Supabase (`migration_fix_reviews_and_tp_security.sql`) ✅ 2026-06-07:**
+- Reviews duplicadas eliminadas (conservada la más reciente por `session_id`)
+- `UNIQUE(session_id)` en `reviews`
+- RLS INSERT en `reviews` — verifica sesión completada
+- RLS UPDATE admin en `reviews`
+- RLS UPDATE split en `therapist_profiles` (propietario + admin separados)
+- RLS UPDATE en `subscription_payments` (faltaba)
+
+---
+
+### Sesión 2026-06-07 (v18) — Facebook OAuth
+
+| Severidad | Área | Corrección |
+|-----------|------|------------|
+| ALTO | `AuthCallback.jsx` | Importaba `fetchProfile` del store pero nunca lo llamaba. Después del redirect OAuth, el store quedaba sin usuario y `ProtectedRoute` redirigía al login. Fix: `await fetchProfile(session.user)` antes de navegar al dashboard. |
+
+**Configuración completada:**
+- Meta for Developers: app "Psiconecta.app" (ID `1117610634776862`), caso de uso "Inicio de sesión de Facebook", URI de callback registrada
+- Supabase Dashboard → Authentication → Providers → Facebook: App ID + App Secret configurados
+
+---
 
 ### Sesión 2026-06-06 (v17) — fetchProfile 500, nombre "Usuario", navegación y loop
 

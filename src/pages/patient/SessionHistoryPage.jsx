@@ -211,6 +211,7 @@ function SessionCard({ session, onSaveFeedback }) {
                   value={feedback}
                   onChange={e => setFeedback(e.target.value)}
                   rows={4}
+                  maxLength={2000}
                   placeholder="¿Qué fue lo más importante de esta sesión? ¿Qué aprendiste sobre ti? ¿Qué quieres recordar?"
                   className="w-full rounded-xl border border-warm-200 bg-white px-3 py-2.5 text-sm text-warm-800 placeholder:text-warm-400 outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 resize-none transition-all leading-relaxed"
                 />

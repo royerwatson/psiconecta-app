@@ -660,7 +660,8 @@ export default function MyAppointments() {
             </div>
             <Textarea label="Comentario (opcional)" value={reviewForm.comment} rows={3}
               onChange={(e) => setReviewForm(f => ({ ...f, comment: e.target.value }))}
-              placeholder="Comparte cómo fue tu experiencia..." />
+              placeholder="Comparte cómo fue tu experiencia..."
+              maxLength={1000} />
             <Button fullWidth onClick={submitReview}>Enviar reseña</Button>
           </div>
         )}
