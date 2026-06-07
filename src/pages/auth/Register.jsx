@@ -54,6 +54,24 @@ function getPasswordStrength(pwd) {
   return               { label: 'Fuerte',  color: 'bg-green-500',  text: 'text-green-600',  width: 'w-full' }
 }
 
+const GENDERS = [
+  { value: 'male',              label: 'Masculino' },
+  { value: 'female',            label: 'Femenino' },
+  { value: 'non_binary',        label: 'No binario' },
+  { value: 'prefer_not_to_say', label: 'Prefiero no decir' },
+]
+
+const LANGUAGES = [
+  { value: 'es', label: 'Español' },
+  { value: 'en', label: 'Inglés' },
+  { value: 'fr', label: 'Francés' },
+  { value: 'pt', label: 'Portugués' },
+  { value: 'de', label: 'Alemán' },
+  { value: 'it', label: 'Italiano' },
+  { value: 'ar', label: 'Árabe' },
+  { value: 'other', label: 'Otro' },
+]
+
 const COUNTRIES = [
   { code: 'DO', name: 'República Dominicana' },
   { code: 'MX', name: 'México' },
@@ -359,6 +377,8 @@ export default function Register() {
   const [role, setRole] = useState(null)
   const [form, setForm] = useState({
     fullName: '', email: '', password: '', confirmPassword: '',
+    // Datos personales
+    gender: '', birthDate: '', preferredLanguage: 'es',
     // Contacto
     city: '', country: '', phone: '',
     emergencyContact: '', emergencyPhone: '',
@@ -407,6 +427,28 @@ export default function Register() {
     }
     if (!/[^A-Za-z0-9]/.test(form.password)) {
       toast.error('La contraseña debe tener al menos un carácter especial (!@#$...)')
+      return
+    }
+    if (!form.gender) {
+      toast.error('Selecciona tu sexo')
+      return
+    }
+    if (!form.birthDate) {
+      toast.error('Ingresa tu fecha de nacimiento')
+      return
+    }
+    // Validar edad mínima
+    const today = new Date()
+    const birth = new Date(form.birthDate)
+    const age = today.getFullYear() - birth.getFullYear() -
+      (today < new Date(today.getFullYear(), birth.getMonth(), birth.getDate()) ? 1 : 0)
+    const minAge = role === 'therapist' ? 21 : 13
+    if (age < minAge) {
+      toast.error(`Debes tener al menos ${minAge} años para registrarte${role === 'therapist' ? ' como terapeuta' : ''}`)
+      return
+    }
+    if (age > 120) {
+      toast.error('Fecha de nacimiento inválida')
       return
     }
     setStep(3)
@@ -463,6 +505,9 @@ export default function Register() {
           phone:               sanitize(form.phone),
           emergency_contact:   role === 'client' ? sanitize(form.emergencyContact) : null,
           emergency_phone:     role === 'client' ? sanitize(form.emergencyPhone)   : null,
+          gender:              form.gender || null,
+          birth_date:          form.birthDate || null,
+          preferred_language:  form.preferredLanguage || 'es',
           terms_accepted_at:   now,
           privacy_accepted_at: now,
         }).eq('id', newUserId)
@@ -617,6 +662,50 @@ export default function Register() {
               <Input label="Confirmar contraseña" name="confirmPassword" type="password"
                 placeholder="Repite tu contraseña"
                 value={form.confirmPassword} onChange={handleChange} required />
+
+              {/* Sexo + Fecha de nacimiento */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-warm-700">Sexo <span className="text-red-400">*</span></label>
+                  <select
+                    name="gender"
+                    value={form.gender}
+                    onChange={handleChange}
+                    required
+                    className="w-full rounded-xl border border-warm-200 bg-white px-3 py-2.5 text-sm text-warm-800 outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                  >
+                    <option value="">Selecciona</option>
+                    {GENDERS.map(g => <option key={g.value} value={g.value}>{g.label}</option>)}
+                  </select>
+                </div>
+
+                <div className="flex flex-col gap-1">
+                  <label className="text-xs font-medium text-warm-700">Fecha de nacimiento <span className="text-red-400">*</span></label>
+                  <input
+                    type="date"
+                    name="birthDate"
+                    value={form.birthDate}
+                    onChange={handleChange}
+                    required
+                    max={new Date().toISOString().split('T')[0]}
+                    className="w-full rounded-xl border border-warm-200 bg-white px-3 py-2.5 text-sm text-warm-800 outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                  />
+                </div>
+              </div>
+
+              {/* Idioma preferido */}
+              <div className="flex flex-col gap-1">
+                <label className="text-xs font-medium text-warm-700">Idioma preferido <span className="text-red-400">*</span></label>
+                <select
+                  name="preferredLanguage"
+                  value={form.preferredLanguage}
+                  onChange={handleChange}
+                  required
+                  className="w-full rounded-xl border border-warm-200 bg-white px-3 py-2.5 text-sm text-warm-800 outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400"
+                >
+                  {LANGUAGES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
+                </select>
+              </div>
 
               <div className="flex gap-3 mt-2">
                 <Button variant="outline" onClick={() => setStep(1)} type="button" className="flex-1">Atrás</Button>

@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-07 (v20 — SQL migration ejecutada: reviews UNIQUE + RLS + therapist_profiles split)*
+*Última actualización: 2026-06-07 (v21 — Nuevos campos de registro: Sexo, Fecha de nacimiento, Idioma preferido)*
 
 ---
 
@@ -73,7 +73,7 @@ src/
 ### Tablas clave
 | Tabla | Descripción |
 |-------|-------------|
-| `profiles` | Todos los usuarios (role, full_name, avatar_url, **is_anonymous**) |
+| `profiles` | Todos los usuarios (role, full_name, avatar_url, **is_anonymous**, gender, birth_date, preferred_language) |
 | `therapist_profiles` | Perfil extendido (specialty, price, **subscription_plan**, **commission_rate**, verified) |
 | `sessions` | Citas (status, price, **platform_commission**, **therapist_net**, video_room_url, is_urgent) |
 | `messages` | Chat (sender_id, receiver_id, content, **read_at**) |
@@ -107,6 +107,7 @@ src/
 | `migration_fix_credentials_rls.sql` | **Ejecutado** — admin puede leer/aprobar `therapist_credentials` |
 | `migration_fix_progate_server_side.sql` | **Ejecutado** — RLS server-side módulo psicométrico + función `is_pro_therapist()` |
 | `migration_fix_length_constraints.sql` | **Ejecutado** — CHECK constraints longitud en messages, clinical_history, patient_tasks, etc. |
+| `migration_add_profile_fields.sql` | **Pendiente de ejecutar** — columnas `gender`, `birth_date`, `preferred_language` en `profiles` |
 
 ---
 
