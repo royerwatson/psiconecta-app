@@ -42,17 +42,28 @@ export const useAuthStore = create(
       // Cargar perfil del usuario desde la BD
       fetchProfile: async (user) => {
         try {
+          // Step 1: basic profile (always works if RLS allows)
           const { data: profile, error } = await supabase
             .from('profiles')
-            .select('*, therapist_profiles(*)')
+            .select('*')
             .eq('id', user.id)
             .single()
 
           if (error) throw error
 
+          // Step 2: therapist extended data (best-effort, not critical)
+          let therapistProfiles = []
+          if (profile.role === 'therapist') {
+            const { data: tp } = await supabase
+              .from('therapist_profiles')
+              .select('*')
+              .eq('user_id', user.id)
+            therapistProfiles = tp ?? []
+          }
+
           set({
             user,
-            profile,
+            profile: { ...profile, therapist_profiles: therapistProfiles },
             role: profile.role,
             loading: false,
             initialized: true,
