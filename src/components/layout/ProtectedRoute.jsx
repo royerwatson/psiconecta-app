@@ -19,6 +19,8 @@ export function TherapistRoute({ children }) {
 
   if (!initialized) return <LoadingScreen />
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />
+  // role=null means profile is still resolving — avoid redirect loop
+  if (role === null) return <LoadingScreen />
   if (role !== 'therapist') return <Navigate to="/patient/dashboard" replace />
   return children
 }
@@ -30,6 +32,8 @@ export function ClientRoute({ children }) {
 
   if (!initialized) return <LoadingScreen />
   if (!user) return <Navigate to="/login" state={{ from: location }} replace />
+  // role=null means profile is still resolving — avoid redirect loop
+  if (role === null) return <LoadingScreen />
   if (role !== 'client') return <Navigate to="/therapist/dashboard" replace />
   return children
 }

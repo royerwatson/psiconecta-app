@@ -70,7 +70,10 @@ export const useAuthStore = create(
           })
         } catch (error) {
           console.error('Error cargando perfil:', error)
-          set({ user, loading: false, initialized: true })
+          // Fallback: read role from JWT metadata so the app stays usable
+          // even when the profiles table query fails (RLS, network, etc.)
+          const fallbackRole = user?.user_metadata?.role ?? null
+          set({ user, role: fallbackRole, loading: false, initialized: true })
         }
       },
 
