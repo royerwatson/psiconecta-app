@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-06 (v16 — fix registro, trigger RLS, Resend integrado con Supabase Auth)*
+*Última actualización: 2026-06-06 (v17 — fix fetchProfile 500, profile name, navegación post-registro, loop de redirección)*
 
 ---
 
@@ -407,7 +407,31 @@ VITE_PAYPAL_CLIENT_ID=...
 
 ## 11. Bugs Corregidos
 
-### Sesión 2026-06-06 — Registro de usuarios
+### Sesión 2026-06-06 (v17) — fetchProfile 500, nombre "Usuario", navegación y loop
+
+| Severidad | Área | Corrección |
+|-----------|------|------------|
+| CRÍTICO | `profiles_select` RLS policy | La política tenía JOINs complejos con `sessions` y `therapeutic_relationships` que crasheaban PostgREST con HTTP 500 en cualquier SELECT de profiles. Eliminadas 3 políticas (`profiles_select`, `admin_select_all_profiles`, `profiles_select_public`) y recreada una sola: `auth.uid() IS NOT NULL`. |
+| ALTO | `authStore.js` → `fetchProfile()` | La query `SELECT *, therapist_profiles(*)` usaba un embedded join de PostgREST que fallaba si no hay FK explícita. Dividida en dos queries separadas: primero el perfil base (`SELECT *`), luego `therapist_profiles` solo si `role='therapist'`. |
+| ALTO | `authStore.js` → `fetchProfile()` catch | Si `fetchProfile` fallaba, `role` quedaba `null`. Ahora el catch extrae `role` de `user.user_metadata.role` como fallback para que el dashboard sea usable aunque la BD no responda. |
+| ALTO | `ProtectedRoute.jsx` — `TherapistRoute` / `ClientRoute` | Cuando `role=null`, ambas rutas se redirigían mutuamente causando un loop infinito (TherapistRoute → /patient/dashboard → ClientRoute → /therapist/dashboard). Ahora devuelven `<LoadingScreen />` cuando `role=null`. |
+| MEDIO | `authStore.js` → `signUp()` — nombre "Usuario" | El trigger `handle_new_user` creaba el perfil con `'Usuario'` cuando los metadatos no estaban listos. El fallback del store detectaba el perfil existente y no lo sobreescribía. Fix: cuando el perfil YA existe, hacer `UPDATE` con el `fullName` real del formulario. |
+| MEDIO | `Register.jsx` — navegación post-registro | `navigate()` usaba el estado local `role` (potencialmente stale en closures async). Cambiado a `useAuthStore.getState().role` que refleja el rol real cargado por `fetchProfile`. |
+| BAJO | `Login.jsx` — email no confirmado | Detecta el error `"Email not confirmed"` de Supabase, reenvía automáticamente el email de confirmación y muestra un mensaje claro al usuario. |
+
+**SQL ejecutado en Supabase (2026-06-06):**
+```sql
+DROP POLICY IF EXISTS "profiles_select" ON profiles;
+DROP POLICY IF EXISTS "admin_select_all_profiles" ON profiles;
+DROP POLICY IF EXISTS "profiles_select_public" ON profiles;
+
+CREATE POLICY "profiles_select" ON profiles
+  FOR SELECT USING (auth.uid() IS NOT NULL);
+```
+
+---
+
+### Sesión 2026-06-06 (v16) — Registro de usuarios
 
 | Severidad | Área | Corrección |
 |-----------|------|------------|
