@@ -103,14 +103,37 @@ export default function TherapistSchedule() {
     if (selectedDays.length === 0) { toast.error('Selecciona al menos un día de la semana'); return }
     if (availForm.start_time >= availForm.end_time) { toast.error('La hora de inicio debe ser anterior a la hora de fin'); return }
     setSavingAvail(true)
+
+    // Eliminar filas existentes para esos días y luego insertar nuevas.
+    // Evita depender de UNIQUE constraint para upsert.
+    const { error: delError } = await supabase
+      .from('therapist_availability')
+      .delete()
+      .eq('therapist_id', user.id)
+      .in('day_of_week', selectedDays.map(Number))
+
+    if (delError) {
+      console.error('[availability] delete error:', delError)
+      toast.error('Error guardando disponibilidad. Intenta de nuevo.')
+      setSavingAvail(false)
+      return
+    }
+
     const rows = selectedDays.map((day) => ({
       therapist_id: user.id,
       day_of_week:  Number(day),
       start_time:   availForm.start_time,
       end_time:     availForm.end_time,
     }))
-    const { error } = await supabase.from('therapist_availability').upsert(rows, { onConflict: 'therapist_id,day_of_week' })
-    if (error) { toast.error('Error guardando disponibilidad. Intenta de nuevo.'); setSavingAvail(false); return }
+
+    const { error } = await supabase.from('therapist_availability').insert(rows)
+    if (error) {
+      console.error('[availability] insert error:', error)
+      toast.error('Error guardando disponibilidad. Intenta de nuevo.')
+      setSavingAvail(false)
+      return
+    }
+
     toast.success(`Disponibilidad guardada para ${selectedDays.length} día${selectedDays.length > 1 ? 's' : ''}`)
     setShowAvailModal(false)
     setSelectedDays([])
