@@ -114,7 +114,7 @@ export default function TherapistSchedule() {
 
     if (delError) {
       console.error('[availability] delete error:', delError)
-      toast.error('Error guardando disponibilidad. Intenta de nuevo.')
+      toast.error(`DEL: ${delError.code} — ${delError.message}`, { duration: 8000 })
       setSavingAvail(false)
       return
     }
@@ -129,7 +129,7 @@ export default function TherapistSchedule() {
     const { error } = await supabase.from('therapist_availability').insert(rows)
     if (error) {
       console.error('[availability] insert error:', error)
-      toast.error('Error guardando disponibilidad. Intenta de nuevo.')
+      toast.error(`INS: ${error.code} — ${error.message}`, { duration: 8000 })
       setSavingAvail(false)
       return
     }
