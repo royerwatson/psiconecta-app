@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-07 (v25 — Fix FindTherapist + TherapistMatchPage columnas pendientes)*
+*Última actualización: 2026-06-07 (v26 — Toggle citas urgentes en agenda + Fix FindTherapist)*
 
 ---
 
@@ -290,7 +290,7 @@ VITE_PAYPAL_CLIENT_ID=...
 ### Citas y Video
 - [x] Búsqueda terapeutas (filtros, badges Pro, orden por plan)
 - [x] Agendamiento + pago PayPal (flujo completo)
-- [x] Citas urgentes (<24h) con +30% precio
+- [x] Citas urgentes (<24h) con +30% precio — toggle activar/desactivar en agenda del terapeuta (`/therapist/schedule`)
 - [x] Cambio de terapeuta (hasta 48h antes)
 - [x] Videollamadas Daily.co (sala server-side, sin API key expuesta)
 - [x] Reconexión automática + banner calidad de red
@@ -417,6 +417,13 @@ VITE_PAYPAL_CLIENT_ID=...
 ---
 
 ## 11. Bugs Corregidos
+
+### Sesión 2026-06-07 (v26) — Toggle urgentes en agenda + Fix FindTherapist
+
+| Área | Corrección |
+|------|------------|
+| `FindTherapist.jsx` + `TherapistMatchPage.jsx` | Columnas `languages`, `years_experience`, `approaches`, `education` removidas del SELECT — no existen en producción hasta ejecutar `migration_payouts_and_payment_fields.sql`. Causaban error de query completa. |
+| `TherapistSchedule.jsx` — Toggle citas urgentes | Card toggle "Citas urgentes" añadida en la agenda del terapeuta. Guarda `available_urgent` en `therapist_profiles` al instante (sin botón guardar separado). El terapeuta aparece en búsquedas urgentes del paciente solo cuando está activo. |
 
 ### Sesión 2026-06-07 (v24) — Landing overhaul + Fix disponibilidad
 
