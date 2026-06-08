@@ -33,6 +33,7 @@ export default function TherapistDashboard() {
   const [expandedAlert, setExpandedAlert] = useState(null)
   const [loading, setLoading]       = useState(true)
   const [error, setError]           = useState(null)
+  const [hasAvailability, setHasAvailability] = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -88,6 +89,11 @@ export default function TherapistDashboard() {
         .gte('scheduled_at', monthStart.toISOString())
       const monthEarnings = (completedThisMonth ?? []).reduce((acc, s) => acc + (s.therapist_net ?? s.price ?? 0), 0)
 
+      const { count: availCount } = await supabase
+        .from('therapist_availability')
+        .select('id', { count: 'exact' })
+        .eq('therapist_id', user.id)
+
       setSessions(sessionsData ?? [])
       setStats({
         today:    todayCount ?? 0,
@@ -96,6 +102,7 @@ export default function TherapistDashboard() {
         earnings: monthEarnings,
       })
       setAlerts(alertsData ?? [])
+      setHasAvailability((availCount ?? 0) > 0)
     } catch (err) {
       console.error('Error cargando dashboard terapeuta:', err)
       setError('No pudimos cargar tu información. Verifica tu conexión.')
@@ -121,7 +128,7 @@ export default function TherapistDashboard() {
     { id: 'bio',       label: 'Escribe tu biografía profesional', done: !!therapist.bio,                           to: '/therapist/profile' },
     { id: 'price',     label: 'Configura tu precio por sesión',   done: (therapist.price_per_session ?? 0) > 0,    to: '/therapist/profile' },
     { id: 'docs',      label: 'Sube tus 3 documentos de credencial', done: therapist.verification_status === 'verified', to: '/therapist/profile' },
-    { id: 'schedule',  label: 'Configura tu disponibilidad horaria',  done: false,                                 to: '/therapist/schedule' },
+    { id: 'schedule',  label: 'Configura tu disponibilidad horaria',  done: hasAvailability,                       to: '/therapist/schedule' },
   ] : []
   const onboardingDone = onboardingSteps.filter(s => s.done).length
   const showOnboarding = therapist && onboardingDone < onboardingSteps.length
