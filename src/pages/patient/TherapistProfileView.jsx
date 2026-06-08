@@ -66,6 +66,33 @@ export default function TherapistProfileView() {
     setLoading(false)
   }
 
+  // ── Helpers para citas urgentes ──────────────────────────────────────────
+  const todayStr = new Date().toISOString().split('T')[0]
+
+  // Fecha mínima seleccionable: hoy si acepta urgentes, mañana si no
+  const minDate = (() => {
+    if (therapist?.available_urgent) return todayStr
+    const d = new Date(); d.setDate(d.getDate() + 1)
+    return d.toISOString().split('T')[0]
+  })()
+
+  const isToday = bookForm.date === todayStr
+
+  // Hora mínima cuando el paciente selecciona hoy: ahora + 1h redondeado al siguiente cuarto
+  const getMinTime = () => {
+    const minDt = new Date(Date.now() + 60 * 60 * 1000)
+    const h = minDt.getHours()
+    const m = minDt.getMinutes()
+    const roundedM = Math.ceil(m / 15) * 15
+    const finalH = roundedM >= 60 ? h + 1 : h
+    const finalM = roundedM >= 60 ? 0 : roundedM
+    if (finalH >= 23) return '23:00'
+    return `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`
+  }
+
+  // Si ya es tan tarde que no quedan franjas disponibles hoy
+  const noUrgentSlotsToday = isToday && getMinTime() >= '23:00'
+
   const handleBookContinue = () => {
     if (!bookForm.date || !bookForm.time) {
       toast.error('Selecciona fecha y hora para tu cita')
@@ -75,6 +102,17 @@ export default function TherapistProfileView() {
     if (scheduledAt <= new Date()) {
       toast.error('La fecha y hora deben ser en el futuro')
       return
+    }
+    if (isToday) {
+      const minT = getMinTime()
+      if (bookForm.time < minT) {
+        toast.error(`La hora mínima para citas urgentes es ${minT} (1 hora desde ahora)`)
+        return
+      }
+      if (bookForm.time > '23:00') {
+        toast.error('Las citas urgentes deben programarse hasta las 23:00')
+        return
+      }
     }
     setBookStep('payment')
   }
@@ -277,13 +315,53 @@ export default function TherapistProfileView() {
                 </div>
               </div>
 
+              {/* Aviso urgente si acepta citas urgentes */}
+              {therapist?.available_urgent && (
+                <div className="flex items-center gap-2 text-xs bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5 text-orange-700">
+                  <Zap size={13} strokeWidth={1.8} className="shrink-0" />
+                  Este terapeuta acepta citas urgentes para hoy — disponibles desde 1 hora a partir de ahora hasta las 23:00 (+30% precio)
+                </div>
+              )}
+
               <div className="grid grid-cols-2 gap-3">
-                <Input label="Fecha" type="date" value={bookForm.date}
-                  onChange={(e) => setBookForm(f => ({ ...f, date: e.target.value }))}
-                  min={new Date().toISOString().split('T')[0]} required />
-                <Input label="Hora" type="time" value={bookForm.time}
-                  onChange={(e) => setBookForm(f => ({ ...f, time: e.target.value }))} required />
+                <Input
+                  label="Fecha"
+                  type="date"
+                  value={bookForm.date}
+                  min={minDate}
+                  onChange={(e) => {
+                    const newDate = e.target.value
+                    const newIsToday = newDate === todayStr
+                    // Si cambia a hoy y la hora seleccionada ya no sería válida, limpiarla
+                    if (newIsToday && bookForm.time) {
+                      const minT = getMinTime()
+                      if (bookForm.time < minT || bookForm.time > '23:00') {
+                        setBookForm(f => ({ ...f, date: newDate, time: '' }))
+                        return
+                      }
+                    }
+                    setBookForm(f => ({ ...f, date: newDate }))
+                  }}
+                  required
+                />
+                <Input
+                  label="Hora"
+                  type="time"
+                  value={bookForm.time}
+                  min={isToday ? getMinTime() : undefined}
+                  max={isToday ? '23:00' : undefined}
+                  onChange={(e) => setBookForm(f => ({ ...f, time: e.target.value }))}
+                  required
+                />
               </div>
+
+              {/* Sin horarios urgentes disponibles hoy */}
+              {noUrgentSlotsToday && (
+                <div className="text-xs bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5 text-amber-700 flex items-center gap-2">
+                  <Zap size={13} strokeWidth={1.8} className="shrink-0" />
+                  No hay franjas urgentes disponibles para hoy. Selecciona otro día.
+                </div>
+              )}
 
               {bookingPreview && (
                 <div className={`rounded-xl p-4 text-sm ${bookingPreview.urgent ? 'bg-orange-50 border border-orange-200' : 'bg-primary-50 border border-primary-100'}`}>
@@ -303,7 +381,7 @@ export default function TherapistProfileView() {
                 </div>
               )}
 
-              <Button fullWidth disabled={!bookForm.date || !bookForm.time} onClick={handleBookContinue}>
+              <Button fullWidth disabled={!bookForm.date || !bookForm.time || noUrgentSlotsToday} onClick={handleBookContinue}>
                 Continuar al pago →
               </Button>
               <p className="text-xs text-warm-400 text-center">
