@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-07 (v23 — Comisiones: Gratuito 20%, Pro 10%)*
+*Última actualización: 2026-06-07 (v24 — Landing overhaul + Fix disponibilidad terapeuta)*
 
 ---
 
@@ -111,6 +111,8 @@ src/
 | `migration_add_profile_fields.sql` | **Pendiente de ejecutar** — columnas `gender`, `birth_date`, `preferred_language` en `profiles` |
 | `migration_payouts_and_payment_fields.sql` | **Pendiente de ejecutar** — tabla `payouts`, vista `therapist_pending_earnings`, columnas de cobro en `therapist_profiles` |
 | `migration_commission_rates.sql` | **Pendiente de ejecutar** — comisión básico 20%, pro/premium 10%; actualiza trigger + filas existentes |
+| `migration_public_reviews.sql` | **Pendiente de ejecutar** — políticas RLS públicas (anon) para SELECT en `reviews` (landing page) |
+| `migration_fix_availability.sql` | **Ejecutado** ✅ — RLS explícita por operación en `therapist_availability` + UNIQUE constraint |
 
 ---
 
@@ -414,6 +416,19 @@ VITE_PAYPAL_CLIENT_ID=...
 ---
 
 ## 11. Bugs Corregidos
+
+### Sesión 2026-06-07 (v24) — Landing overhaul + Fix disponibilidad
+
+| Área | Corrección |
+|------|------------|
+| `LandingPage.jsx` — Testimonios | Reemplazados testimonios falsos por reseñas reales de Supabase (3 al azar, rating ≥ 4, skeleton loader mientras carga) |
+| `LandingPage.jsx` — Quiz matching | Quiz interactivo inline (4 preguntas, barra de progreso, guarda en `sessionStorage`, redirige a `/register?quiz=1`) en lugar de botón directo al registro |
+| `LandingPage.jsx` — Mockup terapeutas | "Paciente Demo" → "Paciente anónimo" |
+| `LandingPage.jsx` — Tipografía | FAQ questions `font-semibold` → `font-bold`; quiz h2 alineado con demás section headers (`text-3xl sm:text-4xl`) |
+| `index.css` — Dark mode | Overrides para `.card-elevated` y `.btn-secondary-premium` que no tenían variantes oscuras |
+| `TherapistSchedule.jsx` — Disponibilidad | Reemplazado `upsert` (requería UNIQUE constraint inexistente) por DELETE+INSERT. Causa raíz real: RLS `FOR ALL USING(...)` sin `WITH CHECK` explícito no cubre INSERT en PostgreSQL 15 (error 42501). Fix: políticas separadas por operación en `migration_fix_availability.sql` |
+
+---
 
 ### Sesión 2026-06-07 (v19) — Auditoría completa de plataforma
 
