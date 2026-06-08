@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-07 (v21 — Nuevos campos de registro: Sexo, Fecha de nacimiento, Idioma preferido)*
+*Última actualización: 2026-06-07 (v22 — Migración payouts + campos de cobro en therapist_profiles)*
 
 ---
 
@@ -74,7 +74,8 @@ src/
 | Tabla | Descripción |
 |-------|-------------|
 | `profiles` | Todos los usuarios (role, full_name, avatar_url, **is_anonymous**, gender, birth_date, preferred_language) |
-| `therapist_profiles` | Perfil extendido (specialty, price, **subscription_plan**, **commission_rate**, verified) |
+| `therapist_profiles` | Perfil extendido (specialty, price, **subscription_plan**, **commission_rate**, verified, **payment_method**, paypal_email, bank_*) |
+| `payouts` | Liquidaciones a terapeutas (amount, status, payment_method, reference, paid_at) |
 | `sessions` | Citas (status, price, **platform_commission**, **therapist_net**, video_room_url, is_urgent) |
 | `messages` | Chat (sender_id, receiver_id, content, **read_at**) |
 | `therapist_credentials` | Docs de verificación (**document_type**, status, **rejection_reason**) |
@@ -108,6 +109,7 @@ src/
 | `migration_fix_progate_server_side.sql` | **Ejecutado** — RLS server-side módulo psicométrico + función `is_pro_therapist()` |
 | `migration_fix_length_constraints.sql` | **Ejecutado** — CHECK constraints longitud en messages, clinical_history, patient_tasks, etc. |
 | `migration_add_profile_fields.sql` | **Pendiente de ejecutar** — columnas `gender`, `birth_date`, `preferred_language` en `profiles` |
+| `migration_payouts_and_payment_fields.sql` | **Pendiente de ejecutar** — tabla `payouts`, vista `therapist_pending_earnings`, columnas de cobro en `therapist_profiles` |
 
 ---
 
