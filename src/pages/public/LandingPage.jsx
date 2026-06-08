@@ -1,4 +1,5 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { supabase } from '@/lib/supabase'
 import {
   ShieldCheck,
   Video,
@@ -28,34 +29,71 @@ import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 
 
-/* ─── Testimonios ───────────────────────────── */
-const TESTIMONIALS = [
+/* ─── Helpers para reviews ──────────────────── */
+const AVATAR_GRADIENTS = [
+  'from-primary-400 to-accent-500',
+  'from-accent-400 to-primary-600',
+  'from-primary-500 to-accent-400',
+  'from-accent-500 to-primary-400',
+  'from-primary-300 to-accent-600',
+]
+
+function getDisplayName(fullName) {
+  if (!fullName) return 'Paciente anónimo'
+  const parts = fullName.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0]
+  return `${parts[0]} ${parts[1][0]}.`
+}
+
+function getInitials(fullName) {
+  if (!fullName) return 'PA'
+  const parts = fullName.trim().split(/\s+/)
+  if (parts.length === 1) return parts[0][0].toUpperCase()
+  return (parts[0][0] + parts[1][0]).toUpperCase()
+}
+
+/* ─── Quiz de matching ──────────────────────── */
+const QUIZ_QUESTIONS = [
   {
-    id: 1,
-    name: 'María G.',
-    role: 'Paciente',
-    initials: 'MG',
-    color: 'from-primary-400 to-accent-500',
-    rating: 5,
-    text: 'Encontré a mi terapeuta en menos de 10 minutos. La videollamada fue fluida y el proceso de pago súper fácil. No imaginé que la terapia online podía sentirse tan cercana.',
+    id: 'reason',
+    q: '¿Cuál es el principal motivo por el que buscas apoyo?',
+    opts: [
+      { label: 'Ansiedad o estrés',          specialties: ['Psicología cognitivo-conductual', 'Psicología clínica'] },
+      { label: 'Depresión o tristeza',        specialties: ['Psicología clínica', 'Psicoanálisis'] },
+      { label: 'Problemas de pareja/familia', specialties: ['Terapia familiar y de pareja'] },
+      { label: 'Crecimiento personal',        specialties: ['Psicología clínica', 'Psicología cognitivo-conductual'] },
+      { label: 'Trauma o duelo',              specialties: ['Psicología clínica', 'Psicoanálisis'] },
+      { label: 'Otro / No estoy seguro/a',    specialties: [] },
+    ],
   },
   {
-    id: 2,
-    name: 'Dr. Carlos M.',
-    role: 'Terapeuta verificado',
-    initials: 'CM',
-    color: 'from-accent-400 to-primary-600',
-    rating: 5,
-    text: 'La plataforma me da todas las herramientas que necesito: tests, escalas clínicas, protocolos. Mis pacientes llegan mejor preparados y yo puedo enfocarme en el trabajo terapéutico.',
+    id: 'budget',
+    q: '¿Cuál es tu presupuesto por sesión?',
+    opts: [
+      { label: 'Hasta $40 USD',   maxPrice: 40 },
+      { label: '$40 – $70 USD',   maxPrice: 70 },
+      { label: '$70 – $100 USD',  maxPrice: 100 },
+      { label: 'Sin límite',      maxPrice: 9999 },
+    ],
   },
   {
-    id: 3,
-    name: 'Sofía R.',
-    role: 'Paciente',
-    initials: 'SR',
-    color: 'from-primary-500 to-accent-400',
-    rating: 5,
-    text: 'El modo anónimo me dio la confianza para dar el primer paso. Nadie en mi entorno sabe que voy a terapia, y eso fue clave para decidirme.',
+    id: 'urgency',
+    q: '¿Con qué urgencia necesitas comenzar?',
+    opts: [
+      { label: 'Hoy o mañana',              urgency: 3 },
+      { label: 'Esta semana',               urgency: 2 },
+      { label: 'En las próximas 2 semanas', urgency: 1 },
+      { label: 'Sin prisa',                 urgency: 0 },
+    ],
+  },
+  {
+    id: 'gender',
+    q: '¿Tienes preferencia de género en tu terapeuta?',
+    opts: [
+      { label: 'Sin preferencia', gender: null },
+      { label: 'Mujer',           gender: 'female' },
+      { label: 'Hombre',          gender: 'male' },
+    ],
   },
 ]
 
@@ -88,6 +126,37 @@ const THERAPIST_TOOLS = [
    Página principal
 ───────────────────────────────────────────── */
 export default function LandingPage() {
+  const [liveReviews, setLiveReviews] = useState([])
+
+  /* Cargar reseñas reales de Supabase */
+  useEffect(() => {
+    supabase
+      .from('reviews')
+      .select(`
+        id, rating, comment, created_at,
+        patient:profiles!reviews_patient_id_fkey(full_name)
+      `)
+      .gte('rating', 4)
+      .not('comment', 'is', null)
+      .neq('comment', '')
+      .order('created_at', { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (!data || data.length === 0) return
+        // Elegir 3 al azar
+        const shuffled = [...data].sort(() => Math.random() - 0.5).slice(0, 3)
+        setLiveReviews(shuffled.map((r, i) => ({
+          id: r.id,
+          name: getDisplayName(r.patient?.full_name),
+          role: 'Paciente verificado',
+          initials: getInitials(r.patient?.full_name),
+          color: AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length],
+          rating: r.rating,
+          text: r.comment,
+        })))
+      })
+  }, [])
+
   /* IntersectionObserver: fade-in en scroll para elementos .fade-in */
   useEffect(() => {
     const style = document.createElement('style')
@@ -260,25 +329,48 @@ export default function LandingPage() {
             />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-5 mt-12">
-              {TESTIMONIALS.map(({ id, name, role, initials, color, rating, text }) => (
-                <div key={id} className="fade-in card p-6">
-                  <div className="flex items-center gap-0.5 mb-4">
-                    {Array.from({ length: rating }).map((_, i) => (
-                      <Star key={i} size={14} strokeWidth={0} className="fill-accent-400 text-accent-400" />
-                    ))}
-                  </div>
-                  <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-5">"{text}"</p>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}>
-                      <span className="text-white font-bold text-xs">{initials}</span>
+              {liveReviews.length > 0
+                ? liveReviews.map(({ id, name, role, initials, color, rating, text }) => (
+                    <div key={id} className="fade-in card p-6">
+                      <div className="flex items-center gap-0.5 mb-4">
+                        {Array.from({ length: rating }).map((_, i) => (
+                          <Star key={i} size={14} strokeWidth={0} className="fill-accent-400 text-accent-400" />
+                        ))}
+                      </div>
+                      <p className="text-slate-600 dark:text-slate-400 text-sm leading-relaxed mb-5">"{text}"</p>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${color} flex items-center justify-center shrink-0`}>
+                          <span className="text-white font-bold text-xs">{initials}</span>
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 dark:text-white text-sm">{name}</p>
+                          <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{role}</p>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="font-bold text-slate-900 dark:text-white text-sm">{name}</p>
-                      <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{role}</p>
+                  ))
+                : Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="card p-6 animate-pulse">
+                      <div className="flex gap-0.5 mb-4">
+                        {Array.from({ length: 5 }).map((__, j) => (
+                          <div key={j} className="w-3.5 h-3.5 rounded-full bg-slate-200 dark:bg-slate-700" />
+                        ))}
+                      </div>
+                      <div className="space-y-2 mb-5">
+                        <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-full" />
+                        <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-4/5" />
+                        <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-3/4" />
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 shrink-0" />
+                        <div className="space-y-1.5 flex-1">
+                          <div className="h-3 bg-slate-200 dark:bg-slate-700 rounded-full w-24" />
+                          <div className="h-2.5 bg-slate-200 dark:bg-slate-700 rounded-full w-16" />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              ))}
+                  ))
+              }
             </div>
           </div>
         </section>
@@ -348,45 +440,7 @@ export default function LandingPage() {
         {/* ── QUIZ DE MATCHING ───────────────────── */}
         <section className="py-20 px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="card-elevated p-8 sm:p-12 text-center">
-              <div className="w-12 h-12 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-5">
-                <BrainCircuit size={24} strokeWidth={1.8} className="text-white" />
-              </div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
-                ¿No sabes por dónde empezar?
-              </h2>
-              <p className="text-slate-500 dark:text-slate-400 font-medium mb-8 max-w-xl mx-auto leading-relaxed">
-                Responde 4 preguntas y nuestro algoritmo te conecta con los terapeutas
-                que mejor se ajustan a lo que necesitas.
-              </p>
-
-              {/* Preview de las 4 preguntas */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
-                {[
-                  { num: '1', label: 'Motivo de consulta' },
-                  { num: '2', label: 'Presupuesto por sesión' },
-                  { num: '3', label: 'Urgencia para comenzar' },
-                  { num: '4', label: 'Preferencia de terapeuta' },
-                ].map(({ num, label }) => (
-                  <div key={num} className="bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 rounded-xl p-3">
-                    <span className="text-xs font-bold text-primary-400 tracking-widest block mb-1">{num}</span>
-                    <span className="text-xs font-semibold text-primary-800 dark:text-primary-300 leading-tight">{label}</span>
-                  </div>
-                ))}
-              </div>
-
-              <Link
-                to="/register"
-                onClick={() => analytics.clickMatchQuiz()}
-                className="btn-premium btn-primary-premium text-base px-8 py-3.5 mx-auto"
-              >
-                Hacer el test gratis
-                <ArrowRight size={18} strokeWidth={1.8} />
-              </Link>
-              <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
-                Menos de 2 minutos · Sin compromisos
-              </p>
-            </div>
+            <MatchingQuiz />
           </div>
         </section>
 
@@ -514,6 +568,122 @@ export default function LandingPage() {
 
 /* ─── Sub-componentes ─────────────────────── */
 
+function MatchingQuiz() {
+  const navigate = useNavigate()
+  const [started, setStarted] = useState(false)
+  const [step, setStep]       = useState(0)
+  const [answers, setAnswers] = useState({})
+
+  const handleAnswer = (opt) => {
+    const q = QUIZ_QUESTIONS[step]
+    const newAnswers = { ...answers, [q.id]: opt }
+    setAnswers(newAnswers)
+    if (step < QUIZ_QUESTIONS.length - 1) {
+      setStep(s => s + 1)
+    } else {
+      sessionStorage.setItem('matchAnswers', JSON.stringify(newAnswers))
+      navigate('/register?quiz=1')
+    }
+  }
+
+  if (!started) {
+    return (
+      <div className="card-elevated dark:bg-slate-800/60 dark:ring-1 dark:ring-slate-700 p-8 sm:p-12 text-center">
+        <div className="w-12 h-12 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-5">
+          <BrainCircuit size={24} strokeWidth={1.8} className="text-white" />
+        </div>
+        <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
+          ¿No sabes por dónde empezar?
+        </h2>
+        <p className="text-slate-500 dark:text-slate-400 font-medium mb-8 max-w-xl mx-auto leading-relaxed">
+          Responde 4 preguntas y nuestro algoritmo te conecta con los terapeutas
+          que mejor se ajustan a lo que necesitas.
+        </p>
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+          {[
+            { num: '1', label: 'Motivo de consulta' },
+            { num: '2', label: 'Presupuesto por sesión' },
+            { num: '3', label: 'Urgencia para comenzar' },
+            { num: '4', label: 'Preferencia de terapeuta' },
+          ].map(({ num, label }) => (
+            <div key={num} className="bg-primary-50 dark:bg-primary-900/30 border border-primary-100 dark:border-primary-800 rounded-xl p-3">
+              <span className="text-xs font-bold text-primary-400 tracking-widest block mb-1">{num}</span>
+              <span className="text-xs font-bold text-primary-800 dark:text-primary-300 leading-tight">{label}</span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          onClick={() => { analytics.clickMatchQuiz(); setStarted(true) }}
+          className="btn-premium btn-primary-premium text-base px-8 py-3.5 mx-auto"
+        >
+          Hacer el test gratis
+          <ArrowRight size={18} strokeWidth={1.8} />
+        </button>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mt-4">
+          Menos de 2 minutos · Sin compromisos
+        </p>
+      </div>
+    )
+  }
+
+  const q = QUIZ_QUESTIONS[step]
+  const progress = Math.round(((step) / QUIZ_QUESTIONS.length) * 100)
+
+  return (
+    <div className="card-elevated dark:bg-slate-800/60 dark:ring-1 dark:ring-slate-700 p-8 sm:p-12">
+      {/* Barra de progreso */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-2">
+          <span className="text-xs font-bold text-primary-500 tracking-widest uppercase">
+            Pregunta {step + 1} de {QUIZ_QUESTIONS.length}
+          </span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">{progress}% completado</span>
+        </div>
+        <div className="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-gradient-brand rounded-full transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Pregunta */}
+      <div className="w-10 h-10 bg-gradient-brand rounded-xl flex items-center justify-center mb-5">
+        <BrainCircuit size={20} strokeWidth={1.8} className="text-white" />
+      </div>
+      <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-8 leading-tight">
+        {q.q}
+      </h2>
+
+      {/* Opciones */}
+      <div className={`grid gap-3 ${q.opts.length <= 4 ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
+        {q.opts.map((opt) => (
+          <button
+            key={opt.label}
+            onClick={() => handleAnswer(opt)}
+            className="group text-left p-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-50 dark:hover:bg-primary-900/20 transition-all duration-150 active:scale-[0.98]"
+          >
+            <span className="font-semibold text-slate-700 dark:text-slate-300 group-hover:text-primary-700 dark:group-hover:text-primary-400 text-sm leading-snug">
+              {opt.label}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {step > 0 && (
+        <button
+          onClick={() => setStep(s => s - 1)}
+          className="mt-6 text-xs text-slate-400 dark:text-slate-500 hover:text-primary-600 font-medium flex items-center gap-1 transition-colors"
+        >
+          ← Volver
+        </button>
+      )}
+    </div>
+  )
+}
+
 function SectionHeader({ title, subtitle }) {
   return (
     <div className="text-center max-w-2xl mx-auto">
@@ -632,7 +802,7 @@ function TherapistMockup() {
             <span className="text-white font-bold text-sm">P</span>
           </div>
           <div>
-            <p className="font-bold text-white text-sm">Paciente Demo</p>
+            <p className="font-bold text-white text-sm">Paciente anónimo</p>
             <p className="text-indigo-200 text-xs">Próxima sesión: hoy, 3:00 PM</p>
           </div>
         </div>
@@ -705,7 +875,7 @@ function FAQItem({ question, answer }) {
         className="w-full flex items-center justify-between px-5 py-4 text-left gap-4"
         aria-expanded={open}
       >
-        <span className="font-semibold text-slate-900 dark:text-white text-sm">{question}</span>
+        <span className="font-bold text-slate-900 dark:text-white text-sm">{question}</span>
         <ChevronDown
           size={18}
           strokeWidth={1.8}

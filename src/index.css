@@ -19,8 +19,11 @@
 .dark .text-warm-500            { color: #64748b !important; }
 .dark .text-warm-400            { color: #475569 !important; }
 .dark .card                     { background-color: #1a1f2e; border-color: #2d3548; }
+.dark .card-elevated            { background-color: #1a1f2e; box-shadow: 0 2px 12px rgba(0,0,0,0.5), 0 0 0 1px #2d3548; }
 .dark .shadow-card              { box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
 .dark .bg-psiconecta            { background: #0f1117; }
+.dark .btn-secondary-premium    { background: #1e2435 !important; color: #a5b4fc !important; border-color: #374160 !important; }
+.dark .btn-secondary-premium:hover { background: #252c3d !important; border-color: #4f46e5 !important; }
 .dark input, .dark textarea, .dark select {
   background-color: #1e2435 !important;
   border-color: #374160 !important;
