@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-07 (v26 — Toggle citas urgentes en agenda + Fix FindTherapist)*
+*Última actualización: 2026-06-07 (v27 — Restricción horaria urgentes + Fix checklist onboarding)*
 
 ---
 
@@ -417,6 +417,13 @@ VITE_PAYPAL_CLIENT_ID=...
 ---
 
 ## 11. Bugs Corregidos
+
+### Sesión 2026-06-07 (v27) — Restricción horaria urgentes + Fix checklist onboarding
+
+| Área | Corrección |
+|------|------------|
+| `TherapistProfileView.jsx` — Citas urgentes | Si `available_urgent = false`: fecha mínima = mañana (no permite agendar hoy). Si `available_urgent = true`: puede seleccionar hoy con hora mínima = ahora+1h (redondeado al siguiente cuarto de hora) y máxima = 23:00. Si ya no quedan franjas válidas hoy, muestra aviso y bloquea el botón. Validación duplicada en `handleBookContinue`. |
+| `TherapistDashboard.jsx` — Checklist onboarding | El paso "Configura tu disponibilidad horaria" tenía `done: false` hardcodeado. Ahora consulta `therapist_availability` en `fetchData` y se marca como ✅ cuando el terapeuta tiene al menos un día configurado. |
 
 ### Sesión 2026-06-07 (v26) — Toggle urgentes en agenda + Fix FindTherapist
 
