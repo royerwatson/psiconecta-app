@@ -16,7 +16,7 @@ import { Crown, Star, Zap, TrendingUp, DollarSign, Users, Check } from 'lucide-r
 
 const PLAN_CONFIG = {
   basic:   { label: 'Básico',   color: 'bg-warm-100 text-warm-600',       Icon: Zap,   price: 0,   commission: 20  },
-  pro:     { label: 'Pro',      color: 'bg-primary-100 text-primary-700', Icon: Star,  price: 50,  commission: 10  },
+  pro:     { label: 'Pro',      color: 'bg-primary-100 text-primary-700', Icon: Star,  price: 79.99,  commission: 10  },
   premium: { label: 'Premium',  color: 'bg-amber-100 text-amber-700',     Icon: Crown, price: 79,  commission: 10  },
 }
 

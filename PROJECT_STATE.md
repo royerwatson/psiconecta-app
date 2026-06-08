@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-07 (v27 — Restricción horaria urgentes + Fix checklist onboarding)*
+*Última actualización: 2026-06-08 (v28 — Precio suscripción $50 → $79.99 USD/mes)*
 
 ---
 
@@ -196,7 +196,7 @@ src/
 | Plan | Precio | Comisión | Herramientas |
 |------|--------|----------|--------------|
 | **Gratuito** | $0/mes | **20%** | Perfil, agenda, chat, videollamadas |
-| **Suscripción** | $50/mes USD | **10%** | Todo + tests, DSM, CIE, escalas, crisis, biblioteca, colegas, protocolos, estadísticas |
+| **Suscripción** | $79.99/mes USD | **10%** | Todo + tests, DSM, CIE, escalas, crisis, biblioteca, colegas, protocolos, estadísticas |
 
 ### Moneda
 - Pagos procesados en **USD** vía PayPal
@@ -417,6 +417,12 @@ VITE_PAYPAL_CLIENT_ID=...
 ---
 
 ## 11. Bugs Corregidos
+
+### Sesión 2026-06-08 (v28) — Precio suscripción $79.99/mes
+
+| Área | Corrección |
+|------|------------|
+| Precio suscripción | Actualizado de $50 → **$79.99 USD/mes** en todos los archivos: `SubscriptionPage.jsx`, `PricingPage.jsx`, `LandingPage.jsx`, `ProGate.jsx`, `PayPalSubscriptionButton.jsx`, `AdminSubscriptions.jsx`, `TermsPage.jsx`, `RefundPage.jsx`, `create-subscription-order/index.ts`, `_shared/email.ts` |
 
 ### Sesión 2026-06-07 (v27) — Restricción horaria urgentes + Fix checklist onboarding
 

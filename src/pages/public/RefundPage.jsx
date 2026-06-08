@@ -75,7 +75,7 @@ export default function RefundPage() {
         </Section>
 
         <Section title="5. Suscripción Plan Pro (terapeutas)">
-          <P>La suscripción mensual de $50 USD para el Plan Pro es no reembolsable una vez procesada. Sin embargo:</P>
+          <P>La suscripción mensual de $79.99 USD para el Plan Pro es no reembolsable una vez procesada. Sin embargo:</P>
           <Ul items={[
             'Puedes cancelar en cualquier momento desde tu panel de suscripción.',
             'El acceso a las herramientas Pro se mantiene activo hasta el fin del período pagado.',

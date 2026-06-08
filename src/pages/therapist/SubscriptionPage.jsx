@@ -48,7 +48,7 @@ const PLANS = [
   {
     id:          'pro',
     name:        'Suscripción',
-    price:       50,
+    price:       79.99,
     commission:  10,
     Icon:        Star,
     highlight:   true,
@@ -152,7 +152,7 @@ export default function SubscriptionPage() {
             </div>
             <div>
               <p className="font-semibold text-primary-900">Plan Suscripción activo</p>
-              <p className="text-sm text-primary-600">$50.00 USD/mes · {formatWithLocal(50).split('≈')[1]?.trim() ?? ''}</p>
+              <p className="text-sm text-primary-600">$79.99 USD/mes · {formatWithLocal(79.99).split('≈')[1]?.trim() ?? ''}</p>
             </div>
           </div>
           {planExpires && (
@@ -193,7 +193,7 @@ export default function SubscriptionPage() {
 
               <div className="mb-3">
                 <p className="text-3xl font-bold text-warm-900">
-                  {plan.price === 0 ? 'Gratis' : '$50.00 USD'}
+                  {plan.price === 0 ? 'Gratis' : '$79.99 USD'}
                 </p>
                 {plan.price > 0 && (
                   <p className="text-xs text-warm-400 mt-0.5">
@@ -235,7 +235,7 @@ export default function SubscriptionPage() {
               ) : plan.id === 'pro' ? (
                 !showPayPal ? (
                   <Button fullWidth onClick={() => setShowPayPal(true)}>
-                    Suscribirme por $50/mes
+                    Suscribirme por $79.99/mes
                   </Button>
                 ) : (
                   <div className="space-y-2">

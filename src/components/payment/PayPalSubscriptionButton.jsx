@@ -74,7 +74,7 @@ export default function PayPalSubscriptionButton({ onSuccess, onError }) {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ plan: 'pro', amount: 50 }),
+            body: JSON.stringify({ plan: 'pro', amount: 79.99 }),
           }
         )
         const data = await res.json()

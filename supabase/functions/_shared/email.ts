@@ -533,7 +533,7 @@ export function subscriptionActivatedEmail({
       <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('Plan', 'Suscripción Pro')}
-          ${infoRow('Monto', '$50.00 USD')}
+          ${infoRow('Monto', '$79.99 USD')}
           ${infoRow('Válido hasta', expiry)}
           ${infoRow('Renovación', 'Manual — recibirás un aviso 7 días antes')}
         </table>
@@ -574,7 +574,7 @@ export function subscriptionExpiryReminderEmail({
       <tr><td>
         <table width="100%" cellpadding="0" cellspacing="0">
           ${infoRow('Vencimiento', expiry)}
-          ${infoRow('Plan', 'Suscripción Pro — $50.00 USD/mes')}
+          ${infoRow('Plan', 'Suscripción Pro — $79.99 USD/mes')}
         </table>
       </td></tr>
     </table>

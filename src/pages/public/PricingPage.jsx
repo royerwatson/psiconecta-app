@@ -30,12 +30,12 @@ const PLANS = [
   {
     id:        'pro',
     name:      'Suscripción',
-    price:     50,
+    price:     79.99,
     Icon:      Star,
     bg:        'bg-primary-600',
     border:    'border-primary-600',
     highlight: true,
-    cta:       'Suscribirme por $50/mes',
+    cta:       'Suscribirme por $79.99/mes',
     features: [
       'Todo lo del plan Gratuito',
       '10% de comisión por sesión (vs 20% en Gratuito)',
@@ -58,7 +58,7 @@ const FAQS = [
   },
   {
     q: '¿La suscripción cambia la comisión?',
-    a: 'Sí. El plan Gratuito tiene un 20% de comisión por sesión. Al suscribirte al plan Pro ($50/mes), la comisión baja al 10%, además de darte acceso a todas las herramientas clínicas.',
+    a: 'Sí. El plan Gratuito tiene un 20% de comisión por sesión. Al suscribirte al plan Pro ($79.99/mes), la comisión baja al 10%, además de darte acceso a todas las herramientas clínicas.',
   },
   {
     q: '¿Puedo cancelar la suscripción en cualquier momento?',

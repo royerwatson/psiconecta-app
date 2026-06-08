@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
         purchase_units: [{
           reference_id: user.id,
           description:  'Psiconecta - Suscripcion mensual Plan Pro',
-          amount: { currency_code: 'USD', value: '50.00' },
+          amount: { currency_code: 'USD', value: '79.99' },
         }],
         application_context: {
           brand_name:          'Psiconecta',
@@ -91,7 +91,7 @@ Deno.serve(async (req) => {
       .insert({
         therapist_id:   user.id,
         plan:           'pro',
-        amount_usd:     50.00,
+        amount_usd:     79.99,
         paypal_order_id: order.id,
         status:         'pending',
         period_start:   periodStart.toISOString(),

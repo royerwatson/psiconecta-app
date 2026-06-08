@@ -48,7 +48,7 @@ export default function ProGate({ children, featureName = 'esta herramienta' }) 
         </h2>
         <p className="text-warm-500 text-sm leading-relaxed">
           El acceso a {featureName} está incluido en la suscripción mensual de{' '}
-          <strong>$50.00 USD/mes</strong>.
+          <strong>$79.99 USD/mes</strong>.
           Actualiza tu plan para acceder a todas las herramientas clínicas profesionales.
         </p>
       </div>
