@@ -105,7 +105,7 @@ export default function TherapistSchedule() {
     setSavingAvail(true)
     const rows = selectedDays.map((day) => ({
       therapist_id: user.id,
-      day_of_week:  String(day),
+      day_of_week:  Number(day),
       start_time:   availForm.start_time,
       end_time:     availForm.end_time,
     }))
