@@ -320,14 +320,14 @@ export default function LandingPage() {
                   <PlanCard
                     name="Plan Gratuito"
                     price="$0/mes"
-                    features={['Perfil público verificado', 'Gestión de agenda', 'Videollamadas ilimitadas', 'Chat con pacientes', 'Comisión del 10 % por sesión']}
+                    features={['Perfil público verificado', 'Gestión de agenda', 'Videollamadas ilimitadas', 'Chat con pacientes', 'Comisión del 20 % por sesión']}
                   />
                   <div className="border-t border-dashed border-slate-100" />
                   <PlanCard
                     name="Plan Pro"
                     price="$50/mes"
                     highlight
-                    features={['Todo lo del plan gratuito', '45+ tests psicométricos', 'DSM-5-TR y CIE-11 en español', 'Escalas clínicas con scoring automático', 'Protocolos TCC, DBT, ACT, EMDR', 'Estadísticas avanzadas']}
+                    features={['Todo lo del plan gratuito', 'Comisión del 10 % por sesión', '45+ tests psicométricos', 'DSM-5-TR y CIE-11 en español', 'Escalas clínicas con scoring automático', 'Protocolos TCC, DBT, ACT, EMDR', 'Estadísticas avanzadas']}
                   />
                 </div>
 
