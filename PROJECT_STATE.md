@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-07 (v22 — Migración payouts + campos de cobro en therapist_profiles)*
+*Última actualización: 2026-06-07 (v23 — Comisiones: Gratuito 20%, Pro 10%)*
 
 ---
 
@@ -110,6 +110,7 @@ src/
 | `migration_fix_length_constraints.sql` | **Ejecutado** — CHECK constraints longitud en messages, clinical_history, patient_tasks, etc. |
 | `migration_add_profile_fields.sql` | **Pendiente de ejecutar** — columnas `gender`, `birth_date`, `preferred_language` en `profiles` |
 | `migration_payouts_and_payment_fields.sql` | **Pendiente de ejecutar** — tabla `payouts`, vista `therapist_pending_earnings`, columnas de cobro en `therapist_profiles` |
+| `migration_commission_rates.sql` | **Pendiente de ejecutar** — comisión básico 20%, pro/premium 10%; actualiza trigger + filas existentes |
 
 ---
 
@@ -191,8 +192,8 @@ src/
 ### Planes del terapeuta
 | Plan | Precio | Comisión | Herramientas |
 |------|--------|----------|--------------|
-| **Gratuito** | $0/mes | 10% | Perfil, agenda, chat, videollamadas |
-| **Suscripción** | $50/mes USD | 10% | Todo + tests, DSM, CIE, escalas, crisis, biblioteca, colegas, protocolos, estadísticas |
+| **Gratuito** | $0/mes | **20%** | Perfil, agenda, chat, videollamadas |
+| **Suscripción** | $50/mes USD | **10%** | Todo + tests, DSM, CIE, escalas, crisis, biblioteca, colegas, protocolos, estadísticas |
 
 ### Moneda
 - Pagos procesados en **USD** vía PayPal

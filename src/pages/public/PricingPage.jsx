@@ -24,7 +24,7 @@ const PLANS = [
       'Agenda y gestión de citas',
       'Chat privado con pacientes',
       'Videollamadas ilimitadas',
-      '10% de comisión por sesión',
+      '20% de comisión por sesión',
     ],
   },
   {
@@ -38,6 +38,7 @@ const PLANS = [
     cta:       'Suscribirme por $50/mes',
     features: [
       'Todo lo del plan Gratuito',
+      '10% de comisión por sesión (vs 20% en Gratuito)',
       'Tests psicométricos (45+ instrumentos)',
       'DSM-5-TR y CIE-11 de referencia',
       'Escalas clínicas validadas',
@@ -53,11 +54,11 @@ const PLANS = [
 const FAQS = [
   {
     q: '¿Cuándo se cobra la comisión?',
-    a: 'La comisión del 10% se descuenta automáticamente cuando el paciente paga. El resto se transfiere a tu cuenta en el siguiente ciclo de liquidación.',
+    a: 'La comisión se descuenta automáticamente cuando el paciente paga. El resto se transfiere a tu cuenta en el siguiente ciclo de liquidación.',
   },
   {
     q: '¿La suscripción cambia la comisión?',
-    a: 'No. Ambos planes mantienen el mismo 10% de comisión. La suscripción te da acceso a las herramientas clínicas, no a una comisión reducida.',
+    a: 'Sí. El plan Gratuito tiene un 20% de comisión por sesión. Al suscribirte al plan Pro ($50/mes), la comisión baja al 10%, además de darte acceso a todas las herramientas clínicas.',
   },
   {
     q: '¿Puedo cancelar la suscripción en cualquier momento?',
@@ -108,7 +109,7 @@ export default function PricingPage() {
         </h1>
         <p className="text-warm-500 text-lg leading-relaxed max-w-xl mx-auto">
           Comienza gratis. Cuando tu práctica crezca, elige el plan que mejor
-          se ajuste a tu volumen y reduce la comisión por sesión.
+          se ajuste a tu práctica y reduce tu comisión del 20% al 10%.
         </p>
       </div>
 

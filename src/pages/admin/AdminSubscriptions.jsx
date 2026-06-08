@@ -15,9 +15,9 @@ import toast from 'react-hot-toast'
 import { Crown, Star, Zap, TrendingUp, DollarSign, Users, Check } from 'lucide-react'
 
 const PLAN_CONFIG = {
-  basic:   { label: 'Básico',   color: 'bg-warm-100 text-warm-600',     Icon: Zap,   price: 0,   commission: 10   },
-  pro:     { label: 'Pro',      color: 'bg-primary-100 text-primary-700', Icon: Star,  price: 39,  commission: 7.5  },
-  premium: { label: 'Premium',  color: 'bg-amber-100 text-amber-700',    Icon: Crown, price: 79,  commission: 5    },
+  basic:   { label: 'Básico',   color: 'bg-warm-100 text-warm-600',       Icon: Zap,   price: 0,   commission: 20  },
+  pro:     { label: 'Pro',      color: 'bg-primary-100 text-primary-700', Icon: Star,  price: 50,  commission: 10  },
+  premium: { label: 'Premium',  color: 'bg-amber-100 text-amber-700',     Icon: Crown, price: 79,  commission: 10  },
 }
 
 export default function AdminSubscriptions() {

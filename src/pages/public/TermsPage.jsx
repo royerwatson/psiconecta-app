@@ -45,8 +45,8 @@ export default function TermsPage() {
 
         <Section title="5. Pagos y comisiones">
           <P>Los pagos se procesan a través de PayPal. Al pagar, aceptas los términos de servicio de PayPal aplicables.</P>
-          <P>Psiconecta cobra una comisión del 10% sobre el valor de cada sesión como contraprestación por el uso de la plataforma. El 90% restante corresponde al terapeuta.</P>
-          <P>Los terapeutas con plan Pro pagan adicionalmente $50 USD mensuales por acceso a herramientas clínicas avanzadas.</P>
+          <P>Psiconecta cobra una comisión sobre el valor de cada sesión como contraprestación por el uso de la plataforma: 20% para el plan Gratuito y 10% para el plan Suscripción. El porcentaje restante corresponde al terapeuta.</P>
+          <P>Los terapeutas con plan Suscripción pagan adicionalmente $50 USD mensuales por acceso a herramientas clínicas avanzadas y comisión reducida.</P>
         </Section>
 
         <Section title="6. Cancelaciones y reembolsos">

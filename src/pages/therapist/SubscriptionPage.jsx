@@ -2,7 +2,7 @@
  * SubscriptionPage — Gestión de plan de suscripción del terapeuta.
  *
  * Planes:
- *   Gratuito  — $0/mes · 10% comisión · funciones core
+ *   Gratuito  — $0/mes · 20% comisión · funciones core
  *   Pro       — $50/mes · 10% comisión · herramientas clínicas completas
  */
 import { useState, useEffect } from 'react'
@@ -24,7 +24,7 @@ const PLANS = [
     id:          'basic',
     name:        'Gratuito',
     price:       0,
-    commission:  10,
+    commission:  20,
     Icon:        Zap,
     highlight:   false,
     description: 'Todo lo necesario para comenzar tu práctica online sin costo mensual.',
@@ -33,7 +33,7 @@ const PLANS = [
       { text: 'Agenda y gestión de citas',    Icon: Check },
       { text: 'Chat con pacientes',           Icon: Check },
       { text: 'Videollamadas ilimitadas',     Icon: Check },
-      { text: '10% de comisión por sesión',   Icon: Check },
+      { text: '20% de comisión por sesión',   Icon: Check },
     ],
     locked: [
       { text: 'Tests psicométricos',          Icon: FlaskConical },
@@ -54,8 +54,9 @@ const PLANS = [
     highlight:   true,
     description: 'Herramientas clínicas completas para potenciar tu práctica profesional.',
     features: [
-      { text: 'Todo lo del plan Gratuito',    Icon: Check },
-      { text: 'Tests psicométricos (45+)',    Icon: FlaskConical },
+      { text: 'Todo lo del plan Gratuito',             Icon: Check },
+      { text: '10% de comisión (vs 20% en Gratuito)',  Icon: Check },
+      { text: 'Tests psicométricos (45+)',              Icon: FlaskConical },
       { text: 'DSM-5-TR y CIE-11',            Icon: BookOpen     },
       { text: 'Escalas clínicas validadas',   Icon: LayoutDashboard },
       { text: 'Plan de crisis (Stanley-Brown)',Icon: Shield       },

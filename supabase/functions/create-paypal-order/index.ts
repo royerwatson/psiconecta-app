@@ -89,7 +89,7 @@ Deno.serve(async (req) => {
       .eq('user_id', therapistId)
       .single()
 
-    const commissionRate  = therapistProfile?.commission_rate ?? 0.10
+    const commissionRate  = therapistProfile?.commission_rate ?? 0.20
     const platformCommission = +(finalPrice * commissionRate).toFixed(2)
     const therapistNet       = +(finalPrice - platformCommission).toFixed(2)
 
