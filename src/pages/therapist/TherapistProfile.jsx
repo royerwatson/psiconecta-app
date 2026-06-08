@@ -44,10 +44,9 @@ export default function TherapistProfile() {
   const therapist = profile?.therapist_profiles?.[0]
   const [editing, setEditing] = useState(false)
   const [form, setForm] = useState({
-    bio:            therapist?.bio ?? '',
-    specialty:      therapist?.specialty ?? SPECIALTIES[0],
-    price:          therapist?.price_per_session ?? 0,
-    available_urgent: therapist?.available_urgent ?? false,
+    bio:       therapist?.bio ?? '',
+    specialty: therapist?.specialty ?? SPECIALTIES[0],
+    price:     therapist?.price_per_session ?? 0,
   })
   const [saving, setSaving]         = useState(false)
   const [uploadingDoc, setUploadingDoc] = useState(null)  // doc type being uploaded
@@ -148,12 +147,11 @@ export default function TherapistProfile() {
       bio:               form.bio.trim(),
       specialty:         form.specialty,
       price_per_session: Number(form.price),
-      available_urgent:  form.available_urgent,
     }).eq('user_id', user.id)
     if (error) { toast.error('Error al guardar el perfil. Intenta de nuevo.'); setSaving(false); return }
     // Sincronizar el store local con los nuevos datos
     updateProfile({
-      therapist_profiles: [{ ...therapist, bio: form.bio.trim(), specialty: form.specialty, price_per_session: Number(form.price), available_urgent: form.available_urgent }],
+      therapist_profiles: [{ ...therapist, bio: form.bio.trim(), specialty: form.specialty, price_per_session: Number(form.price) }],
     })
     toast.success('Perfil actualizado correctamente')
     setEditing(false)
@@ -250,21 +248,6 @@ export default function TherapistProfile() {
             <Textarea label="Biografía" name="bio" value={form.bio} onChange={handleChange} rows={4}
               placeholder="Describe tu enfoque terapéutico y experiencia..." />
             <Input label="Precio por sesión (USD)" name="price" type="number" value={form.price} onChange={handleChange} />
-
-            {/* Toggle urgencias */}
-            <div
-              className="flex items-center justify-between p-4 rounded-xl border border-warm-200 dark:border-warm-700 bg-warm-50 dark:bg-warm-800/40 cursor-pointer select-none"
-              onClick={() => setForm(f => ({ ...f, available_urgent: !f.available_urgent }))}
-            >
-              <div>
-                <p className="text-sm font-semibold text-warm-900 dark:text-warm-100">Acepto citas urgentes</p>
-                <p className="text-xs text-warm-500 dark:text-warm-400 mt-0.5">Sesiones solicitadas con menos de 24 h de anticipación (+30% precio)</p>
-              </div>
-              <div className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${form.available_urgent ? 'bg-primary-600' : 'bg-warm-300 dark:bg-warm-600'}`}>
-                <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all duration-200 ${form.available_urgent ? 'left-7' : 'left-1'}`} />
-              </div>
-            </div>
-
             <Button onClick={saveProfile} loading={saving} fullWidth>Guardar cambios</Button>
           </div>
         ) : (
@@ -272,12 +255,6 @@ export default function TherapistProfile() {
             <InfoRow label="Especialidad" value={therapist?.specialty ?? 'No configurada'} />
             <InfoRow label="Precio por sesión" value={formatPrice(therapist?.price_per_session ?? 0)} />
             <InfoRow label="Cédula profesional" value={therapist?.license_number ?? 'No registrada'} />
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-warm-600 dark:text-warm-400">Citas urgentes</span>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${therapist?.available_urgent ? 'bg-green-100 text-green-700' : 'bg-warm-100 text-warm-500'}`}>
-                {therapist?.available_urgent ? 'Activo' : 'No disponible'}
-              </span>
-            </div>
             {therapist?.bio && <div className="mt-2"><p className="text-xs text-warm-500 uppercase font-semibold mb-1">Sobre mí</p><p className="text-sm text-warm-700">{therapist.bio}</p></div>}
           </div>
         )}

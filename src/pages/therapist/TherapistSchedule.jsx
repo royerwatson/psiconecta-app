@@ -27,7 +27,8 @@ const SESSION_COLORS = {
 }
 
 export default function TherapistSchedule() {
-  const { user } = useAuthStore()
+  const { user, profile } = useAuthStore()
+  const therapist = profile?.therapist_profiles?.[0]
   const [sessions, setSessions] = useState([])
   const [availability, setAvailability] = useState([])
   const [weekStart, setWeekStart] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }))
@@ -43,6 +44,8 @@ export default function TherapistSchedule() {
   const [showBlockModal, setShowBlockModal] = useState(false)
   const [blockForm, setBlockForm] = useState({ date: '', reason: '' })
   const [savingBlock, setSavingBlock] = useState(false)
+  const [urgentEnabled, setUrgentEnabled] = useState(therapist?.available_urgent ?? false)
+  const [togglingUrgent, setTogglingUrgent] = useState(false)
 
   const isCurrentWeek = isSameDay(weekStart, startOfWeek(new Date(), { weekStartsOn: 1 }))
 
@@ -164,6 +167,19 @@ export default function TherapistSchedule() {
     fetchWeek()
   }
 
+  const toggleUrgent = async () => {
+    setTogglingUrgent(true)
+    const newVal = !urgentEnabled
+    const { error } = await supabase
+      .from('therapist_profiles')
+      .update({ available_urgent: newVal })
+      .eq('user_id', user.id)
+    if (error) { toast.error('Error al actualizar'); setTogglingUrgent(false); return }
+    setUrgentEnabled(newVal)
+    toast.success(newVal ? 'Citas urgentes activadas' : 'Citas urgentes desactivadas')
+    setTogglingUrgent(false)
+  }
+
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
 
@@ -246,6 +262,32 @@ export default function TherapistSchedule() {
           <Button size="sm" variant="secondary" className="mr-3 shrink-0" onClick={() => setShowBlockModal(true)}>
             <Ban size={13} strokeWidth={1.8} className="inline mr-1" /> Bloquear
           </Button>
+        </Card>
+
+        {/* Toggle citas urgentes */}
+        <Card
+          className="flex items-center justify-between gap-3 cursor-pointer sm:col-span-2"
+          padding={false}
+          onClick={togglingUrgent ? undefined : toggleUrgent}
+        >
+          <div className="p-4 flex items-center gap-3">
+            <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${urgentEnabled ? 'bg-orange-100' : 'bg-warm-100'}`}>
+              <Zap size={16} strokeWidth={1.8} className={urgentEnabled ? 'text-orange-500' : 'text-warm-400'} />
+            </div>
+            <div>
+              <p className="font-medium text-warm-800 text-sm">Citas urgentes</p>
+              <p className="text-xs text-warm-500 mt-0.5">
+                {urgentEnabled
+                  ? 'Visible para pacientes que necesitan atención hoy (+30% precio)'
+                  : 'Activa para aparecer en búsquedas de citas urgentes'}
+              </p>
+            </div>
+          </div>
+          <div className="mr-4 shrink-0">
+            <div className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${urgentEnabled ? 'bg-orange-500' : 'bg-warm-300'} ${togglingUrgent ? 'opacity-50' : ''}`}>
+              <span className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-all duration-200 ${urgentEnabled ? 'left-7' : 'left-1'}`} />
+            </div>
+          </div>
         </Card>
       </div>
 
