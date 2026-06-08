@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-07 (v24 — Landing overhaul + Fix disponibilidad terapeuta)*
+*Última actualización: 2026-06-07 (v25 — Fix FindTherapist + TherapistMatchPage columnas pendientes)*
 
 ---
 
@@ -113,6 +113,7 @@ src/
 | `migration_commission_rates.sql` | **Pendiente de ejecutar** — comisión básico 20%, pro/premium 10%; actualiza trigger + filas existentes |
 | `migration_public_reviews.sql` | **Pendiente de ejecutar** — políticas RLS públicas (anon) para SELECT en `reviews` (landing page) |
 | `migration_fix_availability.sql` | **Ejecutado** ✅ — RLS explícita por operación en `therapist_availability` + UNIQUE constraint |
+| `fix_find_therapist_columns.md` | **Fix código** ✅ — Removidas columnas `languages/years_experience/approaches/education` de `FindTherapist.jsx` y `TherapistMatchPage.jsx` (requieren `migration_payouts_and_payment_fields.sql` pendiente) |
 
 ---
 
