@@ -16,6 +16,8 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
+          // LandingPage en chunk nombrado para poder hacer modulepreload en index.html
+          'page-landing':    ['./src/pages/public/LandingPage.jsx'],
           'vendor-react':    ['react', 'react-dom', 'react-router-dom'],
           'vendor-supabase': ['@supabase/supabase-js'],
           'vendor-recharts': ['recharts'],

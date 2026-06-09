@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-09 (v29 — Optimización PageSpeed mobile: lazy loading, GA diferido, LandingPage estática)*
+*Última actualización: 2026-06-09 (v30 — Fuentes auto-hospedadas (@fontsource), LandingPage lazy con chunk nombrado)*
 
 ---
 
@@ -417,6 +417,17 @@ VITE_PAYPAL_CLIENT_ID=...
 ---
 
 ## 11. Bugs Corregidos
+
+### Sesión 2026-06-09 (v30) — Self-host fuentes + LandingPage lazy chunk nombrado
+
+| Área | Corrección |
+|------|------------|
+| `package.json` | Instalados `@fontsource-variable/plus-jakarta-sans` y `@fontsource/lora` — fuentes servidas desde mismo origen, sin DNS externo |
+| `src/main.jsx` | Importa `wght.css` (variable, todos los pesos, unicode-range) y `latin-{400,600,700}.css` de Lora |
+| `tailwind.config.js` | `fontFamily.sans` actualizado a `'Plus Jakarta Sans Variable'` como primera opción |
+| `index.html` | Eliminados los `<link rel="preconnect">` y `<link rel="preload">` de Google Fonts (ya no se usan) |
+| `vite.config.js` | Chunk `'page-landing'` con nombre fijo para LandingPage lazy |
+| Resultado build | index.js: 53 KiB (era 117 KiB estático, 81 KiB antes) · CSS: 100 KiB gzip 17.78 KiB · 10 archivos de fuente en /assets/ |
 
 ### Sesión 2026-06-09 (v29) — Optimización PageSpeed mobile
 

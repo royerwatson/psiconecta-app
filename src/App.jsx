@@ -11,8 +11,6 @@ import AdminLayout   from '@/components/layout/AdminLayout'
 import ProtectedRoute, { TherapistRoute, ClientRoute, AdminRoute } from '@/components/layout/ProtectedRoute'
 import ProGate       from '@/components/layout/ProGate'
 
-// Página principal — estática para evitar round-trip extra en la visita inicial
-import LandingPage from '@/pages/public/LandingPage'
 
 // ── Lazy: cada página carga solo cuando el usuario navega a ella ──────────
 
@@ -83,7 +81,8 @@ const PaymentSuccess      = lazy(() => import('@/pages/payment/PaymentSuccess'))
 const PaymentCancel       = lazy(() => import('@/pages/payment/PaymentCancel'))
 const SubscriptionSuccess = lazy(() => import('@/pages/payment/SubscriptionSuccess'))
 
-// Público (LandingPage es estática — ver arriba)
+// Público
+const LandingPage            = lazy(() => import(/* webpackChunkName: "page-landing" */ '@/pages/public/LandingPage'))
 const PricingPage            = lazy(() => import('@/pages/public/PricingPage'))
 const TherapistDirectoryPage = lazy(() => import('@/pages/public/TherapistDirectoryPage'))
 const BlogListPage           = lazy(() => import('@/pages/public/BlogListPage'))
