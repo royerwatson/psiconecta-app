@@ -4,8 +4,8 @@ import { HelmetProvider } from 'react-helmet-async'
 import App from './App.jsx'
 import { CurrencyProvider } from './context/CurrencyContext.jsx'
 
-// Fuentes auto-hospedadas — solo subconjunto latin (sin DNS externo, font-display:swap incluido)
-import '@fontsource-variable/plus-jakarta-sans/wght.css'   // latin + latin-ext, todos los pesos
+// Plus Jakarta Sans — @font-face en index.css (URL estable /fonts/)
+// Lora — auto-hospedada vía @fontsource (sin DNS externo)
 import '@fontsource/lora/latin-400.css'
 import '@fontsource/lora/latin-600.css'
 import '@fontsource/lora/latin-700.css'

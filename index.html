@@ -34,7 +34,9 @@
       });
     </script>
 
-    <!-- Fuentes auto-hospedadas vía @fontsource (sin DNS externo) — importadas en main.jsx -->
+    <!-- Preload de la fuente crítica (hero LCP) desde mismo origen — sin esperar al CSS bundle -->
+    <link rel="preload" as="font" type="font/woff2" crossorigin
+          href="/fonts/plus-jakarta-sans.woff2" />
 
     <title>Psiconecta</title>
   </head>

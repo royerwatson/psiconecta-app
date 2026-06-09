@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-09 (v30 — Fuentes auto-hospedadas (@fontsource), LandingPage lazy con chunk nombrado)*
+*Última actualización: 2026-06-09 (v31 — Preload fuente crítica /fonts/ + fix forced reflow en LandingPage)*
 
 ---
 
@@ -417,6 +417,17 @@ VITE_PAYPAL_CLIENT_ID=...
 ---
 
 ## 11. Bugs Corregidos
+
+### Sesión 2026-06-09 (v31) — Preload fuente crítica + fix forced reflow
+
+| Área | Corrección |
+|------|------------|
+| `public/fonts/plus-jakarta-sans.woff2` | Fuente variable copiada a public/ para URL estable sin hash |
+| `index.html` | `<link rel="preload" as="font" crossorigin href="/fonts/plus-jakarta-sans.woff2">` — el browser descarga la fuente antes que el CSS termine de parsear |
+| `src/index.css` | `@font-face` apuntando a `/fonts/` + `.fade-in/.fade-in.visible` con `will-change: opacity, transform` |
+| `src/pages/public/LandingPage.jsx` | Eliminado `document.createElement('style') + appendChild` — causaba forced reflow. Estilos movidos a index.css |
+| Resultado build | CSS: 97.84 KiB (gzip 15.42 KiB), JS index: 53.84 KiB |
+| PageSpeed mobile | Score: 79 → esperado 82-86 (preload font reduce LCP ~200-400ms) |
 
 ### Sesión 2026-06-09 (v30) — Self-host fuentes + LandingPage lazy chunk nombrado
 

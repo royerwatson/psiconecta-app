@@ -157,21 +157,14 @@ export default function LandingPage() {
       })
   }, [])
 
-  /* IntersectionObserver: fade-in en scroll para elementos .fade-in */
+  /* IntersectionObserver: fade-in en scroll — estilos definidos en index.css, sin forced reflow */
   useEffect(() => {
-    const style = document.createElement('style')
-    style.textContent = `
-      .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.5s ease, transform 0.5s ease; }
-      .fade-in.visible { opacity: 1; transform: translateY(0); }
-    `
-    document.head.appendChild(style)
-
     const observer = new IntersectionObserver(
       (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) } }),
       { threshold: 0.12 }
     )
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el))
-    return () => { observer.disconnect(); document.head.removeChild(style) }
+    return () => observer.disconnect()
   }, [])
 
   return (
