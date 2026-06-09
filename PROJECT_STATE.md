@@ -1,5 +1,5 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-08 (v28 — Precio suscripción $50 → $79.99 USD/mes)*
+*Última actualización: 2026-06-09 (v29 — Optimización PageSpeed mobile: lazy loading, GA diferido, LandingPage estática)*
 
 ---
 
@@ -79,7 +79,7 @@ src/
 | `sessions` | Citas (status, price, **platform_commission**, **therapist_net**, video_room_url, is_urgent) |
 | `messages` | Chat (sender_id, receiver_id, content, **read_at**) |
 | `therapist_credentials` | Docs de verificación (**document_type**, status, **rejection_reason**) |
-| `subscription_payments` | Historial pagos de suscripción $50/mes |
+| `subscription_payments` | Historial pagos de suscripción $79.99 USD/mes |
 | `tests` / `test_assignments` / `test_sessions` / `test_results` | Sistema psicométrico completo |
 | `mood_entries` | Estado de ánimo diario del paciente |
 | `ai_checkins` | Check-ins IA con risk_level (low/medium/high) |
@@ -417,6 +417,16 @@ VITE_PAYPAL_CLIENT_ID=...
 ---
 
 ## 11. Bugs Corregidos
+
+### Sesión 2026-06-09 (v29) — Optimización PageSpeed mobile
+
+| Área | Corrección |
+|------|------------|
+| `src/App.jsx` | Todas las páginas convertidas a `React.lazy()` (code splitting). `LandingPage` se mantiene como import estático para evitar waterfall en "/" (la ruta más visitada). Bundle inicial: 117 KiB vs ~800 KiB antes. |
+| `index.html` | Google Fonts cambiado a `rel="preload" as="style" onload=...` — carga no bloqueante. |
+| `index.html` | Google Analytics diferido con `window.addEventListener('load', ...)` — ya no bloquea render. |
+| `src/index.css` | Eliminado `@import url(...)` de Google Fonts (era inválido en PostCSS + duplicado). `scroll-behavior: smooth` desactivado (penaliza LCP mobile). |
+| Resultado | TBT: 930ms → 50ms · LCP: 6.1s → 4.7s · FCP: 4.5s → 3.8s (pendiente reverificar con GA diferido) |
 
 ### Sesión 2026-06-08 (v28) — Precio suscripción $79.99/mes
 

@@ -19,13 +19,19 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
-    <!-- Google Analytics 4 -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%"></script>
+    <!-- Google Analytics 4 — diferido para no bloquear render -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', '%VITE_GA_MEASUREMENT_ID%', { anonymize_ip: true, cookie_flags: 'SameSite=None;Secure' });
+      window.addEventListener('load', function() {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = 'https://www.googletagmanager.com/gtag/js?id=%VITE_GA_MEASUREMENT_ID%';
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', '%VITE_GA_MEASUREMENT_ID%', { anonymize_ip: true, cookie_flags: 'SameSite=None;Secure' });
+      });
     </script>
 
     <!-- Fuentes: Plus Jakarta Sans (sans) + Lora (serif headings) — carga no bloqueante -->
