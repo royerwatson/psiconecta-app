@@ -25,9 +25,9 @@ export default defineConfig({
           'vendor-ui':       ['react-hot-toast', 'zustand'],
           'vendor-icons':    ['lucide-react'],
           // Datos clínicos pesados — se cargan solo cuando el terapeuta los necesita
+          // (dsm5tr y cie11 ya NO van en el bundle: se sirven desde la
+          //  Edge Function clinical-content, protegida con is_pro_therapist)
           'data-clinical':   [
-            './src/data/dsm5tr.js',
-            './src/data/cie11.js',
             './src/data/therapeuticLibrary.js',
             './src/data/therapeuticProtocols.js',
           ],

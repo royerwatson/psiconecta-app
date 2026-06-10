@@ -3,7 +3,8 @@
  * Búsqueda global + filtro por capítulo + vista expandida de criterios.
  */
 import { useState, useMemo } from 'react'
-import { DSM5TR, searchDSM } from '@/data/dsm5tr'
+import { useClinicalContent } from '@/hooks/useClinicalContent'
+import { LoadingScreen } from '@/components/ui/Spinner'
 import Input from '@/components/ui/Input'
 import { Lightbulb, AlertTriangle, Search } from 'lucide-react'
 
@@ -29,14 +30,10 @@ const CHAPTER_COLORS = [
   'bg-slate-100 text-slate-700 border-slate-200',
 ]
 
-const chapterColorMap = Object.fromEntries(
-  DSM5TR.map((ch, i) => [ch.chapterId, CHAPTER_COLORS[i % CHAPTER_COLORS.length]])
-)
-
 // ── Componente: tarjeta de diagnóstico ────────────────────────────────────────
-function DiagnosisCard({ diagnosis, chapterId, defaultOpen = false }) {
+function DiagnosisCard({ diagnosis, chapterId, colorMap = {}, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
-  const chipColor = chapterColorMap[chapterId] ?? 'bg-warm-100 text-warm-700 border-warm-200'
+  const chipColor = colorMap[chapterId] ?? 'bg-warm-100 text-warm-700 border-warm-200'
 
   const criteriaEntries = Object.entries(diagnosis.criteria ?? {})
 
@@ -128,13 +125,32 @@ export default function DSMReferencePage() {
   const [search, setSearch]           = useState('')
   const [filterChapter, setFilterChapter] = useState('all')
 
+  // Contenido protegido server-side (Edge Function clinical-content)
+  const { data, loading, error } = useClinicalContent('dsm5tr')
+  const DSM5TR = data ?? []
+
+  const chapterColorMap = useMemo(() => Object.fromEntries(
+    DSM5TR.map((ch, i) => [ch.chapterId, CHAPTER_COLORS[i % CHAPTER_COLORS.length]])
+  ), [DSM5TR])
+
+  const allDiagnoses = useMemo(() => DSM5TR.flatMap(chapter =>
+    chapter.diagnoses.map(d => ({ ...d, chapter: chapter.chapter, chapterId: chapter.chapterId }))
+  ), [DSM5TR])
+
   const totalDiagnoses = DSM5TR.reduce((sum, ch) => sum + ch.diagnoses.length, 0)
 
   const filtered = useMemo(() => {
     const q = search.trim()
     if (q) {
       // Búsqueda global — agrupa resultados por capítulo
-      const results = searchDSM(q)
+      const lower = q.toLowerCase()
+      const results = allDiagnoses.filter(d =>
+        d.name.toLowerCase().includes(lower) ||
+        d.icd10.toLowerCase().includes(lower) ||
+        d.dsm?.includes(lower) ||
+        d.description.toLowerCase().includes(lower) ||
+        Object.values(d.criteria ?? {}).some(v => v.toLowerCase().includes(lower))
+      )
       if (filterChapter !== 'all') return results.filter(d => d.chapterId === filterChapter)
       return results
     }
@@ -144,7 +160,18 @@ export default function DSMReferencePage() {
       return (ch?.diagnoses ?? []).map(d => ({ ...d, chapterId: ch.chapterId }))
     }
     return null // null = mostrar vista agrupada por capítulo
-  }, [search, filterChapter])
+  }, [search, filterChapter, allDiagnoses, DSM5TR])
+
+  if (loading) return <LoadingScreen />
+  if (error) {
+    return (
+      <div className="flex flex-col items-center py-20 text-center animate-fade-in">
+        <AlertTriangle className="text-warm-300 mb-3" size={40} strokeWidth={1.8} />
+        <p className="font-semibold text-warm-700">No se pudo cargar el DSM-5-TR</p>
+        <p className="text-sm text-warm-500 mt-1">Verifica tu conexión o tu plan de suscripción e intenta de nuevo.</p>
+      </div>
+    )
+  }
 
   // Cuando hay búsqueda o filtro por capítulo → lista plana
   // Cuando no hay nada → vista agrupada por capítulo
@@ -232,6 +259,7 @@ export default function DSMReferencePage() {
                   key={d.id}
                   diagnosis={d}
                   chapterId={d.chapterId}
+                  colorMap={chapterColorMap}
                   defaultOpen={!!search}
                 />
               ))}
@@ -254,7 +282,7 @@ export default function DSMReferencePage() {
               </div>
               <div className="flex flex-col gap-2">
                 {chapter.diagnoses.map(d => (
-                  <DiagnosisCard key={d.id} diagnosis={d} chapterId={chapter.chapterId} />
+                  <DiagnosisCard key={d.id} diagnosis={d} chapterId={chapter.chapterId} colorMap={chapterColorMap} />
                 ))}
               </div>
             </div>

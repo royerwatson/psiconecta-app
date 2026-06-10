@@ -503,14 +503,22 @@ export default function Register() {
           city:                sanitize(form.city),
           country:             form.country,
           phone:               sanitize(form.phone),
-          emergency_contact:   role === 'client' ? sanitize(form.emergencyContact) : null,
-          emergency_phone:     role === 'client' ? sanitize(form.emergencyPhone)   : null,
           gender:              form.gender || null,
           birth_date:          form.birthDate || null,
           preferred_language:  form.preferredLanguage || 'es',
           terms_accepted_at:   now,
           privacy_accepted_at: now,
         }).eq('id', newUserId)
+
+        // Contacto de emergencia → tabla separada con RLS estricta
+        // (solo el paciente, su terapeuta activo y el admin pueden leerla)
+        if (role === 'client' && form.emergencyContact.trim()) {
+          await supabase.from('emergency_contacts').upsert({
+            patient_id:    newUserId,
+            contact_name:  sanitize(form.emergencyContact),
+            contact_phone: sanitize(form.emergencyPhone),
+          }, { onConflict: 'patient_id' })
+        }
       }
 
       // Enviar email de bienvenida usando el user_id del signup

@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail, reminderEmail, subscriptionExpiryReminderEmail } from '../_shared/email.ts'
+import { sendPushToUser } from '../_shared/push.ts'
 
 // Esta función se ejecuta diariamente (configurar en Supabase como cron job)
 // Busca sesiones programadas para las próximas 24-25 horas y envía recordatorios
@@ -69,6 +70,20 @@ Deno.serve(async (req) => {
 
       await Promise.all(emails)
       sent += emails.length
+
+      // Push nativa a ambas partes (best-effort)
+      await Promise.all([
+        sendPushToUser(supabaseAdmin, session.patient?.id, {
+          title: `Sesión ${label}`,
+          body: `Tu sesión con ${session.therapist?.full_name ?? 'tu terapeuta'} es el ${date} a las ${time}`,
+          route: '/patient/appointments',
+        }),
+        sendPushToUser(supabaseAdmin, session.therapist?.id, {
+          title: `Sesión ${label}`,
+          body: `Tu sesión con ${session.patient?.full_name ?? 'tu paciente'} es el ${date} a las ${time}`,
+          route: '/therapist/schedule',
+        }),
+      ])
     }
 
     // ── Recordatorios 24 horas antes ──────────────────────────────────────────

@@ -28,6 +28,7 @@ const AdminRefunds       = lazy(() => import('@/pages/admin/AdminRefunds'))
 const AdminSubscriptions = lazy(() => import('@/pages/admin/AdminSubscriptions'))
 const AdminActivityLog   = lazy(() => import('@/pages/admin/AdminActivityLog'))
 const AdminReviews       = lazy(() => import('@/pages/admin/AdminReviews'))
+const AdminDeletionRequests = lazy(() => import('@/pages/admin/AdminDeletionRequests'))
 
 // Auth
 const Login          = lazy(() => import('@/pages/auth/Login'))
@@ -290,6 +291,7 @@ export default function App() {
             <Route path="subscriptions" element={<AdminSubscriptions />} />
             <Route path="activity"      element={<AdminActivityLog />} />
             <Route path="reviews"       element={<AdminReviews />} />
+            <Route path="deletions"     element={<AdminDeletionRequests />} />
           </Route>
 
           <Route path="/" element={<Navigate to="/login" replace />} />

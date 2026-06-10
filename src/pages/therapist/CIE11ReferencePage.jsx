@@ -3,7 +3,8 @@
  * Búsqueda global + filtro por capítulo + vista expandida de características.
  */
 import { useState, useMemo } from 'react'
-import { CIE11, searchCIE11 } from '@/data/cie11'
+import { useClinicalContent } from '@/hooks/useClinicalContent'
+import { LoadingScreen } from '@/components/ui/Spinner'
 import Input from '@/components/ui/Input'
 import { Lightbulb, AlertTriangle, Search } from 'lucide-react'
 
@@ -26,10 +27,6 @@ const CHAPTER_COLORS = [
   'bg-red-100 text-red-700 border-red-200',
 ]
 
-const chapterColorMap = Object.fromEntries(
-  CIE11.map((ch, i) => [ch.chapterId, CHAPTER_COLORS[i % CHAPTER_COLORS.length]])
-)
-
 // ── Novedades destacadas respecto CIE-10 ─────────────────────────────────────
 const NEW_CODES = new Set([
   '6B41', // TEPT Complejo
@@ -41,9 +38,9 @@ const NEW_CODES = new Set([
 ])
 
 // ── Componente: tarjeta de diagnóstico ────────────────────────────────────────
-function DiagnosisCard({ diagnosis, chapterId, defaultOpen = false }) {
+function DiagnosisCard({ diagnosis, chapterId, colorMap = {}, defaultOpen = false }) {
   const [open, setOpen] = useState(defaultOpen)
-  const chipColor = chapterColorMap[chapterId] ?? 'bg-warm-100 text-warm-700 border-warm-200'
+  const chipColor = colorMap[chapterId] ?? 'bg-warm-100 text-warm-700 border-warm-200'
   const isNew = NEW_CODES.has(diagnosis.code.split('.')[0])
 
   return (
@@ -136,12 +133,36 @@ export default function CIE11ReferencePage() {
   const [search, setSearch]               = useState('')
   const [filterChapter, setFilterChapter] = useState('all')
 
+  // Contenido protegido server-side (Edge Function clinical-content)
+  const { data, loading, error } = useClinicalContent('cie11')
+  const CIE11 = data ?? []
+
+  const chapterColorMap = useMemo(() => Object.fromEntries(
+    CIE11.map((ch, i) => [ch.chapterId, CHAPTER_COLORS[i % CHAPTER_COLORS.length]])
+  ), [CIE11])
+
+  const allDiagnoses = useMemo(() => CIE11.flatMap(chapter =>
+    chapter.diagnoses.map(d => ({
+      ...d,
+      chapter: chapter.chapter,
+      chapterId: chapter.chapterId,
+      block: chapter.block,
+    }))
+  ), [CIE11])
+
   const totalDiagnoses = CIE11.reduce((sum, ch) => sum + ch.diagnoses.length, 0)
 
   const filtered = useMemo(() => {
     const q = search.trim()
     if (q) {
-      const results = searchCIE11(q)
+      const lower = q.toLowerCase()
+      const results = allDiagnoses.filter(d =>
+        d.name.toLowerCase().includes(lower) ||
+        d.code.toLowerCase().includes(lower) ||
+        d.description.toLowerCase().includes(lower) ||
+        d.features?.toLowerCase().includes(lower) ||
+        d.notes?.toLowerCase().includes(lower)
+      )
       if (filterChapter !== 'all') return results.filter(d => d.chapterId === filterChapter)
       return results
     }
@@ -150,7 +171,18 @@ export default function CIE11ReferencePage() {
       return (ch?.diagnoses ?? []).map(d => ({ ...d, chapterId: ch.chapterId }))
     }
     return null // null = vista agrupada
-  }, [search, filterChapter])
+  }, [search, filterChapter, allDiagnoses, CIE11])
+
+  if (loading) return <LoadingScreen />
+  if (error) {
+    return (
+      <div className="flex flex-col items-center py-20 text-center animate-fade-in">
+        <AlertTriangle className="text-warm-300 mb-3" size={40} strokeWidth={1.8} />
+        <p className="font-semibold text-warm-700">No se pudo cargar la CIE-11</p>
+        <p className="text-sm text-warm-500 mt-1">Verifica tu conexión o tu plan de suscripción e intenta de nuevo.</p>
+      </div>
+    )
+  }
 
   const isGrouped = !filtered
 
@@ -250,6 +282,7 @@ export default function CIE11ReferencePage() {
                   key={d.id}
                   diagnosis={d}
                   chapterId={d.chapterId}
+                  colorMap={chapterColorMap}
                   defaultOpen={!!search}
                 />
               ))}
@@ -275,7 +308,7 @@ export default function CIE11ReferencePage() {
               </div>
               <div className="flex flex-col gap-2">
                 {chapter.diagnoses.map(d => (
-                  <DiagnosisCard key={d.id} diagnosis={d} chapterId={chapter.chapterId} />
+                  <DiagnosisCard key={d.id} diagnosis={d} chapterId={chapter.chapterId} colorMap={chapterColorMap} />
                 ))}
               </div>
             </div>

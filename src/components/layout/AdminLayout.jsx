@@ -3,7 +3,7 @@ import { useAuthStore } from '@/store/authStore'
 import {
   LayoutDashboard, Bot, Stethoscope, Users, Calendar,
   UsersRound, TrendingUp, Wallet, ArrowDownToLine, RotateCcw,
-  ClipboardList, Star, Crown, LogOut,
+  ClipboardList, Star, Crown, LogOut, Trash2,
 } from 'lucide-react'
 
 const NAV = [
@@ -20,6 +20,7 @@ const NAV = [
   { to: '/admin/subscriptions', Icon: Crown,            label: 'Suscripciones'  },
   { to: '/admin/activity',      Icon: ClipboardList,    label: 'Actividad'      },
   { to: '/admin/reviews',       Icon: Star,             label: 'Reseñas'        },
+  { to: '/admin/deletions',     Icon: Trash2,           label: 'Elim. de datos' },
 ]
 
 export default function AdminLayout() {

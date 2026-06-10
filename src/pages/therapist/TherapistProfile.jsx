@@ -9,6 +9,7 @@ import Input, { Textarea, Select } from '@/components/ui/Input'
 import { VerificationBadge } from '@/components/ui/Badge'
 import { RatingDisplay } from '@/components/ui/StarRating'
 import { formatPrice } from '@/lib/utils'
+import DeleteAccountSection from '@/components/shared/DeleteAccountSection'
 import toast from 'react-hot-toast'
 import { Pencil, CheckCircle2, XCircle, Clock, Upload, FileText, AlertCircle } from 'lucide-react'
 
@@ -571,6 +572,12 @@ export default function TherapistProfile() {
             })}
           </div>
         )}
+      </Card>
+
+      {/* Privacidad y datos */}
+      <Card>
+        <CardHeader><CardTitle>Privacidad y datos</CardTitle></CardHeader>
+        <DeleteAccountSection />
       </Card>
     </div>
   )

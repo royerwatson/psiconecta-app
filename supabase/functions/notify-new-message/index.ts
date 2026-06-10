@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail, newMessageEmail } from '../_shared/email.ts'
+import { sendPushToUser } from '../_shared/push.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': 'https://psiconecta.app',
@@ -74,6 +75,13 @@ Deno.serve(async (req) => {
       to: recipientEmail,
       subject: `💬 Nuevo mensaje de ${senderName} en Psiconecta`,
       html: newMessageEmail({ recipientName, senderName, preview, role: recipientRole }),
+    })
+
+    // Push nativa (best-effort — no bloquea si FCM no está configurado)
+    await sendPushToUser(supabaseAdmin, recipientId, {
+      title: `Nuevo mensaje de ${senderName}`,
+      body: preview,
+      route: recipientRole === 'therapist' ? '/therapist/chat' : '/patient/chat',
     })
 
     return new Response(

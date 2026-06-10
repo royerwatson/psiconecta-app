@@ -1,5 +1,42 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-09 (v31 — Preload fuente crítica /fonts/ + fix forced reflow en LandingPage)*
+*Última actualización: 2026-06-09 (v32 — Seguridad/infra: contenido clínico server-side, RGPD, contacto emergencia, Sentry, E2E, push)*
+
+---
+
+## ⚡ Sesión 2026-06-09 (v32) — Resumen de cambios
+
+**Build verificado: 0 errores.** Pendiente de ejecutar/desplegar (en orden):
+
+1. SQL (Supabase SQL Editor) — ver `supabase/RUNBOOK_MIGRACIONES_PENDIENTES.md`:
+   las 4 pendientes (§3) **mejoradas** + `migration_deletion_requests.sql` +
+   `migration_emergency_contacts.sql` + `migration_device_tokens.sql`
+2. Edge Functions nuevas/modificadas:
+   `supabase functions deploy clinical-content delete-user-data notify-new-message send-reminders`
+3. Config externa: Sentry DSN (ver `STAGING.md`), Firebase/FCM (ver `PUSH_SETUP.md`)
+4. `npx playwright install chromium` y `npm run test:e2e` antes del próximo deploy
+
+**Cambios:**
+- **DSM-5-TR y CIE-11 fuera del bundle JS** → Edge Function `clinical-content`
+  (verifica `is_pro_therapist()` server-side). Hook `useClinicalContent` con caché
+  en memoria. `src/data/dsm5tr.js` y `cie11.js` eliminados del frontend.
+- **Migraciones pendientes corregidas antes de ejecutar:** `public_reviews` reescrita
+  como RPC `get_public_reviews()` (la política anon exponía patient_id y el join a
+  profiles fallaba — LandingPage actualizada); `payouts` con `WITH CHECK` + vista
+  `security_invoker=true` (exponía cuentas bancarias a cualquier autenticado).
+- **RGPD / Ley 172-13:** tabla `deletion_requests`, Edge Function `delete-user-data`
+  (borra datos clínicos, anonimiza perfil, banea cuenta, conserva registros
+  financieros), sección "Eliminar mi cuenta" en perfil paciente/terapeuta,
+  panel `/admin/deletions`.
+- **Contacto de emergencia** → tabla `emergency_contacts` con RLS estricta
+  (paciente + terapeuta con relación activa + admin). Columnas eliminadas de
+  `profiles`. Register.jsx actualizado.
+- **Sentry** integrado (`src/lib/sentry.js`, no-op sin DSN, sin PII, usuario por id/rol).
+- **Playwright E2E**: `playwright.config.js` + `tests/e2e/smoke.spec.js`
+  (rutas públicas + auth). Scripts `test:e2e` y `test:e2e:prod`. Guía de staging
+  con Vercel Previews en `STAGING.md`.
+- **Push notifications nativas**: `@capacitor/push-notifications` instalado,
+  registro de tokens en `device_tokens`, helper FCM v1 (`_shared/push.ts`),
+  integrado en chat y recordatorios. Falta config Firebase (ver `PUSH_SETUP.md`).
 
 ---
 
@@ -330,7 +367,7 @@ VITE_PAYPAL_CLIENT_ID=...
 ### Pagos y Negocio
 - [x] Pago sesiones PayPal (flujo completo)
 - [x] Comisión 10% automática sobre cada sesión
-- [x] Plan Suscripción $50/mes — Edge Functions create/capture funcionando, email confirmación, downgrade automático
+- [x] Plan Suscripción **$79.99 USD/mes** — Edge Functions create/capture funcionando, email confirmación, downgrade automático
 - [x] Liquidaciones a terapeutas (AdminPayouts)
 - [x] Conversión USD → DOP en tiempo real
 - [x] Landing pública de precios (/pricing)
@@ -359,12 +396,18 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Downgrade automático al vencer suscripción (`send-reminders`)
 
 ### UX/UI y Performance
-- [x] Design system: Plus Jakarta Sans + Lora, paleta azul
+- [x] Design system: Plus Jakarta Sans Variable + Lora, paleta azul
 - [x] Logo oficial SVG: dos arcos + nodo central (PsiconectaLogo)
 - [x] Favicon SVG con logo de Psiconecta
 - [x] 100% sin emojis — Lucide React uniformes (strokeWidth=1.8)
-- [x] Code splitting: lucide-react, datos clínicos, vendor libs
-- [x] Build limpio — 0 errores (3169 módulos)
+- [x] Code splitting: React.lazy en todas las ~50 páginas; chunks vendor, datos clínicos, page-landing
+- [x] Build limpio — 0 errores (3198 módulos) · index.js 53 KiB · page-landing 63 KiB
+- [x] Fuentes auto-hospedadas: Plus Jakarta Sans Variable en `public/fonts/` + Lora vía @fontsource — sin DNS externo
+- [x] `<link rel="preload" as="font">` para fuente crítica del hero (LCP)
+- [x] Google Analytics 4 diferido (`window.addEventListener('load', ...)`) — no bloquea render
+- [x] Google Fonts eliminado — reemplazado por @fontsource (mismo origen, Vercel CDN)
+- [x] Forced reflow corregido: estilos `.fade-in` movidos de runtime a `index.css`
+- [x] PageSpeed Insights mobile: **87/100** · FCP 2.0s · LCP 3.9s · TBT 30ms · SI 2.0s · CLS 0 (desde 35 en v24)
 - [x] Política de contraseña con complejidad + indicador visual de fortaleza
 - [x] Pantalla de verificación de email post-registro
 
@@ -427,7 +470,7 @@ VITE_PAYPAL_CLIENT_ID=...
 | `src/index.css` | `@font-face` apuntando a `/fonts/` + `.fade-in/.fade-in.visible` con `will-change: opacity, transform` |
 | `src/pages/public/LandingPage.jsx` | Eliminado `document.createElement('style') + appendChild` — causaba forced reflow. Estilos movidos a index.css |
 | Resultado build | CSS: 97.84 KiB (gzip 15.42 KiB), JS index: 53.84 KiB |
-| PageSpeed mobile | Score: 79 → esperado 82-86 (preload font reduce LCP ~200-400ms) |
+| PageSpeed mobile | Score: 79 → **87** ✅ · FCP 2.0s · LCP 3.9s · TBT 30ms · SI 2.0s · CLS 0 |
 
 ### Sesión 2026-06-09 (v30) — Self-host fuentes + LandingPage lazy chunk nombrado
 

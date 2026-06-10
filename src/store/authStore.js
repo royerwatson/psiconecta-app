@@ -14,6 +14,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { supabase } from '@/lib/supabase'
+import { setSentryUser } from '@/lib/sentry'
 
 export const useAuthStore = create(
   persist(
@@ -68,6 +69,7 @@ export const useAuthStore = create(
             loading: false,
             initialized: true,
           })
+          setSentryUser(user, profile.role)
         } catch (error) {
           console.error('Error cargando perfil:', error)
           // Fallback: read role from JWT metadata so the app stays usable
@@ -147,6 +149,7 @@ export const useAuthStore = create(
 
       // Cerrar sesión
       signOut: async () => {
+        setSentryUser(null)
         await supabase.auth.signOut()
         set({ user: null, profile: null, role: null })
       },

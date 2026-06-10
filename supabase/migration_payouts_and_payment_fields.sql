@@ -53,11 +53,14 @@ CREATE TABLE IF NOT EXISTS payouts (
 ALTER TABLE payouts ENABLE ROW LEVEL SECURITY;
 
 -- Admin puede ver y crear/actualizar todos los payouts
+-- NOTA: FOR ALL USING(...) sin WITH CHECK no cubre INSERT en PostgreSQL 15
+-- (misma causa raíz que el bug de therapist_availability). Se usa is_admin()
+-- (SECURITY DEFINER, creada en migration_fix_profiles_select.sql).
 DROP POLICY IF EXISTS "payouts_admin_all" ON payouts;
 CREATE POLICY "payouts_admin_all" ON payouts
-  USING (
-    EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-  );
+  FOR ALL
+  USING (is_admin())
+  WITH CHECK (is_admin());
 
 -- Terapeuta puede ver sus propios payouts
 DROP POLICY IF EXISTS "payouts_therapist_select" ON payouts;
@@ -118,3 +121,14 @@ HAVING
       (SELECT SUM(py.amount) FROM payouts py
        WHERE py.therapist_id = tp.user_id AND py.status = 'completed'), 0
     ) > 0;
+
+-- ── 7. Seguridad de la vista ──────────────────────────────────────
+-- Las vistas se ejecutan con permisos del propietario (postgres) y SALTAN
+-- el RLS de las tablas subyacentes: sin esto, cualquier usuario autenticado
+-- podría leer cuentas bancarias de todos los terapeutas vía PostgREST.
+-- security_invoker = true (PG15) evalúa RLS con el rol del caller;
+-- el admin sigue viendo todo gracias a sus políticas is_admin().
+ALTER VIEW therapist_pending_earnings SET (security_invoker = true);
+
+REVOKE ALL ON therapist_pending_earnings FROM anon;
+GRANT SELECT ON therapist_pending_earnings TO authenticated;

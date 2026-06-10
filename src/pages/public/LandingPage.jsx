@@ -131,25 +131,16 @@ export default function LandingPage() {
   /* Cargar reseñas reales de Supabase */
   useEffect(() => {
     supabase
-      .from('reviews')
-      .select(`
-        id, rating, comment, created_at,
-        patient:profiles!reviews_patient_id_fkey(full_name)
-      `)
-      .gte('rating', 4)
-      .not('comment', 'is', null)
-      .neq('comment', '')
-      .order('created_at', { ascending: false })
-      .limit(20)
+      .rpc('get_public_reviews', { limit_count: 20 })
       .then(({ data }) => {
         if (!data || data.length === 0) return
         // Elegir 3 al azar
         const shuffled = [...data].sort(() => Math.random() - 0.5).slice(0, 3)
         setLiveReviews(shuffled.map((r, i) => ({
           id: r.id,
-          name: getDisplayName(r.patient?.full_name),
+          name: r.display_name,
           role: 'Paciente verificado',
-          initials: getInitials(r.patient?.full_name),
+          initials: r.initials,
           color: AVATAR_GRADIENTS[i % AVATAR_GRADIENTS.length],
           rating: r.rating,
           text: r.comment,

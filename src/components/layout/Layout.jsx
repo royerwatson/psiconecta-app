@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import OnboardingSlides from '@/components/onboarding/OnboardingSlides'
 import NotificationBell from '@/components/ui/NotificationBell'
+import { initPushNotifications } from '@/lib/pushNotifications'
 import {
   Home, Calendar, MessageCircle, User, Search,
   Users, ClipboardList, BookOpen, Clock, Heart,
@@ -149,6 +150,12 @@ export default function Layout() {
   const lastSeenKey  = user ? `chat_last_seen_${user.id}` : null
   const channelRef   = useRef(null)
   const drawerRef    = useRef(null)
+
+  // Push notifications nativas (no-op en web)
+  useEffect(() => {
+    if (!user) return
+    initPushNotifications(user.id, navigate)
+  }, [user]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Plan del terapeuta (para mostrar candado en nav)
   useEffect(() => {

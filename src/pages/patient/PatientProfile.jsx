@@ -7,6 +7,7 @@ import AvatarUpload from '@/components/ui/AvatarUpload'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
+import DeleteAccountSection from '@/components/shared/DeleteAccountSection'
 import toast from 'react-hot-toast'
 import { Bell, Lock, ClipboardList, Hand, EyeOff } from 'lucide-react'
 
@@ -176,6 +177,9 @@ export default function PatientProfile() {
               <span className="text-warm-300">›</span>
             </button>
           ))}
+          <div className="border-t border-warm-100">
+            <DeleteAccountSection />
+          </div>
         </div>
       </Card>
 

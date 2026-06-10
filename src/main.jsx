@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom/client'
 import { HelmetProvider } from 'react-helmet-async'
 import App from './App.jsx'
 import { CurrencyProvider } from './context/CurrencyContext.jsx'
+import { initSentry } from './lib/sentry.js'
+
+// Monitoreo de errores (no-op si VITE_SENTRY_DSN no está definido)
+initSentry()
 
 // Plus Jakarta Sans — @font-face en index.css (URL estable /fonts/)
 // Lora — auto-hospedada vía @fontsource (sin DNS externo)
