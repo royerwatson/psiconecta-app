@@ -183,9 +183,13 @@ export default function FindTherapist() {
     loadSlots(selectedTherapist)
   }
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = (bookingId) => {
     setBookingStep('success')
-    toast.success('¡Pago exitoso! Tu cita ha sido confirmada.')
+    if (bookingId) {
+      setTimeout(() => navigate(`/payment/success?session=${bookingId}`), 1200)
+    } else {
+      toast.success('¡Pago exitoso! Tu cita ha sido confirmada.')
+    }
   }
 
   const handlePaymentError = (msg) => {

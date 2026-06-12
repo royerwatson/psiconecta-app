@@ -117,14 +117,14 @@ export default function TherapistProfileView() {
     setBookStep('payment')
   }
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = (bookingId) => {
     setBookStep('success')
     setTimeout(() => {
       setShowBook(false)
       setBookStep('form')
       setBookForm({ date: '', time: '' })
-      navigate('/patient/appointments')
-    }, 2000)
+      navigate(bookingId ? `/payment/success?session=${bookingId}` : '/patient/appointments')
+    }, 1200)
   }
 
   const handleCloseBook = () => {

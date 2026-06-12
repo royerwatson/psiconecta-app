@@ -538,7 +538,7 @@ export default function ChatPage() {
               const isOwn = msg.sender_id === user.id
               const isTemp = String(msg.id).startsWith('temp-')
               return (
-                <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
+                <div key={msg.id} className={`flex animate-slide-up ${isOwn ? 'justify-end' : 'justify-start'}`}>
                   <div className={`max-w-[75%] ${isOwn ? 'items-end' : 'items-start'} flex flex-col gap-1`}>
                     <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
                       isOwn

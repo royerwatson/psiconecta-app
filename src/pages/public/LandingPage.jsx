@@ -128,12 +128,14 @@ const THERAPIST_TOOLS = [
 ───────────────────────────────────────────── */
 export default function LandingPage() {
   const [liveReviews, setLiveReviews] = useState([])
+  const [reviewsLoaded, setReviewsLoaded] = useState(false)
 
   /* Cargar reseñas reales de Supabase */
   useEffect(() => {
     supabase
       .rpc('get_public_reviews', { limit_count: 20 })
       .then(({ data }) => {
+        setReviewsLoaded(true)
         if (!data || data.length === 0) return
         // Elegir 3 al azar
         const shuffled = [...data].sort(() => Math.random() - 0.5).slice(0, 3)
@@ -301,7 +303,10 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── TESTIMONIOS ────────────────────────── */}
+        {/* ── TESTIMONIOS ──────────────────────────
+            Solo se muestra si hay reseñas reales: una sección de
+            esqueletos eternos comunica "plataforma vacía". */}
+        {(!reviewsLoaded || liveReviews.length > 0) && (
         <section className="py-20 px-4 dark:bg-[#0f1117]">
           <div className="max-w-6xl mx-auto">
             <SectionHeader
@@ -354,6 +359,7 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+        )}
 
         {/* ── PARA TERAPEUTAS ────────────────────── */}
         <section id="terapeutas" className="py-20 px-4 bg-psiconecta">

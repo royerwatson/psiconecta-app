@@ -322,7 +322,10 @@ export default function Layout() {
           </aside>
 
           <main className="flex-1 min-w-0">
-            <Outlet />
+            {/* key por ruta → fade suave en cada navegación */}
+            <div key={location.pathname} className="animate-fade-in">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

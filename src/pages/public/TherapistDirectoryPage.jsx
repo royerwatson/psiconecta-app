@@ -165,6 +165,30 @@ export default function TherapistDirectoryPage() {
                   </div>
                 ))}
               </div>
+            ) : therapists.length === 0 && specialty === 'Todas' ? (
+              /* Sin terapeutas en la plataforma todavía → invitación fundadora */
+              <div className="text-center py-16 max-w-xl mx-auto">
+                <div className="hero-reveal hero-reveal-1 w-16 h-16 mx-auto mb-6 rounded-2xl bg-gradient-brand flex items-center justify-center shadow-lg">
+                  <ShieldCheck size={30} strokeWidth={1.6} className="text-white" />
+                </div>
+                <h2 className="hero-reveal hero-reveal-2 text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
+                  Estamos verificando a los primeros terapeutas
+                </h2>
+                <p className="hero-reveal hero-reveal-3 text-slate-500 dark:text-slate-400 leading-relaxed mb-8">
+                  Cada profesional de Psiconecta pasa por una verificación rigurosa de
+                  título, exequátur y acreditación del Colegio Psicológico antes de
+                  aparecer aquí. El directorio se está llenando.
+                </p>
+                <div className="hero-reveal hero-reveal-4 flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link to="/register?role=therapist" className="btn-premium btn-primary-premium text-sm px-6 py-3">
+                    Soy terapeuta — quiero ser de los primeros
+                    <ArrowRight size={16} strokeWidth={2} />
+                  </Link>
+                  <Link to="/register" className="btn-premium btn-secondary-premium text-sm px-6 py-3">
+                    Avísame cuando esté listo
+                  </Link>
+                </div>
+              </div>
             ) : filtered.length === 0 ? (
               <div className="text-center py-20">
                 <p className="text-slate-500 dark:text-slate-400 font-medium">No se encontraron terapeutas para tu búsqueda.</p>

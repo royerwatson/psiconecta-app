@@ -1,4 +1,4 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import {
   LayoutDashboard, Bot, Stethoscope, Users, Calendar,
@@ -26,6 +26,7 @@ const NAV = [
 export default function AdminLayout() {
   const { signOut } = useAuthStore()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleSignOut = async () => {
     await signOut()
@@ -84,7 +85,9 @@ export default function AdminLayout() {
       {/* Contenido */}
       <main className="flex-1 sm:ml-56 pb-20 sm:pb-0">
         <div className="max-w-4xl mx-auto px-4 py-6">
-          <Outlet />
+          <div key={location.pathname} className="animate-fade-in">
+            <Outlet />
+          </div>
         </div>
       </main>
     </div>

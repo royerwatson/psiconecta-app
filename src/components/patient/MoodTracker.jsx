@@ -200,7 +200,7 @@ export default function MoodTracker({ userId }) {
                     : 'hover:bg-white/60 border-2 border-transparent'
                 }`}
               >
-                <span className="text-2xl">{m.emoji}</span>
+                <span className={`text-2xl ${selected === m.value ? 'animate-pop' : ''}`}>{m.emoji}</span>
                 <span className="text-[10px] text-warm-500 hidden sm:block">{m.label}</span>
               </button>
             ))}

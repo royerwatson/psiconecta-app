@@ -122,7 +122,9 @@ export default function PayPalButton({
           onError?.(result.error ?? 'Error capturando el pago')
           return
         }
-        onSuccess?.()
+        // Se pasa el bookingId para que la pantalla de éxito muestre
+        // el resumen de la cita y el botón "Añadir a calendario"
+        onSuccess?.(bookingId)
       },
 
       onError: (err) => {
