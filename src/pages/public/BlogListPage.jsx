@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 import { BLOG_POSTS } from '@/data/blogPosts'
+import { useScrollReveal } from '@/hooks/useScrollReveal'
 import {
   ArrowRight, ChevronRight, Clock,
   HeartPulse, Users, Video, BrainCircuit, CalendarCheck,
@@ -59,6 +60,8 @@ function PostCover({ gradient, iconName, large = false }) {
 export default function BlogListPage() {
   const [featured, ...rest] = BLOG_POSTS
 
+  useScrollReveal()
+
   return (
     <>
       <SEOHead
@@ -94,11 +97,11 @@ export default function BlogListPage() {
         {/* HERO */}
         <section className="pt-28 pb-10 px-4 bg-psiconecta dark:bg-[#0f1117]">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
+            <h1 className="hero-reveal hero-reveal-1 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
               Recursos de{' '}
               <span className="text-transparent bg-clip-text bg-gradient-brand">salud mental</span>
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 font-medium">
+            <p className="hero-reveal hero-reveal-2 text-slate-500 dark:text-slate-400 font-medium">
               Artículos claros, sin tecnicismos, para entender y cuidar tu bienestar emocional.
             </p>
           </div>
@@ -107,7 +110,8 @@ export default function BlogListPage() {
         <div className="max-w-6xl mx-auto px-4 pb-20">
 
           {/* ARTÍCULO DESTACADO */}
-          <Link to={`/blog/${featured.slug}`} className="group block card-elevated overflow-hidden mb-10 hover:shadow-2xl transition-all duration-300">
+          <div className="fade-in mb-10">
+          <Link to={`/blog/${featured.slug}`} className="group block card-elevated overflow-hidden hover:shadow-2xl transition-all duration-300">
             <div className="grid grid-cols-1 lg:grid-cols-2">
               <PostCover gradient={featured.coverGradient} iconName={featured.icon} large />
               <div className="p-7 sm:p-10 flex flex-col justify-center">
@@ -131,14 +135,15 @@ export default function BlogListPage() {
               </div>
             </div>
           </Link>
+          </div>
 
           {/* GRID */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {rest.map(post => (
+              <div key={post.slug} className="fade-in flex">
               <Link
-                key={post.slug}
                 to={`/blog/${post.slug}`}
-                className="group card overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col"
+                className="group card overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col flex-1"
               >
                 <PostCover gradient={post.coverGradient} iconName={post.icon} />
                 <div className="p-5 flex flex-col flex-1">
@@ -164,6 +169,7 @@ export default function BlogListPage() {
                   </div>
                 </div>
               </Link>
+              </div>
             ))}
           </div>
         </div>

@@ -26,6 +26,7 @@ import {
 import { useEffect, useRef, useState } from 'react'
 import { analytics } from '@/lib/analytics'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
+import { useScrollReveal } from '@/hooks/useScrollReveal'
 import SEOHead from './SEOHead'
 
 
@@ -148,21 +149,8 @@ export default function LandingPage() {
       })
   }, [])
 
-  /* IntersectionObserver: fade-in en scroll — estilos definidos en index.css, sin forced reflow.
-     Los elementos que entran juntos en viewport se revelan en cascada (90ms entre cada uno). */
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.filter(e => e.isIntersecting).forEach((e, i) => {
-          setTimeout(() => e.target.classList.add('visible'), i * 90)
-          observer.unobserve(e.target)
-        })
-      },
-      { threshold: 0.12 }
-    )
-    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el))
-    return () => observer.disconnect()
-  }, [])
+  /* Revelado en cascada al hacer scroll — lenguaje de animación global */
+  useScrollReveal([liveReviews])
 
   return (
     <>

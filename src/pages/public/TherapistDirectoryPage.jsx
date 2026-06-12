@@ -13,6 +13,7 @@ import {
   MapPin, ArrowRight, Crown,
 } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
+import { useScrollReveal } from '@/hooks/useScrollReveal'
 
 const SPECIALTIES = [
   'Todas',
@@ -29,6 +30,9 @@ export default function TherapistDirectoryPage() {
   const [loading, setLoading]         = useState(true)
   const [search, setSearch]           = useState('')
   const [specialty, setSpecialty]     = useState('Todas')
+
+  // Revelado en cascada — re-escanea cuando cargan o se filtran las tarjetas
+  useScrollReveal([loading, therapists, search])
 
   useEffect(() => { fetchTherapists() }, [specialty])
 
@@ -100,18 +104,18 @@ export default function TherapistDirectoryPage() {
         {/* ── HERO ───────────────────────────────── */}
         <section className="pt-28 pb-12 px-4 bg-psiconecta dark:bg-[#0f1117]">
           <div className="max-w-3xl mx-auto text-center">
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
+            <h1 className="hero-reveal hero-reveal-1 text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight mb-3">
               Psicólogos verificados en{' '}
               <span className="text-transparent bg-clip-text bg-gradient-brand">
                 República Dominicana
               </span>
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 font-medium mb-8">
+            <p className="hero-reveal hero-reveal-2 text-slate-500 dark:text-slate-400 font-medium mb-8">
               Todos los terapeutas han presentado título, exequátur y acreditación del Colegio Psicológico.
             </p>
 
             {/* Búsqueda */}
-            <div className="relative max-w-xl mx-auto mb-6">
+            <div className="hero-reveal hero-reveal-3 relative max-w-xl mx-auto mb-6">
               <Search size={16} strokeWidth={1.8} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
@@ -123,7 +127,7 @@ export default function TherapistDirectoryPage() {
             </div>
 
             {/* Filtros de especialidad */}
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="hero-reveal hero-reveal-4 flex flex-wrap justify-center gap-2">
               {SPECIALTIES.map(s => (
                 <button
                   key={s}
@@ -176,7 +180,9 @@ export default function TherapistDirectoryPage() {
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                   {filtered.map(t => (
-                    <TherapistCard key={t.user_id} therapist={t} isPro={isPro(t)} />
+                    <div key={t.user_id} className="fade-in">
+                      <TherapistCard therapist={t} isPro={isPro(t)} />
+                    </div>
                   ))}
                 </div>
               </>

@@ -8,6 +8,7 @@ import { Check, Zap, Star, ArrowRight, Users, Shield, Video,
 import Button from '@/components/ui/Button'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import { useCurrencyContext } from '@/context/CurrencyContext'
+import { useScrollReveal } from '@/hooks/useScrollReveal'
 
 const PLANS = [
   {
@@ -78,6 +79,8 @@ export default function PricingPage() {
   const navigate = useNavigate()
   const { formatWithLocal } = useCurrencyContext()
 
+  useScrollReveal()
+
   return (
     <div className="min-h-dvh bg-psiconecta">
 
@@ -101,13 +104,13 @@ export default function PricingPage() {
 
       {/* Hero */}
       <div className="text-center px-4 pt-12 pb-16 max-w-3xl mx-auto">
-        <span className="inline-block bg-primary-100 text-primary-700 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
+        <span className="hero-reveal hero-reveal-1 inline-block bg-primary-100 text-primary-700 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
           Para terapeutas
         </span>
-        <h1 className="font-serif text-4xl font-bold text-warm-900 mb-4 leading-tight">
+        <h1 className="hero-reveal hero-reveal-1 font-serif text-4xl font-bold text-warm-900 mb-4 leading-tight">
           Planes que crecen<br/>contigo
         </h1>
-        <p className="text-warm-500 text-lg leading-relaxed max-w-xl mx-auto">
+        <p className="hero-reveal hero-reveal-2 text-warm-500 text-lg leading-relaxed max-w-xl mx-auto">
           Comienza gratis. Cuando tu práctica crezca, elige el plan que mejor
           se ajuste a tu práctica y reduce tu comisión del 20% al 10%.
         </p>
@@ -119,9 +122,9 @@ export default function PricingPage() {
           const PlanIcon = plan.Icon
           const isHighlight = plan.highlight
           return (
+            <div key={plan.id} className="fade-in">
             <div
-              key={plan.id}
-              className={`relative rounded-3xl border-2 ${plan.border} ${plan.bg} p-7 flex flex-col shadow-sm ${
+              className={`relative h-full rounded-3xl border-2 ${plan.border} ${plan.bg} p-7 flex flex-col shadow-sm ${
                 isHighlight ? 'shadow-primary-100 shadow-lg scale-[1.02]' : ''
               }`}
             >
@@ -177,6 +180,7 @@ export default function PricingPage() {
                 <ArrowRight size={15} strokeWidth={2} />
               </button>
             </div>
+            </div>
           )
         })}
       </div>
@@ -184,21 +188,21 @@ export default function PricingPage() {
       {/* Stats de confianza */}
       <div className="bg-white border-y border-warm-100 py-12 px-4 mb-16">
         <div className="max-w-3xl mx-auto grid grid-cols-3 gap-8 text-center">
-          <div>
+          <div className="fade-in">
             <div className="flex justify-center mb-2">
               <Users size={24} strokeWidth={1.5} className="text-primary-400" />
             </div>
             <p className="text-2xl font-bold text-warm-900">100%</p>
             <p className="text-sm text-warm-400 mt-0.5">Terapeutas verificados</p>
           </div>
-          <div>
+          <div className="fade-in">
             <div className="flex justify-center mb-2">
               <Shield size={24} strokeWidth={1.5} className="text-primary-400" />
             </div>
             <p className="text-2xl font-bold text-warm-900">SSL</p>
             <p className="text-sm text-warm-400 mt-0.5">Pagos cifrados</p>
           </div>
-          <div>
+          <div className="fade-in">
             <div className="flex justify-center mb-2">
               <Video size={24} strokeWidth={1.5} className="text-primary-400" />
             </div>

@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import SEOHead from './SEOHead'
 import { getBlogPost, getRelatedPosts } from '@/data/blogPosts'
+import { useScrollReveal } from '@/hooks/useScrollReveal'
 import {
   ArrowRight, ChevronRight, Clock, ArrowLeft,
   HeartPulse, Users, Video, BrainCircuit, CalendarCheck,
@@ -103,6 +104,9 @@ export default function BlogPostPage() {
   const post = getBlogPost(slug)
   const related = getRelatedPosts(slug, 2)
 
+  // Revelado en cascada — re-escanea al navegar entre artículos
+  useScrollReveal([slug])
+
   if (!post) return <Navigate to="/blog" replace />
 
   const Icon = ICON_MAP[post.icon]
@@ -160,7 +164,7 @@ export default function BlogPostPage() {
           </div>
 
           {/* Meta badges */}
-          <div className="flex items-center gap-2 mb-5 flex-wrap">
+          <div className="hero-reveal hero-reveal-1 flex items-center gap-2 mb-5 flex-wrap">
             <span className={`text-xs font-bold px-2.5 py-1 rounded-full ${CATEGORY_COLORS[post.category] ?? ''}`}>
               {post.category}
             </span>
@@ -171,12 +175,12 @@ export default function BlogPostPage() {
           </div>
 
           {/* Título */}
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-5">
+          <h1 className="hero-reveal hero-reveal-1 text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-5">
             {post.title}
           </h1>
 
           {/* Extracto destacado */}
-          <div className={`rounded-2xl bg-gradient-to-br ${post.coverGradient} p-5 mb-8`}>
+          <div className={`hero-reveal hero-reveal-2 rounded-2xl bg-gradient-to-br ${post.coverGradient} p-5 mb-8`}>
             <p className="text-white font-medium leading-relaxed text-sm sm:text-base">
               {post.excerpt}
             </p>
@@ -185,7 +189,7 @@ export default function BlogPostPage() {
           {/* Contenido */}
           <div className="space-y-10">
             {post.sections.map((section, i) => (
-              <div key={i}>
+              <div key={i} className={i === 0 ? 'hero-reveal hero-reveal-3' : 'fade-in'}>
                 {section.heading && (
                   <div className="flex items-center gap-3 mb-4">
                     {Icon && i > 0 && (
