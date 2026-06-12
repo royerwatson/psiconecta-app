@@ -34,6 +34,7 @@ export default function TherapistDashboard() {
   const [loading, setLoading]       = useState(true)
   const [error, setError]           = useState(null)
   const [hasAvailability, setHasAvailability] = useState(false)
+  const [offlineSince, setOfflineSince] = useState(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -94,18 +95,43 @@ export default function TherapistDashboard() {
         .select('id', { count: 'exact' })
         .eq('therapist_id', user.id)
 
-      setSessions(sessionsData ?? [])
-      setStats({
+      const freshStats = {
         today:    todayCount ?? 0,
         week:     (sessionsData ?? []).length,
         patients: patientsCount ?? 0,
         earnings: monthEarnings,
-      })
+      }
+      setSessions(sessionsData ?? [])
+      setStats(freshStats)
       setAlerts(alertsData ?? [])
       setHasAvailability((availCount ?? 0) > 0)
+      setOfflineSince(null)
+
+      // Caché para modo offline: agenda del día sin conexión
+      try {
+        localStorage.setItem(`psiconecta_dash_${user.id}`, JSON.stringify({
+          sessions: sessionsData ?? [],
+          stats: freshStats,
+          savedAt: new Date().toISOString(),
+        }))
+      } catch (_e) { /* almacenamiento lleno: ignorar */ }
     } catch (err) {
       console.error('Error cargando dashboard terapeuta:', err)
-      setError('No pudimos cargar tu información. Verifica tu conexión.')
+      // Modo offline: usar la última agenda guardada en este dispositivo
+      const cached = localStorage.getItem(`psiconecta_dash_${user.id}`)
+      if (cached) {
+        try {
+          const { sessions: cs, stats: cst, savedAt } = JSON.parse(cached)
+          setSessions(cs ?? [])
+          setStats(cst ?? { today: 0, week: 0, patients: 0, earnings: 0 })
+          setOfflineSince(savedAt)
+          setError(null)
+        } catch (_e) {
+          setError('No pudimos cargar tu información. Verifica tu conexión.')
+        }
+      } else {
+        setError('No pudimos cargar tu información. Verifica tu conexión.')
+      }
     } finally {
       setLoading(false)
     }
@@ -145,6 +171,18 @@ export default function TherapistDashboard() {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
+      {/* Banner modo offline */}
+      {offlineSince && (
+        <div className="bg-warm-100 border border-warm-200 rounded-2xl px-4 py-3 flex items-center gap-3">
+          <AlertTriangle size={16} className="text-warm-500 shrink-0" />
+          <p className="text-xs text-warm-600 flex-1">
+            Sin conexión — mostrando tu agenda guardada del{' '}
+            {new Date(offlineSince).toLocaleString('es-DO', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}.
+          </p>
+          <Button size="sm" variant="ghost" onClick={fetchData}>Reintentar</Button>
+        </div>
+      )}
+
       {/* Bienvenida */}
       <div className="flex items-start justify-between">
         <div>

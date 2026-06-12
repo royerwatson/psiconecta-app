@@ -86,6 +86,9 @@ Deno.serve(async (req) => {
       ])
     }
 
+    // NOTA: el cron corre cada 15 min (migration_reminder_flags.sql).
+    // Las banderas reminder_*_sent_at evitan envíos duplicados.
+
     // ── Recordatorios 24 horas antes ──────────────────────────────────────────
     const from24 = new Date(Date.now() + 23 * 60 * 60 * 1000).toISOString()
     const to24   = new Date(Date.now() + 25 * 60 * 60 * 1000).toISOString()
@@ -98,11 +101,15 @@ Deno.serve(async (req) => {
         therapist:profiles!sessions_therapist_id_fkey(id, full_name)
       `)
       .eq('status', 'scheduled')
+      .is('reminder_24h_sent_at', null)
       .gte('scheduled_at', from24)
       .lte('scheduled_at', to24)
 
     for (const session of sessions24 ?? []) {
       await sendSessionReminder(session, 'mañana')
+      await supabaseAdmin.from('sessions')
+        .update({ reminder_24h_sent_at: new Date().toISOString() })
+        .eq('id', session.id)
     }
 
     // ── Recordatorios 1 hora antes ────────────────────────────────────────────
@@ -117,11 +124,51 @@ Deno.serve(async (req) => {
         therapist:profiles!sessions_therapist_id_fkey(id, full_name)
       `)
       .eq('status', 'scheduled')
+      .is('reminder_1h_sent_at', null)
       .gte('scheduled_at', from1h)
       .lte('scheduled_at', to1h)
 
     for (const session of sessions1h ?? []) {
       await sendSessionReminder(session, 'en 1 hora')
+      await supabaseAdmin.from('sessions')
+        .update({ reminder_1h_sent_at: new Date().toISOString() })
+        .eq('id', session.id)
+    }
+
+    // ── Recordatorio 30 minutos antes (solo push, con acceso directo a la sala) ─
+    const from30 = new Date(Date.now() + 25 * 60 * 1000).toISOString()
+    const to30   = new Date(Date.now() + 40 * 60 * 1000).toISOString()
+
+    const { data: sessions30 } = await supabaseAdmin
+      .from('sessions')
+      .select(`
+        id, scheduled_at,
+        patient:profiles!sessions_patient_id_fkey(id, full_name),
+        therapist:profiles!sessions_therapist_id_fkey(id, full_name)
+      `)
+      .eq('status', 'scheduled')
+      .is('reminder_30m_sent_at', null)
+      .gte('scheduled_at', from30)
+      .lte('scheduled_at', to30)
+
+    for (const session of sessions30 ?? []) {
+      const t = formatTime(session.scheduled_at)
+      await Promise.all([
+        sendPushToUser(supabaseAdmin, session.therapist?.id, {
+          title: 'Tu sesión comienza en 30 minutos',
+          body: `Sesión con ${session.patient?.full_name ?? 'tu paciente'} a las ${t}. Toca para ir a la sala.`,
+          route: `/video-call/${session.id}`,
+        }),
+        sendPushToUser(supabaseAdmin, session.patient?.id, {
+          title: 'Tu sesión comienza en 30 minutos',
+          body: `Sesión con ${session.therapist?.full_name ?? 'tu terapeuta'} a las ${t}. Toca para ir a la sala.`,
+          route: `/video-call/${session.id}`,
+        }),
+      ])
+      await supabaseAdmin.from('sessions')
+        .update({ reminder_30m_sent_at: new Date().toISOString() })
+        .eq('id', session.id)
+      sent += 2
     }
 
     // ── Recordatorios de vencimiento de suscripción (7 días antes) ────────────

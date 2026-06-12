@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail, cancellationEmail } from '../_shared/email.ts'
+import { sendPushToUser } from '../_shared/push.ts'
 
 import { getCorsHeaders } from '../_shared/cors.ts'
 
@@ -87,6 +88,20 @@ Deno.serve(async (req) => {
     }
 
     await Promise.all(sends)
+
+    // Push nativa a ambos (best-effort)
+    await Promise.all([
+      sendPushToUser(supabaseAdmin, session.therapist?.id, {
+        title: 'Sesión cancelada',
+        body: `La sesión con ${session.patient?.full_name ?? 'un paciente'} del ${date} (${time}) fue cancelada`,
+        route: '/therapist/schedule',
+      }),
+      sendPushToUser(supabaseAdmin, session.patient?.id, {
+        title: 'Sesión cancelada',
+        body: `Tu sesión con ${session.therapist?.full_name ?? 'tu terapeuta'} del ${date} (${time}) fue cancelada`,
+        route: '/patient/appointments',
+      }),
+    ])
 
     return new Response(
       JSON.stringify({ success: true }),

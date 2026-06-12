@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { sendPushToUser } from '../_shared/push.ts'
 import {
   sendEmail,
   bookingConfirmationPatient,
@@ -140,6 +141,20 @@ Deno.serve(async (req) => {
           }),
         })
       }
+
+      // Push nativa a ambos (best-effort)
+      await Promise.all([
+        sendPushToUser(supabaseAdmin, session.therapist?.email, {
+          title: session.is_urgent ? 'Nueva cita URGENTE' : 'Nueva cita agendada',
+          body: `${session.patient?.full_name ?? 'Un paciente'} reservó para el ${date} a las ${time}`,
+          route: '/therapist/schedule',
+        }),
+        sendPushToUser(supabaseAdmin, session.patient?.email, {
+          title: 'Cita confirmada',
+          body: `Tu sesión con ${session.therapist?.full_name ?? 'tu terapeuta'} quedó confirmada: ${date}, ${time}`,
+          route: '/patient/appointments',
+        }),
+      ])
     }
 
     return new Response(

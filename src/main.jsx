@@ -16,6 +16,14 @@ import '@fontsource/lora/latin-700.css'
 
 import './index.css'
 
+// Service Worker (PWA): solo en producción y fuera de la app nativa
+// (Capacitor sirve assets localmente, no necesita SW)
+if ('serviceWorker' in navigator && import.meta.env.PROD && !window.Capacitor) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').catch(() => {})
+  })
+}
+
 // Aplicar dark mode antes del primer render para evitar flash
 const saved = localStorage.getItem('psiconecta-dark-mode')
 const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches

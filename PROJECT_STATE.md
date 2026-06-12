@@ -41,7 +41,32 @@
   ojo: hay una app fantasma `com.psiconecta.psiconecta` registrada en Firebase, ignorable).
 - `FCM_SERVICE_ACCOUNT` ✅ configurado en Supabase Secrets (proyecto `psiconecta-app-web`).
 - Emulador Pixel 7 (API 35, con Play Store) funcionando — requirió liberar espacio en disco.
-- Pendiente: probar flujo completo de push en emulador (token en `device_tokens` → mensaje → notificación). Bloqueado parcialmente por el CORS de funciones (nota arriba).
+- [x] **✅ PUSH FUNCIONANDO EN ANDROID (validado 2026-06-12):** flujo completo
+  verificado en emulador — registro de token, mensaje de chat → notificación FCM.
+  CORS de funciones redesplegado con soporte de orígenes nativos.
+- Pendiente solo iOS: requiere Apple Developer Program ($99/año) — misma membresía
+  que desbloquea Apple OAuth (obligatorio para publicar en App Store).
+
+**v34 (2026-06-12) — Mejoras móviles/PWA:**
+- **Push agendar/cancelar:** `capture-paypal-order` y `notify-cancellation` envían
+  push a paciente y terapeuta (además del email).
+- **Recordatorio 30 min antes (solo push)** con deep-link directo a `/video-call/:id`
+  (videollamada a un toque). `migration_reminder_flags.sql` PENDIENTE de ejecutar:
+  añade banderas anti-duplicado + cambia el cron a cada 15 min.
+- **PWA instalable:** `manifest.webmanifest` + iconos 192/512/maskable + `sw.js`
+  (shell offline: navegaciones network-first con fallback, assets cache-first).
+  Registro del SW en `main.jsx` (solo prod, no en app nativa).
+- **Entrada directa `/app`:** ruta `AppEntry` que salta al dashboard según rol con
+  la sesión persistida — `start_url` del manifest. Abrir el ícono = caer en la agenda.
+- **Agenda offline del terapeuta:** TherapistDashboard cachea sesiones/stats en
+  localStorage; sin conexión muestra la agenda guardada con banner + Reintentar.
+  (Historial clínico offline descartado a propósito: datos de salud sin cifrar en disco.)
+- **Splash nativa:** config SplashScreen en capacitor.config.ts + `resources/`
+  (icon.png, splash.png 2732² fondo indigo). Pendiente en terminal:
+  `npm i -D @capacitor/assets && npm i @capacitor/splash-screen && npx capacitor-assets generate --android && npm run cap:sync`
+- **Dato clave (Google Play):** la comisión 15-30% NO aplica — los pagos por
+  servicios humanos en tiempo real (terapia) están exentos del Play Billing.
+  Solo cuesta $25 únicos la cuenta de desarrollador.
 
 **Cambios:**
 - **DSM-5-TR y CIE-11 fuera del bundle JS** → Edge Function `clinical-content`

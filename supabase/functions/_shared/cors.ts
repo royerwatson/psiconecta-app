@@ -29,6 +29,8 @@ export function getCorsHeaders(req: Request): Record<string, string> {
   const allowed = ALLOWED_ORIGINS.has(origin)
     || origin.startsWith('http://localhost:')   // dev local (vite :3000, preview :4173)
     || origin.startsWith('https://localhost:')
+    // Vercel Preview deploys (staging): https://psiconecta-app-git-dev-xxx.vercel.app
+    || (origin.startsWith('https://psiconecta-app') && origin.endsWith('.vercel.app'))
   return {
     'Access-Control-Allow-Origin':  allowed ? origin : APP_ORIGIN,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
