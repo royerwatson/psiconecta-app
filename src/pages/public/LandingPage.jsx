@@ -148,10 +148,16 @@ export default function LandingPage() {
       })
   }, [])
 
-  /* IntersectionObserver: fade-in en scroll — estilos definidos en index.css, sin forced reflow */
+  /* IntersectionObserver: fade-in en scroll — estilos definidos en index.css, sin forced reflow.
+     Los elementos que entran juntos en viewport se revelan en cascada (90ms entre cada uno). */
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target) } }),
+      (entries) => {
+        entries.filter(e => e.isIntersecting).forEach((e, i) => {
+          setTimeout(() => e.target.classList.add('visible'), i * 90)
+          observer.unobserve(e.target)
+        })
+      },
       { threshold: 0.12 }
     )
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el))
@@ -202,7 +208,7 @@ export default function LandingPage() {
 
             {/* Texto */}
             <div>
-              <h1 className="text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white leading-[1.1] tracking-tight mb-5">
+              <h1 className="hero-reveal hero-reveal-1 text-4xl sm:text-5xl font-extrabold text-slate-900 dark:text-white leading-[1.1] tracking-tight mb-5">
                 Ese paso que llevas<br />
                 tiempo{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-brand">
@@ -210,15 +216,15 @@ export default function LandingPage() {
                 </span>
               </h1>
 
-              <p className="text-lg text-slate-500 dark:text-slate-300 mb-3 leading-relaxed font-medium max-w-lg">
+              <p className="hero-reveal hero-reveal-2 text-lg text-slate-500 dark:text-slate-300 mb-3 leading-relaxed font-medium max-w-lg">
                 Hablar con alguien de confianza cambia todo.
               </p>
-              <p className="text-base text-slate-400 dark:text-slate-400 mb-8 leading-relaxed max-w-lg">
+              <p className="hero-reveal hero-reveal-2 text-base text-slate-400 dark:text-slate-400 mb-8 leading-relaxed max-w-lg">
                 Conéctate con un psicólogo verificado en República Dominicana.
                 Sin salas de espera. Sin estigma. Desde donde estés.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 mb-8">
+              <div className="hero-reveal hero-reveal-3 flex flex-col sm:flex-row gap-3 mb-8">
                 <Link to="/register" onClick={() => analytics.clickHeroCTA('patient')} className="btn-premium btn-primary-premium text-base px-7 py-3.5">
                   Comenzar ahora
                   <ArrowRight size={18} strokeWidth={1.8} />
@@ -229,7 +235,7 @@ export default function LandingPage() {
               </div>
 
               {/* Propuesta de valor */}
-              <div className="flex flex-wrap items-center gap-3">
+              <div className="hero-reveal hero-reveal-4 flex flex-wrap items-center gap-3">
                 {[
                   { icon: ShieldCheck, label: 'Terapeutas verificados' },
                   { icon: EyeOff,      label: 'Modo anónimo' },
@@ -244,9 +250,11 @@ export default function LandingPage() {
             </div>
 
             {/* Mockup hero */}
-            <div className="relative hidden lg:block">
+            <div className="hero-reveal hero-reveal-5 relative hidden lg:block">
               <div className="absolute -inset-4 bg-gradient-brand opacity-10 rounded-[60px] blur-3xl" />
-              <HeroMockup />
+              <div className="float-soft">
+                <HeroMockup />
+              </div>
             </div>
           </div>
         </section>
