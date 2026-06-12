@@ -6,11 +6,12 @@ import { getBlogPost, getRelatedPosts } from '@/data/blogPosts'
 import {
   ArrowRight, ChevronRight, Clock, ArrowLeft,
   HeartPulse, Users, Video, BrainCircuit, CalendarCheck,
+  CloudRain, Wallet, Flame, HeartHandshake, Moon,
 } from 'lucide-react'
 import { analytics } from '@/lib/analytics'
 import DOMPurify from 'dompurify'
 
-const ICON_MAP = { HeartPulse, Users, Video, BrainCircuit, CalendarCheck }
+const ICON_MAP = { HeartPulse, Users, Video, BrainCircuit, CalendarCheck, CloudRain, Wallet, Flame, HeartHandshake, Moon }
 
 const CATEGORY_COLORS = {
   'Bienestar':    'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300',

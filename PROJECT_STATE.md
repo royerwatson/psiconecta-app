@@ -47,7 +47,8 @@
 - Pendiente solo iOS: requiere Apple Developer Program ($99/año) — misma membresía
   que desbloquea Apple OAuth (obligatorio para publicar en App Store).
 
-**v34 (2026-06-12) — Mejoras móviles/PWA:**
+**v34 (2026-06-12) — Mejoras móviles/PWA: ✅ DESPLEGADO COMPLETO**
+(SQL ejecutado: cron a */15 + banderas · funciones redesplegadas · splash generada · push a main)
 - **Push agendar/cancelar:** `capture-paypal-order` y `notify-cancellation` envían
   push a paciente y terapeuta (además del email).
 - **Recordatorio 30 min antes (solo push)** con deep-link directo a `/video-call/:id`
