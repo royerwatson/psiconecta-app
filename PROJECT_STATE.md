@@ -12,7 +12,8 @@
 - [x] Edge Functions ✅ desplegadas 2026-06-09: `clinical-content`, `delete-user-data`, `notify-new-message`, `send-reminders` (esta última con `--no-verify-jwt` — se autentica con CRON_SECRET).
 - [ ] Push del frontend a `main` + verificación en producción (landing/testimonios, DSM-CIE con Pro, "Eliminar mi cuenta", registro con contacto de emergencia)
 - [ ] Verificar comisiones (query en `supabase/RUNBOOK_MIGRACIONES_PENDIENTES.md`, debe devolver 0 filas)
-- [ ] Config externa: Sentry DSN en Vercel (ver `STAGING.md`), Firebase/FCM (ver `PUSH_SETUP.md`)
+- [x] Sentry ✅ configurado 2026-06-09 — proyecto creado en sentry.io (org `psiconecta-ii`), `VITE_SENTRY_DSN` y `VITE_SENTRY_ENVIRONMENT` añadidas en Vercel (Production + Preview). Solo Error Monitoring + tracing 10%; Session Replay descartado por privacidad.
+- [ ] Firebase/FCM para push nativas (ver `PUSH_SETUP.md`) — secret `FCM_SERVICE_ACCOUNT` + apps Android/iOS
 - [ ] `npx playwright install chromium` y `npm run test:e2e` antes del próximo deploy
 - [ ] Restaurar columnas `languages/years_experience/approaches/education` en `FindTherapist.jsx` y `TherapistMatchPage.jsx` (ya existen en BD)
 
@@ -293,10 +294,10 @@ PAYPAL_WEBHOOK_ID    — para producción (actualmente solo existe PAYPAL_WEBHOO
 FCM_SERVICE_ACCOUNT  — JSON de service account de Firebase para push (ver PUSH_SETUP.md)
 ```
 
-**Pendientes en Vercel (frontend):**
+**Configurados en Vercel (frontend):**
 ```
-VITE_SENTRY_DSN          — activa monitoreo de errores (ver STAGING.md)
-VITE_SENTRY_ENVIRONMENT  — production / preview
+VITE_SENTRY_DSN          ✅ configurado 2026-06-09 (Production + Preview)
+VITE_SENTRY_ENVIRONMENT  ✅ configurado 2026-06-09
 ```
 
 **Secrets configurados (2026-06-06):**

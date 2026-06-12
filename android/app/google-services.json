@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "493789738177",
+    "project_id": "psiconecta-app-web",
+    "storage_bucket": "psiconecta-app-web.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:493789738177:android:fe2bac968471f269889040",
+        "android_client_info": {
+          "package_name": "com.psiconecta.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABBQf25VYmSihGPJTq2IyNyY0LCe_j61Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

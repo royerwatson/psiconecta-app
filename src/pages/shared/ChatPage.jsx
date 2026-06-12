@@ -201,10 +201,17 @@ export default function ChatPage() {
 
   const markAsRead = async (convId) => {
     // Intentar con RPC (requiere migration_messages_read_at.sql ejecutado)
-    const { error } = await supabase.rpc('mark_messages_read', {
-      p_sender_id:   convId,
-      p_receiver_id: user.id,
-    }).catch(() => ({ error: true }))
+    // NOTA: no encadenar .catch() al builder de supabase-js — lanza TypeError
+    let error = null
+    try {
+      const res = await supabase.rpc('mark_messages_read', {
+        p_sender_id:   convId,
+        p_receiver_id: user.id,
+      })
+      error = res.error
+    } catch (_e) {
+      error = true
+    }
 
     if (error) {
       // Fallback: UPDATE directo (funciona sin la RPC; también actualiza campo 'read')
