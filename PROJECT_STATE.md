@@ -5,15 +5,16 @@
 
 ## ⚡ Sesión 2026-06-09 (v32) — Resumen de cambios
 
-**Build verificado: 0 errores.** Pendiente de ejecutar/desplegar (en orden):
+**Build verificado: 0 errores.**
 
-1. SQL (Supabase SQL Editor) — ver `supabase/RUNBOOK_MIGRACIONES_PENDIENTES.md`:
-   las 4 pendientes (§3) **mejoradas** + `migration_deletion_requests.sql` +
-   `migration_emergency_contacts.sql` + `migration_device_tokens.sql`
-2. Edge Functions nuevas/modificadas:
-   `supabase functions deploy clinical-content delete-user-data notify-new-message send-reminders`
-3. Config externa: Sentry DSN (ver `STAGING.md`), Firebase/FCM (ver `PUSH_SETUP.md`)
-4. `npx playwright install chromium` y `npm run test:e2e` antes del próximo deploy
+**Estado de ejecución:**
+- [x] SQL ✅ ejecutado 2026-06-09 — las 7 migraciones aplicadas (vía `EJECUTAR_2026-06-09_v32.sql` + `EJECUTAR_FALTANTES.sql`). Incidencias resueltas: vista huérfana `my_profile` eliminada (`DROP VIEW`, dependía de las columnas emergency_* y no se usaba en el código).
+- [x] Edge Functions ✅ desplegadas 2026-06-09: `clinical-content`, `delete-user-data`, `notify-new-message`, `send-reminders` (esta última con `--no-verify-jwt` — se autentica con CRON_SECRET).
+- [ ] Push del frontend a `main` + verificación en producción (landing/testimonios, DSM-CIE con Pro, "Eliminar mi cuenta", registro con contacto de emergencia)
+- [ ] Verificar comisiones (query en `supabase/RUNBOOK_MIGRACIONES_PENDIENTES.md`, debe devolver 0 filas)
+- [ ] Config externa: Sentry DSN en Vercel (ver `STAGING.md`), Firebase/FCM (ver `PUSH_SETUP.md`)
+- [ ] `npx playwright install chromium` y `npm run test:e2e` antes del próximo deploy
+- [ ] Restaurar columnas `languages/years_experience/approaches/education` en `FindTherapist.jsx` y `TherapistMatchPage.jsx` (ya existen en BD)
 
 **Cambios:**
 - **DSM-5-TR y CIE-11 fuera del bundle JS** → Edge Function `clinical-content`
@@ -145,10 +146,13 @@ src/
 | `migration_fix_credentials_rls.sql` | **Ejecutado** — admin puede leer/aprobar `therapist_credentials` |
 | `migration_fix_progate_server_side.sql` | **Ejecutado** — RLS server-side módulo psicométrico + función `is_pro_therapist()` |
 | `migration_fix_length_constraints.sql` | **Ejecutado** — CHECK constraints longitud en messages, clinical_history, patient_tasks, etc. |
-| `migration_add_profile_fields.sql` | **Pendiente de ejecutar** — columnas `gender`, `birth_date`, `preferred_language` en `profiles` |
-| `migration_payouts_and_payment_fields.sql` | **Pendiente de ejecutar** — tabla `payouts`, vista `therapist_pending_earnings`, columnas de cobro en `therapist_profiles` |
-| `migration_commission_rates.sql` | **Pendiente de ejecutar** — comisión básico 20%, pro/premium 10%; actualiza trigger + filas existentes |
-| `migration_public_reviews.sql` | **Pendiente de ejecutar** — políticas RLS públicas (anon) para SELECT en `reviews` (landing page) |
+| `migration_add_profile_fields.sql` | **Ejecutado** ✅ 2026-06-09 — columnas `gender`, `birth_date`, `preferred_language` en `profiles` |
+| `migration_payouts_and_payment_fields.sql` | **Ejecutado** ✅ 2026-06-09 — tabla `payouts`, vista `therapist_pending_earnings` (con `security_invoker=true`), columnas de cobro; política admin con `WITH CHECK` + `is_admin()` |
+| `migration_commission_rates.sql` | **Ejecutado** ✅ 2026-06-09 — comisión básico 20%, pro/premium 10%; trigger + filas existentes actualizadas |
+| `migration_public_reviews.sql` | **Ejecutado** ✅ 2026-06-09 — v2: RPC `get_public_reviews()` SECURITY DEFINER (nombre anonimizado server-side) en lugar de abrir RLS a anon |
+| `migration_deletion_requests.sql` | **Ejecutado** ✅ 2026-06-09 — tabla `deletion_requests` + RLS (derecho de supresión) |
+| `migration_emergency_contacts.sql` | **Ejecutado** ✅ 2026-06-09 — tabla `emergency_contacts` con RLS estricta; columnas emergency_* eliminadas de `profiles` (+ `DROP VIEW my_profile` huérfana) |
+| `migration_device_tokens.sql` | **Ejecutado** ✅ 2026-06-09 — tabla `device_tokens` para push FCM/APNs |
 | `migration_fix_availability.sql` | **Ejecutado** ✅ — RLS explícita por operación en `therapist_availability` + UNIQUE constraint |
 | `fix_find_therapist_columns.md` | **Fix código** ✅ — Removidas columnas `languages/years_experience/approaches/education` de `FindTherapist.jsx` y `TherapistMatchPage.jsx` (requieren `migration_payouts_and_payment_fields.sql` pendiente) |
 
@@ -264,6 +268,10 @@ Flujo: terapeuta sube docs → admin aprueba/rechaza cada uno con motivo → cua
 | `send-reminders` | Recordatorios automáticos (cron) |
 | `admin-toggle-user` | Admin activa/desactiva cuentas |
 | `verify-payment` | Verifica pago completado |
+| `clinical-content` | Sirve DSM-5-TR / CIE-11 solo a terapeutas Pro (`is_pro_therapist()`) — los datos ya no van en el bundle JS (✅ desplegada 2026-06-09) |
+| `delete-user-data` | Derecho de supresión: borra datos clínicos, anonimiza perfil, banea cuenta; conserva registros financieros. Solo admin (✅ desplegada 2026-06-09) |
+
+**Helper compartido nuevo:** `_shared/push.ts` — envío push vía FCM HTTP v1 (best-effort, no-op sin `FCM_SERVICE_ACCOUNT`). Integrado en `notify-new-message` y `send-reminders`.
 
 ### Secrets configurados en Supabase
 ```
@@ -281,7 +289,14 @@ CLINICAL_ENCRYPTION_KEY    ✅ configurado
 
 **Pendientes en Supabase Secrets:**
 ```
-PAYPAL_WEBHOOK_ID   — para producción (actualmente solo existe PAYPAL_WEBHOOK_SANDBOX_ID)
+PAYPAL_WEBHOOK_ID    — para producción (actualmente solo existe PAYPAL_WEBHOOK_SANDBOX_ID)
+FCM_SERVICE_ACCOUNT  — JSON de service account de Firebase para push (ver PUSH_SETUP.md)
+```
+
+**Pendientes en Vercel (frontend):**
+```
+VITE_SENTRY_DSN          — activa monitoreo de errores (ver STAGING.md)
+VITE_SENTRY_ENVIRONMENT  — production / preview
 ```
 
 **Secrets configurados (2026-06-06):**
@@ -732,9 +747,12 @@ CREATE POLICY "profiles_insert" ON profiles FOR INSERT
 - [ ] Paginación chat: scroll infinito funcional, falta test con conversaciones largas reales
 - [ ] VideoCall: `network-connection` event pendiente de prueba real
 - [ ] Tests: sesiones previas a migración RLS sin `test_results` — terapeuta debe reasignar
-- [ ] DSM, CIE, escalas, biblioteca, protocolos — mover a Edge Functions para protección server-side real
-- [ ] Contacto de emergencia — mover a tabla separada con RLS estricta
-- [ ] Flujo RGPD — Edge Function `delete_user_data` + panel admin
+- [x] DSM y CIE — movidos a Edge Function `clinical-content` (✅ v32). Pendiente: escalas, biblioteca y protocolos siguen en el bundle
+- [x] Contacto de emergencia — tabla `emergency_contacts` con RLS estricta (✅ v32)
+- [x] Flujo RGPD — Edge Function `delete-user-data` + panel `/admin/deletions` + solicitud desde perfil (✅ v32)
+- [x] Monitoreo de errores — Sentry integrado, pendiente solo DSN en Vercel (✅ v32)
+- [x] Tests E2E — Playwright con smoke tests de rutas públicas y auth (✅ v32)
+- [x] Push notifications — código completo (tokens, FCM v1, chat + recordatorios), pendiente solo config Firebase (✅ v32)
 
 ---
 
