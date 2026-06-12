@@ -116,6 +116,7 @@ export default function TherapistMatchPage() {
       .from('therapist_profiles')
       .select(`user_id, specialty, bio, price_per_session, rating, review_count,
           subscription_plan, verified, available_urgent,
+          languages, years_experience, approaches, education,
           profile:profiles!therapist_profiles_user_id_fkey(id, full_name, avatar_url)`)
       .eq('verified', true)
       .order('rating', { ascending: false })

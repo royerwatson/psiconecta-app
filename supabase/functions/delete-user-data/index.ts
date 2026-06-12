@@ -19,7 +19,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 const SUPABASE_URL         = Deno.env.get('SUPABASE_URL') ?? ''
 const SUPABASE_ANON_KEY    = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
@@ -57,6 +57,7 @@ const HARD_DELETE: Array<[string, string[]]> = [
 ]
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -64,28 +65,28 @@ Deno.serve(async (req) => {
   try {
     // ── 1. Autorización: solo admin ──────────────────────────────────
     const authHeader = req.headers.get('Authorization')
-    if (!authHeader) return json({ error: 'No autorizado' }, 401)
+    if (!authHeader) return json({ error: 'No autorizado' }, 401, corsHeaders)
 
     const callerClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       global: { headers: { Authorization: authHeader } },
     })
     const { data: { user: caller } } = await callerClient.auth.getUser()
-    if (!caller) return json({ error: 'Sesión inválida' }, 401)
+    if (!caller) return json({ error: 'Sesión inválida' }, 401, corsHeaders)
 
     const { data: isAdmin } = await callerClient.rpc('is_admin')
-    if (!isAdmin) return json({ error: 'Requiere rol admin' }, 403)
+    if (!isAdmin) return json({ error: 'Requiere rol admin' }, 403, corsHeaders)
 
     // ── 2. Validar input ─────────────────────────────────────────────
     const { user_id, request_id } = await req.json().catch(() => ({}))
-    if (!user_id) return json({ error: 'user_id requerido' }, 400)
-    if (user_id === caller.id) return json({ error: 'No puedes eliminarte a ti mismo' }, 400)
+    if (!user_id) return json({ error: 'user_id requerido' }, 400, corsHeaders)
+    if (user_id === caller.id) return json({ error: 'No puedes eliminarte a ti mismo' }, 400, corsHeaders)
 
     const admin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 
     const { data: profile } = await admin
       .from('profiles').select('id, role, email, avatar_url').eq('id', user_id).single()
-    if (!profile) return json({ error: 'Usuario no encontrado' }, 404)
-    if (profile.role === 'admin') return json({ error: 'No se puede eliminar un admin' }, 400)
+    if (!profile) return json({ error: 'Usuario no encontrado' }, 404, corsHeaders)
+    if (profile.role === 'admin') return json({ error: 'No se puede eliminar un admin' }, 400, corsHeaders)
 
     if (request_id) {
       await admin.from('deletion_requests')
@@ -168,14 +169,14 @@ Deno.serve(async (req) => {
       detail: JSON.stringify({ user_id, request_id }),
     }).then(() => {}, () => {})
 
-    return json({ success: true, report }, 200)
+    return json({ success: true, report }, 200, corsHeaders)
   } catch (err) {
     console.error('delete-user-data error:', err)
-    return json({ error: 'Error interno' }, 500)
+    return json({ error: 'Error interno' }, 500, corsHeaders)
   }
 })
 
-function json(body: unknown, status: number): Response {
+function json(body: unknown, status: number, corsHeaders: Record<string, string>): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },

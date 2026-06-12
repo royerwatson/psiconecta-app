@@ -18,7 +18,7 @@
  */
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { corsHeaders } from '../_shared/cors.ts'
+import { getCorsHeaders } from '../_shared/cors.ts'
 import { DSM5TR } from './dsm5tr.js'
 import { CIE11 } from './cie11.js'
 
@@ -31,6 +31,7 @@ const DATASETS: Record<string, unknown> = {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -38,7 +39,7 @@ Deno.serve(async (req) => {
   try {
     const authHeader = req.headers.get('Authorization')
     if (!authHeader) {
-      return json({ error: 'No autorizado' }, 401)
+      return json({ error: 'No autorizado' }, 401, corsHeaders)
     }
 
     // Cliente con el JWT del usuario: getUser valida el token y
@@ -49,22 +50,22 @@ Deno.serve(async (req) => {
 
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     if (userError || !user) {
-      return json({ error: 'Sesión inválida' }, 401)
+      return json({ error: 'Sesión inválida' }, 401, corsHeaders)
     }
 
     const { data: isPro, error: rpcError } = await supabase.rpc('is_pro_therapist')
     if (rpcError) {
       console.error('is_pro_therapist error:', rpcError)
-      return json({ error: 'Error verificando suscripción' }, 500)
+      return json({ error: 'Error verificando suscripción' }, 500, corsHeaders)
     }
     if (!isPro) {
-      return json({ error: 'Requiere plan Suscripción' }, 403)
+      return json({ error: 'Requiere plan Suscripción' }, 403, corsHeaders)
     }
 
     const { dataset } = await req.json().catch(() => ({}))
     const data = DATASETS[dataset]
     if (!data) {
-      return json({ error: 'dataset inválido — usa "dsm5tr" o "cie11"' }, 400)
+      return json({ error: 'dataset inválido — usa "dsm5tr" o "cie11"' }, 400, corsHeaders)
     }
 
     return new Response(JSON.stringify({ data }), {
@@ -77,11 +78,11 @@ Deno.serve(async (req) => {
     })
   } catch (err) {
     console.error('clinical-content error:', err)
-    return json({ error: 'Error interno' }, 500)
+    return json({ error: 'Error interno' }, 500, corsHeaders)
   }
 })
 
-function json(body: unknown, status: number): Response {
+function json(body: unknown, status: number, corsHeaders: Record<string, string>): Response {
   return new Response(JSON.stringify(body), {
     status,
     headers: { ...corsHeaders, 'Content-Type': 'application/json' },

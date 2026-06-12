@@ -10,12 +10,38 @@
 **Estado de ejecución:**
 - [x] SQL ✅ ejecutado 2026-06-09 — las 7 migraciones aplicadas (vía `EJECUTAR_2026-06-09_v32.sql` + `EJECUTAR_FALTANTES.sql`). Incidencias resueltas: vista huérfana `my_profile` eliminada (`DROP VIEW`, dependía de las columnas emergency_* y no se usaba en el código).
 - [x] Edge Functions ✅ desplegadas 2026-06-09: `clinical-content`, `delete-user-data`, `notify-new-message`, `send-reminders` (esta última con `--no-verify-jwt` — se autentica con CRON_SECRET).
-- [ ] Push del frontend a `main` + verificación en producción (landing/testimonios, DSM-CIE con Pro, "Eliminar mi cuenta", registro con contacto de emergencia)
+- [x] Push del frontend a `main` ✅ 2026-06-12 (incluye fixes v33, abajo)
+- [ ] Verificación en producción: landing/testimonios, DSM-CIE con Pro, "Eliminar mi cuenta", registro con contacto de emergencia, chat OK, errores llegando a Sentry
 - [ ] Verificar comisiones (query en `supabase/RUNBOOK_MIGRACIONES_PENDIENTES.md`, debe devolver 0 filas)
 - [x] Sentry ✅ configurado 2026-06-09 — proyecto creado en sentry.io (org `psiconecta-ii`), `VITE_SENTRY_DSN` y `VITE_SENTRY_ENVIRONMENT` añadidas en Vercel (Production + Preview). Solo Error Monitoring + tracing 10%; Session Replay descartado por privacidad.
 - [ ] Firebase/FCM para push nativas (ver `PUSH_SETUP.md`) — secret `FCM_SERVICE_ACCOUNT` + apps Android/iOS
 - [ ] `npx playwright install chromium` y `npm run test:e2e` antes del próximo deploy
 - [ ] Restaurar columnas `languages/years_experience/approaches/education` en `FindTherapist.jsx` y `TherapistMatchPage.jsx` (ya existen en BD)
+
+**Fixes v33 (2026-06-12) — incidente chat + hallazgos de consola:**
+- **CRÍTICO — chat roto (42501):** la política INSERT de `messages` no existía en
+  producción (se perdió en alguna edición por dashboard; el repo la tenía). Restauradas
+  las 4 políticas vía `migration_fix_messages_policies.sql` ✅ ejecutada 2026-06-12.
+- **CSP bloqueaba Sentry:** añadidos `*.ingest.us.sentry.io` y `www.google.com` (GA4
+  regional) a `connect-src` en `vercel.json` — los errores no llegaban a Sentry.
+- **ChatPage `markAsRead`:** `.catch()` encadenado al builder de supabase-js lanzaba
+  TypeError — reemplazado por try/await.
+- **CORS para app nativa ✅ resuelto en código:** `_shared/cors.ts` ahora exporta
+  `getCorsHeaders(req)` con allowlist (psiconecta.app, www, `https://localhost` Android,
+  `capacitor://localhost` iOS, `localhost:*` dev). Las 18 funciones migradas al helper
+  (eliminados los `corsHeaders` inline duplicados). **Pendiente: redesplegar TODAS las
+  funciones** — `supabase functions deploy <cada-una>` (send-reminders con `--no-verify-jwt`).
+- **FindTherapist/TherapistMatchPage:** restauradas las columnas `languages,
+  years_experience, approaches, education` en los SELECT (ya existen en BD).
+
+**Push notifications — progreso emulador (2026-06-12):**
+- Android Studio instalado, proyecto `android/` generado (`cap add android`), TypeScript
+  añadido como devDependency (lo requiere el CLI de Capacitor).
+- `google-services.json` correcto en `android/app/` (package `com.psiconecta.app`;
+  ojo: hay una app fantasma `com.psiconecta.psiconecta` registrada en Firebase, ignorable).
+- `FCM_SERVICE_ACCOUNT` ✅ configurado en Supabase Secrets (proyecto `psiconecta-app-web`).
+- Emulador Pixel 7 (API 35, con Play Store) funcionando — requirió liberar espacio en disco.
+- Pendiente: probar flujo completo de push en emulador (token en `device_tokens` → mensaje → notificación). Bloqueado parcialmente por el CORS de funciones (nota arriba).
 
 **Cambios:**
 - **DSM-5-TR y CIE-11 fuera del bundle JS** → Edge Function `clinical-content`

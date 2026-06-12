@@ -6,10 +6,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail, rescheduleEmail } from '../_shared/email.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://psiconecta.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 function fmtDate(iso: string) {
   return new Date(iso).toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -19,6 +16,7 @@ function fmtTime(iso: string) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {

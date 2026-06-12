@@ -11,10 +11,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { sendEmail, subscriptionActivatedEmail } from '../_shared/email.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://psiconecta.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 // ── Verificar firma del webhook con PayPal ────────────────────────────────────
 
@@ -189,6 +186,7 @@ async function handleSubscriptionCancelled(
 // ── Handler principal ─────────────────────────────────────────────────────────
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }

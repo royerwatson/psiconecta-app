@@ -23,10 +23,7 @@ const ANTHROPIC_API_KEY      = Deno.env.get('ANTHROPIC_API_KEY') ?? ''
 const SUPABASE_URL           = Deno.env.get('SUPABASE_URL') ?? ''
 const SUPABASE_SERVICE_KEY   = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin':  'https://psiconecta.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 // ─── Análisis de riesgo con Claude ───────────────────────────────────────────
 
@@ -119,6 +116,7 @@ async function getMainTherapist(supabase: ReturnType<typeof createClient>, patie
 // ─── Handler principal ────────────────────────────────────────────────────────
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }

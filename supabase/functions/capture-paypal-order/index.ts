@@ -5,10 +5,7 @@ import {
   bookingNotificationTherapist,
 } from '../_shared/email.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': 'https://psiconecta.app',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+import { getCorsHeaders } from '../_shared/cors.ts'
 
 async function getPayPalAccessToken(): Promise<string> {
   const clientId     = Deno.env.get('PAYPAL_CLIENT_ID')!
@@ -41,6 +38,7 @@ function formatTime(iso: string) {
 }
 
 Deno.serve(async (req) => {
+  const corsHeaders = getCorsHeaders(req)
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
