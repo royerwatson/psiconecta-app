@@ -13,7 +13,10 @@ import { cn } from '@/lib/utils'
 import { Frown, HeartPulse, Droplets, Brain, Timer, BarChart2, Lightbulb, Check, X, Search, Send } from 'lucide-react'
 
 // Mapa escala → slug del test en la BD
-const SCALE_SLUG_MAP = { PHQ9: 'phq9', GAD7: 'gad7', AUDIT: 'audit', PCL5: 'pcl5' }
+const SCALE_SLUG_MAP = {
+  PHQ9: 'phq9', GAD7: 'gad7', AUDIT: 'audit', PCL5: 'pcl5',
+  ISI: 'isi', PSS10: 'pss10', DASS21: 'dass21', SPIN: 'spin', DAST10: 'dast10', CSSRS: 'cssrs',
+}
 
 const SCALE_ICON_MAP = { Frown, HeartPulse, Droplets, Brain }
 function ScaleIcon({ name, size = 22, className = '' }) {
