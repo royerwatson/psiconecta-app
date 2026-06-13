@@ -1,6 +1,6 @@
 /**
  * Protocolos y técnicas terapéuticas basadas en evidencia — guía clínica
- * TCC · DBT · ACT · EMDR
+ * TCC · DBT · ACT · EMDR · MBCT · CFT
  *
  * Contenido parafraseado con fines educativos/clínicos.
  * Para práctica formal consulta fuentes originales y realiza la formación
@@ -49,6 +49,26 @@ export const MODALITIES = [
     description:
       'Protocolo estructurado de 8 fases para procesar memorias traumáticas mediante estimulación bilateral (movimientos oculares, tapping o tonos). Reconocido por OMS y APA para TEPT. Requiere formación y certificación específica (EMDR Europe/EMDRIA).',
   },
+  {
+    id: 'mbct',
+    name: 'MBCT',
+    fullName: 'Terapia Cognitiva Basada en Mindfulness',
+    icon: 'Sparkles',
+    color: 'indigo',
+    tagline: 'Segal · Williams · Teasdale · 8 semanas',
+    description:
+      'Programa estructurado de 8 semanas que integra prácticas de mindfulness con elementos de TCC. Primera línea para la prevención de recaídas en depresión mayor recurrente (≥3 episodios). Indicado también para ansiedad crónica y estrés. Reconocido por NICE (Reino Unido) y APA.',
+  },
+  {
+    id: 'cft',
+    name: 'CFT',
+    fullName: 'Terapia Centrada en la Compasión',
+    icon: 'Heart',
+    color: 'rose',
+    tagline: 'Paul Gilbert · Tres sistemas · Yo compasivo',
+    description:
+      'Desarrollada por Paul Gilbert para personas con alta autocrítica y vergüenza. Integra neurociencia evolutiva, psicología budista y TCC. Trabaja el sistema de amenaza, impulso y afiliación/soothing para cultivar el yo compasivo. Evidencia creciente en depresión, trauma, trastornos alimentarios y personalidad.',
+  },
 ]
 
 export const MODALITY_MAP = Object.fromEntries(MODALITIES.map(m => [m.id, m]))
@@ -58,7 +78,9 @@ export const MOD_COLOR = {
   blue:   { tab: 'bg-blue-600 text-white',   pill: 'bg-blue-100 text-blue-700 border-blue-200',   step: 'bg-blue-50 border-blue-200',   num: 'bg-blue-600 text-white'   },
   teal:   { tab: 'bg-teal-600 text-white',   pill: 'bg-teal-100 text-teal-700 border-teal-200',   step: 'bg-teal-50 border-teal-200',   num: 'bg-teal-600 text-white'   },
   green:  { tab: 'bg-green-600 text-white',  pill: 'bg-green-100 text-green-700 border-green-200', step: 'bg-green-50 border-green-200', num: 'bg-green-600 text-white'  },
-  purple: { tab: 'bg-purple-600 text-white', pill: 'bg-purple-100 text-purple-700 border-purple-200',step:'bg-purple-50 border-purple-200',num: 'bg-purple-600 text-white'},
+  purple: { tab: 'bg-purple-600 text-white', pill: 'bg-purple-100 text-purple-700 border-purple-200', step: 'bg-purple-50 border-purple-200', num: 'bg-purple-600 text-white' },
+  indigo: { tab: 'bg-indigo-600 text-white', pill: 'bg-indigo-100 text-indigo-700 border-indigo-200', step: 'bg-indigo-50 border-indigo-200', num: 'bg-indigo-600 text-white' },
+  rose:   { tab: 'bg-rose-600 text-white',   pill: 'bg-rose-100 text-rose-700 border-rose-200',     step: 'bg-rose-50 border-rose-200',     num: 'bg-rose-600 text-white'   },
 }
 
 // ── Protocolos ────────────────────────────────────────────────────────────────
@@ -1018,6 +1040,466 @@ export const PROTOCOLS = [
       'Considera la disponibilidad del terapeuta para contacto breve entre sesiones si el material es muy intenso (similar al coaching DBT).',
     ],
     reference: 'Shapiro, F. (2018). Eye Movement Desensitization and Reprocessing (EMDR) Therapy (3.ª ed.). Guilford.',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // TCC — Protocolos adicionales
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'tcc-ansiedad-social',
+    modality: 'tcc',
+    name: 'Protocolo Heimberg para Ansiedad Social',
+    indication: 'Fobia social · Ansiedad social · Timidez severa · Evitación social',
+    sessions: '12–16 sesiones',
+    difficulty: 'Intermedio-Avanzado',
+    overview:
+      'Protocolo de primera línea para el trastorno de ansiedad social (TAS). Combina reestructuración cognitiva de creencias sobre evaluación negativa con exposición situacional gradual (en vivo y en role-play). Desarrollado por Richard Heimberg y su equipo en la Universidad de Temple.',
+    indications: [
+      'Trastorno de ansiedad social generalizado',
+      'Fobia social circunscrita (hablar en público, citas, etc.)',
+      'Timidez severa con deterioro funcional',
+      'Ansiedad de rendimiento (exámenes, entrevistas)',
+    ],
+    contraindications: [
+      'Abuso activo de sustancias',
+      'Depresión severa no tratada como problema primario',
+      'Ideación suicida activa',
+    ],
+    steps: [
+      {
+        title: 'Psicoeducación y modelo cognitivo de la ansiedad social',
+        body: 'Explica el modelo: la persona con TAS sobreestima la probabilidad de actuar de forma inadecuada Y la consecuencia catastrófica de esa actuación. Introduce el ciclo: anticipación ansiosa → conductas de seguridad/evitación → alivio a corto plazo → mantenimiento del miedo. El tratamiento tiene dos patas: cambiar la cognición + eliminar la evitación.',
+      },
+      {
+        title: 'Identificar pensamientos automáticos en situaciones sociales',
+        body: 'Trabaja el registro A-B-C en situaciones sociales específicas. Pensamientos típicos: "Me voy a quedar en blanco", "Van a notar que estoy nervioso/a", "Pensarán que soy estúpido/a", "Me rechazarán." Identifica las distorsiones más frecuentes: lectura mental, catastrofismo, estándar doble.',
+      },
+      {
+        title: 'Reestructuración cognitiva de creencias de evaluación negativa',
+        body: 'Trabaja las dos estimaciones distorsionadas: (1) Probabilidad: ¿Qué tan probable es que actúes de forma inadecuada? Evalúa la evidencia. (2) Consecuencia: Si actuaras de forma inadecuada, ¿qué pasaría realmente? ¿Lo resistirías? ¿Les importaría tanto a los demás como piensas? Usa el cuestionamiento socrático y el "test de la encuesta" (preguntar a otros sobre sus experiencias).',
+      },
+      {
+        title: 'Construcción de la jerarquía de situaciones sociales',
+        body: 'Lista de 8–12 situaciones sociales temidas, ordenadas de menor a mayor ansiedad (SUDS 0–100). Incluir situaciones de actuación (hablar en público, comer delante de otros) y de interacción (conversaciones, citas, reuniones). Identificar en cada situación las conductas de seguridad que el paciente usa (evitar contacto visual, hablar poco, preparar en exceso, etc.).',
+      },
+      {
+        title: 'Role-play con reestructuración cognitiva previa',
+        body: 'Para cada exposición: (1) Reestructuración ANTES: identifica el pensamiento automático, evalúa su credibilidad (0–100%), genera alternativa. (2) Role-play en sesión (exposición simulada a la situación temida). (3) Reestructuración DESPUÉS: ¿Se cumplió la predicción? ¿Qué aprendiste? Este ciclo es el núcleo diferencial del protocolo Heimberg.',
+      },
+      {
+        title: 'Exposición in vivo con eliminación de conductas de seguridad',
+        body: 'Gradúa la exposición en vivo entre sesiones empezando por ítems de SUDS 30–40. La condición esencial: eliminar todas las conductas de seguridad durante la exposición. Registra el SUDS antes, a los 10 min y al final. Debriefing en sesión: ¿Qué ocurrió? ¿Se cumplió la predicción? ¿Qué harías diferente?',
+      },
+      {
+        title: 'Modificación del sesgo atencional y de memoria post-evento',
+        body: 'Trabaja dos procesos específicos del TAS: (1) Sesgo atencional: la persona centra la atención en sí misma (automonitoreo excesivo) en lugar de en la situación/conversación. Practica "atención externa" durante exposiciones. (2) Rumiación post-evento: revisión negativa de la actuación después de situaciones sociales. Identifica y reestructura estas revisiones.',
+      },
+      {
+        title: 'Prevención de recaídas y generali­zación',
+        body: 'Revisa los avances logrados y los cambios cognitivos consolidados. Identifica situaciones futuras de alto riesgo. Elabora un plan de exposición autónoma para las situaciones que quedan por trabajar. Distingue nerviosismo normal (adaptativo) de ansiedad clínica. Programe sesiones de seguimiento a 1 y 3 meses.',
+      },
+    ],
+    tips: [
+      'El role-play dentro de sesión es esencial — sin él el paciente puede hacer "exposición sin procesamiento cognitivo".',
+      'Las conductas de seguridad son tan importantes como la evitación — identifícalas todas antes de la primera exposición.',
+      'El sesgo atencional autofocalizado es central en el TAS — trabajarlo explícitamente mejora los resultados.',
+      'La rumiación post-evento puede durar días — incluirla en el tratamiento es clave para la generalización.',
+      'Para ansiedad a hablar en público, el role-play grupal es especialmente potente — considera derivación a grupo de habilidades sociales.',
+    ],
+    reference: 'Heimberg, R. G. & Becker, R. E. (2002). Cognitive-Behavioral Group Therapy for Social Phobia. Guilford.',
+  },
+
+  {
+    id: 'tcc-tag',
+    modality: 'tcc',
+    name: 'Protocolo Dugas para TAG — Intolerancia a la incertidumbre',
+    indication: 'Trastorno de Ansiedad Generalizada · Preocupación crónica · Rumiación',
+    sessions: '12–16 sesiones',
+    difficulty: 'Intermedio',
+    overview:
+      'Modelo de Michel Dugas (Concordia University) que conceptualiza el TAG como una respuesta a la intolerancia a la incertidumbre. A diferencia del protocolo de Borkovec (que trabaja la preocupación directamente), este modelo trata la intolerancia a la incertidumbre como el mecanismo central. Evidencia robusta en ensayos clínicos controlados.',
+    indications: [
+      'Trastorno de ansiedad generalizada (TAG)',
+      'Preocupación crónica que interfiere con el funcionamiento',
+      'Perfeccionismo con ansiedad anticipatoria',
+      'Dificultad para tomar decisiones por miedo a equivocarse',
+    ],
+    steps: [
+      {
+        title: 'Psicoeducación: el modelo de intolerancia a la incertidumbre',
+        body: 'El TAG no es preocupación por cosas reales — es intolerancia a la posibilidad de que algo malo ocurra. La persona tiene baja tolerancia a lo incierto y usa la preocupación como "solución" (ilusión de control). Introduce la metáfora del "detector de incertidumbre hipersensible". Distingue preocupaciones Tipo 1 (problemas actuales resolubles) y Tipo 2 (situaciones inciertas hipotéticas).',
+      },
+      {
+        title: 'Registro de preocupaciones y clasificación',
+        body: 'Durante 2 semanas el paciente registra todas sus preocupaciones y las clasifica: ¿Es un problema actual que puedo resolver? (Tipo 1) ¿O es una situación incierta que no puedo controlar? (Tipo 2). El 90% suelen ser Tipo 2. Este registro es revelador — el paciente se da cuenta de que la mayoría de sus preocupaciones son sobre incertidumbre, no sobre problemas reales.',
+      },
+      {
+        title: 'Resolución de problemas (para preocupaciones Tipo 1)',
+        body: 'Para problemas actuales y resolubles: aplica el protocolo de resolución de problemas en 5 pasos. El objetivo es que el paciente actúe en lugar de preocuparse. La acción concreta es el antídoto a la preocupación tipo 1. Si el problema es irresoluble en este momento, clasifícalo como Tipo 2.',
+      },
+      {
+        title: 'Exposición cognitiva a la incertidumbre (para preocupaciones Tipo 2)',
+        body: 'Para situaciones inciertas hipotéticas: construye una jerarquía de situaciones inciertas (SUDS 0–100). Exposición imaginaria: el paciente visualiza la situación incierta temida y permanece en contacto con la incertidumbre sin buscar certeza. Elimina conductas de búsqueda de seguridad (pedir reaseguramiento, comprobar repetidamente, sobreprepararse).',
+      },
+      {
+        title: 'Identificar y modificar creencias positivas sobre la preocupación',
+        body: 'Muchos pacientes con TAG tienen creencias metacognitivas positivas sobre la preocupación: "Si me preocupo, estaré preparado", "Preocuparme es ser responsable", "Si no me preocupo, algo malo pasará." Estas creencias mantienen el TAG. Evalúa su evidencia y genera alternativas más flexibles.',
+      },
+      {
+        title: 'Exposición conductual a situaciones de incertidumbre real',
+        body: 'Diseña experimentos conductuales donde el paciente actúa sin buscar certeza: no comprobar el correo dos veces, enviar un mensaje sin revisarlo diez veces, tomar una decisión sin pedir cuatro opiniones. Registra qué ocurrió y qué aprendió. La exposición conductual a la incertidumbre es el componente más potente.',
+      },
+      {
+        title: 'Consolidación y prevención de recaídas',
+        body: 'Resume el modelo aprendido: intolerancia a la incertidumbre → preocupación → alivio temporal → más intolerancia. Identifica qué estrategias aprendidas fueron más útiles. Plan para afrontar episodios futuros de mayor preocupación. Define el "plan de acción" cuando note que la preocupación vuelve.',
+      },
+    ],
+    tips: [
+      'La distinción Tipo 1 / Tipo 2 es el corazón del modelo — dedica tiempo suficiente a que el paciente la internalice.',
+      'La búsqueda de seguridad (reaseguramiento) es el equivalente a los rituales en el TOC — eliminarla es esencial.',
+      'Las creencias positivas sobre la preocupación son muy resistentes — explora con cuidado y sin debate apresurado.',
+      'Combina este modelo con técnicas de mindfulness para el componente de "estar presente con la incertidumbre".',
+      'Para casos mixtos TAG + depresión, trabaja primero la activación conductual antes de este protocolo.',
+    ],
+    reference: 'Dugas, M. J. & Robichaud, M. (2007). Cognitive-Behavioral Treatment for Generalized Anxiety Disorder. Routledge.',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // DBT — Protocolos adicionales
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'dbt-validacion',
+    modality: 'dbt',
+    name: 'Los 6 niveles de validación de Linehan',
+    indication: 'TLP · Desregulación emocional · Ruptura de alianza · Alta autocrítica',
+    sessions: 'Técnica de uso continuo',
+    difficulty: 'Intermedio-Avanzado',
+    overview:
+      'La validación es la estrategia terapéutica más central de DBT — más que ninguna técnica específica. Marsha Linehan describe 6 niveles de validación en orden creciente de profundidad y potencia. Comunicar validación reduce la desregulación emocional, fortalece la alianza y modela la auto-validación que el paciente necesita desarrollar.',
+    indications: [
+      'Toda sesión con pacientes de alta desregulación emocional',
+      'Momentos de ruptura o tensión en la alianza terapéutica',
+      'Pacientes con alta autocrítica o vergüenza',
+      'Antes y después de intervenciones de cambio (para equilibrar la dialéctica)',
+    ],
+    steps: [
+      {
+        title: 'Nivel 1 — Presencia plena (estar despierto)',
+        body: 'El terapeuta está totalmente presente: escucha sin interrumpir, mantiene contacto visual apropiado, su lenguaje corporal comunica atención genuina. No mira el reloj, no revisa notas, no piensa en la respuesta mientras el paciente habla. Es el nivel más básico y más frecuentemente ignorado. Comunicación implícita: "Lo que dices importa."',
+      },
+      {
+        title: 'Nivel 2 — Reflexión exacta (reflejo preciso)',
+        body: 'El terapeuta refleja con precisión lo que el paciente ha dicho, sin añadir ni quitar. No parafrasea en exceso ni interpreta. "Lo que escucho es que te sientes completamente sola en esto." Valida que el terapeuta ha escuchado correctamente antes de responder. Este nivel por sí solo reduce la activación emocional en pacientes con TLP.',
+      },
+      {
+        title: 'Nivel 3 — Articular lo no dicho (leer la mente)',
+        body: 'El terapeuta verbaliza pensamientos, emociones o significados que el paciente no ha expresado pero que se desprenden del contexto. "No lo has dicho, pero me pregunto si también sientes vergüenza por eso." Requiere observación cuidadosa y cultura de verificación. Frase clave: "¿Me equivoco?" Nunca se usa como interpretación diagnóstica — es tentativa y verificable.',
+      },
+      {
+        title: 'Nivel 4 — Validar en términos de historia o biología (tiene sentido dado tu historia)',
+        body: 'La respuesta del paciente es comprensible dado su aprendizaje pasado, su biología o las circunstancias que vivió. "Tiene sentido que reacciones así — aprendiste desde pequeño/a que expresar emociones era peligroso." No se valida porque sea "correcto" ahora, sino porque es comprensible dado el origen. Diferencia validación de aprobación.',
+      },
+      {
+        title: 'Nivel 5 — Validar en términos del presente (lo razonable ahora)',
+        body: 'La respuesta del paciente es comprensible y razonable dado el contexto ACTUAL, no solo el pasado. Es el nivel más potente de validación para adultos. "Cualquiera en tu situación se sentiría así." "Eso es exactamente lo que cabría esperar." Requiere que la emoción o conducta sea genuinamente razonable — no se usa para validar lo que no lo es.',
+      },
+      {
+        title: 'Nivel 6 — Tratamiento radical como igual (autenticidad)',
+        body: 'El terapeuta trata al paciente como un ser capaz, no como un "caso." Responde desde la autenticidad, no desde el rol de experto. Puede compartir reacciones honestas ("Eso me parece muy difícil") sin sobreimplicarse. Cree en las capacidades del paciente incluso cuando el paciente no las ve. Es la forma más profunda de validación y la que más impacta en la autoeficacia.',
+      },
+      {
+        title: 'Equilibrar validación y cambio (la dialéctica central)',
+        body: 'DBT equilibra aceptación (validación) y cambio (TCC). Demasiada validación sin cambio: el paciente se siente escuchado pero no avanza. Demasiado cambio sin validación: el paciente siente que no le entienden y se activa. La regla práctica: cuando el paciente se active emocionalmente, aumenta la validación antes de cualquier intervención de cambio.',
+      },
+    ],
+    tips: [
+      'Validar no es estar de acuerdo — se puede validar la emoción mientras se trabaja para cambiar la conducta.',
+      'Los niveles 4 y 5 son los más terapéuticos pero también los que más pueden invalidar si se usan incorrectamente ("cualquiera lo haría" puede sentirse minimizador).',
+      'La auto-validación del paciente es el objetivo final — el terapeuta modela lo que el paciente necesita aprender a darse a sí mismo.',
+      'En momentos de ruptura, comienza siempre por el Nivel 1–2 antes de intentar reparar o explicar.',
+      'El Nivel 6 requiere que el terapeuta crea genuinamente en el paciente — la validación falsa se detecta.',
+    ],
+    reference: 'Linehan, M. M. (1997). Validation and psychotherapy. In A. Bohart & L. Greenberg (Eds.), Empathy Reconsidered. APA.',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ACT — Protocolos adicionales
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'act-matriz',
+    modality: 'act',
+    name: 'La Matriz ACT (Polk & Schoendorff)',
+    indication: 'Evitación experiencial · Pérdida de dirección · Casos complejos',
+    sessions: '3–6 sesiones (herramienta de uso continuo)',
+    difficulty: 'Básico-Intermedio',
+    overview:
+      'Herramienta visual desarrollada por Kevin Polk y Benji Schoendorff que simplifica los 6 procesos del Hexaflex en un diagrama de dos ejes. Permite al paciente ver de un vistazo qué lo aleja de lo que valora y qué lo acerca. Especialmente útil al inicio del tratamiento y con pacientes que se benefician de representaciones visuales.',
+    indications: [
+      'Primera herramienta de formulación en ACT',
+      'Pacientes que se pierden en los detalles — necesitan perspectiva visual',
+      'Casos donde hay mucha evitación y poca acción comprometida',
+      'Supervisión y seguimiento del progreso en ACT',
+    ],
+    steps: [
+      {
+        title: 'Dibujar los dos ejes de la Matriz',
+        body: 'Dibuja una cruz que crea cuatro cuadrantes:\n\nEje vertical: Mundo externo (arriba) / Mundo interno (abajo)\nEje horizontal: Alejarse del malestar (izquierda) / Acercarse a lo que importa (derecha)\n\nExplica brevemente: el eje vertical distingue lo observable por otros (conductas, acciones) de lo que solo tú experimentas (pensamientos, emociones, sensaciones). El eje horizontal distingue moverse HACIA tus valores de moverse LEJOS del malestar.',
+      },
+      {
+        title: 'Cuadrante inferior derecho — ¿Quién y qué importa?',
+        body: 'Empieza aquí. Pregunta: "¿Quiénes son las personas más importantes en tu vida? ¿Qué es lo que más valoras?" Escribe respuestas en el cuadrante inferior derecho (mundo interno + acercarse). Esto ancla toda la conversación en valores, no en síntomas. Es el "por qué" de todo el trabajo.',
+      },
+      {
+        title: 'Cuadrante inferior izquierdo — ¿Qué aparece que te aleja?',
+        body: 'Pregunta: "Cuando intentas acercarte a lo que importa, ¿qué experiencias internas aparecen y te frenan? ¿Pensamientos, emociones, sensaciones, recuerdos, impulsos?" Escribe en el cuadrante inferior izquierdo (mundo interno + alejarse). Estos son los "ganchos" — el material que genera evitación experiencial.',
+      },
+      {
+        title: 'Cuadrante superior izquierdo — ¿Qué haces para alejarte?',
+        body: 'Pregunta: "Cuando aparece todo eso [señala cuadrante inferior izquierdo], ¿qué haces para no sentirlo o para que pare? ¿Qué conductas usas para alejarte del malestar?" Escribe en el cuadrante superior izquierdo (mundo externo + alejarse). Estas son las conductas de evitación: aislarse, procrastinar, consumir, distraerse, atacar, someterse.',
+      },
+      {
+        title: 'Cuadrante superior derecho — ¿Qué harías si pudieras acercarte?',
+        body: 'Pregunta: "Si pudieras moverte hacia lo que importa aunque esas experiencias internas estuvieran presentes, ¿qué harías diferente? ¿Qué acciones verían los demás?" Escribe en el cuadrante superior derecho (mundo externo + acercarse). Estas son las acciones comprometidas — las conductas alineadas con valores que el tratamiento buscará aumentar.',
+      },
+      {
+        title: 'El gancho — el momento de la elección',
+        body: 'Añade una flecha en el centro que indica: "Cuando el gancho (cuadrante inferior izquierdo) aparece, ¿notas que estás enganchado/a y puedes elegir hacia dónde ir?" El trabajo terapéutico no es eliminar el gancho (eso es control experiencial) sino ampliar la capacidad de notar que está ahí y elegir la dirección. La flexibilidad psicológica es la amplitud de ese momento de elección.',
+      },
+      {
+        title: 'Uso continuo de la Matriz durante el tratamiento',
+        body: 'La Matriz no es solo una herramienta de evaluación — se usa en cada sesión. "¿Dónde estuviste más esta semana: en el lado derecho o en el izquierdo?" / "Eso que describes, ¿en qué cuadrante lo pondríamos?" Se puede pegar en la nevera, guardar en el celular o usarse como tarjeta de registro. Es un lenguaje compartido terapeuta-paciente.',
+      },
+    ],
+    tips: [
+      'Empieza siempre por el cuadrante inferior derecho (valores) — comenzar por el malestar activa la evitación.',
+      'La Matriz no juzga ningún cuadrante — el lado izquierdo no es "malo", es comprensible. El problema es cuando ese lado domina completamente.',
+      'Con pacientes muy cognitivos, la representación visual puede ser más poderosa que horas de conceptualización verbal.',
+      'La Matriz se adapta a casi cualquier problema: adicciones, relaciones, trabajo, salud — siempre tiene los mismos cuatro cuadrantes.',
+      'Polk usa la pregunta "¿Eres tú o es el gancho?" para entrenar el momento de notar — intégrala como recordatorio entre sesiones.',
+    ],
+    reference: 'Polk, K. L. & Schoendorff, B. (2014). The ACT Matrix: A New Approach to Building Psychological Flexibility. New Harbinger.',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // MBCT — Terapia Cognitiva Basada en Mindfulness
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'mbct-programa',
+    modality: 'mbct',
+    name: 'Programa MBCT de 8 semanas',
+    indication: 'Depresión recurrente (≥3 episodios) · Prevención de recaídas · Ansiedad crónica',
+    sessions: '8 sesiones grupales (2h/semana) + práctica diaria 45 min',
+    difficulty: 'Intermedio',
+    overview:
+      'Programa estructurado de 8 semanas desarrollado por Segal, Williams y Teasdale integrando el protocolo MBSR de Kabat-Zinn con elementos de TCC. Primera línea según NICE para prevención de recaídas en depresión mayor con ≥3 episodios. Reduce el riesgo de recaída en un 43–50% en esa población. Actualmente se evalúa su eficacia en ansiedad generalizada, bipolaridad en remisión y dolor crónico.',
+    indications: [
+      'Depresión mayor recurrente (≥3 episodios) en remisión — primera línea NICE',
+      'Prevención de recaídas en depresión bipolar (en estudio)',
+      'Ansiedad crónica con componente ruminativo',
+      'Estrés crónico con alto impacto en calidad de vida',
+    ],
+    contraindications: [
+      'Episodio depresivo mayor activo severo (esperar remisión)',
+      'Ideación suicida activa',
+      'TEPT con síntomas disociativos activos (primero estabilización)',
+      'Problemas graves de concentración que impidan la práctica formal',
+    ],
+    steps: [
+      {
+        title: 'Semana 1 — Conciencia y piloto automático',
+        body: 'Introducción al piloto automático: cómo funcionamos en "modo automático" la mayor parte del tiempo. Práctica central: meditación de la pasa (uva) — comer una pasa con plena atención como experiencia radical de estar presente. Body scan como práctica formal diaria (45 min). Tarea: realizar una actividad rutinaria con plena atención cada día.',
+      },
+      {
+        title: 'Semana 2 — Vivir en la cabeza',
+        body: 'Explorar cómo la mente vaga y se pierde en pensamientos sobre el pasado y el futuro. Práctica: meditación sentada de respiración consciente. Introducción al concepto de "modo hacer" (driven-doing mode, orientado a resolver problemas) vs "modo ser" (being mode, presencia sin agenda). El modo hacer aplicado a estados emocionales genera rumiación.',
+      },
+      {
+        title: 'Semana 3 — Reunir la mente dispersa',
+        body: 'La práctica de notar que la mente se fue y volver amablemente es EL ejercicio central del mindfulness — no la ausencia de pensamientos. Añade: movimiento consciente (yoga suave o movimiento mindful). Practica el espacio de respiración de 3 minutos (3-minute breathing space): observar → enfocar en la respiración → expandir la conciencia al cuerpo.',
+      },
+      {
+        title: 'Semana 4 — Reconocer la aversión',
+        body: 'Explora cómo la mente rechaza experiencias desagradables (aversión) y cómo ese rechazo amplifica el sufrimiento. Trabaja la diferencia entre dolor (inevitable) y sufrimiento (añadido por la resistencia). Práctica: meditación de dificultades — traer intencionalmente a la mente una dificultad y observar sin rechazarla. La ecuanimidad no es indiferencia.',
+      },
+      {
+        title: 'Semana 5 — Permitir y dejar ser',
+        body: 'Contrapunto a la semana anterior: si la semana 4 fue "observar sin rechazar", esta semana es "abrirse activamente a la experiencia." Diferencia entre tolerancia (aguantar) y aceptación (permitir). Practica dejar que las experiencias difíciles estén sin tratar de cambiarlas. La aceptación no es resignación — es el punto de partida para la acción sabia.',
+      },
+      {
+        title: 'Semana 6 — Los pensamientos no son hechos',
+        body: 'Núcleo cognitivo de MBCT: los pensamientos son eventos mentales, no verdades. Especialmente importante para el pensamiento depresivo ("Soy un fracasado" = pensamiento, no hecho). Integra elementos de defusión cognitiva (ACT). Práctica: observar pensamientos sin identificarse con ellos, etiquetarlos ("Noto el pensamiento de que…"). Introduce el concepto de "modo de pensar depresivo" como señal de alarma.',
+      },
+      {
+        title: 'Semana 7 — Cómo me cuido mejor a mí mismo/a',
+        body: 'Identifica actividades que nutren vs. las que drenan energía. Diseña un plan personalizado de "señales de alarma + respuesta temprana": ¿Cómo reconozco que la depresión se acerca? ¿Qué haré en cuanto la detecte? El espacio de respiración de 3 minutos como herramienta de respuesta rápida ante los primeros síntomas. Atención a los patrones de sueño, ejercicio y relaciones.',
+      },
+      {
+        title: 'Semana 8 — Usar lo que se ha aprendido para afrontar el futuro',
+        body: 'Consolidación del aprendizaje. Plan de práctica post-programa: ¿Qué prácticas continuarás? ¿Con qué frecuencia? ¿Cómo integrar mindfulness en la vida diaria sin bloques de 45 min? Carta a uno mismo/a para leer si nota que la depresión se acerca. Cierre del grupo y revisión del camino recorrido. El fin del programa es el inicio de una práctica de vida.',
+      },
+    ],
+    tips: [
+      'MBCT es más eficaz cuanto más episodios previos de depresión ha tenido el paciente — el mecanismo es la detección temprana de espirales.',
+      'La práctica formal diaria (45 min) es el predictor más potente de beneficio — sin ella el programa pierde eficacia.',
+      'El componente grupal es importante: reduce la vergüenza, normaliza las dificultades y crea comunidad de práctica.',
+      'MBCT puede ofrecerse individualmente cuando el grupo no es posible, aunque la evidencia es algo menor.',
+      'No es adecuado para pacientes en episodio agudo severo — esperar estabilización antes de iniciar.',
+      'El terapeuta MBCT debe tener práctica personal de mindfulness — la autenticidad es esencial.',
+    ],
+    reference: 'Segal, Z. V., Williams, J. M. G. & Teasdale, J. D. (2013). Mindfulness-Based Cognitive Therapy for Depression (2.ª ed.). Guilford.',
+  },
+
+  {
+    id: 'mbct-espacio-respiracion',
+    modality: 'mbct',
+    name: 'Espacio de respiración de 3 minutos',
+    indication: 'Prevención de recaídas · Estrés agudo · Señales de alarma depresivas',
+    sessions: 'Técnica de uso diario y según necesidad',
+    difficulty: 'Básico',
+    overview:
+      'Herramienta central del programa MBCT. Micro-práctica de 3 minutos con estructura de reloj de arena: de lo amplio a lo específico (respiración) y de vuelta a lo amplio (cuerpo y vida). Se usa de forma rutinaria (3 veces al día como práctica) y de forma reactiva (ante las primeras señales de un estado depresivo o ansioso). Es el puente entre la práctica formal y la vida cotidiana.',
+    indications: [
+      'Señales tempranas de espiral depresiva',
+      'Momentos de estrés o ansiedad aguda',
+      'Práctica de mantenimiento post-MBCT (3 veces al día)',
+      'Cualquier momento de piloto automático que se quiera interrumpir',
+    ],
+    steps: [
+      {
+        title: 'Paso 1 — Reconocer (1 minuto): ¿Qué está pasando ahora?',
+        body: 'Adopta una postura consciente — espalda erguida, pies en el suelo. Hazte esta pregunta: "¿Cuál es mi experiencia en este momento?" Observa sin juzgar:\n• Pensamientos: ¿Qué pensamientos están presentes? No los analices, solo nótalos.\n• Emociones: ¿Qué emociones están aquí? Nómbralas si puedes.\n• Sensaciones corporales: ¿Dónde hay tensión, incomodidad, movimiento?\nSolo reconoce. No intentes cambiar nada todavía.',
+      },
+      {
+        title: 'Paso 2 — Reunir (1 minuto): enfocar en la respiración',
+        body: 'Lleva toda la atención a la respiración. Elige un punto de anclaje: el abdomen, el pecho, las fosas nasales. Observa la sensación física de cada inhalación y exhalación. Cuando la mente se vaya (pensamientos, planes, preocupaciones), regresa suavemente a la próxima respiración. Este paso es el "cuello del reloj de arena": estrecha la conciencia al momento más presente.',
+      },
+      {
+        title: 'Paso 3 — Expandir (1 minuto): ampliar al cuerpo y al entorno',
+        body: 'Desde la respiración, expande la conciencia: primero a todo el cuerpo (¿qué sensaciones hay ahora en el cuerpo completo?), luego al entorno (sonidos, temperatura, espacio a tu alrededor). Lleva esta conciencia ampliada al siguiente momento de tu día. La pregunta al terminar: "¿Cómo quiero responder desde este lugar?"',
+      },
+      {
+        title: 'Uso rutinario: 3 veces al día',
+        body: 'Establece 3 momentos fijos del día para practicar el espacio de respiración: por ejemplo, al despertarte, antes de comer y antes de dormir. El objetivo del uso rutinario es mantener el "músculo" del mindfulness activo y desarrollar el hábito de hacer pausas conscientes antes de necesitarlas. No esperes a estar en crisis.',
+      },
+      {
+        title: 'Uso reactivo: ante las primeras señales de alarma',
+        body: 'El espacio de respiración reactivo se usa en cuanto el paciente nota señales tempranas del modo depresivo o ansioso: irritabilidad, pensamiento negativo, cansancio inusual, ganas de aislarse. Al detectar la señal: PARA → practica el espacio de 3 minutos → decide conscientemente qué hacer a continuación. Este es el mecanismo de interrupción del espiral.',
+      },
+    ],
+    tips: [
+      'El espacio de respiración NO es una técnica de relajación — es una práctica de conciencia. No busca calmar; busca ver con claridad.',
+      'Con pacientes que tienden a usar el mindfulness como evitación, enfatiza el Paso 3: el objetivo es volver a la vida, no escapar de ella.',
+      'La regularidad (3 veces al día) es más importante que la duración — 3 minutos consistentes valen más que 45 min ocasionales.',
+      'Puede integrarse en cualquier terapia, no solo MBCT — es útil en TCC, ACT, DBT y tratamiento del dolor crónico.',
+    ],
+    reference: 'Segal, Z. V., Williams, J. M. G. & Teasdale, J. D. (2013). Mindfulness-Based Cognitive Therapy for Depression (2.ª ed.). Guilford.',
+  },
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CFT — Terapia Centrada en la Compasión
+  // ═══════════════════════════════════════════════════════════════════════════
+  {
+    id: 'cft-tres-sistemas',
+    modality: 'cft',
+    name: 'El modelo de los tres sistemas de regulación emocional',
+    indication: 'Alta autocrítica · Vergüenza · Depresión · Trauma de apego',
+    sessions: '2–4 sesiones (psicoeducación y evaluación)',
+    difficulty: 'Básico-Intermedio',
+    overview:
+      'Marco conceptual central de la CFT. Paul Gilbert propone que el ser humano tiene tres sistemas de regulación emocional con bases neurobiológicas diferenciadas: el sistema de amenaza (protección), el sistema de impulso/logro (búsqueda de recursos) y el sistema de afiliación/soothing (calma y seguridad). El sufrimiento psicológico suele asociarse a un desequilibrio entre estos tres sistemas.',
+    indications: [
+      'Pacientes con alta autocrítica y vergüenza tóxica',
+      'Historial de trauma de apego o crianza invalidante',
+      'Depresión con componente de inutilidad/autoodio',
+      'Ansiedad crónica con activación del sistema de amenaza permanente',
+      'Como psicoeducación de base para cualquier trabajo de CFT',
+    ],
+    steps: [
+      {
+        title: 'Sistema 1 — Sistema de amenaza y protección',
+        body: 'Base evolutiva: detectar y responder rápidamente a amenazas para la supervivencia. Emociones asociadas: miedo, ansiedad, enojo, disgusto. Respuestas: lucha, huida, congelación, sumisión. Característica clave: es el sistema más rápido, más antiguo evolutivamente y más fácil de activar. Problema clínico: en personas con trauma o alta autocrítica, este sistema está hiperactivo de forma crónica — el "crítico interno" lo mantiene encendido constantemente.',
+      },
+      {
+        title: 'Sistema 2 — Sistema de impulso, búsqueda y logro',
+        body: 'Base evolutiva: motivar la búsqueda de recursos, logros y metas. Emociones asociadas: excitación, anticipación, deseo, ambición. Característica clave: orientado al futuro y a la consecución. Problema clínico: cuando se convierte en el único sistema activo, lleva al perfeccionismo, la búsqueda compulsiva de logros y la incapacidad de descansar. La autocrítica a menudo usa este sistema: "No has logrado suficiente, tienes que esforzarte más."',
+      },
+      {
+        title: 'Sistema 3 — Sistema de afiliación, calma y soothing',
+        body: 'Base evolutiva: el bienestar que viene del cuidado, la conexión y la seguridad en el vínculo. Emociones asociadas: calma, ternura, satisfacción, gratitud, amor. Activado por: contacto físico seguro, la presencia de figuras de apego, la autocompasión. Característica clave: es el único sistema que calma el sistema de amenaza de forma sostenida. Problema clínico: en personas con trauma de apego o crítica crónica, este sistema está subdesarrollado — la calma y la autocompasión se sienten peligrosas o inmerecidas.',
+      },
+      {
+        title: 'Evaluación del equilibrio de sistemas en el paciente',
+        body: 'Explora con el paciente qué sistema domina su vida: ¿Vive principalmente en el sistema de amenaza? (rumiación, ansiedad, autocrítica) ¿En el sistema de impulso? (hiperproductividad, incapacidad de descansar) ¿Tiene acceso al sistema de afiliación? (¿Puede sentir calma? ¿Puede recibir cuidado?). Usa el diagrama de los tres círculos — dibuja el tamaño de cada sistema en la vida actual del paciente.',
+      },
+      {
+        title: 'Psicoeducación: "Tu cerebro no es tu culpa"',
+        body: 'Uno de los mensajes más transformadores de CFT: el ser humano heredó un cerebro "nuevo" (corteza prefrontal — pensamiento, imaginación) sobre un cerebro "viejo" (sistema límbico — emociones, amenaza). El cerebro nuevo puede activar el sistema de amenaza con solo imaginar o recordar algo peligroso. "No elegiste sentir lo que sientes — tienes ese cerebro por evolución, no por debilidad." Esto reduce la vergüenza y la autocrítica sobre tener emociones difíciles.',
+      },
+      {
+        title: 'El objetivo terapéutico: fortalecer el sistema de afiliación',
+        body: 'El objetivo de CFT es activar y fortalecer el sistema de afiliación/soothing que el paciente ha tenido poco acceso. Esto se logra mediante: práctica de autocompasión, el yo compasivo, las prácticas de bondad amorosa, el trabajo con la figura compasiva, y la exploración de la memoria de figuras nutricias. La autocompasión no es autoindulgencia — es la base desde la que el cambio genuino se sostiene.',
+      },
+    ],
+    tips: [
+      '"Tu cerebro no es tu culpa" es una frase que puede cambiar la relación del paciente con sus síntomas — úsala temprano.',
+      'El diagrama de los tres círculos (dibujado en sesión) es más potente que la explicación verbal — el tamaño de cada círculo revela mucho.',
+      'Muchos pacientes con trauma de apego tienen el sistema de soothing asociado al peligro — la calma les genera ansiedad. Normaliza esto.',
+      'CFT no es solo para depresión — es especialmente poderosa en trastornos de personalidad, trastornos alimentarios y autocrítica en cualquier diagnóstico.',
+      'El terapeuta CFT modela la compasión en la propia relación terapéutica — la forma de responder al sufrimiento del paciente enseña más que cualquier técnica.',
+    ],
+    reference: 'Gilbert, P. (2010). The Compassionate Mind. Constable & Robinson.',
+  },
+
+  {
+    id: 'cft-yo-compasivo',
+    modality: 'cft',
+    name: 'El yo compasivo — Compassionate Self',
+    indication: 'Alta autocrítica · Vergüenza · Trauma · Baja autoestima crónica',
+    sessions: '4–8 sesiones (práctica central de CFT)',
+    difficulty: 'Intermedio',
+    overview:
+      'Técnica central de la CFT. El paciente desarrolla y accede a una parte de sí mismo que encarna las cualidades compasivas: sabiduría, fortaleza, calidez y no-juicio. A diferencia de la autocompasión de Neff (que trabaja más el mindfulness), el yo compasivo es una práctica experiencial de identificación con una identidad alternativa que el paciente cultiva progresivamente.',
+    indications: [
+      'Autocrítica severa y vergüenza tóxica',
+      'Trauma con dificultad para el auto-cuidado',
+      'Baja autoestima arraigada en el carácter ("soy así")',
+      'Trabajo con la voz del crítico interno',
+      'Como herramienta de regulación emocional en crisis',
+    ],
+    steps: [
+      {
+        title: 'Introducir las cualidades del yo compasivo',
+        body: 'El yo compasivo tiene cuatro características esenciales:\n1. Sabiduría: comprende el sufrimiento humano, la impermanencia y las causas del malestar.\n2. Fortaleza: puede tolerar el dolor sin huir de él. No es frágil — es firme.\n3. Calidez: genuino interés en el bienestar del otro (y de uno mismo).\n4. No-juicio: observa sin condenar, con curiosidad en lugar de crítica.\n\nEstas cualidades existen en el paciente — el objetivo es acceder a ellas, no crearlas desde cero.',
+      },
+      {
+        title: 'Práctica de expresión corporal y postura compasiva',
+        body: 'La postura activa el estado interno. Pide al paciente que:\n• Se siente erguido/a, con una ligera apertura del pecho.\n• Relaje el rostro — suavice la mandíbula y el ceño.\n• Adopte una expresión facial ligeramente cálida (como la que tendrías al ver a alguien querido).\n• Respire lentamente desde el abdomen.\n\nObserva: ¿Cómo se siente diferente este cuerpo de cuando está en modo crítico o en modo amenaza?',
+      },
+      {
+        title: 'Visualización: acceder al yo compasivo',
+        body: 'Con los ojos cerrados y la postura compasiva activada:\n"Imagina la versión de ti mismo/a que encarna toda la sabiduría, la fortaleza y la calidez que has desarrollado. Esta versión ha vivido mucho, entiende el sufrimiento, y nada de lo que le cuentes le asustará ni le dará la razón al crítico interno. Tómate un momento para visualizarla — ¿cómo es? ¿Qué postura tiene? ¿Qué expresión?"\nNo es un personaje perfecto — es tú en tu mejor versión.',
+      },
+      {
+        title: 'Diálogo entre el yo compasivo y el crítico interno',
+        body: 'Una vez activo el yo compasivo, trabaja el crítico interno mediante silla vacía o escritura:\n\n1. El crítico habla: ¿Qué dice el crítico interno sobre este problema/situación?\n2. El yo compasivo responde: ¿Qué diría el yo compasivo? No argumenta ni ataca al crítico — lo comprende y lo cuida. El crítico intentaba proteger, aunque de forma dañina.\n\nEjemplo:\nCrítico: "Eres un fracasado, nunca lo conseguirás."\nYo compasivo: "Veo que estás muy asustado/a de que no salga bien. Eso tiene sentido dado lo que has vivido. Y sin embargo, hemos superado cosas difíciles antes..."',
+      },
+      {
+        title: 'Carta desde el yo compasivo',
+        body: 'Tarea entre sesiones: escribir una carta a uno mismo/a desde el yo compasivo sobre la situación que más malestar genera actualmente.\n\nLa carta debe:\n• Reconocer el dolor sin minimizarlo.\n• Entender las causas (historia, biología, circunstancias) sin culpar.\n• Ofrecer calidez, no consejos.\n• Recordar fortalezas y recursos reales.\n• Terminar con una intención compasiva para los próximos días.\n\nLeer la carta en voz alta y notar qué resuena y qué genera resistencia.',
+      },
+      {
+        title: 'Generalización: acceder al yo compasivo en situaciones difíciles',
+        body: 'Con práctica, el paciente puede acceder al yo compasivo en momentos de activación emocional:\n• La postura compasiva como señal de acceso rápido.\n• La pregunta "¿Qué diría mi yo compasivo ahora?" como interrupción del crítico.\n• El espacio de respiración seguido de la visualización breve (30 segundos).\n\nEl objetivo final: que el yo compasivo se convierta en el "narrador" interno habitual, desplazando progresivamente al crítico como voz dominante.',
+      },
+    ],
+    tips: [
+      'Muchos pacientes con alta vergüenza tienen miedo de la compasión — "No me la merezco" o "Si me cuido, me volveré débil." Normaliza este miedo y explora su origen antes de continuar.',
+      'El crítico interno intentaba proteger — no es el enemigo. Validar su función facilita que el paciente no lo rechace (lo cual lo fortalece) sino que lo transforme.',
+      'La práctica corporal (postura, respiración) es tan importante como la cognitiva — empieza por ahí en cada sesión.',
+      'Para pacientes con trauma de apego severo, el yo compasivo puede activar el sistema de amenaza al principio — ir muy despacio y con mucha validación.',
+      'El terapeuta encarna el yo compasivo en la relación terapéutica — la forma de responder modela lo que el paciente necesita internalizarse.',
+    ],
+    reference: 'Gilbert, P. (2014). The origins and nature of compassion focused therapy. British Journal of Clinical Psychology, 53(1), 6–41.',
   },
 
   {
