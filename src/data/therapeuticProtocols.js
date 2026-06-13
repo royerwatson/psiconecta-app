@@ -710,6 +710,51 @@ export const PROTOCOLS = [
   },
 
   {
+    id: 'emdr-fase1',
+    modality: 'emdr',
+    name: 'Fase 1 EMDR — Historia clínica y planificación',
+    indication: 'TEPT · Todo paciente EMDR antes de iniciar',
+    sessions: '1–3 sesiones',
+    difficulty: 'Avanzado — Requiere certificación',
+    overview:
+      'Primera fase del protocolo estándar EMDR. Consiste en la evaluación exhaustiva de la historia traumática y la planificación del tratamiento. Incluye la identificación de memorias diana organizadas en redes de memoria, la evaluación de la capacidad de regulación emocional y la definición del orden de abordaje: pasado → presente → futuro.',
+    indications: ['Todo inicio de tratamiento EMDR', 'Evaluación de la historia traumática completa', 'Planificación del orden de targets'],
+    steps: [
+      {
+        title: 'Recogida de historia traumática completa',
+        body: 'Identifica todos los eventos potencialmente traumáticos utilizando una línea de tiempo. Incluye traumas de shock (eventos únicos) y traumas de desarrollo (negligencia, abuso crónico, pérdidas tempranas). Usa el cuestionario de vida adversa o el LEC-5 como guía sistemática.',
+      },
+      {
+        title: 'Identificación de redes de memoria',
+        body: 'Agrupa los eventos traumáticos en redes de memoria que comparten cogniciones negativas nucleares similares (ej. "No soy valioso/a", "El mundo es peligroso"). Una red bien identificada permite un tratamiento más eficiente — procesar el nodo más antiguo puede generalizar a recuerdos posteriores.',
+      },
+      {
+        title: 'Selección y priorización de memorias diana (targets)',
+        body: 'Establece el orden de procesamiento. Regla general: trabajar primero el evento más antiguo de la red (el que "instaló" la CN). Para casos con riesgo activo, priorizar el evento más perturbador. Usa el protocolo de tres vías: pasado (memorias) → presente (disparadores actuales) → futuro (plantilla de recursos).',
+      },
+      {
+        title: 'Evaluación de la ventana de tolerancia y recursos de regulación',
+        body: 'Evalúa la capacidad del paciente para activarse emocionalmente sin disociarse ni hiperactivarse. Determina si necesita trabajo de estabilización previo (Fase 2 extendida). Identifica qué recursos internos y externos tiene disponibles.',
+      },
+      {
+        title: 'Evaluación de factores contraindicados y adaptaciones necesarias',
+        body: 'Descarta o adapta el protocolo ante: disociación severa (usa protocolo bifásico), epilepsia fotosensible (sustituye movimientos oculares por tapping o tonos alternantes), embarazo, o ausencia de red de apoyo para contener entre sesiones. Documenta las adaptaciones en el plan de tratamiento.',
+      },
+      {
+        title: 'Presentación del plan de tratamiento al paciente',
+        body: 'Explica al paciente la estructura del tratamiento EMDR, el número estimado de sesiones y el orden de abordaje de las memorias. El consentimiento informado debe incluir que el procesamiento puede continuar entre sesiones. Inicia la psicoeducación básica sobre el modelo AIP (preparar para Fase 2).',
+      },
+    ],
+    tips: [
+      'Una historia clínica incompleta lleva a un tratamiento incompleto — dedica el tiempo que haga falta a esta fase.',
+      'El mapa de redes de memoria es un documento vivo que se actualiza durante todo el tratamiento.',
+      'En trauma complejo, esta fase puede durar varias sesiones — es una inversión que protege al paciente.',
+      'Documenta los targets identificados y el SUD estimado de cada uno para monitorizar el progreso.',
+    ],
+    reference: 'Shapiro, F. (2018). Eye Movement Desensitization and Reprocessing (EMDR) Therapy (3.ª ed.). Guilford.',
+  },
+
+  {
     id: 'emdr-preparacion',
     modality: 'emdr',
     name: 'Fase 2 EMDR — Preparación y estabilización',
@@ -752,6 +797,272 @@ export const PROTOCOLS = [
       'En trauma de apego, el Lugar seguro puede ser difícil porque el paciente nunca tuvo uno real — usa el Lugar tranquilo en su lugar.',
     ],
     reference: 'Korn, D. L. & Leeds, A. M. (2002). Preliminary evidence of efficacy for EMDR resource development and installation. Journal of Clinical Psychology.',
+  },
+
+  {
+    id: 'emdr-fase3',
+    modality: 'emdr',
+    name: 'Fase 3 EMDR — Evaluación de la memoria diana',
+    indication: 'TEPT · Evaluación previa a cada sesión de desensibilización',
+    sessions: '20–30 minutos (dentro de la sesión)',
+    difficulty: 'Avanzado — Requiere certificación',
+    overview:
+      'Tercera fase del protocolo EMDR. Antes de iniciar la estimulación bilateral, el terapeuta estructura la memoria diana activando todos sus componentes: imagen representativa, cognición negativa, cognición positiva deseada, emoción, SUD y localización corporal. Esta activación estructurada es lo que permite al sistema nervioso comenzar el reprocesamiento.',
+    indications: ['Inicio de cada sesión de desensibilización EMDR', 'Evaluación del target seleccionado en Fase 1'],
+    steps: [
+      {
+        title: 'Identificar la imagen representativa',
+        body: '"Cuando piensas en [el evento traumático], ¿qué imagen representa el peor momento?" La imagen debe ser específica — no toda la escena, sino el fotograma más perturbador. Si no hay imagen visual, usa el peor pensamiento, sensación o emoción del momento.',
+      },
+      {
+        title: 'Elicitar la Cognición Negativa (CN)',
+        body: '"Cuando traes esa imagen a la mente ahora, ¿qué palabras que comiencen con «Yo soy / Yo no soy / Yo no puedo / Yo debería / Yo no debería» encajan mejor?" La CN debe ser en primera persona, en tiempo presente, y capturar la creencia disfuncional sobre uno mismo. Ejemplos: "Soy impotente", "Estoy en peligro", "Soy responsable".',
+      },
+      {
+        title: 'Elicitar la Cognición Positiva (CP)',
+        body: '"¿Qué te gustaría creer sobre ti mismo/a cuando piensas en esa imagen?" La CP debe ser lo opuesto funcional de la CN, en primera persona, presente y afirmativa. Ejemplos de CN→CP: "Soy impotente" → "Tengo control"; "Estoy en peligro" → "Estoy a salvo ahora". La CP no necesita sentirse verdadera aún.',
+      },
+      {
+        title: 'Medir la Validez de la Cognición (VoC)',
+        body: '"Con esa imagen en mente, ¿cuánto te parecen verdaderas ahora esas palabras [CP] de 1 (completamente falso) a 7 (completamente verdadero)?" El VoC típico al inicio suele ser 1–3. No corrijas una VoC baja — es la línea base para medir el progreso al instalar la CP en Fase 5.',
+      },
+      {
+        title: 'Identificar y medir la emoción',
+        body: '"Cuando traes esa imagen y piensas [CN], ¿qué emoción o emociones sientes AHORA?" Nombra la emoción principal (miedo, vergüenza, asco, tristeza, rabia…). Si el paciente describe un pensamiento en lugar de una emoción, orienta: "¿Y eso qué emoción te provoca?"',
+      },
+      {
+        title: 'Medir el SUD (Unidades Subjetivas de Perturbación)',
+        body: '"En una escala del 0 al 10, donde 0 es neutro y 10 es la perturbación más intensa que puedas imaginar, ¿cuánto te perturba AHORA esa imagen?" El SUD mide la intensidad emocional en el momento presente, no en el pasado. Algunos pacientes reportan SUD muy alto (8–10) — es una indicación de lo que hay que procesar.',
+      },
+      {
+        title: 'Localizar la sensación corporal',
+        body: '"¿Dónde lo sientes en tu cuerpo?" Señala o describe la zona física donde el paciente siente la perturbación (nudo en el estómago, presión en el pecho, tensión en los hombros…). Esta información se usará en la Fase 6 (escaneo corporal) y ayuda a identificar canales somáticos durante el procesamiento.',
+      },
+    ],
+    tips: [
+      'La Fase 3 no es una entrevista — es una activación estructurada. Usa exactamente el guion para no contaminar el procesamiento.',
+      'Si el paciente no puede identificar una CN, usa la técnica de la flecha descendente: "¿Qué significa ese evento para ti como persona?"',
+      'Una CP que el paciente no pueda imaginar creer nunca (VoC = 1) a veces indica una creencia nuclear muy arraigada — trabaja el recurso de CP en preparación antes de desensibilizar.',
+      'Si el SUD es 0 espontáneamente, verifica si hay disociación — el paciente puede haber "desconectado" del material.',
+    ],
+    reference: 'Shapiro, F. (2018). Eye Movement Desensitization and Reprocessing (EMDR) Therapy (3.ª ed.). Guilford.',
+  },
+
+  {
+    id: 'emdr-fase4',
+    modality: 'emdr',
+    name: 'Fase 4 EMDR — Desensibilización',
+    indication: 'TEPT · Núcleo del reprocesamiento traumático',
+    sessions: '45–90 minutos (variable)',
+    difficulty: 'Avanzado — Requiere certificación',
+    overview:
+      'Fase central del protocolo EMDR. El terapeuta aplica estimulación bilateral (EB) — movimientos oculares, tapping bilateral o tonos alternantes — mientras el paciente mantiene la atención dual sobre la memoria diana y el presente. El objetivo es reducir el SUD a 0 (o 1 si es ecológico) permitiendo que la memoria se integre adaptativamente.',
+    indications: ['Memorias traumáticas activas (SUD ≥ 1)', 'Fobias con origen traumático', 'Tras completar Fase 2 y 3 correctamente'],
+    contraindications: [
+      'Disociación severa en la sesión — estabilizar primero con Lugar seguro',
+      'SUD = 0 sin correlato corporal (posible disociación)',
+    ],
+    steps: [
+      {
+        title: 'Activar la memoria diana y comenzar la EB',
+        body: 'Pide al paciente que traiga a la mente la imagen, la CN, la emoción y la sensación corporal identificadas en Fase 3. Inicia la EB: "Sigue el movimiento de mis dedos" (o tapping en rodillas/manos, o auriculares con tonos alternantes). Series de 20–30 movimientos (o 30–45 segundos de tapping/tonos). Velocidad: aproximadamente 1 movimiento por segundo.',
+      },
+      {
+        title: 'Instrucción al paciente durante la EB',
+        body: 'Antes de empezar: "Voy a pedirte que notes lo que venga — pensamientos, imágenes, sensaciones, emociones. Solo observa sin juzgar. No hay respuestas correctas o incorrectas. Al terminar cada serie, te diré «Respira» y me dices brevemente qué notaste." NO guíes el contenido del procesamiento.',
+      },
+      {
+        title: 'Procesamiento: seguir los canales',
+        body: 'Después de cada serie: "Respira. ¿Qué notas ahora?" El terapeuta escucha sin interpretar y aplica una nueva serie sobre lo que emerge. Si el material evoluciona (cambia la imagen, emoción o cognición), es señal de procesamiento activo — continúa sin intervenir. Registra mentalmente la dirección del canal.',
+      },
+      {
+        title: 'Manejo de canales bloqueados (loops)',
+        body: 'Si el paciente reporta exactamente lo mismo durante 3+ series consecutivas, está en un loop. Intervenciones: (a) Cambiar la dirección de los movimientos oculares o el tipo de EB; (b) Cambiar el foco: "¿Qué parte del cuerpo sientes más ahora?"; (c) Entretejido cognitivo: una pregunta socrática que abre el procesamiento ("¿Qué le dirías a un amigo en esa situación?"); (d) Retarget: volver a la imagen original.',
+      },
+      {
+        title: 'Manejo de activación elevada o disociación',
+        body: 'Si el paciente sale de la ventana de tolerancia (hiperactivación: llanto intenso, temblor, flashback; o hipoactivación: voz monótona, mirada perdida, respuesta lenta): Para la EB. Usa técnica de grounding: "Mírame. Estás aquí. Siente los pies en el suelo. Respira conmigo." Regresa al procesamiento solo cuando el paciente esté dentro de la ventana.',
+      },
+      {
+        title: 'Verificar el SUD al final de la sesión',
+        body: '"Cuando vuelves a la imagen original (el [evento]) y traes CN, ¿cuánto te perturba ahora del 0 al 10?" Si SUD = 0 o 1, pasa a Fase 5. Si SUD > 1 y la sesión termina, usa el Contenedor (Fase 2) para guardar el material y procede al cierre (Fase 7). NO cierres una sesión con material activo sin estabilizar.',
+      },
+    ],
+    tips: [
+      'El terapeuta es el "contenedor" — tu presencia tranquila y regulada permite que el paciente se active sin desbordarse.',
+      'No interpretes ni valides el contenido emergente — cualquier intervención verbal puede desviar el procesamiento natural.',
+      'Las series largas (60+ movimientos) no son necesariamente mejores — ajusta la longitud a lo que indica el procesamiento.',
+      'Si el paciente no recuerda bien la imagen original al volver a verificar el SUD, puede ser señal de integración (buen signo).',
+    ],
+    reference: 'Shapiro, F. (2018). Eye Movement Desensitization and Reprocessing (EMDR) Therapy (3.ª ed.). Guilford.',
+  },
+
+  {
+    id: 'emdr-fase5',
+    modality: 'emdr',
+    name: 'Fase 5 EMDR — Instalación de la cognición positiva',
+    indication: 'TEPT · Tras desensibilización completada (SUD = 0–1)',
+    sessions: '10–20 minutos (dentro de la sesión)',
+    difficulty: 'Avanzado — Requiere certificación',
+    overview:
+      'Quinta fase del protocolo EMDR. Una vez que el SUD ha llegado a 0 o 1, se vincula la cognición positiva (CP) a la imagen original para fortalecer la integración adaptativa. Se usa estimulación bilateral para instalar la CP hasta alcanzar un VoC de 7 (o el máximo ecológico posible).',
+    indications: ['SUD = 0–1 tras la desensibilización (Fase 4)', 'Fortalecimiento de la creencia adaptativa'],
+    steps: [
+      {
+        title: 'Verificar o ajustar la cognición positiva',
+        body: '"Cuando piensas en el evento original, ¿aún te parecen adecuadas las palabras [CP]? ¿O hay algo más apropiado que quieras creer?" Es normal que la CP evolucione durante el procesamiento — a veces emerge una CP más matizada y profunda. Si el paciente sugiere una nueva CP más apropiada, úsala.',
+      },
+      {
+        title: 'Vincular imagen y CP',
+        body: '"Trae la imagen original a la mente y repite mentalmente [CP]. ¿Cuánto te parecen verdaderas esas palabras ahora, de 1 a 7 (VoC)?" Si el VoC está entre 5 y 7, procede a instalar. Si es menor, puede haber material residual — considera retarget o nuevo procesamiento antes de instalar.',
+      },
+      {
+        title: 'Aplicar EB para instalar la CP',
+        body: '"Piensa en el evento y en las palabras [CP] a la vez, y sigue mi dedo." Aplica EB. Después de cada serie: "¿Cuánto te parecen verdaderas ahora?" Continúa hasta VoC = 7 o el máximo ecológico. Típicamente requiere 2–4 series de EB.',
+      },
+      {
+        title: 'Gestionar si VoC no llega a 7',
+        body: 'Si el VoC se estanca por debajo de 7 (ej. se queda en 5–6), pregunta: "¿Qué impide que llegue a un 7?" Si hay una razón ecológica ("No siempre tengo control — la vida tiene imprevistos"), acepta el VoC ecológico. Si hay material bloqueador, vuelve a desensibilizar ese material antes de continuar con la instalación.',
+      },
+      {
+        title: 'No instalar una CP con VoC ≤ 3',
+        body: 'Si el VoC sigue muy bajo después de que el SUD llegó a 0, hay material no procesado. No fuerces la instalación — la EB sobre una CP que el paciente no puede creer puede crear confusión. Vuelve a Fase 4 con el material bloqueador identificado.',
+      },
+    ],
+    tips: [
+      'La instalación no es "pensar positivo" — es la consolidación de un cambio cognitivo real que ya ocurrió en el procesamiento.',
+      'Un VoC de 6 ecológico es exitoso en muchos casos — el objetivo es la creencia funcional, no la perfección.',
+      'Si la CP evoluciona durante la instalación hacia algo más profundo, sigue esa dirección — es señal de integración genuina.',
+      'En trauma complejo, el VoC puede tardar varias sesiones en llegar a 7 — es normal y esperable.',
+    ],
+    reference: 'Shapiro, F. (2018). Eye Movement Desensitization and Reprocessing (EMDR) Therapy (3.ª ed.). Guilford.',
+  },
+
+  {
+    id: 'emdr-fase6',
+    modality: 'emdr',
+    name: 'Fase 6 EMDR — Escaneo corporal',
+    indication: 'TEPT · Verificación de canales somáticos residuales',
+    sessions: '5–15 minutos (dentro de la sesión)',
+    difficulty: 'Avanzado — Requiere certificación',
+    overview:
+      'Sexta fase del protocolo EMDR. Tras instalar la CP (Fase 5), el paciente hace un recorrido mental de todo el cuerpo mientras mantiene en mente la imagen original y la CP. Cualquier tensión, incomodidad o sensación residual indica un canal somático no procesado que requiere EB adicional.',
+    indications: ['Tras instalación exitosa de la CP (Fase 5)', 'Verificación de resolución somática completa'],
+    steps: [
+      {
+        title: 'Activar imagen original + CP antes del escaneo',
+        body: '"Cierra los ojos. Trae a la mente la imagen del evento [target] y repite mentalmente [CP]. Ahora vas a hacer un recorrido por tu cuerpo, de la cabeza hasta los pies. Dime si notas alguna tensión, incomodidad, sensación inusual, o también si sientes algo positivo."',
+      },
+      {
+        title: 'Guiar el escaneo sistemático',
+        body: 'Guía lentamente: cabeza → cuello y hombros → pecho → brazos y manos → estómago y abdomen → espalda → caderas y pelvis → piernas y pies. Permite suficiente tiempo en cada zona para que el paciente reporte honestamente.',
+      },
+      {
+        title: 'Procesar sensaciones residuales con EB',
+        body: 'Si el paciente reporta cualquier tensión, presión, dolor, hormigueo o incomodidad: "Nótalo." Aplica EB sobre esa sensación corporal hasta que desaparezca o se convierta en neutra. Repite el escaneo hasta que el cuerpo quede limpio.',
+      },
+      {
+        title: 'Registrar sensaciones positivas con EB',
+        body: 'Si el paciente reporta sensaciones positivas (ligereza, calidez, expansión, relajación): "Nótalo." Aplica una serie de EB corta para reforzar y consolidar esa experiencia positiva.',
+      },
+      {
+        title: 'Escaneo limpio: criterio de completitud',
+        body: 'El escaneo corporal se considera completo cuando el recorrido completo produce solo sensaciones neutras o positivas, sin incomodidad residual. Este es el criterio de "sesión completa" junto con SUD = 0 y VoC = 7. Documenta el resultado.',
+      },
+    ],
+    tips: [
+      'El escaneo corporal a veces revela material que la mente "había resuelto" pero el cuerpo sigue reteniendo — tómalo en serio.',
+      'Las sensaciones físicas persistentes (dolor, tensión crónica) pueden ser canales somáticos de memorias no procesadas.',
+      'Si el escaneo revela mucho material, puede ser necesaria otra sesión completa de desensibilización antes de cerrar.',
+      'Algunas tradiciones somáticas (Somatic Experiencing, sensorimotor) complementan muy bien la Fase 6 del EMDR.',
+    ],
+    reference: 'Shapiro, F. (2018). Eye Movement Desensitization and Reprocessing (EMDR) Therapy (3.ª ed.). Guilford.',
+  },
+
+  {
+    id: 'emdr-fase7',
+    modality: 'emdr',
+    name: 'Fase 7 EMDR — Cierre de sesión',
+    indication: 'TEPT · Al final de cada sesión EMDR (completa o incompleta)',
+    sessions: '5–10 minutos (al final de cada sesión)',
+    difficulty: 'Intermedio-Avanzado',
+    overview:
+      'Séptima fase del protocolo EMDR. Se aplica al final de TODA sesión de procesamiento, tanto si se completó (SUD = 0, VoC = 7, escaneo limpio) como si quedó incompleta. El objetivo es que el paciente salga de la sesión estabilizado, con recursos para manejar el material que puede emerger entre sesiones.',
+    indications: ['Final de toda sesión EMDR', 'Sesión incompleta (SUD > 1 al cierre)', 'Sesión completa (como consolidación)'],
+    steps: [
+      {
+        title: 'Técnica del Contenedor (sesiones incompletas)',
+        body: 'Cuando la sesión termina con material activo (SUD > 1): "Imagina que tomas todo el material que hemos trabajado hoy — imágenes, pensamientos, emociones — y lo colocas en tu Contenedor [descripción del Contenedor del paciente]. Ciérralo con llave. Estará ahí cuando volvamos, pero contenido y seguro." Aplica EB breve para reforzar el Contenedor.',
+      },
+      {
+        title: 'Lugar seguro o Lugar tranquilo (si hay activación residual)',
+        body: 'Si el paciente sigue activado tras el Contenedor: "Lleva tu atención a tu Lugar [seguro/tranquilo]. Nota las imágenes, sonidos, sensaciones de ese lugar. Respira." Aplica EB breve de instalación del recurso. El objetivo es que el paciente salga de la sesión dentro de la ventana de tolerancia.',
+      },
+      {
+        title: 'Psicoeducación sobre procesamiento entre sesiones',
+        body: 'SIEMPRE al finalizar: "El procesamiento puede continuar entre sesiones — pueden aparecer recuerdos, sueños vívidos, emociones o sensaciones inesperadas. Esto es normal y señal de que tu sistema nervioso sigue trabajando. Si ocurre, observa sin juzgar y anota lo que surja para traerlo a la próxima sesión."',
+      },
+      {
+        title: 'Diary card o registro de seguimiento',
+        body: 'Proporciona al paciente una hoja de registro para anotar: qué material emerge entre sesiones (imágenes, pensamientos, sueños, emociones, sensaciones), el SUD aproximado, y cuándo ocurre. Este registro informa la Fase 8 (reevaluación) de la siguiente sesión.',
+      },
+      {
+        title: 'Verificar estado antes de que el paciente se vaya',
+        body: 'Antes de terminar: "¿Cómo te encuentras ahora? ¿Estás listo/a para irte?" El paciente debe salir orientado, regulado y no disociado. Si hay activación significativa, extiende la estabilización. NUNCA permitas que un paciente disociado o muy activado abandone la consulta.',
+      },
+    ],
+    tips: [
+      'Un cierre incompleto bien ejecutado es más valioso que un procesamiento incompleto mal cerrado — la estabilización protege al paciente.',
+      'La psicoeducación sobre procesamiento entre sesiones reduce la alarma del paciente si emergen síntomas inesperados.',
+      'El Contenedor no es represión — es organización temporal del material para procesarlo con seguridad en la siguiente sesión.',
+      'Considera la disponibilidad del terapeuta para contacto breve entre sesiones si el material es muy intenso (similar al coaching DBT).',
+    ],
+    reference: 'Shapiro, F. (2018). Eye Movement Desensitization and Reprocessing (EMDR) Therapy (3.ª ed.). Guilford.',
+  },
+
+  {
+    id: 'emdr-fase8',
+    modality: 'emdr',
+    name: 'Fase 8 EMDR — Reevaluación',
+    indication: 'TEPT · Inicio de cada nueva sesión de procesamiento',
+    sessions: '5–15 minutos (inicio de cada sesión)',
+    difficulty: 'Avanzado — Requiere certificación',
+    overview:
+      'Octava y última fase del protocolo estándar EMDR. Se aplica al INICIO de cada nueva sesión de tratamiento para verificar el mantenimiento de los avances de la sesión anterior, explorar el material emergido entre sesiones y determinar el próximo target. Es el puente entre las sesiones y garantiza la fidelidad al protocolo.',
+    indications: ['Inicio de toda sesión EMDR posterior a la primera', 'Monitoreo del progreso del tratamiento'],
+    steps: [
+      {
+        title: 'Verificar el target procesado en la sesión anterior',
+        body: '"La semana pasada trabajamos en [descripción del evento]. Cuando traes esa imagen a la mente ahora, ¿cuánto te perturba del 0 al 10?" Si el SUD se mantiene en 0–1, el procesamiento fue completo y estable. Si el SUD subió respecto al cierre (ej. era 0 y ahora es 3), hay material residual — vuelve a Fase 3 y reprocesa.',
+      },
+      {
+        title: 'Explorar el material emergido entre sesiones',
+        body: 'Revisa el diary card del paciente: "¿Qué apareció esta semana? ¿Sueños, recuerdos, emociones, sensaciones?" El material emergido entre sesiones es información clínica valiosa — puede indicar nuevas redes de memoria activadas, la dirección del procesamiento o material que necesita ser target directo.',
+      },
+      {
+        title: 'Evaluar si hay targets incompletos de la sesión anterior',
+        body: 'Si la sesión anterior cerró con SUD > 1 (sesión incompleta): verifica el SUD actual del mismo target. Si el procesamiento continuó entre sesiones (SUD bajó espontáneamente), es una buena señal — continúa desde donde quedó. Si el SUD aumentó, evalúa si hay un factor de vulnerabilidad o un bloqueo.',
+      },
+      {
+        title: 'Seleccionar el target de la sesión actual',
+        body: 'Decisión: (a) Si hay target incompleto → continúa ese mismo target. (b) Si el target anterior se completó → pasa al siguiente target del plan de tratamiento (Fase 1). (c) Si emergió material nuevo urgente → evalúa si desplaza al target planificado. Consulta con el paciente y justifica la decisión.',
+      },
+      {
+        title: 'Actualizar el mapa de redes de memoria',
+        body: 'Registra el progreso: qué targets completados, qué SUD residual, qué material emergió. El mapa evoluciona — algunos targets se resuelven en cascada (procesar uno puede generalizar a varios relacionados). Ajusta el plan de tratamiento si es necesario.',
+      },
+      {
+        title: 'Proceder a Fase 3 con el nuevo target',
+        body: 'Una vez identificado el target de la sesión: pasa a Fase 3 (evaluación) con ese target específico. Si el target ya fue parcialmente evaluado en sesión anterior, verifica que los elementos (imagen, CN, CP, VoC, emoción, SUD, localización corporal) sigan siendo los mismos o actualízalos.',
+      },
+    ],
+    tips: [
+      'La Fase 8 evita perder el trabajo de sesiones anteriores — siempre verifica el SUD del target previo antes de avanzar.',
+      'El material emergido entre sesiones a veces es más importante que el target planificado — mantén flexibilidad.',
+      'Un SUD que sube entre sesiones no indica "fracaso" — puede señalar una red de memoria más profunda activada.',
+      'La Fase 8 es también el momento de evaluar el estado general del paciente y cualquier crisis entre sesiones antes de iniciar el procesamiento.',
+    ],
+    reference: 'Shapiro, F. (2018). Eye Movement Desensitization and Reprocessing (EMDR) Therapy (3.ª ed.). Guilford.',
   },
 ]
 

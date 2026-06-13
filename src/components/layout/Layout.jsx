@@ -273,7 +273,7 @@ export default function Layout() {
               onClick={() => navigate(role === 'therapist' ? '/therapist/profile' : '/patient/profile')}
               className="hidden sm:flex items-center gap-2 pl-2 hover:opacity-80 transition-opacity"
             >
-              <Avatar name={profile?.full_name ?? ''} size="sm" />
+              <Avatar name={profile?.full_name ?? ''} src={profile?.avatar_url} size="sm" />
               <div className="text-left hidden md:block">
                 <p className="text-sm font-semibold text-warm-800 leading-none">
                   {profile?.full_name?.split(' ')[0] ?? 'Usuario'}

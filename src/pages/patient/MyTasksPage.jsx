@@ -243,14 +243,24 @@ export default function MyTasksPage() {
       .from('patient_tasks')
       .select(`
         *,
-        therapist:profiles!patient_tasks_therapist_id_fkey(id, full_name, avatar_url)
+        therapist:profiles!therapist_id(id, full_name, avatar_url)
       `)
       .eq('patient_id', user.id)
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error(error)
-      toast.error('No se pudieron cargar las tareas')
+      console.error('[tasks] fetch error:', error)
+      // Si el join falla intentamos sin el join de terapeuta
+      const { data: fallback, error: fallbackError } = await supabase
+        .from('patient_tasks')
+        .select('*')
+        .eq('patient_id', user.id)
+        .order('created_at', { ascending: false })
+      if (fallbackError) {
+        toast.error('No se pudieron cargar las tareas')
+      } else {
+        setTasks(fallback ?? [])
+      }
     } else {
       setTasks(data ?? [])
     }

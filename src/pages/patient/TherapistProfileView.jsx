@@ -50,6 +50,13 @@ export default function TherapistProfileView() {
 
   useEffect(() => { fetchTherapist() }, [therapistId])
 
+  // Si el terapeuta desactiva urgentes y hoy estaba seleccionado, limpiar la fecha
+  useEffect(() => {
+    if (!therapist?.available_urgent && bookForm.date === todayStr) {
+      setBookForm({ date: '', time: '' })
+    }
+  }, [therapist?.available_urgent])
+
   const fetchTherapist = async () => {
     setLoading(true)
     const [{ data: t }, { data: r }] = await Promise.all([
@@ -78,9 +85,9 @@ export default function TherapistProfileView() {
 
   const isToday = bookForm.date === todayStr
 
-  // Hora mínima cuando el paciente selecciona hoy: ahora + 1h redondeado al siguiente cuarto
+  // Hora mínima cuando el paciente selecciona hoy: ahora + 2h redondeado al siguiente cuarto
   const getMinTime = () => {
-    const minDt = new Date(Date.now() + 60 * 60 * 1000)
+    const minDt = new Date(Date.now() + 2 * 60 * 60 * 1000)
     const h = minDt.getHours()
     const m = minDt.getMinutes()
     const roundedM = Math.ceil(m / 15) * 15
@@ -106,7 +113,7 @@ export default function TherapistProfileView() {
     if (isToday) {
       const minT = getMinTime()
       if (bookForm.time < minT) {
-        toast.error(`La hora mínima para citas urgentes es ${minT} (1 hora desde ahora)`)
+        toast.error(`La hora mínima para citas urgentes es ${minT} (2 horas desde ahora)`)
         return
       }
       if (bookForm.time > '23:00') {
@@ -319,7 +326,7 @@ export default function TherapistProfileView() {
               {therapist?.available_urgent && (
                 <div className="flex items-center gap-2 text-xs bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5 text-orange-700">
                   <Zap size={13} strokeWidth={1.8} className="shrink-0" />
-                  Este terapeuta acepta citas urgentes para hoy — disponibles desde 1 hora a partir de ahora hasta las 23:00 (+30% precio)
+                  Este terapeuta acepta citas urgentes para hoy — disponibles desde 2 horas a partir de ahora hasta las 23:00 (+30% precio)
                 </div>
               )}
 

@@ -167,11 +167,18 @@ export default function TherapistProfile() {
     if (file.size > maxSize) { toast.error('El archivo no puede superar 10 MB'); return }
 
     setUploadingDoc(docType)
-    const ext  = file.name.split('.').pop()
-    const path = `credentials/${user.id}/${docType}-${Date.now()}.${ext}`
+    const ext  = file.name.split('.').pop().toLowerCase()
+    const path = `${user.id}/${docType}-${Date.now()}.${ext}`
 
-    const { error: uploadError } = await supabase.storage.from('credentials').upload(path, file)
-    if (uploadError) { toast.error('Error subiendo el documento'); setUploadingDoc(null); return }
+    const { error: uploadError } = await supabase.storage
+      .from('credentials')
+      .upload(path, file, { contentType: file.type, upsert: false })
+    if (uploadError) {
+      console.error('[credentials] upload error:', uploadError)
+      toast.error('Error subiendo el documento. Verifica que el archivo sea PDF, JPG o PNG.')
+      setUploadingDoc(null)
+      return
+    }
 
     const { error: dbError } = await supabase.from('therapist_credentials').insert({
       therapist_id:  user.id,
