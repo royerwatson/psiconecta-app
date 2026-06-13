@@ -83,7 +83,7 @@ export default function AdminDashboard() {
       { count: pendingDeletions },
     ] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }).in('role', ['patient', 'client']),
-      supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'therapist'),
+      supabase.from('therapist_profiles').select('*', { count: 'exact', head: true }),
       supabase.from('therapist_profiles').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending'),
       supabase.from('sessions').select('price, status, paid_at'),
       supabase.from('sessions').select(`
