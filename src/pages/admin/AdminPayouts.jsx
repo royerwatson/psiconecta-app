@@ -30,6 +30,7 @@ const METHOD_LABEL = {
 
 export default function AdminPayouts() {
   const [tab, setTab]               = useState('pending')  // pending | history
+  const [search, setSearch]         = useState('')
   const [earnings, setEarnings]     = useState([])         // ganancias pendientes
   const [history, setHistory]       = useState([])         // payouts anteriores
   const [loading, setLoading]       = useState(true)
@@ -215,19 +216,28 @@ export default function AdminPayouts() {
         )}
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-warm-100 p-1 rounded-xl w-fit">
-        {[
-          { id: 'pending', label: 'Pendientes' },
-          { id: 'history', label: 'Historial'  },
-        ].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-              tab === t.id ? 'bg-white shadow-sm text-warm-900' : 'text-warm-500 hover:text-warm-700'
-            }`}>
-            {t.label}
-          </button>
-        ))}
+      {/* Tabs + búsqueda */}
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+        <div className="flex gap-1 bg-warm-100 p-1 rounded-xl w-fit shrink-0">
+          {[
+            { id: 'pending', label: 'Pendientes' },
+            { id: 'history', label: 'Historial'  },
+          ].map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)}
+              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                tab === t.id ? 'bg-white shadow-sm text-warm-900' : 'text-warm-500 hover:text-warm-700'
+              }`}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Buscar terapeuta..."
+          className="flex-1 px-4 py-2.5 rounded-xl border border-warm-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-200"
+        />
       </div>
 
       {/* ── TAB: Pendientes ── */}
@@ -245,7 +255,7 @@ export default function AdminPayouts() {
             </div>
           ) : (
             <div className="flex flex-col gap-4">
-              {earnings.map(e => (
+              {earnings.filter(e => !search.trim() || (e.therapist_name ?? '').toLowerCase().includes(search.toLowerCase())).map(e => (
                 <div key={e.therapist_id}
                   className="bg-white border border-warm-100 rounded-2xl p-4 hover:border-warm-200 transition-colors">
                   <div className="flex items-start gap-3">
@@ -327,7 +337,7 @@ export default function AdminPayouts() {
             </div>
           ) : (
             <div className="flex flex-col gap-3">
-              {history.map(p => {
+              {history.filter(p => !search.trim() || (p.therapist?.full_name ?? '').toLowerCase().includes(search.toLowerCase())).map(p => {
                 const sc = STATUS_CONFIG[p.status] ?? STATUS_CONFIG.pending
                 return (
                   <div key={p.id} className="bg-white border border-warm-100 rounded-2xl p-4">

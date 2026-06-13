@@ -69,7 +69,15 @@ export default function AdminRefunds() {
     fetchRefunds()
   }
 
-  const filtered = refunds.filter(r => filter === 'all' || r.status === filter)
+  const [search, setSearch] = useState('')
+
+  const filtered = refunds.filter(r => {
+    if (filter !== 'all' && r.status !== filter) return false
+    if (!search.trim()) return true
+    const q = search.toLowerCase()
+    return (r.patient?.full_name ?? '').toLowerCase().includes(q)
+      || (r.therapist?.full_name ?? '').toLowerCase().includes(q)
+  })
 
   // Métricas
   const totalRefunded = refunds.filter(r => r.status === 'completed').reduce((a, r) => a + (r.refund_amount ?? 0), 0)
@@ -99,6 +107,15 @@ export default function AdminRefunds() {
           </div>
         ))}
       </div>
+
+      {/* Búsqueda */}
+      <input
+        type="text"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        placeholder="Buscar por paciente o terapeuta..."
+        className="w-full px-4 py-2.5 rounded-xl border border-warm-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-200"
+      />
 
       {/* Filtros */}
       <div className="flex gap-2 flex-wrap">

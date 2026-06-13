@@ -6,6 +6,7 @@ import Button from '@/components/ui/Button'
 import { VerificationBadge } from '@/components/ui/Badge'
 import { Skeleton } from '@/components/ui/Spinner'
 import Modal from '@/components/ui/Modal'
+import ConfirmToggleModal from '@/components/admin/ConfirmToggleModal'
 import toast from 'react-hot-toast'
 import { Search, DollarSign, Calendar, Wallet, CheckCircle2, XCircle, FileText, Image, File, AlertCircle } from 'lucide-react'
 
@@ -59,7 +60,9 @@ export default function AdminTherapists() {
     setLoading(false)
   }
 
-  const toggleActive = async (t) => {
+  const [confirmTarget, setConfirmTarget] = useState(null)
+
+  const toggleActive = async (t, reason) => {
     const newState = !t.is_active
     setToggling(t.user_id)
     const { data: { session: authSession } } = await supabase.auth.getSession()
@@ -69,11 +72,17 @@ export default function AdminTherapists() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authSession?.access_token}`,
       },
-      body: JSON.stringify({ userId: t.user_id, activate: newState }),
+      body: JSON.stringify({ userId: t.user_id, activate: newState, reason }),
     })
     if (!res.ok) { toast.error('Error al cambiar estado'); setToggling(null); return }
+    // Rastro de auditoría (best-effort)
+    supabase.from('audit_log').insert({
+      action: newState ? 'admin_activate_user' : 'admin_deactivate_user',
+      detail: JSON.stringify({ user_id: t.user_id, reason }),
+    }).then(() => {}, () => {})
     toast.success(newState ? 'Cuenta reactivada' : 'Cuenta desactivada')
     setToggling(null)
+    setConfirmTarget(null)
     fetchTherapists()
   }
 
@@ -155,9 +164,16 @@ export default function AdminTherapists() {
     fetchTherapists()
   }
 
-  const filtered = therapists.filter(t =>
-    filter === 'all' ? true : t.verification_status === filter
-  )
+  const [search, setSearch] = useState('')
+
+  const filtered = therapists.filter(t => {
+    if (filter !== 'all' && t.verification_status !== filter) return false
+    if (!search.trim()) return true
+    const q = search.toLowerCase()
+    return (t.profile?.full_name ?? '').toLowerCase().includes(q)
+      || (t.specialty ?? '').toLowerCase().includes(q)
+      || (t.license_number ?? '').toLowerCase().includes(q)
+  })
 
   const counts = {
     all:      therapists.length,
@@ -171,6 +187,18 @@ export default function AdminTherapists() {
       <div>
         <h1 className="font-serif text-2xl font-bold text-warm-900">Terapeutas</h1>
         <p className="text-warm-500 text-sm mt-1">Gestión y verificación de terapeutas</p>
+      </div>
+
+      {/* Búsqueda */}
+      <div className="relative">
+        <Search size={15} strokeWidth={1.8} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-warm-400" />
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Buscar por nombre, especialidad o licencia..."
+          className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-warm-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-200"
+        />
       </div>
 
       {/* Filtros */}
@@ -218,7 +246,7 @@ export default function AdminTherapists() {
                       <VerificationBadge status={t.verification_status} />
                       <button
                         disabled={toggling === t.user_id}
-                        onClick={() => toggleActive(t)}
+                        onClick={() => setConfirmTarget({ ...t, name: t.profile?.full_name, role: 'therapist' })}
                         title={t.is_active ? 'Desactivar cuenta' : 'Reactivar cuenta'}
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
                           t.is_active ? 'bg-emerald-500' : 'bg-warm-300'
@@ -478,6 +506,13 @@ export default function AdminTherapists() {
           </div>
         </div>
       )}
+
+      {/* Confirmación activar/desactivar con motivo */}
+      <ConfirmToggleModal
+        target={confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+        onConfirm={(reason) => toggleActive(confirmTarget, reason)}
+      />
     </div>
   )
 }

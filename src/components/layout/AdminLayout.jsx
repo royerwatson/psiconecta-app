@@ -1,5 +1,7 @@
 import { NavLink, Outlet, useNavigate, useLocation } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useAuthStore } from '@/store/authStore'
+import { supabase } from '@/lib/supabase'
 import {
   LayoutDashboard, Bot, Stethoscope, Users, Calendar,
   UsersRound, TrendingUp, Wallet, ArrowDownToLine, RotateCcw,
@@ -27,6 +29,31 @@ export default function AdminLayout() {
   const { signOut } = useAuthStore()
   const navigate = useNavigate()
   const location = useLocation()
+  const [pending, setPending] = useState({})
+
+  // Badges de pendientes: el admin ve dónde hay trabajo sin entrar sección
+  // por sección. Se refresca al navegar y cada 60s.
+  useEffect(() => {
+    let active = true
+    const fetchPending = async () => {
+      const [creds, alerts, refunds, deletions] = await Promise.all([
+        supabase.from('therapist_credentials').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('ai_checkins').select('id', { count: 'exact', head: true }).in('risk_level', ['high', 'medium']).is('therapist_reviewed_at', null),
+        supabase.from('refunds').select('id', { count: 'exact', head: true }).in('status', ['pending', 'disputed', 'failed']),
+        supabase.from('deletion_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+      ])
+      if (!active) return
+      setPending({
+        '/admin/therapists': creds.count ?? 0,
+        '/admin/ai-alerts':  alerts.count ?? 0,
+        '/admin/refunds':    refunds.count ?? 0,
+        '/admin/deletions':  deletions.count ?? 0,
+      })
+    }
+    fetchPending()
+    const interval = setInterval(fetchPending, 60_000)
+    return () => { active = false; clearInterval(interval) }
+  }, [location.pathname])
 
   const handleSignOut = async () => {
     await signOut()
@@ -55,7 +82,12 @@ export default function AdminLayout() {
                 }`
               }>
               <Icon size={17} strokeWidth={1.8} />
-              {label}
+              <span className="flex-1">{label}</span>
+              {pending[to] > 0 && (
+                <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-red-500 text-white text-[10px] font-bold flex items-center justify-center">
+                  {pending[to] > 99 ? '99+' : pending[to]}
+                </span>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -73,10 +105,17 @@ export default function AdminLayout() {
       <nav className="fixed bottom-0 left-0 right-0 bg-primary-900 flex sm:hidden z-20 border-t border-primary-800">
         {NAV.map(({ to, Icon, label }) => (
           <NavLink key={to} to={to} className={({ isActive }) =>
-            `flex-1 flex flex-col items-center gap-0.5 py-2 text-xs transition-all ${
+            `flex-1 flex flex-col items-center gap-0.5 py-2 text-xs transition-all relative ${
               isActive ? 'text-white' : 'text-primary-400'
             }`}>
-            <Icon size={18} strokeWidth={1.8} />
+            <span className="relative">
+              <Icon size={18} strokeWidth={1.8} />
+              {pending[to] > 0 && (
+                <span className="absolute -top-1.5 -right-2 min-w-[14px] h-3.5 px-0.5 rounded-full bg-red-500 text-white text-[8px] font-bold flex items-center justify-center">
+                  {pending[to] > 9 ? '9+' : pending[to]}
+                </span>
+              )}
+            </span>
             <span>{label}</span>
           </NavLink>
         ))}

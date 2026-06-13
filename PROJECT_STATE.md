@@ -47,6 +47,34 @@
 - Pendiente solo iOS: requiere Apple Developer Program ($99/año) — misma membresía
   que desbloquea Apple OAuth (obligatorio para publicar en App Store).
 
+**v36 (2026-06-12) — Panel admin operativo:**
+- **Badges de pendientes en sidebar** (AdminLayout): credenciales por revisar,
+  alertas IA sin revisar, reembolsos pendientes/disputados y solicitudes de
+  eliminación — refresco al navegar + cada 60s. También en nav móvil.
+- **Confirmación con motivo al banear** (`ConfirmToggleModal` compartido en
+  Terapeutas y Pacientes): motivo obligatorio al desactivar, registrado en
+  `audit_log` (best-effort) y enviado a `admin-toggle-user`.
+- **Búsqueda** añadida en: Terapeutas (nombre/especialidad/licencia), Sesiones,
+  Reembolsos, Suscripciones (nombre/email) y Pagos (ambas pestañas).
+- **Paginación** en Sesiones (50/página con "Cargar más"; métricas siguen
+  siendo globales vía query ligera).
+- Pendiente próxima sesión: realtime en alertas IA, 2FA admins, paginación en
+  Pacientes cuando crezca.
+
+**v35 (2026-06-12) — Contenido + UX premium: ✅ DESPLEGADO Y VERIFICADO**
+- **Blog ×2:** 5 artículos SEO nuevos (depresión, costo psicólogo RD, burnout,
+  cómo ayudar a alguien, insomnio) — 10 en total. Sitemap actualizado.
+  Pendiente: registrar/verificar sitemap en Google Search Console.
+- **Lenguaje de animación premium** (hook `useScrollReveal` + CSS en index.css):
+  landing, /pricing, /terapeutas, /blog y artículos. Hero en cascada, stagger
+  90ms, hover lift, float del mockup. GPU puro, reduced-motion respetado.
+- **Estados vacíos:** testimonios de landing se ocultan sin reseñas; directorio
+  sin terapeutas muestra invitación "terapeutas fundadores" con CTA.
+- **Post-pago premium:** PaymentSuccess con resumen de cita, contador y botón
+  "Añadir a mi calendario" (.ics con alarma -30min). PayPalButton pasa bookingId.
+- **Micro-interacciones:** mensajes de chat con slide-up, mood tracker con pop,
+  fade de ruta en Layout y AdminLayout.
+
 **v34 (2026-06-12) — Mejoras móviles/PWA: ✅ DESPLEGADO COMPLETO**
 (SQL ejecutado: cron a */15 + banderas · funciones redesplegadas · splash generada · push a main)
 - **Push agendar/cancelar:** `capture-paypal-order` y `notify-cancellation` envían

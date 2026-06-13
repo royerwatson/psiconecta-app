@@ -13,10 +13,15 @@ const STATUS_CONFIG = {
   payment_pending: { label: 'Pago pendiente', color: 'text-warm-500 bg-warm-100' },
 }
 
+const PAGE_SIZE = 50
+
 export default function AdminSessions() {
   const [sessions, setSessions] = useState([])
   const [loading, setLoading]   = useState(true)
   const [filter, setFilter]     = useState('all')
+  const [search, setSearch]     = useState('')
+  const [hasMore, setHasMore]   = useState(false)
+  const [loadingMore, setLoadingMore] = useState(false)
 
   // Métricas
   const [metrics, setMetrics] = useState({ total: 0, revenue: 0, completed: 0, cancelled: 0 })
@@ -25,6 +30,20 @@ export default function AdminSessions() {
 
   const fetchSessions = async () => {
     setLoading(true)
+
+    // Métricas globales (query ligera de todas las filas)
+    const { data: allLight } = await supabase
+      .from('sessions')
+      .select('status, price, paid_at')
+    const all = allLight ?? []
+    setMetrics({
+      total:     all.length,
+      revenue:   all.filter(s => s.paid_at).reduce((a, s) => a + (s.price ?? 0), 0),
+      completed: all.filter(s => s.status === 'completed').length,
+      cancelled: all.filter(s => s.status === 'cancelled').length,
+    })
+
+    // Lista detallada paginada
     const { data } = await supabase
       .from('sessions')
       .select(`
@@ -33,19 +52,36 @@ export default function AdminSessions() {
         therapist:profiles!sessions_therapist_id_fkey(full_name)
       `)
       .order('scheduled_at', { ascending: false })
+      .range(0, PAGE_SIZE - 1)
 
-    const all = data ?? []
-    setMetrics({
-      total:     all.length,
-      revenue:   all.filter(s => s.paid_at).reduce((a, s) => a + (s.price ?? 0), 0),
-      completed: all.filter(s => s.status === 'completed').length,
-      cancelled: all.filter(s => s.status === 'cancelled').length,
-    })
-    setSessions(all)
+    setSessions(data ?? [])
+    setHasMore((data ?? []).length === PAGE_SIZE)
     setLoading(false)
   }
 
-  const filtered = sessions.filter(s => filter === 'all' ? true : s.status === filter)
+  const loadMore = async () => {
+    setLoadingMore(true)
+    const { data } = await supabase
+      .from('sessions')
+      .select(`
+        id, scheduled_at, status, price, is_urgent, paid_at, payment_intent_id, created_at,
+        patient:profiles!sessions_patient_id_fkey(full_name),
+        therapist:profiles!sessions_therapist_id_fkey(full_name)
+      `)
+      .order('scheduled_at', { ascending: false })
+      .range(sessions.length, sessions.length + PAGE_SIZE - 1)
+    setSessions(prev => [...prev, ...(data ?? [])])
+    setHasMore((data ?? []).length === PAGE_SIZE)
+    setLoadingMore(false)
+  }
+
+  const filtered = sessions.filter(s => {
+    if (filter !== 'all' && s.status !== filter) return false
+    if (!search.trim()) return true
+    const q = search.toLowerCase()
+    return (s.patient?.full_name ?? '').toLowerCase().includes(q)
+      || (s.therapist?.full_name ?? '').toLowerCase().includes(q)
+  })
 
   const exportCSV = () => {
     const headers = ['ID', 'Paciente', 'Terapeuta', 'Fecha', 'Estado', 'Urgente', 'Monto (USD)', 'Pagado en']
@@ -100,15 +136,24 @@ export default function AdminSessions() {
         </div>
       )}
 
-      {/* Filtro */}
-      <Select value={filter} onChange={e => setFilter(e.target.value)} className="max-w-xs">
-        <option value="all">Todas las sesiones</option>
-        <option value="scheduled">Programadas</option>
-        <option value="in_progress">En curso</option>
-        <option value="completed">Completadas</option>
-        <option value="cancelled">Canceladas</option>
-        <option value="payment_pending">Pago pendiente</option>
-      </Select>
+      {/* Búsqueda + filtro */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Buscar por paciente o terapeuta..."
+          className="flex-1 px-4 py-2.5 rounded-xl border border-warm-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-200"
+        />
+        <Select value={filter} onChange={e => setFilter(e.target.value)} className="max-w-xs">
+          <option value="all">Todas las sesiones</option>
+          <option value="scheduled">Programadas</option>
+          <option value="in_progress">En curso</option>
+          <option value="completed">Completadas</option>
+          <option value="cancelled">Canceladas</option>
+          <option value="payment_pending">Pago pendiente</option>
+        </Select>
+      </div>
 
       {loading ? (
         <div className="flex flex-col gap-3">{[1,2,3,4].map(i => <Skeleton key={i} className="h-16" />)}</div>
@@ -149,6 +194,17 @@ export default function AdminSessions() {
             </tbody>
           </table>
         </div>
+      )}
+
+      {/* Paginación */}
+      {!loading && hasMore && !search.trim() && (
+        <button
+          onClick={loadMore}
+          disabled={loadingMore}
+          className="mx-auto px-6 py-2.5 rounded-xl border border-warm-200 bg-white text-sm font-medium text-warm-600 hover:border-warm-300 transition-colors disabled:opacity-50"
+        >
+          {loadingMore ? 'Cargando...' : `Cargar más (mostrando ${sessions.length} de ${metrics.total})`}
+        </button>
       )}
     </div>
   )

@@ -68,7 +68,15 @@ export default function AdminSubscriptions() {
   const premiumCount = therapists.filter(t => t.subscription_plan === 'premium').length
   const basicCount   = therapists.filter(t => t.subscription_plan === 'basic').length
 
-  const filtered = filter === 'all' ? therapists : therapists.filter(t => t.subscription_plan === filter)
+  const [search, setSearch] = useState('')
+
+  const filtered = therapists.filter(t => {
+    if (filter !== 'all' && t.subscription_plan !== filter) return false
+    if (!search.trim()) return true
+    const q = search.toLowerCase()
+    return (t.profile?.full_name ?? '').toLowerCase().includes(q)
+      || (t.profile?.email ?? '').toLowerCase().includes(q)
+  })
 
   return (
     <div className="space-y-6">
@@ -100,6 +108,15 @@ export default function AdminSubscriptions() {
           <p className="text-xs text-warm-400 mt-0.5">terapeutas · gratis</p>
         </div>
       </div>
+
+      {/* Búsqueda */}
+      <input
+        type="text"
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        placeholder="Buscar terapeuta por nombre o email..."
+        className="w-full px-4 py-2.5 rounded-xl border border-warm-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-primary-200"
+      />
 
       {/* Filtros */}
       <div className="flex gap-2 flex-wrap">

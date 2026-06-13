@@ -4,6 +4,7 @@ import Avatar from '@/components/ui/Avatar'
 import { Skeleton } from '@/components/ui/Spinner'
 import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
+import ConfirmToggleModal from '@/components/admin/ConfirmToggleModal'
 import toast from 'react-hot-toast'
 import { formatPrice } from '@/lib/utils'
 import { Calendar, ClipboardList, Bot } from 'lucide-react'
@@ -111,7 +112,9 @@ export default function AdminPatients() {
     setLoadingDetail(false)
   }
 
-  const toggleActive = async (patient) => {
+  const [confirmTarget, setConfirmTarget] = useState(null)
+
+  const toggleActive = async (patient, reason) => {
     const newState = !patient.is_active
     setToggling(patient.id)
 
@@ -122,7 +125,7 @@ export default function AdminPatients() {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${authSession?.access_token}`,
       },
-      body: JSON.stringify({ userId: patient.id, activate: newState }),
+      body: JSON.stringify({ userId: patient.id, activate: newState, reason }),
     })
 
     if (!res.ok) {
@@ -131,8 +134,15 @@ export default function AdminPatients() {
       return
     }
 
+    // Rastro de auditoría (best-effort)
+    supabase.from('audit_log').insert({
+      action: newState ? 'admin_activate_user' : 'admin_deactivate_user',
+      detail: JSON.stringify({ user_id: patient.id, reason }),
+    }).then(() => {}, () => {})
+
     toast.success(newState ? 'Cuenta reactivada' : 'Cuenta desactivada')
     setToggling(null)
+    setConfirmTarget(null)
     fetchPatients()
   }
 
@@ -258,7 +268,7 @@ export default function AdminPatients() {
                     <td className="px-4 py-3 text-center">
                       <button
                         disabled={toggling === p.id}
-                        onClick={() => toggleActive(p)}
+                        onClick={() => setConfirmTarget({ ...p, name: p.full_name, role: 'patient' })}
                         className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none ${
                           p.is_active ? 'bg-emerald-500' : 'bg-warm-300'
                         } ${toggling === p.id ? 'opacity-50 cursor-wait' : 'cursor-pointer'}`}
@@ -410,6 +420,13 @@ export default function AdminPatients() {
           </div>
         ) : null}
       </Modal>
+
+      {/* Confirmación activar/desactivar con motivo */}
+      <ConfirmToggleModal
+        target={confirmTarget}
+        onClose={() => setConfirmTarget(null)}
+        onConfirm={(reason) => toggleActive(confirmTarget, reason)}
+      />
     </div>
   )
 }
