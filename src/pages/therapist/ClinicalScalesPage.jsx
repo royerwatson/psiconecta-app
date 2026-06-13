@@ -23,10 +23,15 @@ function ScaleIcon({ name, size = 22, className = '' }) {
 
 // ── Estilos por tema ──────────────────────────────────────────────────────────
 const THEME = {
-  blue:   { pill: 'bg-blue-100 text-blue-700 border-blue-200',   ring: 'ring-blue-400',   active: 'bg-blue-600 text-white border-blue-600',   header: 'bg-blue-50 border-blue-100'   },
+  blue:   { pill: 'bg-blue-100 text-blue-700 border-blue-200',     ring: 'ring-blue-400',   active: 'bg-blue-600 text-white border-blue-600',     header: 'bg-blue-50 border-blue-100'     },
   purple: { pill: 'bg-purple-100 text-purple-700 border-purple-200', ring: 'ring-purple-400', active: 'bg-purple-600 text-white border-purple-600', header: 'bg-purple-50 border-purple-100' },
-  amber:  { pill: 'bg-amber-100 text-amber-700 border-amber-200', ring: 'ring-amber-400',  active: 'bg-amber-600 text-white border-amber-600',  header: 'bg-amber-50 border-amber-100'   },
-  rose:   { pill: 'bg-rose-100 text-rose-700 border-rose-200',   ring: 'ring-rose-400',   active: 'bg-rose-600 text-white border-rose-600',     header: 'bg-rose-50 border-rose-100'     },
+  amber:  { pill: 'bg-amber-100 text-amber-700 border-amber-200',   ring: 'ring-amber-400',  active: 'bg-amber-600 text-white border-amber-600',   header: 'bg-amber-50 border-amber-100'   },
+  rose:   { pill: 'bg-rose-100 text-rose-700 border-rose-200',     ring: 'ring-rose-400',   active: 'bg-rose-600 text-white border-rose-600',     header: 'bg-rose-50 border-rose-100'     },
+  indigo: { pill: 'bg-indigo-100 text-indigo-700 border-indigo-200', ring: 'ring-indigo-400', active: 'bg-indigo-600 text-white border-indigo-600', header: 'bg-indigo-50 border-indigo-100' },
+  orange: { pill: 'bg-orange-100 text-orange-700 border-orange-200', ring: 'ring-orange-400', active: 'bg-orange-600 text-white border-orange-600', header: 'bg-orange-50 border-orange-100' },
+  teal:   { pill: 'bg-teal-100 text-teal-700 border-teal-200',     ring: 'ring-teal-400',   active: 'bg-teal-600 text-white border-teal-600',     header: 'bg-teal-50 border-teal-100'     },
+  violet: { pill: 'bg-violet-100 text-violet-700 border-violet-200', ring: 'ring-violet-400', active: 'bg-violet-600 text-white border-violet-600', header: 'bg-violet-50 border-violet-100' },
+  red:    { pill: 'bg-red-100 text-red-700 border-red-200',         ring: 'ring-red-400',    active: 'bg-red-600 text-white border-red-600',       header: 'bg-red-50 border-red-100'       },
 }
 
 const BAND_STYLE = {
@@ -94,8 +99,8 @@ function OptionButton({ label, value, selected, onClick, themeClass }) {
 function ProgressBar({ answered, total, themeClass }) {
   const pct = Math.round((answered / total) * 100)
   const barColor = {
-    blue: 'bg-blue-500', purple: 'bg-purple-500',
-    amber: 'bg-amber-500', rose: 'bg-rose-500',
+    blue: 'bg-blue-500', purple: 'bg-purple-500', amber: 'bg-amber-500', rose: 'bg-rose-500',
+    indigo: 'bg-indigo-500', orange: 'bg-orange-500', teal: 'bg-teal-500', violet: 'bg-violet-500', red: 'bg-red-500',
   }[themeClass] ?? 'bg-primary-500'
 
   return (
@@ -537,7 +542,7 @@ export default function ClinicalScalesPage() {
 
         <div className="text-center">
           <p className="text-xs text-warm-400">
-            Próximamente: Columbia C-SSRS · BDI-II · STAI · CAGE · BPRS
+            Próximamente: BDI-II · STAI · CAGE · BPRS
           </p>
         </div>
       </div>
