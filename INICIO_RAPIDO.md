@@ -78,6 +78,9 @@ src/
 │   ├── ui/            Button, Input, Card, Modal, Avatar, Badge, etc.
 │   ├── layout/        Layout, Navbar, ProtectedRoute
 │   └── patient/       MoodTracker, AICheckin
+├── data/
+│   ├── therapeuticLibrary.js    56 ejercicios en 8 categorías (TCC, DBT, ACT, Mindfulness…)
+│   └── therapeuticProtocols.js  28 protocolos en 6 modalidades (TCC, DBT, ACT, EMDR, MBCT, CFT)
 ├── store/             authStore (Zustand)
 └── lib/               supabase.js, utils.js
 supabase/
@@ -94,7 +97,7 @@ supabase/
 | ✅ Dashboard terapeuta (agenda, historial, tareas) | Completo |
 | ✅ Dashboard paciente (citas, mood, actividades) | Completo |
 | ✅ Sistema de agenda con disponibilidad | Completo |
-| ✅ Citas urgentes <24h con tarifa adicional | Completo |
+| ✅ Citas urgentes <24h con tarifa adicional (+30%) | Completo |
 | ✅ Historial clínico compartido entre terapeutas | Completo |
 | ✅ Cambio de terapeuta hasta 48h antes | Completo |
 | ✅ Chat en tiempo real (Supabase Realtime) | Completo |
@@ -104,4 +107,43 @@ supabase/
 | ✅ Mood Tracker con gráfica semanal | Completo |
 | ✅ Sistema de reseñas (1-5 estrellas) | Completo |
 | ✅ Verificación de credenciales del terapeuta | Completo |
+| ✅ Biblioteca terapéutica (56 ejercicios, 8 categorías) | Completo |
+| ✅ Protocolos clínicos (28 protocolos, 6 modalidades) | Completo |
 | ✅ Empaquetado móvil (Capacitor) | Listo para configurar |
+
+---
+
+## 📋 Changelog
+
+### Junio 2025
+
+#### Correcciones de bugs
+- **Avatar paciente en header** — `Layout.jsx`: se pasaba `name` pero faltaba el prop `src={profile?.avatar_url}` en el componente Avatar del encabezado.
+- **Tareas del paciente vacías** — `MyTasksPage.jsx`: el hint de FK `!patient_tasks_therapist_id_fkey` fallaba en producción; cambiado a `!therapist_id` (column-based) + fallback query sin join para evitar toast de error cuando no hay tareas.
+- **Subida de credenciales del terapeuta** — `TherapistProfile.jsx`: ruta de Storage tenía prefijo redundante `credentials/` (el bucket ya se llama `credentials`); se eliminó y se añadió `contentType: file.type` al upload.
+- **Lógica de citas urgentes** — `TherapistProfileView.jsx`:
+  - Mínimo cambiado de 1 hora a **2 horas** desde el momento actual.
+  - Al desactivar el modo urgente se resetea la fecha/hora seleccionada si era "hoy".
+  - Mensajes de error y aviso actualizados a "2 horas desde ahora".
+
+#### Contenido clínico nuevo
+
+**Biblioteca terapéutica** (`src/data/therapeuticLibrary.js`) — de 38 a **56 ejercicios**:
+- TCC +2: Decatastrofización · Programación de tareas graduales
+- DBT +2: Mente sabia (Wise Mind) · GIVE — mantener relaciones
+- ACT +2: Metáfora arenas movedizas · Defusión (voz ridícula, etiquetado, "gracias mente")
+- Mindfulness +3: Meditación Metta · Mindfulness en un bocado · Meditación de la montaña
+- Activación Conductual +3: Activación social gradual · Rutina matutina anti-depresión · "Actuar como si"
+- Regulación Emocional +2: Técnica del semáforo · Surfeo de la ola (Urge Surfing)
+- Relajación +2: Respiración alternada de fosas nasales · Relajación autógena de Schultz
+- Escritura Reflexiva +2: Tres buenos momentos (Seligman) · Mi historia de resiliencia
+
+**Protocolos terapéuticos** (`src/data/therapeuticProtocols.js`) — de 20 a **28 protocolos**, 2 modalidades nuevas:
+- TCC +2: Protocolo Heimberg (ansiedad social) · Protocolo Dugas (TAG — intolerancia a la incertidumbre)
+- DBT +1: Los 6 niveles de validación de Linehan
+- ACT +1: La Matriz ACT (Polk & Schoendorff)
+- **MBCT** (nueva modalidad): Programa de 8 semanas · Espacio de respiración de 3 minutos
+- **CFT** (nueva modalidad): Modelo de los tres sistemas de regulación emocional · El yo compasivo
+
+**EMDR** (`src/data/therapeuticProtocols.js`) — de 1 entrada (overview) a **9 entradas**:
+- Protocolo completo de 8 fases + cada fase con su propia tarjeta clínica detallada.
