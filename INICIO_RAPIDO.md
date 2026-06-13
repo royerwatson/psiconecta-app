@@ -80,7 +80,8 @@ src/
 │   └── patient/       MoodTracker, AICheckin
 ├── data/
 │   ├── therapeuticLibrary.js    56 ejercicios en 8 categorías (TCC, DBT, ACT, Mindfulness…)
-│   └── therapeuticProtocols.js  28 protocolos en 6 modalidades (TCC, DBT, ACT, EMDR, MBCT, CFT)
+│   ├── therapeuticProtocols.js  28 protocolos en 6 modalidades (TCC, DBT, ACT, EMDR, MBCT, CFT)
+│   └── clinicalScales.js        10 escalas clínicas validadas (PHQ-9, GAD-7, AUDIT, PCL-5, ISI, PSS-10, DASS-21, SPIN, DAST-10, C-SSRS)
 ├── store/             authStore (Zustand)
 └── lib/               supabase.js, utils.js
 supabase/
@@ -109,6 +110,7 @@ supabase/
 | ✅ Verificación de credenciales del terapeuta | Completo |
 | ✅ Biblioteca terapéutica (56 ejercicios, 8 categorías) | Completo |
 | ✅ Protocolos clínicos (28 protocolos, 6 modalidades) | Completo |
+| ✅ Escalas clínicas validadas (10 escalas, multi-dominio) | Completo |
 | ✅ Empaquetado móvil (Capacitor) | Listo para configurar |
 
 ---
@@ -147,3 +149,11 @@ supabase/
 
 **EMDR** (`src/data/therapeuticProtocols.js`) — de 1 entrada (overview) a **9 entradas**:
 - Protocolo completo de 8 fases + cada fase con su propia tarjeta clínica detallada.
+
+**Escalas clínicas** (`src/data/clinicalScales.js`) — de 4 a **10 escalas validadas**:
+- **ISI** (Índice de Severidad del Insomnio) — 7 ítems, 4 bandas, dominio sueño
+- **PSS-10** (Estrés Percibido de Cohen) — 10 ítems con ítems inversos, dominio estrés
+- **DASS-21** (Depresión, Ansiedad y Estrés) — 21 ítems, 3 subescalas independientes (×2), bandas por subescala
+- **SPIN** (Inventario de Fobia Social) — 17 ítems, punto de corte ≥19, dominio ansiedad social
+- **DAST-10** (Abuso de Drogas) — 10 ítems Sí/No, excluye alcohol/tabaco, 5 bandas de riesgo
+- **C-SSRS** (Columbia — ideación suicida) — 6 ítems secuenciales con `isRiskScale: true` y lógica de ramificación clínica; protocolo de acción inmediata en ítems 3–6
