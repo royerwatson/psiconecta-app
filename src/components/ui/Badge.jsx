@@ -39,9 +39,10 @@ export default function Badge({ children, variant = 'primary', dot = false, clas
 // Badge de verificación de terapeuta
 export function VerificationBadge({ status }) {
   const map = {
-    verified: { label: 'Verificado',  variant: 'verified', Icon: CheckCircle2 },
-    pending:  { label: 'En revisión', variant: 'pending',  Icon: Clock        },
-    rejected: { label: 'Rechazado',   variant: 'rejected', Icon: XCircle      },
+    verified:   { label: 'Verificado',        variant: 'verified', Icon: CheckCircle2 },
+    pending:    { label: 'En revisión',        variant: 'pending',  Icon: Clock        },
+    rejected:   { label: 'Rechazado',          variant: 'rejected', Icon: XCircle      },
+    incomplete: { label: 'Perfil incompleto',  variant: 'warning',  Icon: Clock        },
   }
   const b = map[status] ?? map.pending
   return <Badge variant={b.variant}><b.Icon size={11} strokeWidth={1.8} />{b.label}</Badge>

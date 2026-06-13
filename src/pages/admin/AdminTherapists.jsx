@@ -33,12 +33,15 @@ export default function AdminTherapists() {
 
   const fetchTherapists = async () => {
     setLoading(true)
+
+    // Partir de profiles para incluir terapeutas que aún no completaron therapist_profiles
     const { data, error } = await supabase
-      .from('therapist_profiles')
+      .from('profiles')
       .select(`
-        *,
-        profile:profiles!therapist_profiles_user_id_fkey(id, full_name, avatar_url, created_at, is_active)
+        id, full_name, avatar_url, created_at, is_active,
+        therapist_profile:therapist_profiles(*)
       `)
+      .eq('role', 'therapist')
       .order('created_at', { ascending: false })
 
     if (error) console.error('fetchTherapists error:', error)
@@ -48,13 +51,19 @@ export default function AdminTherapists() {
       .from('sessions')
       .select('therapist_id, status, price')
 
-    setTherapists((data ?? []).map(t => {
-      const tSessions = (sessionStats ?? []).filter(s => s.therapist_id === t.user_id)
+    setTherapists((data ?? []).map(p => {
+      const tp = Array.isArray(p.therapist_profile) ? p.therapist_profile[0] : p.therapist_profile
+      const tSessions = (sessionStats ?? []).filter(s => s.therapist_id === p.id)
       return {
-        ...t,
-        is_active: t.profile?.is_active ?? true,
-        totalSessions: tSessions.length,
-        totalRevenue: tSessions.filter(s => s.status === 'completed').reduce((a, s) => a + (s.price ?? 0), 0),
+        // campos de therapist_profiles (pueden ser null si no completó perfil)
+        ...(tp ?? {}),
+        // siempre disponibles desde profiles
+        user_id:             p.id,
+        profile:             { id: p.id, full_name: p.full_name, avatar_url: p.avatar_url, created_at: p.created_at, is_active: p.is_active },
+        is_active:           p.is_active ?? true,
+        verification_status: tp?.verification_status ?? 'incomplete',
+        totalSessions:       tSessions.length,
+        totalRevenue:        tSessions.filter(s => s.status === 'completed').reduce((a, s) => a + (s.price ?? 0), 0),
       }
     }))
     setLoading(false)
@@ -167,7 +176,8 @@ export default function AdminTherapists() {
   const [search, setSearch] = useState('')
 
   const filtered = therapists.filter(t => {
-    if (filter !== 'all' && t.verification_status !== filter) return false
+    if (filter === 'pending' && t.verification_status !== 'pending' && t.verification_status !== 'incomplete') return false
+    if (filter !== 'all' && filter !== 'pending' && t.verification_status !== filter) return false
     if (!search.trim()) return true
     const q = search.toLowerCase()
     return (t.profile?.full_name ?? '').toLowerCase().includes(q)
@@ -177,7 +187,7 @@ export default function AdminTherapists() {
 
   const counts = {
     all:      therapists.length,
-    pending:  therapists.filter(t => t.verification_status === 'pending').length,
+    pending:  therapists.filter(t => t.verification_status === 'pending' || t.verification_status === 'incomplete').length,
     verified: therapists.filter(t => t.verification_status === 'verified').length,
     rejected: therapists.filter(t => t.verification_status === 'rejected').length,
   }
@@ -268,6 +278,15 @@ export default function AdminTherapists() {
                   )}
                 </div>
               </div>
+
+              {t.verification_status === 'incomplete' && (
+                <div className="mt-3 pt-3 border-t border-warm-100">
+                  <p className="text-xs text-warm-400 flex items-center gap-1.5">
+                    <AlertCircle size={12} className="text-amber-400" />
+                    Perfil incompleto — el terapeuta aún no ha completado su registro.
+                  </p>
+                </div>
+              )}
 
               {t.verification_status === 'pending' && (
                 <div className="flex gap-2 mt-3 pt-3 border-t border-warm-100">
