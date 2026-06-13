@@ -1,6 +1,6 @@
 /**
  * Biblioteca de ejercicios terapéuticos predefinidos — español
- * 50 ejercicios en 8 categorías.
+ * 56 ejercicios en 8 categorías.
  *
  * Cada ejercicio:
  *  id          string — identificador único
@@ -1143,6 +1143,651 @@ Paso 3 — Escribe la respuesta del problema (si quieres):
 
 Paso 4 — Reflexión:
 ¿Qué descubriste al verlo como algo separado de ti?`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // TCC — Adicionales
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'tcc-07',
+    category: 'tcc',
+    title: 'Decatastrofización — ¿Qué tan probable es realmente?',
+    summary: 'Evalúa la probabilidad real de que ocurra lo que temes y tu capacidad de afrontarlo.',
+    goal: 'Reducir el pensamiento catastrófico poniendo a prueba las predicciones negativas con datos.',
+    duration: '15 min',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['catastrofismo', 'probabilidad', 'peor caso', 'ansiedad', 'TCC'],
+    instructions: `Cuando notes que estás imaginando lo peor, completa este ejercicio:
+
+1. ¿Cuál es mi pensamiento catastrófico?
+   Escríbelo exactamente: "Va a pasar que…"
+
+2. ¿Qué probabilidad real tiene de ocurrir? (0–100 %)
+   No lo que sientes — lo que los datos y la experiencia sugieren.
+
+3. ¿Cuántas veces he temido algo similar y no ocurrió?
+   Escribe al menos 3 ejemplos concretos de tu propia vida.
+
+4. Si ocurriera lo peor: ¿podría sobrevivirlo?
+   ¿Qué recursos tengo? ¿Qué haría? ¿He superado cosas difíciles antes?
+
+5. ¿Cuál es el escenario más probable (no el peor ni el mejor)?
+   Descríbelo con realismo.
+
+6. ¿Qué consejo le daría a un amigo que pensara lo mismo?
+
+Escribe un pensamiento más equilibrado y evalúa cómo cambia tu ansiedad (0–10) antes y después.`,
+  },
+  {
+    id: 'tcc-08',
+    category: 'tcc',
+    title: 'Programación de tareas graduales',
+    summary: 'Divide una tarea que evitas en pasos muy pequeños y agrégalos a tu agenda de forma progresiva.',
+    goal: 'Superar la procrastinación y la evitación mediante la descomposición y planificación gradual.',
+    duration: '20 min',
+    frequency: 'Según necesidad',
+    difficulty: 'básico',
+    tags: ['procrastinación', 'evitación', 'planificación', 'pasos', 'tareas'],
+    instructions: `Elige una tarea que llevas tiempo evitando. Sigue estos pasos:
+
+1. Escribe la tarea completa tal como la ves ahora (aunque se sienta enorme):
+   Ejemplo: "Ordenar toda mi habitación"
+
+2. Descomponla en 6–10 pasos muy concretos y pequeños:
+   • Paso 1: Poner la ropa del suelo en el cesto (5 min)
+   • Paso 2: Hacer la cama (3 min)
+   • Paso 3: Ordenar el escritorio (10 min)
+   … y así sucesivamente.
+
+3. Ordénalos de menor a mayor dificultad.
+
+4. Asigna cada paso a un día y hora específica de esta semana.
+   Empieza siempre con el más fácil.
+
+5. Después de completar cada paso, anota:
+   • ¿Lo hice? Sí / No
+   • ¿Cuánto tardé?
+   • ¿Cómo me sentí al terminar? (0–10)
+
+Recuerda: el objetivo de hoy es UN PASO, no toda la tarea. El impulso llega después de empezar, no antes.`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // DBT — Adicionales
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'dbt-06',
+    category: 'dbt',
+    title: 'Mente sabia (Wise Mind)',
+    summary: 'Accede al punto de equilibrio entre la mente racional y la mente emocional para tomar decisiones sabias.',
+    goal: 'Tomar decisiones desde un estado interno integrado, ni puramente emocional ni puramente lógico.',
+    duration: '10 min',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['mente sabia', 'decisiones', 'equilibrio', 'emocional', 'racional', 'DBT', 'Linehan'],
+    instructions: `La Mente Sabia es el lugar interno donde la emoción y la razón se integran.
+
+Antes de una decisión difícil, haz este ejercicio:
+
+Paso 1 — Consulta la Mente Emocional:
+¿Qué sientes sobre esta situación? ¿Qué quiere la emoción que hagas?
+Escríbelo sin filtro.
+
+Paso 2 — Consulta la Mente Racional:
+¿Cuáles son los hechos objetivos? ¿Qué dice la lógica?
+¿Cuáles son las consecuencias a corto y largo plazo de cada opción?
+
+Paso 3 — Busca la Mente Sabia:
+Siéntate en silencio. Respira lentamente. Pregúntate:
+"¿Qué sé en lo más profundo que es lo correcto aquí?"
+No es lo que la emoción grita ni solo lo que la razón calcula — es la intersección.
+
+Una señal de Mente Sabia: suele sentirse como calma, certeza tranquila, no como urgencia.
+
+Paso 4 — Escribe la respuesta de tu Mente Sabia:
+¿Qué te dice? ¿Qué acción es coherente con eso?`,
+  },
+  {
+    id: 'dbt-07',
+    category: 'dbt',
+    title: 'GIVE — Mantener relaciones valiosas',
+    summary: 'Cuatro habilidades clave para cuidar las relaciones importantes durante conversaciones difíciles.',
+    goal: 'Fortalecer los vínculos interpersonales manteniendo el respeto y la validación mutua.',
+    duration: '15 min (preparación)',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['relaciones', 'comunicación', 'validación', 'respeto', 'DBT', 'GIVE'],
+    instructions: `Usa GIVE cuando quieras mantener o mejorar una relación importante durante un conflicto o conversación difícil:
+
+G — Sé Gentil (Gentle):
+• No ataques, amenaces ni juzgues.
+• Evita el sarcasmo y el tono burlón.
+• Si estás enojado/a, espera antes de hablar.
+
+I — Actúa Interesado/a (Interested):
+• Escucha activamente lo que la otra persona dice.
+• Haz preguntas genuinas. No interrumpas.
+• El objetivo es entender, no solo responder.
+
+V — Valida (Validate):
+• Busca algo válido en lo que siente o piensa la otra persona.
+• "Tiene sentido que te sientas así porque…"
+• La validación no significa que estés de acuerdo — significa que entiendes.
+
+E — Actúa con Calma (Easy manner):
+• Usa un poco de humor cuando sea apropiado.
+• Sonríe. Mantén un tono relajado.
+• Evita la rigidez o la actitud defensiva.
+
+Antes de la conversación, escribe:
+¿Cómo aplicaré cada letra de GIVE en esta situación específica?`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // ACT — Adicionales
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'act-06',
+    category: 'act',
+    title: 'El control como problema — Metáfora de la arena de arenas movedizas',
+    summary: 'Explora cómo luchar contra pensamientos y emociones difíciles puede empeorar la situación.',
+    goal: 'Reducir la lucha interna y abrirse a la aceptación como alternativa al control.',
+    duration: '10 min',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['aceptación', 'control', 'metáfora', 'lucha', 'ACT', 'Hayes'],
+    instructions: `Lee esta metáfora y reflexiona por escrito:
+
+Imagina que caes en arenas movedizas.
+El instinto es luchar, agitarte, intentar salir con fuerza.
+Pero cuanto más luchas, más te hundes.
+
+La contra-intuición: para sobrevivir en arenas movedizas, debes extenderte y dejar que la superficie de tu cuerpo toque la arena. Rendirse al miedo, no combatirlo.
+
+Tus pensamientos y emociones difíciles son esas arenas movedizas.
+Cuanto más luchas contra la ansiedad, la tristeza, los pensamientos no deseados — más energía consumes y más atrapado/a te sientes.
+
+Reflexión escrita (responde estas preguntas):
+
+1. ¿Con qué emoción o pensamiento llevas más tiempo luchando?
+   ¿Cuánta energía has gastado tratando de controlarlo o eliminarlo?
+
+2. ¿Ha funcionado la lucha a largo plazo? ¿Qué has perdido mientras luchabas?
+
+3. ¿Qué significaría "dejar de luchar" con esa emoción o pensamiento?
+   (No es rendirse ni estar de acuerdo — es soltar el esfuerzo de control)
+
+4. Si no gastaras energía en luchar, ¿qué podrías hacer con esa energía en tu vida?`,
+  },
+  {
+    id: 'act-07',
+    category: 'act',
+    title: 'Defusión — Dale un nombre ridículo a tu pensamiento',
+    summary: 'Reduce el impacto de pensamientos negativos cambiando la forma en que te relacionas con ellos.',
+    goal: 'Crear distancia psicológica de pensamientos automáticos sin suprimirlos ni creerlos literalmente.',
+    duration: '5 min',
+    frequency: 'Según necesidad',
+    difficulty: 'básico',
+    tags: ['defusión', 'pensamiento', 'distancia', 'humor', 'ACT'],
+    instructions: `Cuando aparezca un pensamiento difícil o recurrente, prueba una de estas técnicas de defusión:
+
+Técnica 1 — Voz de caricatura:
+Di el pensamiento en voz alta con una voz ridícula (un personaje de dibujos animados, voz de robot, etc.).
+¿Cambia su poder cuando lo escuchas así?
+
+Técnica 2 — La mente como radio:
+Imagina que tu mente es una radio que pone el programa "Pensamientos catastrofistas".
+No tienes que cambiar la estación, pero sí recordar que eres el oyente, no el locutor.
+Anota: "La radio está poniendo el programa: ___"
+
+Técnica 3 — Etiqueta el pensamiento:
+En lugar de "Voy a fracasar", di:
+"Noto que estoy teniendo el pensamiento de que voy a fracasar."
+Esa pequeña frase pone distancia entre tú y el pensamiento.
+
+Técnica 4 — Gracias, mente:
+Cuando aparezca el pensamiento, dile en voz baja: "Gracias, mente. Mensaje recibido."
+No lo rechaces — simplemente reconócelo y sigue haciendo lo que ibas a hacer.
+
+Anota qué técnica usaste y cómo cambió la intensidad del pensamiento (0–10).`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Mindfulness — Adicionales
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'mind-05',
+    category: 'mindfulness',
+    title: 'Meditación de amor y bondad (Metta)',
+    summary: 'Cultiva sentimientos de amor, bondad y compasión hacia ti mismo/a y hacia otros.',
+    goal: 'Aumentar la compasión propia, reducir la hostilidad y fortalecer la conexión con los demás.',
+    duration: '10–15 min',
+    frequency: 'Diario',
+    difficulty: 'intermedio',
+    tags: ['compasión', 'bondad', 'amor', 'Metta', 'budista', 'mindfulness', 'hostilidad'],
+    instructions: `Siéntate cómodamente, cierra los ojos y respira profundamente 3 veces.
+
+Esta meditación se hace en 4 fases, dirigiendo las mismas frases a diferentes personas:
+
+Las frases base (puedes adaptarlas):
+"Que estés bien. Que seas feliz. Que estés libre de sufrimiento. Que tengas paz."
+
+FASE 1 — Hacia ti mismo/a:
+Imagina tu propia imagen con claridad. Repite las frases hacia ti 5 veces, sintiendo genuinamente cada una.
+
+FASE 2 — Hacia alguien querido:
+Piensa en alguien que amas sin complicaciones. Repite las frases hacia esa persona 5 veces.
+
+FASE 3 — Hacia alguien neutral:
+Piensa en alguien que no te genera emociones fuertes (un vecino, un conocido). Repite las frases 5 veces.
+
+FASE 4 — Hacia alguien difícil:
+Piensa en alguien con quien tengas dificultades. Sin forzar nada, intenta enviarle las frases 3 veces.
+(Si es muy difícil, empieza con alguien con quien el conflicto sea pequeño.)
+
+Al terminar, regresa a ti mismo/a y repite las frases una vez más.
+
+Anota: ¿En qué fase fue más difícil? ¿Cómo te sientes ahora?`,
+  },
+  {
+    id: 'mind-06',
+    category: 'mindfulness',
+    title: 'Mindfulness en un solo bocado',
+    summary: 'Practica la atención plena con un solo bocado de comida como objeto de meditación.',
+    goal: 'Desarrollar la conciencia sensorial plena y reducir el comer automático o emocional.',
+    duration: '5 min',
+    frequency: 'Diario (durante una comida)',
+    difficulty: 'básico',
+    tags: ['comer', 'atención', 'sentidos', 'presente', 'impulsivo', 'mindfulness'],
+    instructions: `Elige un alimento pequeño (una uva, un trozo de chocolate, una nuez, una galleta).
+
+Antes de comerlo, haz esto:
+
+1. Míralo durante 30 segundos:
+   Observa su color, forma, textura. Como si nunca hubieras visto ese alimento.
+
+2. Huélelo:
+   Acércalo a la nariz. ¿Qué notas? ¿Te genera alguna reacción en la boca?
+
+3. Tócalo:
+   ¿Cómo se siente en los dedos? ¿Duro, suave, rugoso?
+
+4. Ponlo en la boca sin morderlo todavía:
+   ¿Qué sientes? ¿Cambia algo?
+
+5. Mastícalo lentamente:
+   ¿Cómo evoluciona el sabor? ¿Hay diferentes notas?
+
+6. Trágalo con plena conciencia.
+
+Reflexión:
+• ¿Cómo fue diferente a comer de manera automática?
+• ¿Qué notaste que normalmente no notas?
+• ¿Qué emociones o pensamientos surgieron durante el ejercicio?
+
+Puedes aplicar esto al primer bocado de cualquier comida.`,
+  },
+  {
+    id: 'mind-07',
+    category: 'mindfulness',
+    title: 'Meditación de la montaña',
+    summary: 'Conéctate con una estabilidad interna profunda usando la imagen de una montaña ante las tormentas.',
+    goal: 'Cultivar ecuanimidad y fortaleza interna ante las circunstancias cambiantes de la vida.',
+    duration: '15 min',
+    frequency: 'Semanal',
+    difficulty: 'intermedio',
+    tags: ['estabilidad', 'ecuanimidad', 'montaña', 'Kabat-Zinn', 'metáfora', 'mindfulness'],
+    instructions: `Siéntate erguido/a, como si fueras una montaña. Cierra los ojos.
+
+1. Visualiza una montaña grande y poderosa.
+   Tiene una cima que a veces está entre nubes, laderas boscosas, nieve, roca antigua.
+   Es completamente inmóvil en su esencia.
+
+2. Imagina que tú ERES esa montaña.
+   Tu cabeza es la cima. Tus hombros y brazos son las laderas. Tu base es el suelo firme.
+
+3. Observa cómo las estaciones cambian sobre la montaña:
+   • Primavera: flores, lluvia, suavidad.
+   • Verano: calor intenso, visitantes, actividad.
+   • Otoño: viento, hojas que caen, cambio de colores.
+   • Invierno: nieve, silencio, frío.
+
+4. La montaña no "resiste" el clima — lo recibe. Sigue siendo montaña en todas las estaciones.
+
+5. Ahora piensa en las "tormentas" de tu vida: el estrés, el dolor, la incertidumbre, la alegría, la pérdida.
+   Tú puedes ser la montaña: recibirlo todo sin ser destruido/a por ello.
+
+Al terminar, escribe: ¿Qué tormenta estás viviendo ahora? ¿Qué significa ser montaña ante ella?`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Activación Conductual — Adicionales
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'act-cond-04',
+    category: 'activacion',
+    title: 'Activación de contacto social gradual',
+    summary: 'Planifica interacciones sociales de menor a mayor complejidad para salir del aislamiento.',
+    goal: 'Reducir el aislamiento social asociado a la depresión o la ansiedad mediante pasos graduales.',
+    duration: '15 min (planificación)',
+    frequency: 'Semanal',
+    difficulty: 'intermedio',
+    tags: ['aislamiento', 'social', 'depresión', 'relaciones', 'gradual', 'activación'],
+    instructions: `El aislamiento alimenta la depresión. Esta semana planifica al menos 3 contactos sociales graduales:
+
+NIVEL 1 — Contacto mínimo (sin salir de casa):
+• Enviar un mensaje de texto a alguien que aprecias
+• Comentar una foto de un amigo en redes
+• Llamar a un familiar por 5 minutos
+→ Elige uno y comprométete a hacerlo mañana.
+
+NIVEL 2 — Contacto breve fuera de casa:
+• Saludar al vecino
+• Hacer una consulta en una tienda
+• Tomar un café solo/a en un lugar público
+→ Planifica cuándo y dónde harás esto esta semana.
+
+NIVEL 3 — Interacción social real:
+• Quedar con un amigo para caminar 30 minutos
+• Llamar a alguien para hablar (no texto)
+• Asistir a una actividad grupal (clase, reunión, evento)
+→ Elige una opción y ponla en tu agenda con fecha y hora.
+
+Después de cada contacto, anota:
+¿Cómo me sentía antes? ¿Cómo me sentí después? ¿Valió la pena?`,
+  },
+  {
+    id: 'act-cond-05',
+    category: 'activacion',
+    title: 'Rutina matutina anti-depresión',
+    summary: 'Diseña una rutina de mañana simple y estructurada para contrarrestar la inercia depresiva.',
+    goal: 'Establecer un ancla conductual diaria que genere estructura y sensación de logro desde temprano.',
+    duration: '15 min (diseño) + práctica diaria',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['rutina', 'mañana', 'depresión', 'estructura', 'hábitos', 'activación'],
+    instructions: `La depresión prospera en el caos y la inactividad. Una rutina matutina simple puede cambiar el tono del día.
+
+Diseña TU rutina de 30–45 minutos eligiendo entre estas opciones:
+
+Bloque 1 — Activar el cuerpo (10 min):
+[ ] Levantarse a la misma hora
+[ ] Hacer la cama inmediatamente
+[ ] Tomar un vaso de agua
+[ ] Estiramiento básico o caminata corta
+
+Bloque 2 — Higiene y presencia (10 min):
+[ ] Ducha o lavarse la cara
+[ ] Vestirse (aunque no salgas)
+
+Bloque 3 — Nutrirse (10 min):
+[ ] Desayuno sin pantallas
+[ ] 5 respiraciones conscientes o 2 min de silencio
+
+Bloque 4 — Intención (5 min):
+[ ] Escribir UNA cosa que haré hoy
+[ ] Leer o escuchar algo positivo
+
+Reglas:
+• Empieza con solo 3 elementos. No seas ambicioso/a al principio.
+• Hazla a la misma hora cada día (el horario es más importante que los elementos).
+• Registra si la cumpliste (sí/parcial/no) durante 7 días.
+
+¿Cuánto mejor fue el día cuando hiciste la rutina vs. cuando no la hiciste?`,
+  },
+  {
+    id: 'act-cond-06',
+    category: 'activacion',
+    title: 'Técnica "Actuar como si"',
+    summary: 'Actúa como si ya tuvieras la motivación o el estado de ánimo deseado, antes de sentirlo.',
+    goal: 'Romper la espera de la motivación para actuar, entendiendo que la acción precede al estado de ánimo.',
+    duration: '10 min',
+    frequency: 'Según necesidad',
+    difficulty: 'básico',
+    tags: ['motivación', 'acción', 'depresión', 'activación', 'cambio conductual'],
+    instructions: `Esperamos sentir motivación para actuar. En la depresión, esa motivación no llega espontáneamente.
+La solución: actuar primero, sentir después.
+
+Ejercicio:
+
+1. Identifica cómo te gustaría sentirte hoy:
+   Ejemplo: "Con energía", "Motivado/a", "Tranquilo/a", "Productivo/a"
+
+2. Pregúntate: ¿Qué haría una persona que ya se siente así?
+   Ejemplo: Si tuviera energía, me levantaría, desayunaría bien, saldría a caminar.
+
+3. Elige UNA de esas acciones y hazla ahora, aunque no lo sientas:
+   No tienes que creerlo. Solo actúa como si.
+
+4. Después de hacerlo, anota:
+   • ¿Cómo me sentía antes (0–10)?
+   • ¿Cómo me siento ahora (0–10)?
+   • ¿Qué noté?
+
+Principio clave: El estado de ánimo sigue a la acción, no al revés.
+La motivación no aparece esperando — aparece actuando.`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Regulación Emocional — Adicionales
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'emoc-05',
+    category: 'emocional',
+    title: 'Técnica del semáforo emocional',
+    summary: 'Usa la metáfora del semáforo para pausar, evaluar y responder ante emociones intensas.',
+    goal: 'Interrumpir respuestas emocionales automáticas y elegir una respuesta más consciente.',
+    duration: '5 min',
+    frequency: 'Según necesidad (en el momento)',
+    difficulty: 'básico',
+    tags: ['semáforo', 'pausa', 'impulsividad', 'regulación', 'emociones', 'respuesta'],
+    instructions: `Cuando sientas que una emoción fuerte está a punto de controlarte, aplica el semáforo:
+
+🔴 ROJO — Para:
+Detente. No actúes todavía.
+Respira: inhala 4 segundos, exhala 6 segundos. Repite 3 veces.
+Reconoce: "Estoy sintiendo ___. Esto es una señal de que necesito una pausa."
+
+🟡 AMARILLO — Evalúa:
+Hazte estas preguntas rápidas:
+• ¿Qué está pasando realmente?
+• ¿Qué estoy sintiendo y por qué?
+• ¿Cuáles son mis opciones ahora?
+• Si actúo impulsivamente, ¿qué consecuencias habrá?
+• ¿Qué diría mi "mejor yo" en este momento?
+
+🟢 VERDE — Responde:
+Elige la respuesta más útil, no la más automática.
+Actúa desde ese lugar.
+
+Después, reflexiona:
+• ¿Qué emoción detuvo el semáforo?
+• ¿Qué habrías hecho sin la pausa?
+• ¿Qué hiciste en cambio? ¿Cómo resultó?`,
+  },
+  {
+    id: 'emoc-06',
+    category: 'emocional',
+    title: 'Surfeo de la ola emocional (Urge Surfing)',
+    summary: 'Observa cómo una emoción o impulso intenso sube y baja como una ola sin necesidad de actuar sobre él.',
+    goal: 'Tolerar impulsos y emociones intensas sin actuar, aprendiendo que siempre bajan por sí solos.',
+    duration: '10–15 min',
+    frequency: 'Según necesidad',
+    difficulty: 'intermedio',
+    tags: ['impulso', 'urge surfing', 'tolerancia', 'ola', 'emoción', 'Marlatt'],
+    instructions: `Esta técnica viene de la investigación sobre adicciones (Marlatt) y funciona con cualquier impulso o emoción intensa.
+
+Cuando sientas un impulso fuerte (comer emocionalmente, discutir, aislarte, etc.):
+
+1. Nómbralo:
+   "Siento el impulso de ___. La emoción detrás es ___."
+
+2. Visualiza la ola:
+   Las emociones siempre suben, llegan a un pico y bajan. Son como olas.
+   Esta emoción también pasará si no la alimentas ni la combates.
+
+3. Obsérvala en tu cuerpo (sin actuar):
+   ¿Dónde la sientes? ¿En el pecho, garganta, estómago?
+   ¿Cómo es la sensación? ¿Cómo cambia con cada respiración?
+   Pon tu atención en las sensaciones físicas, no en el pensamiento que las acompaña.
+
+4. Respira y surféala:
+   Imagina que eres un surfista sobre esa ola.
+   No la controlas — la cabalgas. Subes con ella, llegas a la cima y bajas.
+
+5. Nota cuándo baja:
+   Anota cuánto tardó en bajar la intensidad (en minutos).
+   ¿Qué aprendiste sobre ese impulso?
+
+Con práctica, cada vez confiarás más en que la ola siempre baja.`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Relajación — Adicionales
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'relax-06',
+    category: 'relajacion',
+    title: 'Respiración alternada de fosas nasales',
+    summary: 'Técnica de pranayama que equilibra el sistema nervioso alternando la respiración por cada fosa nasal.',
+    goal: 'Reducir el estrés y la ansiedad, y mejorar la concentración mediante el equilibrio del sistema nervioso.',
+    duration: '5–10 min',
+    frequency: 'Diario',
+    difficulty: 'básico',
+    tags: ['pranayama', 'fosas nasales', 'yoga', 'equilibrio', 'sistema nervioso', 'respiración'],
+    instructions: `Esta técnica proviene del yoga (Nadi Shodhana). Siéntate erguido/a con la espalda recta.
+
+Posición de la mano:
+Coloca el pulgar derecho sobre la fosa nasal derecha y el anular derecho sobre la izquierda.
+(El índice y el medio se doblan hacia la palma o se apoyan entre las cejas.)
+
+El ciclo:
+1. Cierra la fosa DERECHA con el pulgar. Inhala lentamente por la fosa IZQUIERDA (4 seg).
+2. Cierra ambas fosas. Retén brevemente (2 seg).
+3. Abre la fosa DERECHA. Exhala lentamente por la DERECHA (4 seg).
+4. Inhala por la fosa DERECHA (4 seg).
+5. Cierra ambas. Retén brevemente (2 seg).
+6. Abre la fosa IZQUIERDA. Exhala por la IZQUIERDA (4 seg).
+
+Eso es un ciclo completo. Repite 5–10 ciclos.
+
+Siempre termina exhalando por la fosa izquierda.
+
+Puedes ir aumentando los tiempos gradualmente (4-4-6, luego 4-4-8).
+Ideal por la mañana o antes de dormir.`,
+  },
+  {
+    id: 'relax-07',
+    category: 'relajacion',
+    title: 'Relajación autógena de Schultz',
+    summary: 'Induce estados de relajación profunda mediante autosugestiones de calor y pesadez en el cuerpo.',
+    goal: 'Generar un estado de relajación fisiológica profunda mediante la regulación voluntaria del sistema nervioso.',
+    duration: '15–20 min',
+    frequency: 'Diario',
+    difficulty: 'intermedio',
+    tags: ['autógena', 'Schultz', 'autosugestión', 'pesadez', 'calor', 'relajación', 'profunda'],
+    instructions: `Acuéstate o siéntate cómodamente. Cierra los ojos. Respira normalmente.
+
+Repite cada fórmula mentalmente 3–6 veces, en voz baja o solo pensándola, y tómate tiempo para sentirla:
+
+FASE 1 — Pesadez:
+"Mi brazo derecho está pesado…" (luego izquierdo, piernas)
+"Mis brazos y piernas están pesados y relajados."
+
+FASE 2 — Calor:
+"Mi brazo derecho está caliente…" (luego izquierdo, piernas)
+"Mis brazos y piernas están cálidos y pesados."
+
+FASE 3 — Corazón (solo observa, no controles):
+"Mi corazón late tranquilo y regular."
+
+FASE 4 — Respiración:
+"Mi respiración es suave y tranquila."
+
+FASE 5 — Abdomen:
+"Mi abdomen irradia calor."
+
+FASE 6 — Frente:
+"Mi frente está fresca y despejada."
+
+Al terminar, sal lentamente:
+• Dobla y estira los brazos con energía (3 veces).
+• Respira profundamente.
+• Abre los ojos.
+
+Con práctica (2–4 semanas), el estado de relajación llegará más rápido.`,
+  },
+
+  // ──────────────────────────────────────────────────────────────────────────
+  // Escritura Reflexiva — Adicionales
+  // ──────────────────────────────────────────────────────────────────────────
+  {
+    id: 'escr-07',
+    category: 'escritura',
+    title: 'Los tres buenos momentos (Seligman)',
+    summary: 'Escribe cada noche tres cosas buenas que ocurrieron hoy y explica por qué ocurrieron.',
+    goal: 'Entrenar el cerebro para notar lo positivo y aumentar el bienestar subjetivo de forma sostenida.',
+    duration: '10 min',
+    frequency: 'Diario (durante 2 semanas)',
+    difficulty: 'básico',
+    tags: ['psicología positiva', 'Seligman', 'bienestar', 'positivo', 'gratitud', 'tres cosas buenas'],
+    instructions: `Este ejercicio proviene de la investigación de Martin Seligman (Psicología Positiva) y ha demostrado reducir la depresión y aumentar el bienestar en estudios clínicos controlados.
+
+Cada noche durante al menos 2 semanas, escribe:
+
+Tres cosas buenas que ocurrieron hoy
+(pueden ser pequeñas: una conversación agradable, un café rico, un logro en el trabajo, un momento de paz)
+
+Por cada una, responde:
+1. ¿Qué pasó exactamente?
+   Descríbelo con detalle.
+
+2. ¿Por qué ocurrió?
+   Esta es la parte clave. No es "tuve suerte" — busca causas:
+   ¿Fue por algo que hiciste tú? ¿Por una cualidad tuya? ¿Por algo que organizaste?
+
+3. ¿Qué significa esto para ti?
+
+Instrucción importante: escribe de puño y letra si puedes, o en la app de notas — no solo en la cabeza. La escritura fija la experiencia.
+
+Los días malos son los más importantes: buscar los tres momentos cuando todo estuvo mal entrena la resilencia real.`,
+  },
+  {
+    id: 'escr-08',
+    category: 'escritura',
+    title: 'Mi historia de resiliencia',
+    summary: 'Escribe la historia de una dificultad que superaste, identificando los recursos que usaste.',
+    goal: 'Fortalecer la narrativa de resiliencia personal y recuperar confianza en la propia capacidad de afrontar.',
+    duration: '30 min',
+    frequency: 'Mensual',
+    difficulty: 'intermedio',
+    tags: ['resiliencia', 'narrativa', 'historia', 'fortalezas', 'superación', 'escritura'],
+    instructions: `Elige una dificultad significativa que hayas superado en tu vida (no tiene que ser la más grande — elige una de la que puedas hablar con cierta distancia).
+
+Escribe tu historia siguiendo esta estructura:
+
+1. El contexto (¿qué estaba pasando?):
+   Describe la situación. ¿Cuántos años tenías? ¿Qué hacía difícil ese momento?
+
+2. El punto más duro:
+   ¿Cuál fue el momento en que fue más difícil? ¿Qué sentiste?
+
+3. Lo que hiciste:
+   ¿Qué recursos usaste para seguir adelante? (personas, habilidades, valores, decisiones)
+   ¿Qué parte de ti salió a la luz en ese momento?
+
+4. El giro:
+   ¿Qué cambió? ¿Cómo empezaste a salir de esa etapa?
+
+5. Lo que aprendiste:
+   ¿Qué sabe hoy tu yo actual que no sabía entonces?
+   ¿Qué te dejó esa experiencia que llevas contigo?
+
+6. El mensaje para tu yo actual:
+   ¿Qué le diría esa versión de ti que superó aquello a la versión que vive lo que vive hoy?
+
+Lee la historia en voz alta al terminar.`,
   },
 ]
 
