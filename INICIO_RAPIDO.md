@@ -150,6 +150,13 @@ supabase/
 **EMDR** (`src/data/therapeuticProtocols.js`) — de 1 entrada (overview) a **9 entradas**:
 - Protocolo completo de 8 fases + cada fase con su propia tarjeta clínica detallada.
 
+**Admin — lista de terapeutas** (`src/pages/admin/AdminTherapists.jsx` + `AdminDashboard.jsx` + `Badge.jsx`):
+- La lista ahora parte de `profiles` con LEFT JOIN a `therapist_profiles`, mostrando todos los terapeutas registrados aunque no hayan completado su perfil.
+- Terapeutas con perfil incompleto muestran badge **"Perfil incompleto"** y aviso en su tarjeta.
+- El conteo del dashboard vuelve a leer `profiles` con `role='therapist'` para que el número cuadre con la lista.
+- Filtro "Pendientes" incluye tanto `pending` como `incomplete`.
+- `VerificationBadge` maneja el nuevo estado `incomplete`.
+
 **Escalas clínicas** (`src/data/clinicalScales.js`) — de 4 a **10 escalas validadas**:
 - **ISI** (Índice de Severidad del Insomnio) — 7 ítems, 4 bandas, dominio sueño
 - **PSS-10** (Estrés Percibido de Cohen) — 10 ítems con ítems inversos, dominio estrés
@@ -157,3 +164,9 @@ supabase/
 - **SPIN** (Inventario de Fobia Social) — 17 ítems, punto de corte ≥19, dominio ansiedad social
 - **DAST-10** (Abuso de Drogas) — 10 ítems Sí/No, excluye alcohol/tabaco, 5 bandas de riesgo
 - **C-SSRS** (Columbia — ideación suicida) — 6 ítems secuenciales con `isRiskScale: true` y lógica de ramificación clínica; protocolo de acción inmediata en ítems 3–6
+
+#### Correcciones adicionales (post-deploy)
+
+- **Sentry: `TypeError: Cannot read properties of undefined (reading 'pill')`** — `ClinicalScalesPage.jsx`: el objeto `THEME` solo tenía 4 colores; las 6 escalas nuevas usaban `indigo`, `orange`, `teal`, `violet`, `red` → `th` era `undefined` → crash. Se añadieron los 5 colores faltantes en `THEME` y en `barColor` del `ProgressBar`.
+- **Botón "Aplicar a paciente" faltante** — `ClinicalScalesPage.jsx`: las nuevas escalas no estaban en `SCALE_SLUG_MAP`; se añadieron (`isi`, `pss10`, `dass21`, `spin`, `dast10`, `cssrs`).
+- **Admin: conteo vs lista de terapeutas inconsistente** — el dashboard contaba desde `profiles` (2) pero la lista consultaba solo `therapist_profiles` (1). La lista ahora parte de `profiles` con LEFT JOIN a `therapist_profiles`, mostrando también terapeutas con perfil incompleto.
