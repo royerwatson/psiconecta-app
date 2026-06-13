@@ -58,6 +58,12 @@
   Reembolsos, Suscripciones (nombre/email) y Pagos (ambas pestañas).
 - **Paginación** en Sesiones (50/página con "Cargar más"; métricas siguen
   siendo globales vía query ligera).
+- **Bandeja "Requiere tu atención hoy"** en AdminDashboard: las 4 categorías
+  (alertas IA, credenciales, reembolsos, eliminaciones) como tarjetas accionables
+  con conteo y acceso directo; banner verde "Todo al día" cuando no hay pendientes.
+- **Sidebar agrupado:** Dashboard · Personas (Terapeutas/Pacientes/Reseñas) ·
+  Clínico (Alertas IA/Sesiones/Grupales) · Finanzas (Finanzas/Pagos/Reembolsos/
+  Suscripciones) · Sistema (Estadísticas/Actividad/Elim. de datos).
 - Pendiente próxima sesión: realtime en alertas IA, 2FA admins, paginación en
   Pacientes cuando crezca.
 

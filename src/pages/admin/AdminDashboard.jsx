@@ -78,6 +78,9 @@ export default function AdminDashboard() {
       { count: pendingTasks },
       { count: completedTasks },
       { count: journalEntries },
+      { count: pendingCreds },
+      { count: pendingRefunds },
+      { count: pendingDeletions },
     ] = await Promise.all([
       supabase.from('profiles').select('*', { count: 'exact', head: true }).in('role', ['patient', 'client']),
       supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'therapist'),
@@ -94,6 +97,9 @@ export default function AdminDashboard() {
       supabase.from('patient_tasks').select('*', { count: 'exact', head: true }).is('completed_at', null),
       supabase.from('patient_tasks').select('*', { count: 'exact', head: true }).not('completed_at', 'is', null),
       supabase.from('patient_journal').select('*', { count: 'exact', head: true }),
+      supabase.from('therapist_credentials').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('refunds').select('*', { count: 'exact', head: true }).in('status', ['pending', 'disputed', 'failed']),
+      supabase.from('deletion_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     ])
 
     const completedSessions = (sessions ?? []).filter(s => s.status === 'completed')
@@ -116,6 +122,9 @@ export default function AdminDashboard() {
       highRiskUnread:   highRiskUnread ?? 0,
       mediumRiskUnread: mediumRiskUnread ?? 0,
       totalCheckins:    totalCheckins ?? 0,
+      pendingCreds:     pendingCreds ?? 0,
+      pendingRefunds:   pendingRefunds ?? 0,
+      pendingDeletions: pendingDeletions ?? 0,
     })
 
     setEngagement({
@@ -158,41 +167,82 @@ export default function AdminDashboard() {
         </div>
       ) : (
         <>
-          {/* ── Alertas críticas ── */}
-          {(stats.highRiskUnread > 0 || stats.pendingTherapists > 0) && (
-            <div className="flex flex-col gap-2">
-              {stats.highRiskUnread > 0 && (
-                <button
-                  onClick={() => navigate('/admin/ai-alerts')}
-                  className="w-full text-left bg-red-50 border border-red-200 rounded-2xl p-4 flex items-center gap-3 hover:bg-red-100 transition-colors"
-                >
-                  <AlertCircle size={22} className="text-red-500 shrink-0" />
-                  <div className="flex-1">
-                    <p className="font-semibold text-red-800 text-sm">
-                      {stats.highRiskUnread} alerta{stats.highRiskUnread > 1 ? 's' : ''} de riesgo alto sin revisar
-                    </p>
-                    <p className="text-xs text-red-600 mt-0.5">Pacientes que necesitan atención urgente</p>
-                  </div>
-                  <ChevronRight size={16} className="text-red-400 shrink-0" />
-                </button>
-              )}
-              {stats.pendingTherapists > 0 && (
-                <button
-                  onClick={() => navigate('/admin/therapists')}
-                  className="w-full text-left bg-amber-50 border border-amber-200 rounded-2xl p-4 flex items-center gap-3 hover:bg-amber-100 transition-colors"
-                >
-                  <AlertTriangle size={22} className="text-amber-500 shrink-0" />
-                  <div className="flex-1">
-                    <p className="font-semibold text-amber-800 text-sm">
-                      {stats.pendingTherapists} terapeuta{stats.pendingTherapists > 1 ? 's' : ''} esperando verificación
-                    </p>
-                    <p className="text-xs text-amber-600 mt-0.5">Ve a "Terapeutas" para revisar sus credenciales</p>
-                  </div>
-                  <ChevronRight size={16} className="text-amber-400 shrink-0" />
-                </button>
-              )}
-            </div>
-          )}
+          {/* ── Bandeja: requiere tu atención hoy ── */}
+          {(() => {
+            const inbox = [
+              {
+                count: stats.highRiskUnread + stats.mediumRiskUnread,
+                label: 'alertas de riesgo IA sin revisar',
+                sub: stats.highRiskUnread > 0
+                  ? `${stats.highRiskUnread} de riesgo ALTO — atención urgente`
+                  : 'Riesgo medio — revisar pronto',
+                to: '/admin/ai-alerts',
+                Icon: AlertCircle,
+                tone: stats.highRiskUnread > 0
+                  ? 'bg-red-50 border-red-200 hover:bg-red-100 text-red-800 sub:text-red-600 icon:text-red-500'
+                  : 'bg-amber-50 border-amber-200 hover:bg-amber-100 text-amber-800 sub:text-amber-600 icon:text-amber-500',
+              },
+              {
+                count: stats.pendingCreds,
+                label: 'credenciales esperando verificación',
+                sub: 'Terapeutas bloqueados hasta que las revises',
+                to: '/admin/therapists',
+                Icon: AlertTriangle,
+                tone: 'bg-amber-50 border-amber-200 hover:bg-amber-100 text-amber-800 sub:text-amber-600 icon:text-amber-500',
+              },
+              {
+                count: stats.pendingRefunds,
+                label: 'reembolsos por gestionar',
+                sub: 'Pendientes, fallidos o en disputa',
+                to: '/admin/refunds',
+                Icon: AlertTriangle,
+                tone: 'bg-primary-50 border-primary-200 hover:bg-primary-100 text-primary-800 sub:text-primary-600 icon:text-primary-500',
+              },
+              {
+                count: stats.pendingDeletions,
+                label: 'solicitudes de eliminación de datos',
+                sub: 'Plazo legal: 30 días desde la solicitud',
+                to: '/admin/deletions',
+                Icon: AlertTriangle,
+                tone: 'bg-warm-100 border-warm-200 hover:bg-warm-200 text-warm-800 sub:text-warm-500 icon:text-warm-500',
+              },
+            ].filter(i => i.count > 0)
+
+            if (inbox.length === 0) {
+              return (
+                <div className="bg-emerald-50 border border-emerald-100 rounded-2xl p-4 flex items-center gap-3">
+                  <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
+                  <p className="text-sm font-medium text-emerald-800">
+                    Todo al día — sin pendientes que requieran tu atención.
+                  </p>
+                </div>
+              )
+            }
+            return (
+              <div className="flex flex-col gap-2">
+                <p className="text-xs font-bold text-warm-400 uppercase tracking-wider">
+                  Requiere tu atención hoy · {inbox.reduce((a, i) => a + i.count, 0)} pendiente{inbox.reduce((a, i) => a + i.count, 0) !== 1 ? 's' : ''}
+                </p>
+                {inbox.map(({ count, label, sub, to, Icon, tone }) => {
+                  const [bg, border, hover, text, subC, iconC] = tone.split(' ')
+                  return (
+                    <button
+                      key={to}
+                      onClick={() => navigate(to)}
+                      className={`w-full text-left ${bg} border ${border} rounded-2xl p-4 flex items-center gap-3 ${hover} transition-colors`}
+                    >
+                      <Icon size={22} className={`${iconC.replace('icon:', '')} shrink-0`} />
+                      <div className="flex-1">
+                        <p className={`font-semibold ${text} text-sm`}>{count} {label}</p>
+                        <p className={`text-xs ${subC.replace('sub:', '')} mt-0.5`}>{sub}</p>
+                      </div>
+                      <ChevronRight size={16} className="opacity-40 shrink-0" />
+                    </button>
+                  )
+                })}
+              </div>
+            )
+          })()}
 
           {/* ── KPIs principales ── */}
           <div className="grid grid-cols-2 gap-3">
