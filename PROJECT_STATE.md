@@ -1,5 +1,25 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-14 (v40 — PDF de progreso clínico + Landing actualizado)*
+*Última actualización: 2026-06-14 (v41 — PWA Service Worker fix + §12 Staging/Monitoring)*
+
+---
+
+## ⚡ Sesión 2026-06-14 (v41) — PWA Service Worker activo
+
+**Problema:** Service Worker no se registraba en producción — `navigator.serviceWorker.getRegistrations()` retornaba `[]`.
+
+**Causa raíz:** `vercel.json` CSP tenía `worker-src blob:` sin `'self'`. Chrome bloquea silenciosamente el registro de `/sw.js` (mismo origen) cuando `'self'` no está en `worker-src`. El `.catch(() => {})` en `main.jsx` ocultaba el error.
+
+**Fix:** `vercel.json` → `worker-src 'self' blob:` (1 carácter cambiado).
+
+**Archivos modificados:**
+- `vercel.json` — CSP: `worker-src blob:` → `worker-src 'self' blob:`
+
+**Verificado ✅ 2026-06-14:**
+- SW #254 `activated and is running` en Application → Service Workers (`https://psiconecta.app/`)
+- Botón "Abrir en la app" visible en barra de Chrome → instalable como PWA nativa
+- Instalación manual desde Safari/iPhone: compartir → "Agregar a pantalla de inicio"
+- Lighthouse ya no tiene categoría PWA separada (removida en Chrome 116+) — los indicadores reales son el SW activo y el manifest válido, ambos ✅
+- Commit `1406641`
 
 ---
 

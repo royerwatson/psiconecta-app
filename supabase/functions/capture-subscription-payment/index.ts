@@ -2,7 +2,16 @@
  * capture-subscription-payment
  *
  * Captura el pago y activa el plan Pro.
- * NO requiere sesión. Identifica al terapeuta de dos formas:
+ *
+ * Seguridad:
+ *   - Si la petición incluye Authorization header: verifica el JWT y valida
+ *     que user.id === therapistId (cross-check). Rechaza si no coincide.
+ *   - Si no hay Authorization header: procede solo con validación PayPal
+ *     (flujo redirect donde la sesión pudo haberse perdido). El orderId de
+ *     PayPal es generado por sus servidores y de un solo uso — suficiente
+ *     como prueba de posesión del pago.
+ *
+ * Identifica al terapeuta de dos formas:
  *   1. Por subscription_payments.paypal_order_id (si el insert funcionó)
  *   2. Por el reference_id de la orden PayPal (siempre contiene user_id)
  *
@@ -40,6 +49,26 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
+
+    // ── Verificar JWT si está presente ────────────────────────────────────
+    const authHeader = req.headers.get('Authorization')
+    let authenticatedUserId: string | null = null
+
+    if (authHeader) {
+      const supabaseAnon = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_ANON_KEY')!,
+        { global: { headers: { Authorization: authHeader } } }
+      )
+      const { data: { user }, error: authError } = await supabaseAnon.auth.getUser()
+      if (authError || !user) {
+        return new Response(
+          JSON.stringify({ error: 'Token inválido o expirado' }),
+          { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      authenticatedUserId = user.id
+    }
 
     // ── Verificar si ya fue procesado (idempotencia) ──────────────────────
     const { data: existing } = await supabaseAdmin
@@ -92,6 +121,15 @@ Deno.serve(async (req) => {
 
     if (!therapistId) {
       throw new Error('No se pudo identificar al terapeuta asociado a este pago')
+    }
+
+    // ── Cross-check: JWT user debe coincidir con el dueño del pago ────────
+    if (authenticatedUserId && authenticatedUserId !== therapistId) {
+      console.error(`[capture-subscription] SECURITY: JWT user ${authenticatedUserId} != therapistId ${therapistId}`)
+      return new Response(
+        JSON.stringify({ error: 'No autorizado: el pago no corresponde a tu cuenta' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     // ── Determinar ciclo de facturación ──────────────────────────────────

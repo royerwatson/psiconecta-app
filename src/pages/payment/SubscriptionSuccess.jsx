@@ -10,6 +10,7 @@ import Button from '@/components/ui/Button'
 import toast from 'react-hot-toast'
 import { Loader2, Star, XCircle, RefreshCw } from 'lucide-react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
+import { supabase } from '@/lib/supabase'
 
 export default function SubscriptionSuccess() {
   const [searchParams]  = useSearchParams()
@@ -36,12 +37,18 @@ export default function SubscriptionSuccess() {
   const capturePayment = async () => {
     setStatus('capturing')
     try {
-      // No requiere auth — el servidor busca el therapist por orderId
+      // Intentar adjuntar JWT si la sesión sigue activa (flujo redirect)
+      const { data: { session: authSession } } = await supabase.auth.getSession()
+      const headers = { 'Content-Type': 'application/json' }
+      if (authSession?.access_token) {
+        headers['Authorization'] = `Bearer ${authSession.access_token}`
+      }
+
       const res = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-subscription-payment`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers,
           body: JSON.stringify({ orderId }),
         }
       )
