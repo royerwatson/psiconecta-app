@@ -53,93 +53,207 @@ function getInitials(fullName) {
   return (parts[0][0] + parts[1][0]).toUpperCase()
 }
 
+/* ─── Hook: número animado con RAF ─────────── */
+function useAnimatedNumber(target, decimals = 1, duration = 600) {
+  const [display, setDisplay] = useState(target)
+  const rafRef  = useRef(null)
+  const fromRef = useRef(target)
+  const startRef = useRef(null)
+
+  useEffect(() => {
+    const from = fromRef.current
+    const to   = target
+    if (from === to) return
+    cancelAnimationFrame(rafRef.current)
+    startRef.current = null
+
+    rafRef.current = requestAnimationFrame(function tick(now) {
+      if (!startRef.current) startRef.current = now
+      const elapsed = now - startRef.current
+      const progress = Math.min(elapsed / duration, 1)
+      // ease-out-cubic
+      const ease = 1 - Math.pow(1 - progress, 3)
+      const value = from + (to - from) * ease
+      setDisplay(parseFloat(value.toFixed(decimals)))
+      if (progress < 1) rafRef.current = requestAnimationFrame(tick)
+      else { fromRef.current = to; setDisplay(to) }
+    })
+    return () => cancelAnimationFrame(rafRef.current)
+  }, [target, duration, decimals])
+
+  return display
+}
+
 /* ─── Calculadora de tiempo para pacientes ─── */
 function PatientTimeCalc() {
   const [sessions, setSessions] = useState(4)
 
-  const TRAVEL_PER_SESSION  = 60   // min promedio ida+vuelta a terapia presencial
-  const COORD_PER_SESSION   = 20   // min coordinando horario por teléfono
-  const SEARCH_TOTAL        = 180  // min buscando terapeuta (se amortiza / mes)
-  const REMINDER_PER_SESSION = 10  // min recordatorios / seguimiento manual
+  const travel   = parseFloat((sessions * 60  / 60).toFixed(1))
+  const coord    = parseFloat((sessions * 20  / 60).toFixed(1))
+  const search   = 3.0
+  const reminder = parseFloat((sessions * 10  / 60).toFixed(1))
+  const total    = parseFloat((travel + coord + search + reminder).toFixed(1))
+  const days     = Math.round(total * 12 / 8)
 
-  const travelSaved   = Math.round((sessions * TRAVEL_PER_SESSION) / 60 * 10) / 10
-  const coordSaved    = Math.round((sessions * COORD_PER_SESSION) / 60 * 10) / 10
-  const searchSaved   = Math.round(SEARCH_TOTAL / 60 * 10) / 10
-  const reminderSaved = Math.round((sessions * REMINDER_PER_SESSION) / 60 * 10) / 10
-  const totalSaved    = Math.round((travelSaved + coordSaved + searchSaved + reminderSaved) * 10) / 10
-  const daysPerYear   = Math.round(totalSaved * 12 / 8)
+  const animTotal = useAnimatedNumber(total)
+  const animDays  = useAnimatedNumber(days, 0)
 
-  const bars = [
-    { label: 'Traslados eliminados',        h: travelSaved,   color: 'bg-primary-500' },
-    { label: 'Coordinación de horarios',    h: coordSaved,    color: 'bg-accent-500' },
-    { label: 'Búsqueda del terapeuta',      h: searchSaved,   color: 'bg-purple-500' },
-    { label: 'Recordatorios y seguimiento', h: reminderSaved, color: 'bg-pink-500' },
+  const items = [
+    { label: 'Traslados eliminados',        val: travel,   grad: 'from-violet-500 to-primary-500' },
+    { label: 'Coordinación de horarios',    val: coord,    grad: 'from-primary-500 to-cyan-500' },
+    { label: 'Búsqueda del terapeuta',      val: search,   grad: 'from-cyan-500 to-teal-400' },
+    { label: 'Recordatorios y seguimiento', val: reminder, grad: 'from-teal-400 to-emerald-400' },
   ]
-  const maxH = Math.max(...bars.map(b => b.h), 0.1)
+  const maxVal = Math.max(...items.map(i => i.val), 0.1)
 
   return (
-    <section className="py-20 px-4 bg-psiconecta">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="inline-block px-3 py-1.5 rounded-full bg-primary-100 text-primary-700 text-xs font-semibold mb-4">Para pacientes</span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-3">
-            Descubre cuánto tiempo puedes recuperar
+    <section className="relative py-28 px-4 overflow-hidden" style={{ background: '#0a0a0f' }}>
+      {/* Ambient glow */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.08]"
+          style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }} />
+        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-[0.06]"
+          style={{ background: 'radial-gradient(circle, #06b6d4, transparent 70%)' }} />
+      </div>
+
+      <div className="relative max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase mb-5"
+            style={{ background: 'rgba(124,58,237,0.15)', color: '#a78bfa', border: '1px solid rgba(124,58,237,0.25)' }}>
+            Para pacientes
+          </span>
+          <h2 className="font-serif text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight tracking-tight">
+            Recupera el tiempo que<br/>la terapia presencial te roba
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-            La terapia presencial tiene costos ocultos de tiempo. Psiconecta los elimina.
+          <p className="text-slate-400 max-w-lg mx-auto text-lg leading-relaxed">
+            Traslados, llamadas, esperas. Con Psiconecta, todo eso desaparece.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Slider */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700">
-            <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1">¿Cuántas sesiones al mes?</p>
-            <p className="text-6xl font-black text-slate-900 dark:text-white mb-1">{sessions}</p>
-            <p className="text-slate-400 text-sm mb-6">sesiones / mes</p>
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-4">
 
-            <input
-              type="range" min={1} max={12} value={sessions}
-              onChange={e => setSessions(Number(e.target.value))}
-              className="w-full accent-primary-600 mb-8"
-            />
+          {/* Left — slider + breakdown */}
+          <div className="rounded-[28px] p-8 flex flex-col gap-8"
+            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(24px)' }}>
 
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Tiempo que ahorras al mes</p>
-            <div className="space-y-3">
-              {bars.map(b => (
-                <div key={b.label}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-600 dark:text-slate-300">{b.label}</span>
-                    <span className="font-semibold text-slate-800 dark:text-white">{b.h}h</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${b.color} rounded-full transition-all duration-500`}
-                      style={{ width: `${(b.h / maxH) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Resultado */}
-          <div className="bg-gradient-to-br from-primary-600 to-purple-700 rounded-3xl p-8 text-white flex flex-col justify-between">
+            {/* Slider control */}
             <div>
-              <p className="text-xs font-semibold text-primary-200 uppercase tracking-widest mb-4">Podrías recuperar</p>
-              <p className="text-7xl font-black mb-1 leading-none">{totalSaved}</p>
-              <p className="text-primary-200 text-lg mb-6">horas al mes</p>
+              <div className="flex items-end justify-between mb-6">
+                <div>
+                  <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-2">Sesiones por mes</p>
+                  <p className="text-white font-black leading-none" style={{ fontSize: '72px', lineHeight: 1 }}>
+                    {sessions}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-slate-500 text-xs mb-1">Rango recomendado</p>
+                  <p className="text-slate-300 text-sm font-medium">2 – 8 sesiones</p>
+                </div>
+              </div>
 
-              <div className="bg-white/10 rounded-2xl px-5 py-4 mb-6">
-                <p className="text-3xl font-black">{daysPerYear} días al año</p>
-                <p className="text-primary-200 text-sm mt-1">que dejan de perderse en desplazamientos y gestión</p>
+              {/* Premium slider */}
+              <style>{`
+                .calc-slider-patient {
+                  -webkit-appearance: none; appearance: none;
+                  width: 100%; height: 6px; border-radius: 9999px; outline: none; cursor: pointer;
+                  background: linear-gradient(to right, #7c3aed ${((sessions-1)/11)*100}%, rgba(255,255,255,0.12) ${((sessions-1)/11)*100}%);
+                  transition: background 0.2s;
+                }
+                .calc-slider-patient::-webkit-slider-thumb {
+                  -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
+                  background: white; box-shadow: 0 0 0 4px rgba(124,58,237,0.35), 0 4px 12px rgba(0,0,0,0.5);
+                  transition: transform 0.15s, box-shadow 0.15s;
+                }
+                .calc-slider-patient::-webkit-slider-thumb:hover {
+                  transform: scale(1.15); box-shadow: 0 0 0 6px rgba(124,58,237,0.3), 0 6px 16px rgba(0,0,0,0.6);
+                }
+                .calc-slider-patient::-moz-range-thumb {
+                  width: 24px; height: 24px; border-radius: 50%; border: none;
+                  background: white; box-shadow: 0 0 0 4px rgba(124,58,237,0.35);
+                }
+              `}</style>
+              <input type="range" min={1} max={12} value={sessions}
+                onChange={e => setSessions(Number(e.target.value))}
+                className="calc-slider-patient mb-1"
+              />
+              <div className="flex justify-between text-xs text-slate-600">
+                <span>1</span><span>12</span>
               </div>
             </div>
 
-            <div className="space-y-2 text-sm text-primary-100">
-              <p>✓ Sesiones 100 % desde el navegador — sin apps</p>
-              <p>✓ Terapeuta asignado por IA según tu perfil</p>
-              <p>✓ Recordatorios y reprogramación automática</p>
-              <p>✓ Historial clínico y tareas en tu perfil</p>
+            {/* Breakdown bars */}
+            <div>
+              <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-5">Tiempo eliminado al mes</p>
+              <div className="space-y-4">
+                {items.map((item, i) => (
+                  <div key={item.label}>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-slate-300 text-sm">{item.label}</span>
+                      <span className="text-white text-sm font-semibold tabular-nums">
+                        {item.val.toFixed(1)}h
+                      </span>
+                    </div>
+                    <div className="h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                      <div
+                        className={`h-full rounded-full bg-gradient-to-r ${item.grad}`}
+                        style={{
+                          width: `${(item.val / maxVal) * 100}%`,
+                          transition: 'width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                          transitionDelay: `${i * 60}ms`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right — result card */}
+          <div className="rounded-[28px] p-8 flex flex-col justify-between relative overflow-hidden"
+            style={{ background: 'linear-gradient(135deg, #4f1fc4 0%, #7c3aed 45%, #0ea5e9 100%)' }}>
+            {/* Shine overlay */}
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.18) 0%, transparent 60%)' }} />
+
+            <div className="relative">
+              <p className="text-violet-200 text-xs font-semibold uppercase tracking-widest mb-6">Tiempo que recuperas</p>
+
+              <div className="mb-6">
+                <div className="flex items-end gap-3">
+                  <span className="text-white font-black tabular-nums" style={{ fontSize: '88px', lineHeight: 1 }}>
+                    {animTotal}
+                  </span>
+                  <span className="text-violet-200 text-xl font-medium mb-3">h</span>
+                </div>
+                <p className="text-violet-200 text-base font-medium mt-1">al mes</p>
+              </div>
+
+              <div className="rounded-2xl px-5 py-4 mb-8"
+                style={{ background: 'rgba(0,0,0,0.2)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <p className="text-white font-black text-4xl tabular-nums mb-1">{animDays}</p>
+                <p className="text-violet-200 text-sm">días al año devueltos a tu vida</p>
+              </div>
+            </div>
+
+            <div className="relative space-y-3">
+              {[
+                'Sesiones desde tu navegador, sin apps extra',
+                'Terapeuta ideal asignado por IA en minutos',
+                'Recordatorios automáticos y reagendas',
+                'Historial clínico y tareas en un solo lugar',
+              ].map(t => (
+                <div key={t} className="flex items-start gap-2.5 text-sm text-white/80">
+                  <span className="mt-0.5 w-4 h-4 rounded-full flex items-center justify-center shrink-0"
+                    style={{ background: 'rgba(255,255,255,0.2)' }}>
+                    <svg width="8" height="6" viewBox="0 0 8 6" fill="none">
+                      <path d="M1 3l2 2 4-4" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </span>
+                  {t}
+                </div>
+              ))}
             </div>
           </div>
         </div>
@@ -152,93 +266,156 @@ function PatientTimeCalc() {
 function TherapistTimeCalc() {
   const [patients, setPatients] = useState(20)
 
-  // Horas ahorradas por paciente por mes
-  const AGENDA_PER_PT    = 0.55  // agenda, reagendas, recordatorios
-  const BILLING_PER_PT   = 0.30  // cobros, facturación, seguimiento de pagos
-  const TASKS_PER_PT     = 0.40  // tareas terapéuticas, seguimiento entre sesiones
-  const UNIQUE_PER_PT    = 0.65  // protocolos IA, tests psicométricos, notas asistidas, PDF clínico
+  const agenda   = parseFloat((patients * 0.55).toFixed(1))
+  const billing  = parseFloat((patients * 0.30).toFixed(1))
+  const tasks    = parseFloat((patients * 0.40).toFixed(1))
+  const unique   = parseFloat((patients * 0.65).toFixed(1))
+  const total    = parseFloat((agenda + billing + tasks + unique).toFixed(1))
+  const days     = Math.round(total * 12 / 8)
 
-  const agendaSaved    = Math.round(patients * AGENDA_PER_PT * 10) / 10
-  const billingSaved   = Math.round(patients * BILLING_PER_PT * 10) / 10
-  const tasksSaved     = Math.round(patients * TASKS_PER_PT * 10) / 10
-  const uniqueSaved    = Math.round(patients * UNIQUE_PER_PT * 10) / 10
-  const totalSaved     = Math.round((agendaSaved + billingSaved + tasksSaved + uniqueSaved) * 10) / 10
-  const daysPerYear    = Math.round(totalSaved * 12 / 8)
+  const animTotal = useAnimatedNumber(total)
+  const animDays  = useAnimatedNumber(days, 0)
 
-  const bars = [
-    { label: 'Agenda y reagendas',            h: agendaSaved,  color: 'bg-primary-500' },
-    { label: 'Cobros y facturación',           h: billingSaved, color: 'bg-accent-500' },
-    { label: 'Tareas y seguimiento',           h: tasksSaved,   color: 'bg-purple-500' },
-    { label: 'IA + protocolos + tests + PDF',  h: uniqueSaved,  color: 'bg-emerald-500' },
+  const items = [
+    { label: 'Agenda y reagendas',           val: agenda,   dot: '#7c3aed' },
+    { label: 'Cobros y facturación',          val: billing,  dot: '#0ea5e9' },
+    { label: 'Tareas y seguimiento',          val: tasks,    dot: '#10b981' },
+    { label: 'IA · Protocolos · Tests · PDF', val: unique,   dot: '#f59e0b' },
   ]
-  const maxH = Math.max(...bars.map(b => b.h), 0.1)
+  const maxVal = Math.max(...items.map(i => i.val), 0.1)
 
   return (
-    <section className="py-20 px-4">
-      <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-12">
-          <span className="inline-block px-3 py-1.5 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold mb-4">Para terapeutas</span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-3">
-            Descubre cuántas horas recuperas al mes
+    <section className="py-28 px-4 relative overflow-hidden" style={{ background: '#f8f7ff' }}>
+      {/* Subtle grid bg */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.4]"
+        style={{ backgroundImage: 'radial-gradient(circle, #c4b5fd 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+
+      <div className="relative max-w-5xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase mb-5"
+            style={{ background: 'rgba(124,58,237,0.08)', color: '#7c3aed', border: '1px solid rgba(124,58,237,0.2)' }}>
+            Para terapeutas
+          </span>
+          <h2 className="font-serif text-4xl sm:text-5xl font-bold text-slate-900 mb-4 leading-tight tracking-tight">
+            Descubre cuántas horas<br/>devuelves a tus pacientes
           </h2>
-          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
-            El papeleo no debería robarte tiempo de tus pacientes. Dinos cuántos tienes activos.
+          <p className="text-slate-500 max-w-lg mx-auto text-lg leading-relaxed">
+            El papeleo no debería costarte tiempo clínico. Mueve el control y descubre cuánto puedes recuperar.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Slider */}
-          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700">
-            <p className="text-xs font-semibold text-accent-600 uppercase tracking-widest mb-1">¿Cuántos pacientes activos tienes?</p>
-            <p className="text-6xl font-black text-slate-900 dark:text-white mb-1">{patients}</p>
-            <p className="text-slate-400 text-sm mb-6">pacientes activos</p>
+        <div className="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-4">
 
-            <div className="flex justify-between text-xs text-slate-400 mb-1">
-              <span>3</span><span>50</span>
-            </div>
-            <input
-              type="range" min={3} max={50} value={patients}
-              onChange={e => setPatients(Number(e.target.value))}
-              className="w-full accent-accent-600 mb-8"
-            />
+          {/* Left — result */}
+          <div className="rounded-[28px] p-8 flex flex-col justify-between relative overflow-hidden shadow-2xl"
+            style={{ background: 'linear-gradient(150deg, #1e0050 0%, #3b0d8a 50%, #0f172a 100%)' }}>
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: 'radial-gradient(ellipse at 70% 10%, rgba(167,139,250,0.2) 0%, transparent 55%)' }} />
 
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Lo que Psiconecta automatiza por ti</p>
-            <div className="space-y-3">
-              {bars.map(b => (
-                <div key={b.label}>
-                  <div className="flex justify-between text-sm mb-1">
-                    <span className="text-slate-600 dark:text-slate-300">{b.label}</span>
-                    <span className="font-semibold text-slate-800 dark:text-white">~{b.h} h/mes</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                    <div
-                      className={`h-full ${b.color} rounded-full transition-all duration-500`}
-                      style={{ width: `${(b.h / maxH) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
+            <div className="relative">
+              <p className="text-violet-300 text-xs font-semibold uppercase tracking-widest mb-6">Horas recuperadas al mes</p>
+              <div className="flex items-end gap-3 mb-2">
+                <span className="text-white font-black tabular-nums" style={{ fontSize: '88px', lineHeight: 1 }}>
+                  {animTotal}
+                </span>
+                <span className="text-violet-300 text-2xl font-medium mb-3">h</span>
+              </div>
+              <p className="text-violet-300 text-base font-medium mb-8">al mes · {patients} pacientes activos</p>
+
+              <div className="rounded-2xl px-5 py-4 mb-6"
+                style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <p className="text-white font-black text-4xl tabular-nums mb-1">{animDays}</p>
+                <p className="text-violet-300 text-sm">días al año devueltos a la atención clínica</p>
+              </div>
+
+              <p className="text-slate-500 text-xs">* Estimación basada en tiempos promedio reportados por psicólogos en plataformas similares.</p>
             </div>
+
+            <Link to="/register?role=therapist"
+              className="relative mt-6 flex items-center justify-center gap-2 py-3.5 rounded-2xl text-sm font-semibold text-white transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              style={{ background: 'linear-gradient(135deg, #7c3aed, #4f1fc4)' }}>
+              Empieza gratis como terapeuta
+              <ArrowRight size={15} strokeWidth={2} />
+            </Link>
           </div>
 
-          {/* Resultado */}
-          <div className="bg-gradient-to-br from-accent-600 to-primary-700 rounded-3xl p-8 text-white flex flex-col justify-between">
-            <div>
-              <p className="text-xs font-semibold text-accent-200 uppercase tracking-widest mb-4">Podrías recuperar</p>
-              <p className="text-7xl font-black mb-1 leading-none">{totalSaved}</p>
-              <p className="text-accent-200 text-lg mb-6">horas / mes</p>
+          {/* Right — slider + breakdown */}
+          <div className="rounded-[28px] p-8 bg-white shadow-sm border border-slate-100 flex flex-col gap-8">
 
-              <div className="bg-white/10 rounded-2xl px-5 py-4 mb-6">
-                <p className="text-3xl font-black">{daysPerYear} días al año</p>
-                <p className="text-accent-200 text-sm mt-1">devueltos a la atención clínica</p>
+            {/* Slider */}
+            <div>
+              <div className="flex items-end justify-between mb-6">
+                <div>
+                  <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-2">Pacientes activos</p>
+                  <p className="text-slate-900 font-black leading-none" style={{ fontSize: '72px', lineHeight: 1 }}>
+                    {patients}
+                  </p>
+                </div>
+                <div className="text-right">
+                  <p className="text-slate-400 text-xs mb-1">Promedio en RD</p>
+                  <p className="text-slate-600 text-sm font-medium">15 – 25 pacientes</p>
+                </div>
+              </div>
+
+              <style>{`
+                .calc-slider-therapist {
+                  -webkit-appearance: none; appearance: none;
+                  width: 100%; height: 6px; border-radius: 9999px; outline: none; cursor: pointer;
+                  background: linear-gradient(to right, #7c3aed ${((patients-3)/47)*100}%, #e2e8f0 ${((patients-3)/47)*100}%);
+                  transition: background 0.2s;
+                }
+                .calc-slider-therapist::-webkit-slider-thumb {
+                  -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
+                  background: #7c3aed; box-shadow: 0 0 0 4px rgba(124,58,237,0.15), 0 4px 12px rgba(124,58,237,0.4);
+                  transition: transform 0.15s, box-shadow 0.15s;
+                }
+                .calc-slider-therapist::-webkit-slider-thumb:hover {
+                  transform: scale(1.15); box-shadow: 0 0 0 6px rgba(124,58,237,0.15), 0 6px 20px rgba(124,58,237,0.5);
+                }
+                .calc-slider-therapist::-moz-range-thumb {
+                  width: 24px; height: 24px; border-radius: 50%; border: none;
+                  background: #7c3aed; box-shadow: 0 0 0 4px rgba(124,58,237,0.15);
+                }
+              `}</style>
+              <input type="range" min={3} max={50} value={patients}
+                onChange={e => setPatients(Number(e.target.value))}
+                className="calc-slider-therapist mb-1"
+              />
+              <div className="flex justify-between text-xs text-slate-400">
+                <span>3</span><span>50</span>
               </div>
             </div>
 
-            <div className="space-y-2 text-sm text-accent-100">
-              <p>✓ Agenda online con recordatorios automáticos</p>
-              <p>✓ Pagos vía PayPal sin gestión manual</p>
-              <p>✓ Tareas y seguimiento entre sesiones</p>
-              <p>✓ Protocolos TCC/DBT/ACT/EMDR + 45 tests + PDF clínico</p>
+            {/* Breakdown */}
+            <div>
+              <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-5">Lo que Psiconecta automatiza por ti</p>
+              <div className="space-y-5">
+                {items.map((item, i) => (
+                  <div key={item.label}>
+                    <div className="flex justify-between items-center mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full shrink-0" style={{ background: item.dot }} />
+                        <span className="text-slate-600 text-sm">{item.label}</span>
+                      </div>
+                      <span className="text-slate-900 text-sm font-bold tabular-nums">
+                        {item.val.toFixed(1)} h/mes
+                      </span>
+                    </div>
+                    <div className="h-[5px] rounded-full bg-slate-100 overflow-hidden">
+                      <div
+                        className="h-full rounded-full"
+                        style={{
+                          width: `${(item.val / maxVal) * 100}%`,
+                          background: item.dot,
+                          transition: 'width 0.65s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                          transitionDelay: `${i * 60}ms`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
