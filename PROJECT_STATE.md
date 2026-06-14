@@ -1,5 +1,34 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-14 (v51 — Tipografía global + Plan Pro + coherencia landing)*
+*Última actualización: 2026-06-14 (v52 — Fix FindTherapist + RLS profiles restaurado)*
+
+---
+
+## ⚡ Sesión 2026-06-14 (v52) — Fix crítico: FindTherapist + profiles RLS
+
+### Descripción
+Diagnóstico y resolución del error "No pudimos cargar los terapeutas" en la página Buscar del paciente. El problema tenía dos capas:
+
+1. **Causa raíz**: columnas `languages`, `years_experience`, `approaches`, `education` faltaban en `therapist_profiles` en producción (en `migration_payouts_and_payment_fields.sql` pero no ejecutadas). La query de FindTherapist fallaba con error de columna inexistente.
+
+2. **Daño colateral**: al ejecutar `migration_fix_findtherapist.sql`, el `DROP POLICY` en `profiles` tuvo éxito pero el `CREATE POLICY` falló (is_admin() no disponible en ese momento), dejando `profiles` con RLS activo sin ninguna política → nadie podía leer perfiles → "Usuario" en header + FindTherapist error.
+
+3. **Fix definitivo**: `EMERGENCIA_fix_profiles_rls.sql` — crea `is_admin()` primero, luego recrea `profiles_select` simplificada (`auth.uid() = id OR role = 'therapist' OR is_admin()`), agrega las 4 columnas faltantes, y recrea `tp_select`.
+
+### Verificación exitosa (4/4 true en Supabase)
+- `is_admin()` existe ✓
+- `profiles_select` existe ✓  
+- Columnas FindTherapist OK ✓
+- `tp_select` existe ✓
+
+### Archivos modificados (v52)
+| Archivo | Tipo | Cambio |
+|---------|------|--------|
+| `supabase/EMERGENCIA_fix_profiles_rls.sql` | NEW | Fix definitivo RLS profiles + columnas |
+| `supabase/migration_fix_findtherapist.sql` | NEW | Migración auxiliar (ejecutar con precaución) |
+| `src/pages/patient/FindTherapist.jsx` | MODIFIED | Error catch muestra mensaje real de Supabase |
+
+### SQL ejecutado en producción
+`EMERGENCIA_fix_profiles_rls.sql` — verificación: 4/4 true
 
 ---
 

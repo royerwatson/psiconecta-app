@@ -82,7 +82,9 @@ export default function FindTherapist() {
       setTherapists(withRating)
     } catch (err) {
       console.error('fetchTherapists error:', err)
-      setFetchError('No pudimos cargar los terapeutas. Intenta de nuevo.')
+      // Muestra el mensaje real de Supabase para facilitar el diagnóstico en producción
+      const detail = err?.message ?? err?.details ?? JSON.stringify(err)
+      setFetchError(`No pudimos cargar los terapeutas. ${detail}`)
     } finally {
       setLoading(false)
     }
