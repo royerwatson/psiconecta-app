@@ -178,6 +178,7 @@ export default function LandingPage() {
               <Link to="/terapeutas"   className="hover:text-primary-600 transition-colors">Terapeutas</Link>
               <Link to="/blog"         className="hover:text-primary-600 transition-colors">Blog</Link>
               <Link to="/pricing"      className="hover:text-primary-600 transition-colors">Planes</Link>
+              <Link to="/regalo"       className="hover:text-primary-600 transition-colors flex items-center gap-1">🎁 Regalar</Link>
             </nav>
 
             <div className="flex items-center gap-2">
@@ -526,6 +527,7 @@ export default function LandingPage() {
               { label: 'Ver terapeutas',         href: '/terapeutas' },
               { label: 'Blog de salud mental',   href: '/blog' },
               { label: 'Planes y precios',       href: '/pricing' },
+              { label: 'Regalar sesiones 🎁',    href: '/regalo' },
               { label: 'Recursos de crisis',     href: '/patient/crisis' },
             ]} />
 

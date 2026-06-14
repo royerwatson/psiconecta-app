@@ -620,3 +620,71 @@ export function newMessageEmail({
     </div>
   `)
 }
+
+export function giftCardEmail({
+  recipientName,
+  senderName,
+  message,
+  code,
+  amountUsd,
+  redeemUrl,
+}: {
+  recipientName: string
+  senderName:    string
+  message?:      string
+  code:          string
+  amountUsd:     number
+  redeemUrl:     string
+}) {
+  return baseLayout(`
+    <p style="margin:0 0 6px;font-size:22px;font-weight:800;color:#1e293b;">
+      🎁 Tienes un regalo, ${recipientName}
+    </p>
+    <p style="margin:0 0 28px;font-size:15px;color:#64748b;">
+      <strong>${senderName}</strong> quiere regalarte sesiones de terapia online en Psiconecta.
+    </p>
+
+    <!-- Gift card visual -->
+    <div style="background:linear-gradient(135deg,#4f46e5 0%,#7e22ce 100%);border-radius:20px;padding:32px;text-align:center;margin-bottom:28px;">
+      <p style="margin:0 0 4px;font-size:13px;color:#c4b5fd;font-weight:600;letter-spacing:1px;text-transform:uppercase;">Tarjeta de regalo</p>
+      <p style="margin:0 0 16px;font-size:42px;font-weight:900;color:#ffffff;">$${amountUsd} USD</p>
+      <p style="margin:0 0 4px;font-size:12px;color:#a78bfa;">De ${senderName} → Para ${recipientName}</p>
+      <div style="background:rgba(255,255,255,0.15);border-radius:12px;padding:12px 24px;display:inline-block;margin-top:16px;">
+        <p style="margin:0;font-size:11px;color:#c4b5fd;letter-spacing:1px;">CÓDIGO DE CANJE</p>
+        <p style="margin:4px 0 0;font-size:24px;font-weight:800;color:#ffffff;letter-spacing:4px;">${code}</p>
+      </div>
+    </div>
+
+    ${message ? `
+    <!-- Mensaje personal -->
+    <div style="background:#eef2ff;border-left:4px solid #4f46e5;border-radius:8px;padding:16px 20px;margin-bottom:28px;">
+      <p style="margin:0 0 6px;font-size:12px;color:#6366f1;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Mensaje de ${senderName}</p>
+      <p style="margin:0;font-size:15px;color:#334155;font-style:italic;">"${message}"</p>
+    </div>
+    ` : ''}
+
+    <!-- Instrucciones -->
+    <div style="background:#f8fafc;border-radius:12px;padding:20px 24px;margin-bottom:28px;">
+      <p style="margin:0 0 12px;font-size:14px;font-weight:700;color:#1e293b;">¿Cómo usar tu regalo?</p>
+      <table cellpadding="0" cellspacing="0">
+        ${[
+          ['1.', 'Crea una cuenta gratuita en Psiconecta (o inicia sesión si ya tienes una)'],
+          ['2.', 'Ve a tu perfil → "Canjear código de regalo"'],
+          ['3.', `Ingresa el código <strong>${code}</strong>`],
+          ['4.', 'Usa tu crédito para reservar con el terapeuta que elijas'],
+        ].map(([n, t]) => `<tr>
+          <td style="padding:6px 12px 6px 0;font-size:14px;font-weight:800;color:#4f46e5;vertical-align:top;">${n}</td>
+          <td style="padding:6px 0;font-size:14px;color:#334155;">${t}</td>
+        </tr>`).join('')}
+      </table>
+    </div>
+
+    <div style="text-align:center;">
+      ${btn('Canjear mi regalo →', redeemUrl)}
+    </div>
+
+    <p style="margin:24px 0 0;font-size:12px;color:#94a3b8;text-align:center;">
+      Este crédito es válido por 12 meses · Válido para cualquier terapeuta en Psiconecta
+    </p>
+  `)
+}

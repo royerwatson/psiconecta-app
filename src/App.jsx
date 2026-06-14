@@ -92,6 +92,8 @@ const TermsPage              = lazy(() => import('@/pages/public/TermsPage'))
 const PrivacyPage            = lazy(() => import('@/pages/public/PrivacyPage'))
 const RefundPage             = lazy(() => import('@/pages/public/RefundPage'))
 const NotFoundPage           = lazy(() => import('@/pages/public/NotFoundPage'))
+const GiftPage               = lazy(() => import('@/pages/public/GiftPage'))
+const RedeemGiftPage         = lazy(() => import('@/pages/patient/RedeemGiftPage'))
 const AppEntry               = lazy(() => import('@/pages/shared/AppEntry'))
 
 // ── Fallback de carga ─────────────────────────────────────────────────────
@@ -141,6 +143,8 @@ export default function App() {
           <Route path="/privacidad"      element={<PrivacyPage />} />
           <Route path="/reembolsos"      element={<RefundPage />} />
           <Route path="/pricing"         element={<PricingPage />} />
+          <Route path="/regalo"          element={<GiftPage />} />
+          <Route path="/canjear"         element={<RedeemGiftPage />} />
           <Route path="/auth/callback"   element={<AuthCallback />} />
 
           {/* Auth — pacientes y terapeutas */}

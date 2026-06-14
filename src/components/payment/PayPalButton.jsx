@@ -20,6 +20,7 @@
  *   isUrgent      — boolean, aplica el 30% extra
  *   priceBase     — precio base de la sesión (USD)
  *   therapistName — nombre del terapeuta (para el resumen en PayPal)
+ *   creditUsed    — (opcional) crédito de gift card a descontar (USD)
  *   onSuccess     — callback cuando el pago es exitoso
  *   onError       — callback con mensaje de error
  */
@@ -31,6 +32,7 @@ export default function PayPalButton({
   isUrgent,
   priceBase,
   therapistName,
+  creditUsed = 0,
   onSuccess,
   onError,
 }) {
@@ -88,7 +90,7 @@ export default function PayPalButton({
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ therapistId, scheduledAt, isUrgent, priceBase, therapistName }),
+            body: JSON.stringify({ therapistId, scheduledAt, isUrgent, priceBase, therapistName, creditUsed: creditUsed > 0 ? creditUsed : undefined }),
           }
         )
         const data = await res.json()

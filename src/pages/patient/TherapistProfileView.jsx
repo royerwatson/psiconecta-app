@@ -15,7 +15,7 @@ import { useCurrencyContext } from '@/context/CurrencyContext'
 import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
 import toast from 'react-hot-toast'
-import { Star, MessageCircle, Calendar, Search, Zap } from 'lucide-react'
+import { Star, MessageCircle, Calendar, Search, Zap, Gift } from 'lucide-react'
 
 /** Barra de distribución de estrellas (5→1) */
 function RatingBar({ star, count, total }) {
@@ -47,8 +47,17 @@ export default function TherapistProfileView() {
   const [bookForm, setBookForm] = useState({ date: '', time: '' })
   const [booking, setBooking] = useState(false)
   const [bookStep, setBookStep] = useState('form') // 'form' | 'payment' | 'success'
+  const [creditBalance, setCreditBalance] = useState(0)
+  const [applyCredit, setApplyCredit] = useState(false)
 
   useEffect(() => { fetchTherapist() }, [therapistId])
+
+  // Cargar balance de crédito del paciente
+  useEffect(() => {
+    if (!user) return
+    supabase.rpc('get_patient_credit_balance', { p_user_id: user.id })
+      .then(({ data }) => setCreditBalance(data ?? 0))
+  }, [user])
 
   // Si el terapeuta desactiva urgentes y hoy estaba seleccionado, limpiar la fecha
   useEffect(() => {
@@ -398,7 +407,10 @@ export default function TherapistProfileView() {
           )}
 
           {/* PASO 2: Pago PayPal */}
-          {bookStep === 'payment' && bookingPreview && (
+          {bookStep === 'payment' && bookingPreview && (() => {
+            const creditApplied = applyCredit ? Math.min(creditBalance, bookingPreview.price) : 0
+            const paypalAmount  = Math.max(0, bookingPreview.price - creditApplied)
+            return (
             <>
               <div className="bg-warm-50 rounded-xl p-4 text-sm">
                 <p className="font-semibold text-warm-800 mb-2">Resumen de tu cita</p>
@@ -416,21 +428,81 @@ export default function TherapistProfileView() {
                   <span>Hora</span>
                   <span className="font-medium">{bookForm.time}</span>
                 </div>
+                {creditApplied > 0 && (
+                  <div className="flex justify-between text-green-600 mt-1">
+                    <span>Crédito aplicado</span>
+                    <span className="font-medium">- ${creditApplied.toFixed(2)} USD</span>
+                  </div>
+                )}
                 <div className="flex justify-between text-warm-900 font-bold mt-2 pt-2 border-t border-warm-200">
                   <span>Total</span>
-                  <span>{formatWithLocal(bookingPreview.price)}</span>
+                  <span>{paypalAmount > 0 ? formatWithLocal(paypalAmount) : <span className="text-green-600">¡Cubierto con crédito!</span>}</span>
                 </div>
               </div>
 
-              <PayPalButton
-                therapistId={therapistId}
-                scheduledAt={new Date(`${bookForm.date}T${bookForm.time}`).toISOString()}
-                isUrgent={bookingPreview.urgent}
-                priceBase={therapist.price_per_session}
-                therapistName={therapist.profile?.full_name ?? 'el terapeuta'}
-                onSuccess={handlePaymentSuccess}
-                onError={(msg) => toast.error(msg)}
-              />
+              {/* Banner de crédito disponible */}
+              {creditBalance > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setApplyCredit(a => !a)}
+                  className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all text-sm ${
+                    applyCredit
+                      ? 'border-green-400 bg-green-50 text-green-700'
+                      : 'border-warm-200 bg-white text-warm-600 hover:border-primary-300'
+                  }`}
+                >
+                  <span className="flex items-center gap-2">
+                    <Gift size={15} strokeWidth={1.8} className={applyCredit ? 'text-green-500' : 'text-primary-400'} />
+                    Tienes <strong>${Number(creditBalance).toFixed(2)} USD</strong> en crédito de regalo
+                  </span>
+                  <span className={`text-xs font-semibold ${applyCredit ? 'text-green-600' : 'text-primary-500'}`}>
+                    {applyCredit ? '✓ Aplicado' : 'Aplicar'}
+                  </span>
+                </button>
+              )}
+
+              {paypalAmount > 0 ? (
+                <PayPalButton
+                  therapistId={therapistId}
+                  scheduledAt={new Date(`${bookForm.date}T${bookForm.time}`).toISOString()}
+                  isUrgent={bookingPreview.urgent}
+                  priceBase={therapist.price_per_session}
+                  therapistName={therapist.profile?.full_name ?? 'el terapeuta'}
+                  creditUsed={creditApplied}
+                  onSuccess={handlePaymentSuccess}
+                  onError={(msg) => toast.error(msg)}
+                />
+              ) : (
+                // Sesión cubierta 100% con crédito — no necesita PayPal
+                <button
+                  type="button"
+                  onClick={async () => {
+                    const { data: { session: authSession } } = await supabase.auth.getSession()
+                    const res = await fetch(
+                      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-paypal-order`,
+                      {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authSession?.access_token}` },
+                        body: JSON.stringify({
+                          therapistId,
+                          scheduledAt: new Date(`${bookForm.date}T${bookForm.time}`).toISOString(),
+                          isUrgent: bookingPreview.urgent,
+                          priceBase: therapist.price_per_session,
+                          therapistName: therapist.profile?.full_name ?? 'el terapeuta',
+                          creditUsed: creditApplied,
+                          freeWithCredit: true,
+                        }),
+                      }
+                    )
+                    const data = await res.json()
+                    if (!res.ok) { toast.error(data.error ?? 'Error procesando'); return }
+                    handlePaymentSuccess(data.bookingId)
+                  }}
+                  className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors"
+                >
+                  Confirmar cita sin pago adicional →
+                </button>
+              )}
 
               <p className="text-[11px] text-warm-400 text-center leading-relaxed">
                 El cobro se realiza en <strong>USD</strong>. La conversión a tu moneda local
@@ -442,7 +514,8 @@ export default function TherapistProfileView() {
                 ← Cambiar fecha u hora
               </button>
             </>
-          )}
+            )
+          })()}
 
           {/* PASO 3: Éxito */}
           {bookStep === 'success' && (

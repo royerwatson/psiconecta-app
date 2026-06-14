@@ -1,5 +1,103 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-14 (v41 — PWA Service Worker fix + §12 Staging/Monitoring)*
+*Última actualización: 2026-06-14 (v43 — Gift Cards system)*
+
+---
+
+## ⚡ Sesión 2026-06-14 (v43) — Sistema de Gift Cards 🎁
+
+### Arquitectura
+
+**Flujo completo:**
+1. Cualquier persona (sin cuenta) entra a `/regalo`
+2. Elige monto ($50/$100/$150 o libre ≥ $50), llena datos del remitente y destinatario + mensaje
+3. Paga vía PayPal → `create-gift-order` crea la orden, `capture-gift-payment` la activa
+4. El destinatario recibe email con código `PSICO-XXXX-XXXX` y botón "Canjear mi regalo"
+5. Destinatario entra a `/canjear?code=PSICO-XXXX-XXXX` (requiere login como paciente)
+6. `redeem-gift-card` valida el código, marca como canjeado, agrega crédito en `patient_credits`
+7. En el checkout de TherapistProfileView aparece el banner de crédito disponible — el paciente lo aplica con un click
+
+**Tablas nuevas:**
+- `gift_cards` — código, monto, remitente, destinatario, estado (pending_payment → paid → redeemed), expiración 1 año
+- `patient_credits` — créditos por usuario (source: gift_card/refund/promo), con `get_patient_credit_balance()` SECURITY DEFINER
+- `session_payments` — nuevas columnas `credit_used_usd` y `gift_card_id`
+
+### Archivos creados/modificados (v43)
+
+| Archivo | Tipo | Descripción |
+|---------|------|-------------|
+| `supabase/migration_gift_cards.sql` | NEW | Tablas, índices, RLS, función de balance |
+| `supabase/functions/create-gift-order/index.ts` | NEW | Crea orden PayPal (endpoint público) |
+| `supabase/functions/capture-gift-payment/index.ts` | NEW | Captura pago, activa gift card, envía email |
+| `supabase/functions/redeem-gift-card/index.ts` | NEW | Valida código, agrega crédito al paciente |
+| `supabase/functions/_shared/email.ts` | MODIFIED | Añadida `giftCardEmail()` — template purple gradient con código en display grande |
+| `src/pages/public/GiftPage.jsx` | NEW | `/regalo` — página pública con 3 pasos: form → PayPal → éxito |
+| `src/pages/patient/RedeemGiftPage.jsx` | NEW | `/canjear` — canje de código (requiere login) |
+| `src/components/payment/PayPalButton.jsx` | MODIFIED | Prop `creditUsed` → se pasa a `create-paypal-order` |
+| `src/pages/patient/TherapistProfileView.jsx` | MODIFIED | Carga balance en `useEffect`, banner "Aplicar crédito" en checkout paso 2 |
+| `src/pages/public/LandingPage.jsx` | MODIFIED | "🎁 Regalar" en navbar + "Regalar sesiones 🎁" en footer |
+| `src/App.jsx` | MODIFIED | Rutas `/regalo` y `/canjear` |
+
+### Pendientes de ejecución manual
+
+```bash
+# 1. Limpiar lock file y hacer commit+push
+rm ~/Documents/Claude/Projects/Psiconecta\ App/.git/index.lock
+cd ~/Documents/Claude/Projects/Psiconecta\ App
+git add -A && git commit -m "feat: gift cards system" && git push origin main
+
+# 2. Ejecutar SQL en Supabase Dashboard → SQL Editor
+# Archivo: supabase/migration_gift_cards.sql
+
+# 3. Deploy Edge Functions
+supabase functions deploy create-gift-order
+supabase functions deploy capture-gift-payment
+supabase functions deploy redeem-gift-card
+```
+
+### Seguridad
+- `create-gift-order` y `capture-gift-payment`: endpoints públicos (no requieren JWT) — necesario porque el comprador puede no tener cuenta
+- `redeem-gift-card`: requiere JWT de paciente autenticado
+- Race condition prevenida: `redeem-gift-card` hace UPDATE con `.eq('status', 'paid')` como guard atómico antes de insertar crédito; revierte si falla
+- Idempotencia: `capture-gift-payment` verifica si la order ya fue procesada antes de capturar
+- Códigos sin caracteres ambiguos: charset `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (sin O, 0, I, 1)
+
+---
+
+## ⚡ Sesión 2026-06-14 (v42) — Auditoría de seguridad + fixes
+
+### Hallazgos y resoluciones
+
+| Hallazgo | Severidad | Estado |
+|----------|-----------|--------|
+| `worker-src` CSP bloqueaba SW | Medio | ✅ Resuelto (v41) |
+| `capture-subscription-payment` sin validación JWT | Medio | ✅ Resuelto (v42) |
+| 9 vulnerabilidades HIGH en npm audit (tooling) | Medio | ✅ `npm audit fix` ejecutado |
+| `apple-mobile-web-app-capable` deprecado | Bajo | ✅ Resuelto (v42) |
+| `dangerouslySetInnerHTML` en BlogPostPage | Info | ✅ Ya protegido con DOMPurify |
+| Sin `eval()` ni `.innerHTML =` en frontend | Info | ✅ Confirmado |
+| Secrets hardcodeados | Info | ✅ Ninguno — solo `import.meta.env.*` y `Deno.env.get()` |
+
+**Archivos modificados (v42):**
+- `supabase/functions/capture-subscription-payment/index.ts` — JWT validation opcional: si el header `Authorization` está presente, verifica JWT con Supabase y hace cross-check `user.id === therapistId`. Si no coinciden → 403. Sin JWT → procede (flujo redirect, orderId de PayPal es prueba suficiente).
+- `src/pages/payment/SubscriptionSuccess.jsx` — ahora intenta adjuntar JWT via `supabase.auth.getSession()` si la sesión sigue activa en el flujo redirect.
+- `index.html` — agregado `<meta name="mobile-web-app-capable">` (estándar actual); mantenido `apple-mobile-web-app-capable` para compatibilidad iOS.
+
+**Deploy:** `supabase functions deploy capture-subscription-payment` + commit + push ✅ 2026-06-14
+
+**Fix adicional — Open Redirect (react-router CVE):**
+- `src/components/ui/NotificationBell.jsx` — `handleClick` ahora valida que `notif.link` empiece con `/` y no con `//` antes de llamar `navigate()`. Bloquea redirect a dominios externos vía protocol-relative URLs (`//evil.com`). Commit + push ✅ 2026-06-14
+
+**PWA Screenshots ✅ 2026-06-14:**
+- `public/screenshots/screenshot-desktop.png` — 1280×800, landing page, `form_factor: "wide"`
+- `public/screenshots/screenshot-mobile.png` — 390×844, landing page móvil, `form_factor: "narrow"`
+- `public/manifest.webmanifest` — sección `screenshots` agregada. Elimina warnings de Chrome "Richer PWA Install UI". Banner de instalación enriquecido en Android.
+
+**Playwright E2E — primera ejecución ✅ 2026-06-14:**
+```
+BASE_URL=https://psiconecta.app npm run test:e2e
+20 passed (23.6s) — Chromium + Mobile (Pixel 7)
+```
+Cobertura: landing, pricing, directorio, blog, páginas legales, 404, login form, registro, credenciales inválidas, redirect de rutas privadas.
 
 ---
 
