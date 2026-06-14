@@ -1,5 +1,41 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-14 (v44 — Calculadoras interactivas premium)*
+*Última actualización: 2026-06-14 (v45 — Análisis clínico longitudinal)*
+
+---
+
+## ⚡ Sesión 2026-06-14 (v45) — Análisis clínico longitudinal
+
+### Descripción
+Nuevo tab **"Evolución"** en `PatientDetail` (vista del terapeuta) con análisis longitudinal completo del paciente.
+
+### Componente: `LongitudinalAnalysis.jsx`
+`src/components/psychometrics/LongitudinalAnalysis.jsx`
+
+**Datos que consume:**
+- `therapeutic_relationships` → relación activa terapeuta-paciente
+- `test_assignments` + `test_sessions` (status=completed) + `test_results` → scores históricos con `raw_score`, `adjusted_score`, `severity_label`, `score_delta`, `is_clinically_significant`
+- `ai_checkins` → mood_score + risk_level por semana (últimas 12 semanas)
+
+**Secciones:**
+
+1. **Tarjetas resumen por test** — Una card por cada test aplicado al paciente. Muestra último score, severity label con color semántico (verde/ámbar/rojo), flecha de tendencia (TrendingUp/Down/Minus), badge "↓ Cambio significativo" si `is_clinically_significant=true`, y conteo de aplicaciones. Clic filtra la gráfica.
+
+2. **Gráfica de evolución** — `LineChart` de Recharts. Una línea por test, paleta de 6 colores, puntos interactivos, tooltip custom con score + severity. Líneas de referencia clínica hardcodeadas:
+   - PHQ-9: 10 (moderado) / 20 (grave)
+   - GAD-7: 10 (moderado) / 15 (grave)
+   - PCL-5: 33 (PTSD probable)
+   - AUDIT: 8 (riesgo) / 15 (dependencia)
+   - PHQ-15: 10 / ISI: 15
+
+3. **Resumen semanal de check-ins** — Colapsable. Gráfica de mood promedio por semana + línea de referencia en 4/10. Tabla: semana, nº check-ins, ánimo promedio (color por valor), alertas de riesgo alto.
+
+### Archivos modificados (v45)
+| Archivo | Tipo | Cambio |
+|---------|------|--------|
+| `src/components/psychometrics/LongitudinalAnalysis.jsx` | NEW | Componente completo |
+| `src/pages/therapist/PatientDetail.jsx` | MODIFIED | Tab "Evolución" + import + TrendingUp icon |
+
+**Commit:** `b1d817a`
 
 ---
 
