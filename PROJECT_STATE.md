@@ -655,7 +655,72 @@ VITE_PAYPAL_CLIENT_ID=...
 
 ---
 
-## 11. Bugs Corregidos
+## 11. Staging, Monitoreo y Tests
+
+### Sentry (monitoreo de errores) — ✅ Activo en producción
+
+Código integrado en `src/lib/sentry.js`, init en `main.jsx`, usuario asociado por `id/rol` en `authStore`. `sendDefaultPii: false`; ids de pacientes saneados de URLs antes de enviar.
+
+| Variable | Entorno | Estado |
+|----------|---------|--------|
+| `VITE_SENTRY_DSN` | Production + Preview | ✅ configurado 2026-06-09 |
+| `VITE_SENTRY_ENVIRONMENT` | Production = `production` · Preview = `preview` | ✅ configurado 2026-06-09 |
+
+Plan gratuito: 5K errores/mes. Sin DSN, Sentry es no-op en dev local.
+
+---
+
+### Staging con Vercel Preview — ⚠️ Disponible, no adoptado como flujo
+
+Vercel genera automáticamente una Preview URL por cada push a cualquier rama distinta de `main` (`psiconecta-app-git-<rama>-xxx.vercel.app`).
+
+**Flujo recomendado (pendiente de adoptar):**
+```bash
+git checkout -b dev
+# trabajar + push a dev → Preview URL disponible
+git checkout main && git merge dev && git push   # solo cuando preview OK
+```
+
+- Recomendado: proteger rama `main` en Vercel → Settings → Git → Production Branch.
+- ⚠️ Las previews comparten la BD de producción. Para cambios de esquema arriesgados crear un segundo proyecto Supabase (free tier) y apuntar las env vars de Preview a él.
+
+---
+
+### Tests E2E (Playwright) — 🔴 Instalado, nunca ejecutado
+
+Configuración en `playwright.config.js` + smoke tests en `tests/e2e/smoke.spec.js` (rutas públicas + auth básico, sin credenciales reales).
+
+**Primer uso (descarga browsers — una sola vez):**
+```bash
+npx playwright install chromium
+```
+
+**Correr:**
+```bash
+npm run test:e2e                                                          # build local + vite preview automático
+BASE_URL=https://psiconecta-app-git-dev-xxx.vercel.app npm run test:e2e  # contra preview
+npm run test:e2e:prod                                                     # contra producción (solo lectura)
+```
+
+**Siguiente nivel (cuando PayPal sandbox sea estable):**
+- `tests/e2e/booking.spec.js` — flujo completo reserva + pago con cuenta sandbox de PayPal.
+- Variables en env vars: `E2E_PATIENT_EMAIL` / `E2E_PATIENT_PASSWORD`.
+- Integrar en GitHub Actions para correr en cada PR a `main`.
+
+---
+
+### Checklist de despliegue seguro
+
+| Paso | Estado actual |
+|------|--------------|
+| `npm run build` → 0 errores | ⚠️ No se corre en local — Vercel compila en su CI |
+| `npm run test:e2e` en local o contra preview | 🔴 Nunca ejecutado |
+| Merge a `main` + push | ✅ Se hace |
+| Verificar Sentry sin errores nuevos (~5 min post-deploy) | ✅ Se revisa |
+
+---
+
+## 12. Bugs Corregidos
 
 ### Sesión 2026-06-09 (v31) — Preload fuente crítica + fix forced reflow
 
