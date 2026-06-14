@@ -15,9 +15,15 @@ import toast from 'react-hot-toast'
 import { Crown, Star, Zap, TrendingUp, DollarSign, Users, Check } from 'lucide-react'
 
 const PLAN_CONFIG = {
-  basic:   { label: 'Básico',   color: 'bg-warm-100 text-warm-600',       Icon: Zap,   price: 0,   commission: 20  },
-  pro:     { label: 'Pro',      color: 'bg-primary-100 text-primary-700', Icon: Star,  price: 79.99,  commission: 10  },
-  premium: { label: 'Premium',  color: 'bg-amber-100 text-amber-700',     Icon: Crown, price: 79,  commission: 10  },
+  basic:   { label: 'Básico',   color: 'bg-warm-100 text-warm-600',       Icon: Zap,   priceMonthly: 0,      commission: 20  },
+  pro:     { label: 'Pro',      color: 'bg-primary-100 text-primary-700', Icon: Star,  priceMonthly: 79.99,  commission: 10  },
+  premium: { label: 'Premium',  color: 'bg-amber-100 text-amber-700',     Icon: Crown, priceMonthly: 79.99,  commission: 10  },
+}
+
+// MRR mensual equivalente según ciclo de facturación
+const monthlyEquivalent = (plan, billingCycle) => {
+  if (plan === 'basic') return 0
+  return billingCycle === 'annual' ? (799 / 12) : (PLAN_CONFIG[plan]?.priceMonthly ?? 0)
 }
 
 export default function AdminSubscriptions() {
@@ -33,7 +39,7 @@ export default function AdminSubscriptions() {
     const { data } = await supabase
       .from('therapist_profiles')
       .select(`
-        user_id, subscription_plan, commission_rate, plan_expires_at,
+        user_id, subscription_plan, commission_rate, plan_expires_at, billing_cycle,
         price_per_session, sessions_count,
         profile:profiles!therapist_profiles_user_id_fkey(full_name, avatar_url, email)
       `)
@@ -49,7 +55,8 @@ export default function AdminSubscriptions() {
       .from('therapist_profiles')
       .update({
         subscription_plan: newPlan,
-        plan_expires_at: newPlan === 'basic' ? null : new Date(Date.now() + 30 * 86400000).toISOString(),
+        billing_cycle:     newPlan === 'basic' ? 'monthly' : undefined, // conservar ciclo si se mantiene pro
+        plan_expires_at:   newPlan === 'basic' ? null : new Date(Date.now() + 30 * 86400000).toISOString(),
       })
       .eq('user_id', userId)
 
@@ -63,10 +70,12 @@ export default function AdminSubscriptions() {
   }
 
   // Métricas
-  const mrr = therapists.reduce((sum, t) => sum + (PLAN_CONFIG[t.subscription_plan]?.price ?? 0), 0)
-  const proCount     = therapists.filter(t => t.subscription_plan === 'pro').length
-  const premiumCount = therapists.filter(t => t.subscription_plan === 'premium').length
-  const basicCount   = therapists.filter(t => t.subscription_plan === 'basic').length
+  const mrr = therapists.reduce((sum, t) =>
+    sum + monthlyEquivalent(t.subscription_plan, t.billing_cycle ?? 'monthly'), 0)
+  const proCount      = therapists.filter(t => t.subscription_plan === 'pro').length
+  const premiumCount  = therapists.filter(t => t.subscription_plan === 'premium').length
+  const basicCount    = therapists.filter(t => t.subscription_plan === 'basic').length
+  const annualCount   = therapists.filter(t => t.billing_cycle === 'annual' && t.subscription_plan !== 'basic').length
 
   const [search, setSearch] = useState('')
 
@@ -89,18 +98,18 @@ export default function AdminSubscriptions() {
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="bg-white border border-warm-100 rounded-2xl p-4">
           <p className="text-xs text-warm-400 font-medium mb-1">MRR Suscripciones</p>
-          <p className="text-2xl font-bold text-warm-900">${mrr}</p>
-          <p className="text-xs text-warm-400 mt-0.5">/mes en planes</p>
+          <p className="text-2xl font-bold text-warm-900">${mrr.toFixed(2)}</p>
+          <p className="text-xs text-warm-400 mt-0.5">equiv. mensual (anuales ÷ 12)</p>
         </div>
         <div className="bg-white border border-warm-100 rounded-2xl p-4">
-          <p className="text-xs text-warm-400 font-medium mb-1">Plan Premium</p>
-          <p className="text-2xl font-bold text-amber-600">{premiumCount}</p>
-          <p className="text-xs text-warm-400 mt-0.5">terapeutas · $79/mes c/u</p>
+          <p className="text-xs text-warm-400 font-medium mb-1">Suscriptores Pro</p>
+          <p className="text-2xl font-bold text-primary-600">{proCount + premiumCount}</p>
+          <p className="text-xs text-warm-400 mt-0.5">terapeutas · $79.99/mes</p>
         </div>
         <div className="bg-white border border-warm-100 rounded-2xl p-4">
-          <p className="text-xs text-warm-400 font-medium mb-1">Plan Pro</p>
-          <p className="text-2xl font-bold text-primary-600">{proCount}</p>
-          <p className="text-xs text-warm-400 mt-0.5">terapeutas · $39/mes c/u</p>
+          <p className="text-xs text-warm-400 font-medium mb-1">Ciclo Anual</p>
+          <p className="text-2xl font-bold text-green-600">{annualCount}</p>
+          <p className="text-xs text-warm-400 mt-0.5">terapeutas · $799/año</p>
         </div>
         <div className="bg-white border border-warm-100 rounded-2xl p-4">
           <p className="text-xs text-warm-400 font-medium mb-1">Plan Básico</p>
@@ -156,6 +165,9 @@ export default function AdminSubscriptions() {
                   <p className="text-xs text-warm-400 mt-0.5">{t.profile?.email}</p>
                   <p className="text-xs text-warm-500 mt-0.5">
                     Comisión: <strong>{(t.commission_rate * 100).toFixed(1)}%</strong>
+                    {t.billing_cycle === 'annual' && (
+                      <span className="ml-2 text-green-600 font-medium">· Anual ($799/año)</span>
+                    )}
                     {t.plan_expires_at && (
                       <span className="ml-2 text-warm-300">
                         · Vence: {new Date(t.plan_expires_at).toLocaleDateString('es-DO', { dateStyle: 'short' })}

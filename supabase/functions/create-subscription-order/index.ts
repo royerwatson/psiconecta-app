@@ -1,7 +1,9 @@
 /**
  * create-subscription-order
- * Crea una orden PayPal de $50 para la suscripción mensual del terapeuta.
- * Guarda el registro pendiente en subscription_payments con schema correcto.
+ * Crea una orden PayPal para la suscripción del terapeuta.
+ *   - Plan mensual: $79.99/mes
+ *   - Plan anual:   $799/año (~17% de descuento)
+ * Body: { plan: 'pro', billingCycle?: 'monthly' | 'annual' }
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -47,6 +49,15 @@ Deno.serve(async (req) => {
       .from('profiles').select('role').eq('id', user.id).single()
     if (profile?.role !== 'therapist') throw new Error('Solo terapeutas pueden suscribirse')
 
+    // ── Determinar ciclo y monto ──────────────────────────────────────────
+    const body         = await req.json().catch(() => ({}))
+    const billingCycle = body.billingCycle === 'annual' ? 'annual' : 'monthly'
+    const amount       = billingCycle === 'annual' ? 799.00 : 79.99
+    const amountStr    = amount.toFixed(2)
+    const description  = billingCycle === 'annual'
+      ? 'Psiconecta - Suscripcion anual Plan Pro (17% descuento)'
+      : 'Psiconecta - Suscripcion mensual Plan Pro'
+
     const baseUrl = Deno.env.get('PAYPAL_BASE_URL') ?? 'https://api-m.sandbox.paypal.com'
     const appUrl  = Deno.env.get('APP_URL') ?? 'https://psiconecta-app.vercel.app'
     const token   = await getPayPalToken()
@@ -62,8 +73,8 @@ Deno.serve(async (req) => {
         intent: 'CAPTURE',
         purchase_units: [{
           reference_id: user.id,
-          description:  'Psiconecta - Suscripcion mensual Plan Pro',
-          amount: { currency_code: 'USD', value: '79.99' },
+          description,
+          amount: { currency_code: 'USD', value: amountStr },
         }],
         application_context: {
           brand_name:          'Psiconecta',
@@ -82,14 +93,19 @@ Deno.serve(async (req) => {
     // Guardar en subscription_payments con el schema correcto
     const periodStart = new Date()
     const periodEnd   = new Date()
-    periodEnd.setDate(periodEnd.getDate() + 30)
+    if (billingCycle === 'annual') {
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1)
+    } else {
+      periodEnd.setDate(periodEnd.getDate() + 30)
+    }
 
     const { error: insertError } = await supabaseAdmin
       .from('subscription_payments')
       .insert({
         therapist_id:   user.id,
         plan:           'pro',
-        amount_usd:     79.99,
+        amount_usd:     amount,
+        billing_cycle:  billingCycle,
         paypal_order_id: order.id,
         status:         'pending',
         period_start:   periodStart.toISOString(),

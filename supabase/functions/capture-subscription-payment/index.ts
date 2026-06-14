@@ -82,7 +82,7 @@ Deno.serve(async (req) => {
     // Fuente 2: subscription_payments (si el insert funcionó)
     const { data: pendingPayment } = await supabaseAdmin
       .from('subscription_payments')
-      .select('id, therapist_id')
+      .select('id, therapist_id, billing_cycle')
       .eq('paypal_order_id', orderId)
       .eq('status', 'pending')
       .single()
@@ -94,9 +94,19 @@ Deno.serve(async (req) => {
       throw new Error('No se pudo identificar al terapeuta asociado a este pago')
     }
 
-    // ── Activar plan Pro (30 días) ────────────────────────────────────────
+    // ── Determinar ciclo de facturación ──────────────────────────────────
+    // Priorizar el registro en BD; si no existe, inferir por monto pagado
+    const billingCycle = pendingPayment?.billing_cycle
+      ?? (amountPaid >= 300 ? 'annual' : 'monthly')
+    const isAnnual = billingCycle === 'annual'
+
+    // ── Activar plan Pro ──────────────────────────────────────────────────
     const expiresAt = new Date()
-    expiresAt.setDate(expiresAt.getDate() + 30)
+    if (isAnnual) {
+      expiresAt.setFullYear(expiresAt.getFullYear() + 1)
+    } else {
+      expiresAt.setDate(expiresAt.getDate() + 30)
+    }
 
     // Usar .select() para verificar que el update afectó filas
     const { data: updatedRows, error: updateError } = await supabaseAdmin
@@ -104,6 +114,7 @@ Deno.serve(async (req) => {
       .update({
         subscription_plan: 'pro',
         plan_expires_at:   expiresAt.toISOString(),
+        billing_cycle:     billingCycle,
       })
       .eq('user_id', therapistId)
       .select('user_id, subscription_plan')
@@ -119,6 +130,7 @@ Deno.serve(async (req) => {
           user_id:           therapistId,
           subscription_plan: 'pro',
           plan_expires_at:   expiresAt.toISOString(),
+          billing_cycle:     billingCycle,
         }, { onConflict: 'user_id' })
       if (upsertError) throw new Error('Error en upsert del plan: ' + upsertError.message)
     }
@@ -133,6 +145,7 @@ Deno.serve(async (req) => {
           status:            'completed',
           paypal_capture_id: captureId,
           amount_usd:        amountPaid,
+          billing_cycle:     billingCycle,
           period_end:        expiresAt.toISOString(),
         })
         .eq('id', pendingPayment.id)
@@ -143,6 +156,7 @@ Deno.serve(async (req) => {
         therapist_id:      therapistId,
         plan:              'pro',
         amount_usd:        amountPaid,
+        billing_cycle:     billingCycle,
         paypal_order_id:   orderId,
         paypal_capture_id: captureId,
         status:            'completed',

@@ -1,5 +1,72 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-09 (v32 — Seguridad/infra: contenido clínico server-side, RGPD, contacto emergencia, Sentry, E2E, push)*
+*Última actualización: 2026-06-14 (v39 — Plan anual $799/año + billing_cycle)*
+
+---
+
+## ⚡ Sesión 2026-06-14 (v39) — Plan anual con descuento 17%
+
+**Archivos modificados:**
+- `supabase/migration_annual_billing.sql` — NUEVO: agrega `billing_cycle TEXT DEFAULT 'monthly' CHECK (monthly|annual)` a `therapist_profiles` y `subscription_payments`; índice `idx_therapist_profiles_billing_cycle`
+- `supabase/functions/create-subscription-order/index.ts` — acepta `billingCycle` en el body; monto $799 si anual, $79.99 si mensual; `period_end` +1 año si anual; guarda `billing_cycle` en `subscription_payments`
+- `supabase/functions/capture-subscription-payment/index.ts` — lee `billing_cycle` de `subscription_payments`; si anual → `plan_expires_at` +1 año; escribe `billing_cycle` en `therapist_profiles`; fallback por `amountPaid >= 300` si no hay registro previo
+- `src/components/payment/PayPalSubscriptionButton.jsx` — prop `billingCycle` (default `'monthly'`); ref `billingCycleRef` para capturar valor fresco en closure de PayPal; envía `{ plan: 'pro', billingCycle }` al Edge Function
+- `src/pages/therapist/SubscriptionPage.jsx` — estado `billingCycle`; toggle Mensual/Anual (resetea `showPayPal` al cambiar); precio dinámico con badge "−17%"; savings callout "$159.88 ahorrado/año"; CTA label dinámico; disclaimer dinámico; `fetchPlan` lee `billing_cycle` de BD
+- `src/pages/public/PricingPage.jsx` — estado `billing`; toggle Mensual/Anual sobre el grid; precio del plan Pro dinámico ($799/año con badge "−17%", savings "$159.88" en verde); CTA dinámico; nueva FAQ sobre diferencia mensual/anual
+- `src/pages/admin/AdminSubscriptions.jsx` — función `monthlyEquivalent(plan, billingCycle)`: anual = 799/12, mensual = 79.99; MRR calculado correctamente; nueva métrica "Ciclo Anual"; badge verde "Anual ($799/año)" en lista de terapeutas; `changePlan` limpia `billing_cycle` a 'monthly' al bajar a básico
+
+**SQL a ejecutar en Supabase (migration_annual_billing.sql):**
+```sql
+ALTER TABLE therapist_profiles ADD COLUMN IF NOT EXISTS billing_cycle TEXT NOT NULL DEFAULT 'monthly' CHECK (billing_cycle IN ('monthly', 'annual'));
+ALTER TABLE subscription_payments ADD COLUMN IF NOT EXISTS billing_cycle TEXT NOT NULL DEFAULT 'monthly' CHECK (billing_cycle IN ('monthly', 'annual'));
+CREATE INDEX IF NOT EXISTS idx_therapist_profiles_billing_cycle ON therapist_profiles (billing_cycle);
+```
+
+**Edge Functions a redesplegar:**
+```bash
+supabase functions deploy create-subscription-order
+supabase functions deploy capture-subscription-payment
+```
+
+---
+
+## ⚡ Sesión 2026-06-14 (v38) — Resumen de cambios
+
+**Build verificado: 0 errores (verificación sintáctica — build nativo en Mac).**
+
+**Estado de ejecución:**
+- [x] Push `main` ✅ 2026-06-14
+- [x] SQL `MIGRAR_AHORA.sql` ✅ ejecutado — bloques 4-9 aplicados: `is_anonymous`, RPC `get_public_reviews`, `deletion_requests`, `emergency_contacts`, `device_tokens`, 6 tests psicométricos (isi, pss10, dass21, spin, dast10, cssrs)
+- [x] SQL `seed_psychometrics_clinicas_nuevas.sql` ✅ ejecutado — seed completo para ISI, PSS-10, SPIN, DAST-10, C-SSRS (DASS-21 ya existía en `seed_psychometrics.sql`)
+- [ ] Verificación en producción: escalas nuevas visibles, realtime admin activo, CSV Payouts funcional
+
+**Escalas clínicas — 6 nuevas (v38):**
+- **`src/data/clinicalScales.js`** — de 4 a **10 escalas validadas**: ISI, PSS-10, DASS-21, SPIN, DAST-10, C-SSRS añadidas con esquema completo (`questions`, `bands`, `maxScore`, `reference`, `instruction`)
+- **`ClinicalScalesPage.jsx`** — THEME expandido de 4 a 9 colores (indigo, orange, teal, violet, red). Fix Sentry: `TypeError: Cannot read properties of undefined (reading 'pill')`. `SCALE_SLUG_MAP` actualizado con los 6 slugs nuevos — botón "Aplicar a paciente" ahora aparece en todas las escalas.
+- **`supabase/seed_psychometrics_clinicas_nuevas.sql`** — seed de 5 escalas con `test_sections`, `items`, `response_options`, `scoring_rules` e `interpretation_ranges`:
+  - ISI: 7 ítems, opciones por ítem (distintas etiquetas 0-4), 4 bandas de insomnio
+  - PSS-10: 10 ítems, 4 ítems inversos con valor ya embebido en `response_options` (evita `sum_reversed` — no está en el CHECK constraint), 3 bandas
+  - SPIN: 17 ítems, 3 subescalas (miedo/evitación/fisiológico) + total, 4 bandas, punto corte ≥19
+  - DAST-10: 10 ítems `multiple_choice` Sí/No, Q3 invertido con opciones propias, 5 bandas de riesgo
+  - C-SSRS: 6 ítems `multiple_choice`, `alert_threshold=1` en ítems 3-6, 3 subescalas (ideación/plan/conducta), `is_risk_level=TRUE` desde score ≥3
+- **Errores SQL corregidos durante ejecución:** `sum_reversed` no existe en constraint (→ reverso en options), `binary` no existe (→ `multiple_choice`), VALUES con columnas desiguales en DAST-10 Q10 (→ columna `alert_threshold` explícita con NULL)
+
+**Admin — lista de terapeutas (v38):**
+- `AdminTherapists.jsx`: query cambiada de `therapist_profiles` a `profiles` con LEFT JOIN — muestra todos los terapeutas registrados, incluso sin perfil completo
+- `Badge.jsx`: `VerificationBadge` maneja nuevo estado `incomplete` → badge "Perfil incompleto"
+- `AdminDashboard.jsx`: conteo revertido a `profiles` con `role='therapist'` para que coincida con la lista
+- Filtro "Pendientes" incluye `pending` e `incomplete`
+
+**FindTherapist / TherapistMatchPage (v38):**
+- Restauradas columnas `languages`, `years_experience`, `approaches`, `education` en los SELECT (ya existen en BD desde `migration_payouts_and_payment_fields.sql`)
+- Chips visuales bajo el bio en ambas páginas: años de experiencia (warm), idiomas (blue), enfoques (indigo/primary)
+
+**Realtime admin (v38):**
+- **`AdminAIAlerts.jsx`** — suscripción `postgres_changes INSERT` en `ai_checkins`. Cuando llega alerta high/medium: ítem prepended sin recargar, contadores actualizados, toast 8s con fondo rojo/amarillo. Chip "En tiempo real" + contador "+N nuevas en esta sesión" siempre visibles.
+- **`AdminTherapists.jsx`** — suscripción `postgres_changes INSERT` en `therapist_credentials`. Toast azul con nombre del terapeuta, lista auto-refrescada, banner "Nuevas credenciales subidas".
+
+**CSV export (v38):**
+- **`AdminPayouts.jsx`** — botón CSV en tab Historial. 11 columnas: ID, terapeuta, monto, estado, método, referencia, período desde/hasta, pagado en, creado en, nota. Solo visible cuando hay datos. Respeta el filtro de búsqueda activo.
+- `AdminSessions.jsx` ya tenía CSV desde v36.
 
 ---
 
@@ -16,7 +83,7 @@
 - [x] Sentry ✅ configurado 2026-06-09 — proyecto creado en sentry.io (org `psiconecta-ii`), `VITE_SENTRY_DSN` y `VITE_SENTRY_ENVIRONMENT` añadidas en Vercel (Production + Preview). Solo Error Monitoring + tracing 10%; Session Replay descartado por privacidad.
 - [ ] Firebase/FCM para push nativas (ver `PUSH_SETUP.md`) — secret `FCM_SERVICE_ACCOUNT` + apps Android/iOS
 - [ ] `npx playwright install chromium` y `npm run test:e2e` antes del próximo deploy
-- [ ] Restaurar columnas `languages/years_experience/approaches/education` en `FindTherapist.jsx` y `TherapistMatchPage.jsx` (ya existen en BD)
+- [x] Restaurar columnas `languages/years_experience/approaches/education` en `FindTherapist.jsx` y `TherapistMatchPage.jsx` ✅ 2026-06-14
 
 **Fixes v33 (2026-06-12) — incidente chat + hallazgos de consola:**
 - **CRÍTICO — chat roto (42501):** la política INSERT de `messages` no existía en
@@ -64,8 +131,7 @@
 - **Sidebar agrupado:** Dashboard · Personas (Terapeutas/Pacientes/Reseñas) ·
   Clínico (Alertas IA/Sesiones/Grupales) · Finanzas (Finanzas/Pagos/Reembolsos/
   Suscripciones) · Sistema (Estadísticas/Actividad/Elim. de datos).
-- Pendiente próxima sesión: realtime en alertas IA, 2FA admins, paginación en
-  Pacientes cuando crezca.
+- Pendiente próxima sesión: 2FA admins, paginación en Pacientes cuando crezca.
 
 **v35 (2026-06-12) — Contenido + UX premium: ✅ DESPLEGADO Y VERIFICADO**
 - **Blog ×2:** 5 artículos SEO nuevos (depresión, costo psicólogo RD, burnout,
@@ -449,8 +515,12 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Botón "Revisado" en vista de resultado de test (terapeuta)
 - [x] Tests completados aparecen en dashboard del terapeuta (CompletedTestsSection)
 - [x] DSM-5-TR y CIE-11 en español
-- [x] Escalas clínicas validadas (PHQ-9, GAD-7, AUDIT, PCL-5)
-- [x] Escalas: botón "Aplicar a paciente" — crea test_assignment directo al paciente (PHQ9→phq9, GAD7→gad7, AUDIT→audit, PCL5→pcl5)
+- [x] Escalas clínicas validadas (10 escalas: PHQ-9, GAD-7, AUDIT, PCL-5, ISI, PSS-10, DASS-21, SPIN, DAST-10, C-SSRS)
+- [x] Escalas: botón "Aplicar a paciente" en todas las escalas — crea test_assignment directo al paciente
+- [x] Seed psicométrico completo para ISI, PSS-10, SPIN, DAST-10, C-SSRS (secciones, ítems, opciones, scoring rules, interpretation ranges)
+- [x] Realtime en alertas IA admin (INSERT ai_checkins → toast + prepend sin recargar)
+- [x] Realtime en verificaciones admin (INSERT therapist_credentials → toast + auto-refresh)
+- [x] CSV export en AdminPayouts (tab Historial, 11 columnas, respeta búsqueda activa)
 - [x] Plan de crisis (Safety Planning Intervention)
 - [x] Biblioteca terapéutica (40+ ejercicios)
 - [x] Terapeuta asigna ejercicios desde la biblioteca al ver perfil del paciente (tab Tareas → "Desde biblioteca")
@@ -834,7 +904,9 @@ CREATE POLICY "profiles_insert" ON profiles FOR INSERT
 - [ ] Paginación chat: scroll infinito funcional, falta test con conversaciones largas reales
 - [ ] VideoCall: `network-connection` event pendiente de prueba real
 - [ ] Tests: sesiones previas a migración RLS sin `test_results` — terapeuta debe reasignar
-- [x] DSM y CIE — movidos a Edge Function `clinical-content` (✅ v32). Pendiente: escalas, biblioteca y protocolos siguen en el bundle
+- [x] DSM y CIE — movidos a Edge Function `clinical-content` (✅ v32). Escalas, biblioteca y protocolos siguen en el bundle (aceptable por tamaño)
+- [x] Realtime admin alertas IA y credenciales nuevas (✅ v38)
+- [x] CSV export AdminPayouts (✅ v38)
 - [x] Contacto de emergencia — tabla `emergency_contacts` con RLS estricta (✅ v32)
 - [x] Flujo RGPD — Edge Function `delete-user-data` + panel `/admin/deletions` + solicitud desde perfil (✅ v32)
 - [x] Monitoreo de errores — Sentry integrado, pendiente solo DSN en Vercel (✅ v32)

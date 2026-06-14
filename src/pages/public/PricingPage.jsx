@@ -2,6 +2,7 @@
  * PricingPage — Página pública de planes y precios.
  * Ruta: /pricing (no requiere autenticación)
  */
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Check, Zap, Star, ArrowRight, Users, Shield, Video,
   FlaskConical, BookOpen, LayoutDashboard, Library, Stethoscope, FolderOpen } from 'lucide-react'
@@ -59,7 +60,11 @@ const FAQS = [
   },
   {
     q: '¿La suscripción cambia la comisión?',
-    a: 'Sí. El plan Gratuito tiene un 20% de comisión por sesión. Al suscribirte al plan Pro ($79.99/mes), la comisión baja al 10%, además de darte acceso a todas las herramientas clínicas.',
+    a: 'Sí. El plan Gratuito tiene un 20% de comisión por sesión. Al suscribirte ($79.99/mes o $799/año), la comisión baja al 10%, además de darte acceso a todas las herramientas clínicas.',
+  },
+  {
+    q: '¿Cuál es la diferencia entre mensual y anual?',
+    a: 'El plan anual cuesta $799 en un solo pago, equivalente a $66.58/mes — un ahorro de $159.88 vs pagar mensualmente ($79.99 × 12 = $959.88). El acceso es por 12 meses completos.',
   },
   {
     q: '¿Puedo cancelar la suscripción en cualquier momento?',
@@ -78,8 +83,16 @@ const FAQS = [
 export default function PricingPage() {
   const navigate = useNavigate()
   const { formatWithLocal } = useCurrencyContext()
+  const [billing, setBilling] = useState('monthly') // 'monthly' | 'annual'
 
   useScrollReveal()
+
+  const proPrice     = billing === 'annual' ? 799 : 79.99
+  const proLabel     = billing === 'annual' ? '$799' : '$79.99'
+  const proPeriod    = billing === 'annual' ? '/año' : '/mes'
+  const proLocalSub  = billing === 'annual'
+    ? formatWithLocal(799).split('≈')[1]?.trim() ?? ''
+    : formatWithLocal(79.99).split('≈')[1]?.trim() ?? ''
 
   return (
     <div className="min-h-dvh bg-psiconecta">
@@ -116,6 +129,35 @@ export default function PricingPage() {
         </p>
       </div>
 
+      {/* Toggle mensual / anual */}
+      <div className="flex items-center justify-center gap-3 mb-10">
+        <button
+          onClick={() => setBilling('monthly')}
+          className={`px-5 py-2 rounded-xl text-sm font-medium border transition-all ${
+            billing === 'monthly'
+              ? 'bg-primary-600 text-white border-primary-600'
+              : 'bg-white text-warm-600 border-warm-200 hover:border-warm-300'
+          }`}
+        >
+          Mensual
+        </button>
+        <button
+          onClick={() => setBilling('annual')}
+          className={`px-5 py-2 rounded-xl text-sm font-medium border transition-all flex items-center gap-2 ${
+            billing === 'annual'
+              ? 'bg-primary-600 text-white border-primary-600'
+              : 'bg-white text-warm-600 border-warm-200 hover:border-warm-300'
+          }`}
+        >
+          Anual
+          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+            billing === 'annual' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'
+          }`}>
+            −17%
+          </span>
+        </button>
+      </div>
+
       {/* Planes */}
       <div className="grid sm:grid-cols-3 gap-5 max-w-5xl mx-auto px-4 pb-16">
         {PLANS.map((plan) => {
@@ -144,15 +186,27 @@ export default function PricingPage() {
               </div>
 
               <div className="mb-6">
-                <div className={`flex items-end gap-1 ${isHighlight ? 'text-white' : 'text-warm-900'}`}>
-                  <span className="text-4xl font-bold">{plan.priceLabel}</span>
-                  {plan.period && <span className={`text-sm mb-1.5 ${isHighlight ? 'text-white/70' : 'text-warm-400'}`}>{plan.period}</span>}
+                <div className={`flex items-end gap-2 ${isHighlight ? 'text-white' : 'text-warm-900'}`}>
+                  <span className="text-4xl font-bold">
+                    {isHighlight ? proLabel : (plan.price === 0 ? 'Gratis' : plan.priceLabel)}
+                  </span>
+                  {isHighlight && (
+                    <span className={`text-sm mb-1.5 ${isHighlight ? 'text-white/70' : 'text-warm-400'}`}>{proPeriod}</span>
+                  )}
+                  {!isHighlight && plan.period && (
+                    <span className={`text-sm mb-1.5 text-warm-400`}>{plan.period}</span>
+                  )}
+                  {isHighlight && billing === 'annual' && (
+                    <span className="text-[10px] font-bold bg-white/20 text-white px-2 py-0.5 rounded-full mb-1.5">−17%</span>
+                  )}
                 </div>
-                {/* Conversión a moneda local para planes de pago */}
-                {plan.price > 0 && (
-                  <p className={`text-xs mt-0.5 ${isHighlight ? 'text-white/60' : 'text-warm-400'}`}>
-                    ≈ {formatWithLocal(plan.price).split('≈')[1]?.trim() ?? ''} /mes
+                {isHighlight && (
+                  <p className="text-xs mt-0.5 text-white/60">
+                    ≈ {proLocalSub} {billing === 'annual' ? '/año' : '/mes'}
                   </p>
+                )}
+                {isHighlight && billing === 'annual' && (
+                  <p className="text-xs mt-0.5 text-green-300 font-medium">Ahorras $159.88 vs mensual</p>
                 )}
                 <p className={`text-sm mt-1 ${isHighlight ? 'text-white/80' : 'text-warm-500'}`}>
                   {plan.commission} de comisión por sesión
@@ -176,7 +230,9 @@ export default function PricingPage() {
                     : 'bg-primary-600 text-white hover:bg-primary-700'
                 }`}
               >
-                {plan.cta}
+                {isHighlight
+                  ? (billing === 'annual' ? 'Suscribirme por $799/año' : 'Suscribirme por $79.99/mes')
+                  : plan.cta}
                 <ArrowRight size={15} strokeWidth={2} />
               </button>
             </div>

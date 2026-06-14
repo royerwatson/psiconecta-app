@@ -12,14 +12,18 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '@/lib/supabase'
 
-export default function PayPalSubscriptionButton({ onSuccess, onError }) {
-  const containerRef = useRef(null)
-  const rendered     = useRef(false)
+export default function PayPalSubscriptionButton({ onSuccess, onError, billingCycle = 'monthly' }) {
+  const containerRef    = useRef(null)
+  const rendered        = useRef(false)
+  const billingCycleRef = useRef(billingCycle)
   const [sdkReady, setSdkReady]   = useState(false)
   const [sdkError, setSdkError]   = useState(false)
   const [processing, setProcessing] = useState(false)
 
   const clientId = import.meta.env.VITE_PAYPAL_CLIENT_ID
+
+  // Mantener ref actualizado si el padre cambia el billingCycle
+  useEffect(() => { billingCycleRef.current = billingCycle }, [billingCycle])
 
   useEffect(() => {
     return () => { rendered.current = false }
@@ -74,7 +78,7 @@ export default function PayPalSubscriptionButton({ onSuccess, onError }) {
               'Content-Type': 'application/json',
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify({ plan: 'pro', amount: 79.99 }),
+            body: JSON.stringify({ plan: 'pro', billingCycle: billingCycleRef.current }),
           }
         )
         const data = await res.json()

@@ -73,11 +73,12 @@ const PLANS = [
 export default function SubscriptionPage() {
   const { user } = useAuthStore()
   const { formatWithLocal } = useCurrencyContext()
-  const [currentPlan, setCurrentPlan] = useState('basic')
-  const [planExpires, setPlanExpires] = useState(null)
-  const [loading, setLoading]         = useState(true)
-  const [upgrading, setUpgrading]     = useState(false)
-  const [showPayPal, setShowPayPal]   = useState(false)
+  const [currentPlan, setCurrentPlan]   = useState('basic')
+  const [planExpires, setPlanExpires]   = useState(null)
+  const [billingCycle, setBillingCycle] = useState('monthly') // 'monthly' | 'annual'
+  const [loading, setLoading]           = useState(true)
+  const [upgrading, setUpgrading]       = useState(false)
+  const [showPayPal, setShowPayPal]     = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { fetchPlan() }, [user])
@@ -86,12 +87,13 @@ export default function SubscriptionPage() {
     if (!user) return
     const { data } = await supabase
       .from('therapist_profiles')
-      .select('subscription_plan, plan_expires_at')
+      .select('subscription_plan, plan_expires_at, billing_cycle')
       .eq('user_id', user.id)
       .single()
     if (data) {
       setCurrentPlan(data.subscription_plan ?? 'basic')
       setPlanExpires(data.plan_expires_at)
+      if (data.billing_cycle) setBillingCycle(data.billing_cycle)
     }
     setLoading(false)
   }
@@ -152,7 +154,13 @@ export default function SubscriptionPage() {
             </div>
             <div>
               <p className="font-semibold text-primary-900">Plan Suscripción activo</p>
-              <p className="text-sm text-primary-600">$79.99 USD/mes · {formatWithLocal(79.99).split('≈')[1]?.trim() ?? ''}</p>
+              {billingCycle === 'annual'
+                ? <p className="text-sm text-primary-600">$799 USD/año · {formatWithLocal(799).split('≈')[1]?.trim() ?? ''}</p>
+                : <p className="text-sm text-primary-600">$79.99 USD/mes · {formatWithLocal(79.99).split('≈')[1]?.trim() ?? ''}</p>
+              }
+              {billingCycle === 'annual' && (
+                <p className="text-xs text-green-600 font-medium mt-0.5">Ahorras $159.88/año vs mensual</p>
+              )}
             </div>
           </div>
           {planExpires && (
@@ -160,6 +168,37 @@ export default function SubscriptionPage() {
               Renueva: {new Date(planExpires).toLocaleDateString('es-DO', { dateStyle: 'medium' })}
             </p>
           )}
+        </div>
+      )}
+
+      {/* Toggle ciclo de facturación (solo si no tiene plan activo) */}
+      {!isPro && (
+        <div className="flex items-center justify-center gap-3">
+          <button
+            onClick={() => { setBillingCycle('monthly'); setShowPayPal(false) }}
+            className={`px-5 py-2 rounded-xl text-sm font-medium border transition-all ${
+              billingCycle === 'monthly'
+                ? 'bg-primary-600 text-white border-primary-600'
+                : 'bg-white text-warm-600 border-warm-200 hover:border-warm-300'
+            }`}
+          >
+            Mensual
+          </button>
+          <button
+            onClick={() => { setBillingCycle('annual'); setShowPayPal(false) }}
+            className={`px-5 py-2 rounded-xl text-sm font-medium border transition-all flex items-center gap-2 ${
+              billingCycle === 'annual'
+                ? 'bg-primary-600 text-white border-primary-600'
+                : 'bg-white text-warm-600 border-warm-200 hover:border-warm-300'
+            }`}
+          >
+            Anual
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+              billingCycle === 'annual' ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'
+            }`}>
+              −17%
+            </span>
+          </button>
         </div>
       )}
 
@@ -192,13 +231,26 @@ export default function SubscriptionPage() {
               </div>
 
               <div className="mb-3">
-                <p className="text-3xl font-bold text-warm-900">
-                  {plan.price === 0 ? 'Gratis' : '$79.99 USD'}
-                </p>
-                {plan.price > 0 && (
-                  <p className="text-xs text-warm-400 mt-0.5">
-                    ≈ {formatWithLocal(plan.price).split('≈')[1]?.trim() ?? ''} /mes
-                  </p>
+                {plan.price === 0 ? (
+                  <p className="text-3xl font-bold text-warm-900">Gratis</p>
+                ) : billingCycle === 'annual' ? (
+                  <>
+                    <div className="flex items-end gap-2">
+                      <p className="text-3xl font-bold text-warm-900">$799 USD</p>
+                      <span className="text-xs bg-green-100 text-green-700 font-bold px-2 py-0.5 rounded-full mb-1">−17%</span>
+                    </div>
+                    <p className="text-xs text-warm-400 mt-0.5">
+                      ≈ {formatWithLocal(799).split('≈')[1]?.trim() ?? ''} /año · $66.58/mes
+                    </p>
+                    <p className="text-xs text-green-600 font-medium mt-0.5">Ahorras $159.88 vs mensual</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-3xl font-bold text-warm-900">$79.99 USD</p>
+                    <p className="text-xs text-warm-400 mt-0.5">
+                      ≈ {formatWithLocal(79.99).split('≈')[1]?.trim() ?? ''} /mes
+                    </p>
+                  </>
                 )}
                 <p className="text-xs text-warm-500 mt-1">{plan.commission}% de comisión por sesión</p>
               </div>
@@ -235,11 +287,14 @@ export default function SubscriptionPage() {
               ) : plan.id === 'pro' ? (
                 !showPayPal ? (
                   <Button fullWidth onClick={() => setShowPayPal(true)}>
-                    Suscribirme por $79.99/mes
+                    {billingCycle === 'annual'
+                      ? 'Suscribirme por $799/año'
+                      : 'Suscribirme por $79.99/mes'}
                   </Button>
                 ) : (
                   <div className="space-y-2">
                     <PayPalSubscriptionButton
+                      billingCycle={billingCycle}
                       onSuccess={handleSubscriptionSuccess}
                       onError={handleSubscriptionError}
                     />
@@ -265,7 +320,8 @@ export default function SubscriptionPage() {
       <div className="flex items-start gap-2 text-xs text-warm-400 bg-warm-50 rounded-xl p-4">
         <AlertCircle size={14} strokeWidth={1.8} className="shrink-0 mt-0.5" />
         <p>
-          La suscripción se factura mensualmente en <strong>USD</strong> a través de PayPal.
+          La suscripción se factura en <strong>USD</strong> a través de PayPal
+          ({billingCycle === 'annual' ? 'un solo pago anual de $799' : 'mensualmente'}).
           La conversión a tu moneda local es referencial — el monto exacto lo determina
           PayPal según su tipo de cambio al momento del pago.
           Puedes cancelar en cualquier momento.
