@@ -109,26 +109,26 @@ function PatientTimeCalc() {
   const maxVal = Math.max(...items.map(i => i.val), 0.1)
 
   return (
-    <section className="relative py-28 px-4 overflow-hidden" style={{ background: '#0a0a0f' }}>
-      {/* Ambient glow */}
+    <section className="relative py-28 px-4 overflow-hidden bg-psiconecta">
+      {/* Ambient glows sutiles */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[600px] h-[600px] rounded-full opacity-[0.08]"
-          style={{ background: 'radial-gradient(circle, #7c3aed, transparent 70%)' }} />
-        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-[0.06]"
-          style={{ background: 'radial-gradient(circle, #06b6d4, transparent 70%)' }} />
+        <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[500px] h-[500px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.08), transparent 70%)', filter: 'blur(40px)' }} />
+        <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-[400px] h-[400px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(14,165,233,0.06), transparent 70%)', filter: 'blur(40px)' }} />
       </div>
 
       <div className="relative max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase mb-5"
-            style={{ background: 'rgba(124,58,237,0.15)', color: '#a78bfa', border: '1px solid rgba(124,58,237,0.25)' }}>
+            style={{ background: 'rgba(124,58,237,0.08)', color: '#7c3aed', border: '1px solid rgba(124,58,237,0.2)' }}>
             Para pacientes
           </span>
-          <h2 className="font-serif text-4xl sm:text-5xl font-bold text-white mb-4 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 leading-tight tracking-tight">
             Recupera el tiempo que<br/>la terapia presencial te roba
           </h2>
-          <p className="text-slate-400 max-w-lg mx-auto text-lg leading-relaxed">
+          <p className="text-slate-500 max-w-lg mx-auto text-lg leading-relaxed">
             Traslados, llamadas, esperas. Con Psiconecta, todo eso desaparece.
           </p>
         </div>
@@ -136,67 +136,65 @@ function PatientTimeCalc() {
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_420px] gap-4">
 
           {/* Left — slider + breakdown */}
-          <div className="rounded-[28px] p-8 flex flex-col gap-8"
-            style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', backdropFilter: 'blur(24px)' }}>
+          <div className="rounded-[28px] p-8 flex flex-col gap-8 bg-white shadow-sm border border-slate-100">
 
             {/* Slider control */}
             <div>
               <div className="flex items-end justify-between mb-6">
                 <div>
-                  <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-2">Sesiones por mes</p>
-                  <p className="text-white font-black leading-none" style={{ fontSize: '72px', lineHeight: 1 }}>
+                  <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-2">Sesiones por mes</p>
+                  <p className="text-slate-900 font-black leading-none" style={{ fontSize: '72px', lineHeight: 1 }}>
                     {sessions}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-slate-500 text-xs mb-1">Rango recomendado</p>
-                  <p className="text-slate-300 text-sm font-medium">2 – 8 sesiones</p>
+                  <p className="text-slate-400 text-xs mb-1">Rango recomendado</p>
+                  <p className="text-slate-600 text-sm font-medium">2 – 8 sesiones</p>
                 </div>
               </div>
 
-              {/* Premium slider */}
               <style>{`
                 .calc-slider-patient {
                   -webkit-appearance: none; appearance: none;
                   width: 100%; height: 6px; border-radius: 9999px; outline: none; cursor: pointer;
-                  background: linear-gradient(to right, #7c3aed ${((sessions-1)/11)*100}%, rgba(255,255,255,0.12) ${((sessions-1)/11)*100}%);
+                  background: linear-gradient(to right, #7c3aed ${((sessions-1)/11)*100}%, #e2e8f0 ${((sessions-1)/11)*100}%);
                   transition: background 0.2s;
                 }
                 .calc-slider-patient::-webkit-slider-thumb {
                   -webkit-appearance: none; width: 24px; height: 24px; border-radius: 50%;
-                  background: white; box-shadow: 0 0 0 4px rgba(124,58,237,0.35), 0 4px 12px rgba(0,0,0,0.5);
+                  background: #7c3aed; box-shadow: 0 0 0 4px rgba(124,58,237,0.15), 0 4px 12px rgba(124,58,237,0.4);
                   transition: transform 0.15s, box-shadow 0.15s;
                 }
                 .calc-slider-patient::-webkit-slider-thumb:hover {
-                  transform: scale(1.15); box-shadow: 0 0 0 6px rgba(124,58,237,0.3), 0 6px 16px rgba(0,0,0,0.6);
+                  transform: scale(1.15); box-shadow: 0 0 0 6px rgba(124,58,237,0.15), 0 6px 20px rgba(124,58,237,0.5);
                 }
                 .calc-slider-patient::-moz-range-thumb {
                   width: 24px; height: 24px; border-radius: 50%; border: none;
-                  background: white; box-shadow: 0 0 0 4px rgba(124,58,237,0.35);
+                  background: #7c3aed; box-shadow: 0 0 0 4px rgba(124,58,237,0.15);
                 }
               `}</style>
               <input type="range" min={1} max={12} value={sessions}
                 onChange={e => setSessions(Number(e.target.value))}
                 className="calc-slider-patient mb-1"
               />
-              <div className="flex justify-between text-xs text-slate-600">
+              <div className="flex justify-between text-xs text-slate-400">
                 <span>1</span><span>12</span>
               </div>
             </div>
 
             {/* Breakdown bars */}
             <div>
-              <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mb-5">Tiempo eliminado al mes</p>
-              <div className="space-y-4">
+              <p className="text-slate-400 text-xs font-semibold uppercase tracking-widest mb-5">Tiempo eliminado al mes</p>
+              <div className="space-y-5">
                 {items.map((item, i) => (
                   <div key={item.label}>
                     <div className="flex justify-between items-center mb-2">
-                      <span className="text-slate-300 text-sm">{item.label}</span>
-                      <span className="text-white text-sm font-semibold tabular-nums">
-                        {item.val.toFixed(1)}h
+                      <span className="text-slate-600 text-sm">{item.label}</span>
+                      <span className="text-slate-900 text-sm font-bold tabular-nums">
+                        {item.val.toFixed(1)} h/mes
                       </span>
                     </div>
-                    <div className="h-[5px] rounded-full" style={{ background: 'rgba(255,255,255,0.07)' }}>
+                    <div className="h-[5px] rounded-full bg-slate-100 overflow-hidden">
                       <div
                         className={`h-full rounded-full bg-gradient-to-r ${item.grad}`}
                         style={{
@@ -212,10 +210,9 @@ function PatientTimeCalc() {
             </div>
           </div>
 
-          {/* Right — result card */}
+          {/* Right — result card (mantiene gradiente violeta premium) */}
           <div className="rounded-[28px] p-8 flex flex-col justify-between relative overflow-hidden"
             style={{ background: 'linear-gradient(135deg, #4f1fc4 0%, #7c3aed 45%, #0ea5e9 100%)' }}>
-            {/* Shine overlay */}
             <div className="absolute inset-0 pointer-events-none"
               style={{ background: 'radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.18) 0%, transparent 60%)' }} />
 
@@ -287,19 +284,24 @@ function TherapistTimeCalc() {
   const maxVal = Math.max(...items.map(i => i.val), 0.1)
 
   return (
-    <section className="py-28 px-4 relative overflow-hidden" style={{ background: '#f8f7ff' }}>
-      {/* Subtle grid bg */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.4]"
+    <section className="py-28 px-4 relative overflow-hidden bg-psiconecta">
+      {/* Subtle dot grid */}
+      <div className="absolute inset-0 pointer-events-none opacity-[0.35]"
         style={{ backgroundImage: 'radial-gradient(circle, #c4b5fd 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
+      {/* Ambient glows */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] rounded-full"
+          style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.07), transparent 70%)', filter: 'blur(40px)' }} />
+      </div>
 
       <div className="relative max-w-5xl mx-auto">
         {/* Header */}
         <div className="text-center mb-16">
           <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold tracking-widest uppercase mb-5"
             style={{ background: 'rgba(124,58,237,0.08)', color: '#7c3aed', border: '1px solid rgba(124,58,237,0.2)' }}>
-            Para terapeutas
+            Para profesionales
           </span>
-          <h2 className="font-serif text-4xl sm:text-5xl font-bold text-slate-900 mb-4 leading-tight tracking-tight">
+          <h2 className="text-4xl sm:text-5xl font-bold text-slate-900 mb-4 leading-tight tracking-tight">
             Descubre cuántas horas<br/>devuelves a tus pacientes
           </h2>
           <p className="text-slate-500 max-w-lg mx-auto text-lg leading-relaxed">
