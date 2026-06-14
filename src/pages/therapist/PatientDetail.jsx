@@ -12,13 +12,14 @@ import { formatDate, formatDateTime, formatPrice, sanitize } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 import PatientTestsTab from '@/components/psychometrics/PatientTestsTab'
-import { MessageCircle, Lock, Calendar, ClipboardList, CheckCircle2, Bot, FlaskConical, AlertTriangle, Eye, Unlock, AlertCircle, Check, BookOpen, Search, X } from 'lucide-react'
+import { MessageCircle, Lock, Calendar, ClipboardList, CheckCircle2, Bot, FlaskConical, AlertTriangle, Eye, Unlock, AlertCircle, Check, BookOpen, Search, X, FileDown } from 'lucide-react'
+import { generatePatientPDF } from '@/lib/generatePatientPDF'
 import { LIBRARY, CATEGORIES } from '@/data/therapeuticLibrary'
 import { cn } from '@/lib/utils'
 
 export default function PatientDetail() {
   const { patientId } = useParams()
-  const { user } = useAuthStore()
+  const { user, profile } = useAuthStore()
   const navigate = useNavigate()
   const [patient, setPatient] = useState(null)
   const [sessions, setSessions] = useState([])
@@ -38,6 +39,8 @@ export default function PatientDetail() {
   const [libraryQuery, setLibraryQuery] = useState('')
   const [libraryCat, setLibraryCat] = useState('all')
   const [addingFromLib, setAddingFromLib] = useState(null)
+  const [generatingPDF, setGeneratingPDF] = useState(false)
+  const [isPro, setIsPro] = useState(false)
 
   useEffect(() => {
     fetchAll()
@@ -45,6 +48,10 @@ export default function PatientDetail() {
 
   const fetchAll = async () => {
     setLoading(true)
+
+    // Verificar plan del terapeuta (para mostrar botón PDF)
+    supabase.from('therapist_profiles').select('subscription_plan').eq('user_id', user.id).single()
+      .then(({ data }) => setIsPro(['pro', 'premium'].includes(data?.subscription_plan)))
 
     // Verificar si este terapeuta tiene alguna sesión con el paciente
     const { data: mySession } = await supabase
@@ -172,6 +179,45 @@ export default function PatientDetail() {
     fetchAll()
   }
 
+  const handleGeneratePDF = async () => {
+    setGeneratingPDF(true)
+    try {
+      // Obtener assignments de tests del paciente
+      const { data: rel } = await supabase
+        .from('therapeutic_relationships')
+        .select('id')
+        .eq('therapist_id', user.id)
+        .eq('patient_id', patientId)
+        .eq('status', 'active')
+        .maybeSingle()
+
+      let testAssignments = []
+      if (rel) {
+        const { data } = await supabase
+          .from('test_assignments')
+          .select('id, tests(id, name, category), test_sessions(id, status, completed_at)')
+          .eq('relationship_id', rel.id)
+          .eq('status', 'completed')
+        testAssignments = data ?? []
+      }
+
+      await generatePatientPDF({
+        patient,
+        therapistName: profile?.full_name ?? 'Terapeuta',
+        sessions,
+        history,
+        tasks,
+        checkins,
+        testAssignments,
+      })
+    } catch (err) {
+      console.error('PDF error:', err)
+      toast.error('No se pudo generar el PDF. Intenta de nuevo.')
+    } finally {
+      setGeneratingPDF(false)
+    }
+  }
+
   if (loading) return <div className="flex flex-col gap-4">{[1,2,3].map(i => <Skeleton key={i} className="h-32" />)}</div>
   if (!patient) return <p className="text-center text-warm-500 mt-20">Paciente no encontrado</p>
 
@@ -203,9 +249,23 @@ export default function PatientDetail() {
               <Badge variant="neutral">{history.length} notas clínicas</Badge>
             </div>
           </div>
-          <Button size="sm" variant="calm" onClick={() => navigate(`/therapist/chat?patient=${patientId}`)} className="flex items-center gap-1.5">
-            <MessageCircle size={14} strokeWidth={1.8} /> Mensaje
-          </Button>
+          <div className="flex items-center gap-2">
+            {isPro && hasAccess && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleGeneratePDF}
+                disabled={generatingPDF}
+                className="flex items-center gap-1.5"
+              >
+                <FileDown size={14} strokeWidth={1.8} />
+                {generatingPDF ? 'Generando…' : 'Exportar PDF'}
+              </Button>
+            )}
+            <Button size="sm" variant="calm" onClick={() => navigate(`/therapist/chat?patient=${patientId}`)} className="flex items-center gap-1.5">
+              <MessageCircle size={14} strokeWidth={1.8} /> Mensaje
+            </Button>
+          </div>
         </div>
       </Card>
 

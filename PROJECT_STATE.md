@@ -1,5 +1,22 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-14 (v39 — Plan anual $799/año + billing_cycle)*
+*Última actualización: 2026-06-14 (v40 — PDF de progreso clínico + Landing actualizado)*
+
+---
+
+## ⚡ Sesión 2026-06-14 (v40) — Reporte PDF de progreso del paciente
+
+**Archivos modificados/creados:**
+- `src/lib/generatePatientPDF.js` — NUEVO: genera PDF client-side con jsPDF (cargado dinámicamente desde CDN). Secciones: resumen numérico, historial de sesiones, notas clínicas (con nivel de riesgo por nota), tareas terapéuticas (% completadas), check-ins IA (con colores por riesgo), tests psicométricos completados. Sin datos de contacto ni pagos. Footer con paginación y marca "Confidencial". Descarga como `reporte_NombrePaciente_YYYY-MM-DD.pdf`
+- `src/pages/therapist/PatientDetail.jsx` — botón "Exportar PDF" en header del paciente (solo visible si `isPro && hasAccess`). Al clickear: fetcha `therapeutic_relationships` + `test_assignments` completados, luego llama `generatePatientPDF`. Estado `generatingPDF` muestra "Generando…" mientras procesa.
+- `src/pages/public/LandingPage.jsx` — feature "Exporta el expediente clínico completo en PDF" agregado al Plan Pro en sección Para profesionales
+- `src/pages/public/PricingPage.jsx` — mismo feature agregado a la lista de features del plan Pro
+- `src/pages/therapist/SubscriptionPage.jsx` — "Expediente clínico en PDF" con icono BookMarked en features del plan Pro
+
+**Sin dependencias nuevas de npm** — jsPDF y jspdf-autotable se cargan desde CDN en tiempo de ejecución (mismo patrón que PayPal SDK). No requiere `npm install`.
+
+**Sin migraciones SQL necesarias** — usa datos ya existentes en BD.
+
+---
 
 ---
 

@@ -64,6 +64,7 @@ const PLANS = [
       { text: 'Consulta con colegas',         Icon: Stethoscope  },
       { text: 'Protocolos terapéuticos',      Icon: FolderOpen   },
       { text: 'Dashboard de estadísticas',    Icon: Star         },
+      { text: 'Expediente clínico en PDF',   Icon: BookMarked   },
     ],
   },
 ]

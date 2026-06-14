@@ -49,6 +49,7 @@ const PLANS = [
       'Consulta con colegas',
       'Protocolos terapéuticos',
       'Dashboard de estadísticas avanzadas',
+      'Exporta el expediente clínico completo en PDF',
     ],
   },
 ]

@@ -405,7 +405,7 @@ export default function LandingPage() {
                     name="Plan Pro"
                     price="$79.99/mes"
                     highlight
-                    features={['Todo lo del plan gratuito', 'Comisión del 10 % por sesión', '45+ tests psicométricos', 'DSM-5-TR y CIE-11 en español', 'Escalas clínicas con scoring automático', 'Protocolos TCC, DBT, ACT, EMDR', 'Estadísticas avanzadas']}
+                    features={['Todo lo del plan gratuito', 'Comisión del 10 % por sesión', '45+ tests psicométricos', 'DSM-5-TR y CIE-11 en español', 'Escalas clínicas con scoring automático', 'Protocolos TCC, DBT, ACT, EMDR', 'Estadísticas avanzadas', 'Exporta el expediente clínico completo en PDF']}
                   />
                 </div>
 
