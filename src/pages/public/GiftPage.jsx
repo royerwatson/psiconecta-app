@@ -189,7 +189,7 @@ export default function GiftPage() {
   }
 
   return (
-    <div style={{ minHeight:'100dvh', background:C.bg }}>
+    <div style={{ minHeight:'100dvh', background:C.bg, fontFamily:"'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" }}>
 
       {/* Ambient glows sutiles sobre fondo claro */}
       <div style={{ position:'fixed',inset:0,pointerEvents:'none',zIndex:0 }}>
@@ -203,11 +203,11 @@ export default function GiftPage() {
 
       {/* Navbar */}
       <nav style={{ position:'relative',zIndex:10,display:'flex',alignItems:'center',justifyContent:'space-between',padding:'20px 32px',maxWidth:940,margin:'0 auto' }}>
-        <button onClick={() => navigate('/')} style={{ display:'flex',alignItems:'center',gap:8,background:'none',border:'none',cursor:'pointer' }} className="hover:opacity-70 transition-opacity">
-          <div style={{ width:32,height:32,background:'linear-gradient(135deg,#7c3aed,#0ea5e9)',borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center' }}>
-            <PsiconectaLogo size={18} color="white" />
+        <button onClick={() => navigate('/')} style={{ display:'flex',alignItems:'center',gap:10,background:'none',border:'none',cursor:'pointer' }} className="hover:opacity-80 transition-opacity">
+          <div style={{ width:36,height:36,background:'linear-gradient(135deg,#4f46e5 0%,#7c3aed 100%)',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',boxShadow:'0 2px 8px rgba(124,58,237,0.25)' }}>
+            <PsiconectaLogo size={22} color="white" />
           </div>
-          <span style={{ fontWeight:700,fontSize:15,color:C.text }}>Psico<span style={{ color:C.violet }}>necta</span></span>
+          <span style={{ fontWeight:700,fontSize:18,color:'#0f172a',letterSpacing:'-0.01em' }}>Psico<span style={{ color:'#7c3aed' }}>necta</span></span>
         </button>
         <button onClick={() => navigate('/login')}
           style={{ fontSize:13,color:C.muted,background:'none',border:'none',cursor:'pointer' }}
@@ -229,14 +229,14 @@ export default function GiftPage() {
               <span style={{ fontSize:12,fontWeight:700,color:C.violet,letterSpacing:'0.05em' }}>EL REGALO QUE CAMBIA VIDAS</span>
             </div>
             <h1 style={{ fontSize:'clamp(30px,5.5vw,52px)',fontWeight:900,letterSpacing:'-0.03em',lineHeight:1.08,
-              marginBottom:16,fontFamily:'Georgia,serif',color:C.text }}>
+              marginBottom:16,fontFamily:"'Plus Jakarta Sans', sans-serif",color:C.text }}>
               El mejor regalo<br />
               <span style={{ background:'linear-gradient(135deg,#7c3aed,#9333ea,#ec4899)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent' }}>
                 es el autocuidado
               </span>
             </h1>
             <p style={{ fontSize:17,color:C.muted,maxWidth:420,margin:'0 auto',lineHeight:1.65 }}>
-              Regala sesiones de terapia online. Un gesto que acompaña, apoya, y transforma.
+              Regala sesiones de terapia online. Un gesto que acompaña, apoya y transforma.
             </p>
           </div>
 
@@ -466,7 +466,7 @@ export default function GiftPage() {
           </div>
 
           <h2 style={{ fontSize:36,fontWeight:900,letterSpacing:'-0.03em',marginBottom:12,
-            fontFamily:'Georgia,serif',color:C.text }}>
+            fontFamily:"'Plus Jakarta Sans', sans-serif",color:C.text }}>
             ¡Listo,{' '}
             <span style={{ background:'linear-gradient(135deg,#7c3aed,#ec4899)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent' }}>
               gracias!
