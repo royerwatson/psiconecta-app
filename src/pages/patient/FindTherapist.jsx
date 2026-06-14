@@ -329,10 +329,29 @@ export default function FindTherapist() {
 
               {/* Bio */}
               {t.bio && (
-                <p className="text-sm text-slate-500 px-5 pb-4 line-clamp-2 leading-relaxed -mt-1">
+                <p className="text-sm text-slate-500 px-5 pb-2 line-clamp-2 leading-relaxed -mt-1">
                   {t.bio}
                 </p>
               )}
+
+              {/* Experiencia, idiomas, enfoques */}
+              <div className="flex flex-wrap gap-1.5 px-5 pb-4">
+                {t.years_experience > 0 && (
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 font-medium">
+                    {t.years_experience} {t.years_experience === 1 ? 'año' : 'años'} de exp.
+                  </span>
+                )}
+                {(t.languages ?? []).map(lang => (
+                  <span key={lang} className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
+                    {lang}
+                  </span>
+                ))}
+                {(t.approaches ?? []).slice(0, 3).map(ap => (
+                  <span key={ap} className="text-[11px] px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 font-medium">
+                    {ap}
+                  </span>
+                ))}
+              </div>
 
               {/* Actions */}
               <div className="flex gap-2.5 px-5 pb-5">

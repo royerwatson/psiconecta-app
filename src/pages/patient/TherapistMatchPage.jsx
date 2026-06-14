@@ -221,6 +221,23 @@ export default function TherapistMatchPage() {
                   {t.bio && (
                     <p className="text-xs text-warm-500 mt-2 line-clamp-2">{t.bio}</p>
                   )}
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {t.years_experience > 0 && (
+                      <span className="text-[11px] px-2 py-0.5 rounded-full bg-warm-100 text-warm-500 font-medium">
+                        {t.years_experience} {t.years_experience === 1 ? 'año' : 'años'} exp.
+                      </span>
+                    )}
+                    {(t.languages ?? []).map(lang => (
+                      <span key={lang} className="text-[11px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-medium">
+                        {lang}
+                      </span>
+                    ))}
+                    {(t.approaches ?? []).slice(0, 2).map(ap => (
+                      <span key={ap} className="text-[11px] px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 font-medium">
+                        {ap}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
               <div className="flex gap-2 mt-4">
