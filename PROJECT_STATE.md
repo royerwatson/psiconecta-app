@@ -1,5 +1,39 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-14 (v43 — Gift Cards system)*
+*Última actualización: 2026-06-14 (v44 — Calculadoras interactivas premium)*
+
+---
+
+## ⚡ Sesión 2026-06-14 (v44) — Calculadoras de tiempo interactivas en Landing
+
+### Descripción
+Dos secciones interactivas añadidas a `LandingPage.jsx` para demostrar el valor de Psiconecta con datos personalizados en tiempo real.
+
+### Calculadora para pacientes (`PatientTimeCalc`)
+- **Ubicación:** Entre "Cómo funciona" y "Testimonios"
+- **Fondo:** Dark `#0a0a0f` con ambient glows radiales violeta/cyan
+- **Slider:** 1–12 sesiones/mes. Calcula horas eliminadas en traslados, coordinación, búsqueda de terapeuta y recordatorios
+- **Animaciones:**
+  - Número principal (88px) animado con `useAnimatedNumber` hook (RAF + ease-out-cubic)
+  - Barras con spring bounce `cubic-bezier(0.34, 1.56, 0.64, 1)` + stagger de 60ms por fila
+  - Slider custom CSS: thumb blanco con glow violeta, scale on hover
+  - Card de resultado con gradiente `#4f1fc4 → #7c3aed → #0ea5e9` + shine overlay radial
+
+### Calculadora para terapeutas (`TherapistTimeCalc`)
+- **Ubicación:** Después de "Para terapeutas", antes del Quiz de matching
+- **Fondo:** Crema `#f8f7ff` con dot-grid sutil violeta
+- **Slider:** 3–50 pacientes activos. Desglose: agenda y reagendas (0.55h/pt), cobros (0.30h/pt), tareas/seguimiento (0.40h/pt), IA + protocolos + tests + PDF (0.65h/pt)
+- **Animaciones:** Mismas que pacientes. Card izquierda oscura `#1e0050 → #3b0d8a → #0f172a` con CTA inline. Card derecha blanca limpia con dots de color por categoría
+- **CTA:** "Empieza gratis como terapeuta" → `/register?role=therapist`
+
+### Hook compartido
+```js
+function useAnimatedNumber(target, decimals = 1, duration = 600)
+// requestAnimationFrame loop con ease-out-cubic
+// from → to suavizado, sin dependencias externas
+```
+
+### Archivos modificados (v44)
+- `src/pages/public/LandingPage.jsx` — `PatientTimeCalc` + `TherapistTimeCalc` + hook `useAnimatedNumber` + CSS inline para sliders premium
 
 ---
 
