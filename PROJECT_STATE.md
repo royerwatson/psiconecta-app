@@ -1,5 +1,32 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-14 (v45 — Análisis clínico longitudinal)*
+*Última actualización: 2026-06-14 (v46 — Gift card UI en perfil del paciente)*
+
+---
+
+## ⚡ Sesión 2026-06-14 (v46) — Gift card UI en perfil del paciente
+
+### Descripción
+Sección de **crédito de regalo** añadida a `PatientProfile.jsx` para que el paciente pueda ver su saldo y canjear códigos directamente desde su perfil.
+
+### Ubicación en el perfil
+Inserted between the avatar/photo card and the Configuración card.
+
+### UI implementada
+- **Saldo disponible** — muestra `$X.XX USD` con texto explicativo si hay saldo positivo ("Se descuenta automáticamente en tu próxima sesión")
+- **Input código** — mono-font, uppercase automático, `PSICO-XXXX-XXXX` placeholder
+- **Botón Canjear** — spinner `Loader2` durante carga, `Check` verde en éxito, rojo en error
+- **Feedback** — mensaje de éxito (balance actualizado) o error debajo del input
+- **Link** — invita a comprar tarjeta en `/regalo`
+
+### Estado y lógica (ya existentes desde sesión anterior)
+- `creditBalance`, `giftCode`, `redeemStatus`, `redeemMsg`
+- `loadCreditBalance()` → `supabase.rpc('get_patient_credit_balance')`
+- `handleRedeem()` → POST `redeem-gift-card` Edge Function con JWT, actualiza balance en UI
+
+### Archivos modificados (v46)
+| Archivo | Tipo | Cambio |
+|---------|------|--------|
+| `src/pages/patient/PatientProfile.jsx` | MODIFIED | Card gift card entre avatar y configuración |
 
 ---
 
