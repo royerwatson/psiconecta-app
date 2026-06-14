@@ -74,7 +74,10 @@ export default function NotificationBell({ userId }) {
   const handleClick = async (notif) => {
     if (!notif.read) await markRead(notif.id)
     setOpen(false)
-    if (notif.link) navigate(notif.link)
+    // Sanear el link: solo navegar a rutas internas relativas (empieza con '/' pero no '//')
+    if (notif.link && notif.link.startsWith('/') && !notif.link.startsWith('//')) {
+      navigate(notif.link)
+    }
   }
 
   const timeAgo = (dateStr) => {
