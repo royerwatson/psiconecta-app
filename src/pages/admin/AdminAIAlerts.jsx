@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 import Avatar from '@/components/ui/Avatar'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
-import { Bell, AlertCircle, AlertTriangle, CheckCircle2, Bot, Zap, Check } from 'lucide-react'
+import { Bell, AlertCircle, AlertTriangle, CheckCircle2, Bot, Zap, Check, Radio } from 'lucide-react'
 
 const RISK_CONFIG = {
   high:   { label: 'Riesgo alto',  color: 'bg-red-50 border-red-200 text-red-800',       badge: 'bg-red-100 text-red-700',    dot: 'bg-red-500'    },
@@ -17,9 +17,63 @@ export default function AdminAIAlerts() {
   const [filter, setFilter]     = useState('unreviewed') // unreviewed | high | medium | all
   const [expanded, setExpanded] = useState(null)
   const [marking, setMarking]   = useState(null)
+  const [liveCount, setLiveCount] = useState(0) // nuevas alertas llegadas por realtime
 
   // Stats
   const [counts, setCounts] = useState({ high: 0, medium: 0, unreviewed: 0, total: 0 })
+
+  // ── Realtime: escucha INSERT en ai_checkins ──────────────────────────────────
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-ai-alerts-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'ai_checkins' },
+        async (payload) => {
+          const raw = payload.new
+          if (!['high', 'medium'].includes(raw.risk_level)) return
+
+          // Cargar datos completos (con joins a profiles)
+          const { data } = await supabase
+            .from('ai_checkins')
+            .select(`
+              id, risk_level, ai_message, questions_answers, created_at, notified,
+              patient:profiles!ai_checkins_patient_id_fkey(id, full_name, avatar_url),
+              therapist:profiles!ai_checkins_therapist_id_fkey(id, full_name)
+            `)
+            .eq('id', raw.id)
+            .single()
+
+          if (!data) return
+
+          setAlerts(prev => [data, ...prev])
+          setCounts(prev => ({
+            ...prev,
+            high:       raw.risk_level === 'high'   ? prev.high + 1   : prev.high,
+            medium:     raw.risk_level === 'medium' ? prev.medium + 1 : prev.medium,
+            unreviewed: prev.unreviewed + 1,
+            total:      prev.total + 1,
+          }))
+          setLiveCount(n => n + 1)
+
+          const patientName = data.patient?.full_name ?? 'Un paciente'
+          const label = raw.risk_level === 'high' ? '🔴 Riesgo ALTO' : '🟡 Riesgo medio'
+          toast(
+            `${label} — ${patientName}`,
+            {
+              duration:  8000,
+              style:     raw.risk_level === 'high'
+                ? { background: '#fef2f2', color: '#991b1b', fontWeight: '600', border: '1px solid #fecaca' }
+                : { background: '#fffbeb', color: '#92400e', fontWeight: '600', border: '1px solid #fde68a' },
+              icon: raw.risk_level === 'high' ? '🚨' : '⚠️',
+            }
+          )
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   useEffect(() => { fetchAlerts() }, [])
 
@@ -98,6 +152,17 @@ export default function AdminAIAlerts() {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
+      {/* Banner realtime activo */}
+      <div className="flex items-center gap-2 text-xs text-emerald-600 font-medium">
+        <Radio size={12} strokeWidth={2} className="animate-pulse" />
+        <span>En tiempo real</span>
+        {liveCount > 0 && (
+          <span className="bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-bold">
+            +{liveCount} nueva{liveCount > 1 ? 's' : ''} en esta sesión
+          </span>
+        )}
+      </div>
+
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>

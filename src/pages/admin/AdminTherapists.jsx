@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { formatPrice } from '@/lib/utils'
 import Avatar from '@/components/ui/Avatar'
@@ -8,7 +8,7 @@ import { Skeleton } from '@/components/ui/Spinner'
 import Modal from '@/components/ui/Modal'
 import ConfirmToggleModal from '@/components/admin/ConfirmToggleModal'
 import toast from 'react-hot-toast'
-import { Search, DollarSign, Calendar, Wallet, CheckCircle2, XCircle, FileText, Image, File, AlertCircle } from 'lucide-react'
+import { Search, DollarSign, Calendar, Wallet, CheckCircle2, XCircle, FileText, Image, File, AlertCircle, Radio } from 'lucide-react'
 
 const REQUIRED_DOCS = [
   { type: 'titulo_profesional', label: 'Título profesional' },
@@ -28,6 +28,38 @@ export default function AdminTherapists() {
   const [rejectingDoc, setRejectingDoc] = useState(null)  // { credId, label }
   const [rejectReason, setRejectReason] = useState('')
   const [actingDoc, setActingDoc]       = useState(null)  // credId being processed
+
+  const [newCredsBanner, setNewCredsBanner] = useState(false)
+
+  // ── Realtime: nueva credencial subida ───────────────────────────────────────
+  useEffect(() => {
+    const channel = supabase
+      .channel('admin-therapist-creds-realtime')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'therapist_credentials' },
+        async (payload) => {
+          // Obtener nombre del terapeuta para el toast
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('id', payload.new.therapist_id)
+            .single()
+
+          const name = profile?.full_name ?? 'Un terapeuta'
+          toast(`📋 ${name} subió nuevas credenciales`, {
+            duration: 7000,
+            style: { background: '#eff6ff', color: '#1e40af', fontWeight: '600', border: '1px solid #bfdbfe' },
+          })
+          setNewCredsBanner(true)
+          // Refresca la lista automáticamente
+          fetchTherapists()
+        }
+      )
+      .subscribe()
+
+    return () => { supabase.removeChannel(channel) }
+  }, [])
 
   useEffect(() => { fetchTherapists() }, [])
 
@@ -194,6 +226,19 @@ export default function AdminTherapists() {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
+      {/* Indicador realtime + banner de credenciales nuevas */}
+      <div className="flex items-center gap-3 flex-wrap">
+        <span className="flex items-center gap-1.5 text-xs text-emerald-600 font-medium">
+          <Radio size={12} strokeWidth={2} className="animate-pulse" />
+          En tiempo real
+        </span>
+        {newCredsBanner && (
+          <span className="text-xs bg-blue-100 text-blue-700 px-2.5 py-1 rounded-full font-semibold">
+            📋 Nuevas credenciales subidas — lista actualizada
+          </span>
+        )}
+      </div>
+
       <div>
         <h1 className="font-serif text-2xl font-bold text-warm-900">Terapeutas</h1>
         <p className="text-warm-500 text-sm mt-1">Gestión y verificación de terapeutas</p>

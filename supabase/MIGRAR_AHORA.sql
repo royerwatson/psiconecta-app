@@ -175,18 +175,8 @@ CREATE POLICY "ec_therapist_select" ON emergency_contacts
 CREATE POLICY "ec_admin_select" ON emergency_contacts
   FOR SELECT USING (is_admin());
 
--- Migrar datos existentes en profiles → emergency_contacts (si los hay)
-INSERT INTO emergency_contacts (patient_id, contact_name, contact_phone)
-SELECT id, emergency_contact, emergency_phone
-FROM profiles
-WHERE emergency_contact IS NOT NULL
-  AND emergency_phone   IS NOT NULL
-ON CONFLICT (patient_id) DO NOTHING;
-
--- Eliminar columnas de profiles (los datos ya están en emergency_contacts)
-ALTER TABLE profiles
-  DROP COLUMN IF EXISTS emergency_contact,
-  DROP COLUMN IF EXISTS emergency_phone;
+-- Las columnas emergency_contact/emergency_phone ya fueron eliminadas
+-- de profiles en una migración anterior. No hay nada que migrar.
 
 
 -- ══════════════════════════════════════════════════════════════════════
@@ -230,62 +220,61 @@ CREATE INDEX IF NOT EXISTS idx_device_tokens_user_id ON device_tokens (user_id);
 -- Necesario para que el botón "Aplicar a paciente" funcione en
 -- ClinicalScalesPage. Los slugs deben coincidir con SCALE_SLUG_MAP.
 -- ══════════════════════════════════════════════════════════════════════
-INSERT INTO tests (slug, title, description, category, estimated_minutes, is_active)
+INSERT INTO tests (slug, name, description, category, license_type, version, author, estimated_minutes)
 VALUES
   (
     'isi',
-    'Índice de Severidad del Insomnio (ISI)',
+    'ISI — Índice de Severidad del Insomnio',
     'Evalúa la naturaleza, severidad e impacto del insomnio durante las últimas 2 semanas. 7 ítems, puntuación 0-28.',
-    'sueño',
-    3,
-    true
+    'sintomas', 'public_domain', 1,
+    'Morin CM (1993) / Fernández-Mendoza et al. (2012)',
+    3
   ),
   (
     'pss10',
-    'Escala de Estrés Percibido — PSS-10',
+    'PSS-10 — Escala de Estrés Percibido',
     'Mide el grado en que situaciones de la vida se perciben como estresantes durante el último mes. 10 ítems con ítems inversos.',
-    'estrés',
-    3,
-    true
+    'sintomas', 'public_domain', 1,
+    'Cohen S, Kamarck T, Mermelstein R (1983) / Remor E (2006)',
+    3
   ),
   (
     'dass21',
     'DASS-21 — Depresión, Ansiedad y Estrés',
-    'Mide tres dimensiones del malestar psicológico: depresión, ansiedad y estrés. 21 ítems divididos en 3 subescalas de 7 ítems.',
-    'multidominio',
-    7,
-    true
+    'Mide tres dimensiones del malestar psicológico: depresión, ansiedad y estrés. 21 ítems en 3 subescalas de 7 ítems (×2).',
+    'sintomas', 'public_domain', 1,
+    'Lovibond SH & Lovibond PF (1995) / Bados, Solanas & Andrés (2005)',
+    7
   ),
   (
     'spin',
-    'Inventario de Fobia Social (SPIN)',
+    'SPIN — Inventario de Fobia Social',
     'Evalúa el miedo, la evitación y el malestar fisiológico en situaciones sociales. 17 ítems, punto de corte ≥19.',
-    'ansiedad',
-    5,
-    true
+    'sintomas', 'public_domain', 1,
+    'Connor KM et al. (2000) / García-López LJ et al. (2010)',
+    5
   ),
   (
     'dast10',
-    'Test de Detección de Abuso de Drogas — DAST-10',
+    'DAST-10 — Test de Detección de Abuso de Drogas',
     'Cribado del uso problemático de drogas (excluye alcohol y tabaco) en los últimos 12 meses. 10 ítems Sí/No.',
-    'sustancias',
-    3,
-    true
+    'funcional', 'public_domain', 1,
+    'Skinner HA (1982) / OMS adaptación',
+    3
   ),
   (
     'cssrs',
-    'Escala Columbia de Ideación Suicida — C-SSRS',
+    'C-SSRS — Escala Columbia de Ideación Suicida',
     'Evalúa la presencia y severidad de ideación e intento de suicidio. Versión de cribado clínico. 6 ítems secuenciales.',
-    'riesgo',
-    5,
-    true
+    'riesgo', 'public_domain', 1,
+    'Posner K et al. (2011) / Columbia University Medical Center',
+    5
   )
 ON CONFLICT (slug) DO UPDATE SET
-  title              = EXCLUDED.title,
-  description        = EXCLUDED.description,
-  category           = EXCLUDED.category,
-  estimated_minutes  = EXCLUDED.estimated_minutes,
-  is_active          = EXCLUDED.is_active;
+  name              = EXCLUDED.name,
+  description       = EXCLUDED.description,
+  category          = EXCLUDED.category,
+  estimated_minutes = EXCLUDED.estimated_minutes;
 
 
 -- ══════════════════════════════════════════════════════════════════════
@@ -308,13 +297,6 @@ SELECT
   to_regclass('public.deletion_requests')  IS NOT NULL        AS deletion_requests_ok,
   to_regclass('public.emergency_contacts') IS NOT NULL        AS emergency_contacts_ok,
   to_regclass('public.device_tokens')      IS NOT NULL        AS device_tokens_ok,
-
-  -- Columnas emergency eliminadas de profiles
-  NOT EXISTS (
-    SELECT 1 FROM information_schema.columns
-    WHERE table_name = 'profiles'
-      AND column_name IN ('emergency_contact', 'emergency_phone')
-  )                                                           AS old_emergency_cols_removed,
 
   -- Escalas clínicas nuevas en tests
   (SELECT COUNT(*) FROM tests WHERE slug IN ('isi','pss10','dass21','spin','dast10','cssrs'))

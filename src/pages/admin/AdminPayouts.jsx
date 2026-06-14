@@ -6,7 +6,7 @@ import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
-import { CheckCircle2, Clock, ClipboardList, Landmark, User, CreditCard, Hash, AlertCircle, Calendar, Wallet, Send } from 'lucide-react'
+import { CheckCircle2, Clock, ClipboardList, Landmark, User, CreditCard, Hash, AlertCircle, Calendar, Wallet, Send, Download } from 'lucide-react'
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -195,6 +195,36 @@ export default function AdminPayouts() {
     }
   }
 
+  // ── Exportar historial como CSV ─────────────────────────────────────────────
+  const exportPayoutsCSV = () => {
+    const filtered = search.trim()
+      ? history.filter(p => (p.therapist?.full_name ?? '').toLowerCase().includes(search.toLowerCase()))
+      : history
+
+    const headers = ['ID', 'Terapeuta', 'Monto (USD)', 'Estado', 'Método', 'Referencia', 'Período desde', 'Período hasta', 'Pagado en', 'Creado en', 'Nota']
+    const rows = filtered.map(p => [
+      p.id,
+      p.therapist?.full_name ?? '',
+      (p.amount ?? 0).toFixed(2),
+      STATUS_CONFIG[p.status]?.label ?? p.status,
+      METHOD_LABEL[p.payment_method] ?? p.payment_method ?? '',
+      p.reference ?? '',
+      p.period_start ? fmtDate(p.period_start) : '',
+      p.period_end   ? fmtDate(p.period_end)   : '',
+      p.paid_at      ? fmtDate(p.paid_at)      : '',
+      p.created_at   ? fmtDate(p.created_at)   : '',
+      p.note ?? '',
+    ])
+    const csv  = [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href     = url
+    a.download = `payouts_${new Date().toISOString().slice(0, 10)}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   // ── Totales ────────────────────────────────────────────────────────────────
   const totalPending = earnings.reduce((a, e) => a + (e.pending_amount ?? 0), 0)
 
@@ -326,6 +356,17 @@ export default function AdminPayouts() {
       {/* ── TAB: Historial ── */}
       {tab === 'history' && (
         <>
+          {/* Botón CSV — solo visible cuando hay datos */}
+          {!histLoading && history.length > 0 && (
+            <div className="flex justify-end">
+              <button
+                onClick={exportPayoutsCSV}
+                className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm font-medium hover:bg-emerald-100 transition-colors"
+              >
+                <Download size={13} strokeWidth={1.8} />CSV
+              </button>
+            </div>
+          )}
           {histLoading ? (
             <div className="flex flex-col gap-3">
               {[1,2,3,4].map(i => <Skeleton key={i} className="h-20" />)}
