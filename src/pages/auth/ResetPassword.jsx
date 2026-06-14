@@ -46,7 +46,7 @@ export default function ResetPassword() {
           <div className="w-14 h-14 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-calm">
               <PsiconectaLogo size={36} color="white" />
             </div>
-          <h1 className="font-serif text-3xl font-bold text-primary-800">
+          <h1 className="text-3xl font-bold text-primary-800">
             Psico<span className="text-calm-500">necta</span>
           </h1>
         </div>
@@ -59,7 +59,7 @@ export default function ResetPassword() {
             </div>
           ) : (
             <>
-              <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Nueva contraseña</h2>
+              <h2 className="text-xl font-semibold text-warm-900 mb-1">Nueva contraseña</h2>
               <p className="text-sm text-warm-500 mb-6">Ingresa tu nueva contraseña.</p>
 
               <form onSubmit={handleSubmit} className="flex flex-col gap-4">

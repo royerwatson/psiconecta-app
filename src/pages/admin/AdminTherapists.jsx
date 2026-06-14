@@ -240,7 +240,7 @@ export default function AdminTherapists() {
       </div>
 
       <div>
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Terapeutas</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Terapeutas</h1>
         <p className="text-warm-500 text-sm mt-1">Gestión y verificación de terapeutas</p>
       </div>
 
@@ -545,7 +545,7 @@ export default function AdminTherapists() {
       {rejectingDoc && (
         <div className="fixed inset-0 z-[70] bg-black/40 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm">
-            <h3 className="font-serif font-bold text-warm-900 mb-1">Rechazar documento</h3>
+            <h3 className="font-bold text-warm-900 mb-1">Rechazar documento</h3>
             <p className="text-sm text-warm-500 mb-4">
               Indica el motivo para rechazar <strong>{rejectingDoc.label}</strong>.
               El terapeuta verá este mensaje y podrá corregirlo.

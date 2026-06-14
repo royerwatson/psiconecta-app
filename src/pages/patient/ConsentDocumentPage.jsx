@@ -90,7 +90,7 @@ export default function ConsentDocumentPage() {
 
           {/* Cabecera del documento */}
           <div className="text-center border-b border-warm-100 pb-6 mb-6">
-            <p className="text-2xl font-bold text-warm-900 font-serif">Psiconecta</p>
+            <p className="text-2xl font-bold text-warm-900">Psiconecta</p>
             <p className="text-sm text-warm-500 mt-1">Plataforma de Psicoterapia en Línea</p>
             <h1 className="text-lg font-bold text-warm-800 mt-4">
               Consentimiento Informado para Servicios de Psicoterapia

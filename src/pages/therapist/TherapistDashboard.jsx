@@ -186,7 +186,7 @@ export default function TherapistDashboard() {
       {/* Bienvenida */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">
+          <h1 className="text-2xl font-bold text-warm-900">
             {getGreeting()}, {profile?.full_name?.split(' ')[0]}
           </h1>
           <p className="text-warm-500 text-sm mt-1">
@@ -280,7 +280,7 @@ export default function TherapistDashboard() {
       {alerts.length > 0 && (
         <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <h2 className="flex items-center gap-2 font-serif text-lg font-semibold text-warm-900">
+            <h2 className="flex items-center gap-2 text-lg font-semibold text-warm-900">
               <Bot size={18} className="text-warm-500" /> Check-ins de bienestar
             </h2>
             <span className="text-xs text-warm-400">Últimas respuestas de tus pacientes</span>
@@ -391,7 +391,7 @@ export default function TherapistDashboard() {
       {/* Próximas sesiones */}
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="font-serif text-lg font-semibold text-warm-900">Próximas sesiones</h2>
+          <h2 className="text-lg font-semibold text-warm-900">Próximas sesiones</h2>
           <Button size="sm" variant="ghost" onClick={() => navigate('/therapist/schedule')}>
             Ver agenda →
           </Button>
@@ -426,7 +426,7 @@ export default function TherapistDashboard() {
 
       {/* Accesos rápidos */}
       <div>
-        <h2 className="font-serif text-lg font-semibold text-warm-900 mb-3">Accesos rápidos</h2>
+        <h2 className="text-lg font-semibold text-warm-900 mb-3">Accesos rápidos</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {QUICK_LINKS.map(({ Icon, label, to }) => (
             <Card key={label} hover padding className="flex flex-col items-center gap-2 py-5 text-center"

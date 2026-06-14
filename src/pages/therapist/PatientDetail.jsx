@@ -244,7 +244,7 @@ export default function PatientDetail() {
         <div className="flex items-center gap-4">
           <Avatar name={patient.full_name} size="xl" />
           <div className="flex-1">
-            <h1 className="font-serif text-2xl font-bold text-warm-900">{patient.full_name}</h1>
+            <h1 className="text-2xl font-bold text-warm-900">{patient.full_name}</h1>
             <p className="text-warm-500 text-sm mt-1">{patient.email}</p>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant="calm">{sessions.length} sesiones</Badge>
@@ -547,7 +547,7 @@ export default function PatientDetail() {
             <div className="w-10 h-1 bg-warm-200 rounded-full mx-auto mt-3 sm:hidden" />
             <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-warm-100">
               <div>
-                <p className="font-serif font-semibold text-warm-900">Biblioteca terapéutica</p>
+                <p className="font-semibold text-warm-900">Biblioteca terapéutica</p>
                 <p className="text-xs text-warm-400">Selecciona un ejercicio para asignar a {patient?.full_name?.split(' ')[0]}</p>
               </div>
               <button onClick={() => setShowLibraryPicker(false)} className="p-1.5 rounded-lg hover:bg-warm-100 transition-colors">

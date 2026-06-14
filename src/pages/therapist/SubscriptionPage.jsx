@@ -140,7 +140,7 @@ export default function SubscriptionPage() {
 
       {/* Header */}
       <div>
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Mi suscripción</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Mi suscripción</h1>
         <p className="text-warm-500 text-sm mt-1">
           {isPro
             ? 'Tienes acceso completo a todas las herramientas clínicas.'

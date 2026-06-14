@@ -78,7 +78,7 @@ export default function SubscriptionSuccess() {
           <div className="w-12 h-12 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-calm">
             <PsiconectaLogo size={30} color="white" />
           </div>
-          <h1 className="font-serif text-2xl font-bold text-primary-800">
+          <h1 className="text-2xl font-bold text-primary-800">
             Psico<span className="text-calm-500">necta</span>
           </h1>
         </div>
@@ -86,7 +86,7 @@ export default function SubscriptionSuccess() {
         {status === 'capturing' && (
           <div className="bg-white rounded-3xl shadow-float p-10 text-center">
             <Loader2 size={44} strokeWidth={1.8} className="mx-auto mb-4 animate-spin text-primary-400" />
-            <h2 className="font-serif text-xl font-bold text-warm-900 mb-2">Activando tu suscripción...</h2>
+            <h2 className="text-xl font-bold text-warm-900 mb-2">Activando tu suscripción...</h2>
             <p className="text-warm-500 text-sm">Estamos confirmando tu pago con PayPal.</p>
           </div>
         )}
@@ -96,7 +96,7 @@ export default function SubscriptionSuccess() {
             <div className="w-20 h-20 bg-primary-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <Star size={40} strokeWidth={1.8} className="text-primary-500" />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-warm-900 mb-2">¡Plan Pro activado!</h2>
+            <h2 className="text-2xl font-bold text-warm-900 mb-2">¡Plan Pro activado!</h2>
             <p className="text-warm-500 text-sm mb-4">
               Ahora tienes acceso completo a todas las herramientas clínicas.
             </p>
@@ -121,7 +121,7 @@ export default function SubscriptionSuccess() {
             <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-6">
               <XCircle size={40} strokeWidth={1.8} className="text-red-400" />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-warm-900 mb-2">Error al procesar</h2>
+            <h2 className="text-2xl font-bold text-warm-900 mb-2">Error al procesar</h2>
             <p className="text-warm-500 text-sm mb-2">{errorMsg}</p>
             <div className="flex flex-col gap-3 mt-6">
               <Button fullWidth onClick={() => { hasCaptured.current = false; capturePayment() }}>

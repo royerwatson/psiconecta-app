@@ -146,7 +146,7 @@ export default function AdminLogin() {
               <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
             </svg>
           </div>
-          <h1 className="font-serif text-2xl font-bold text-white">
+          <h1 className="text-2xl font-bold text-white">
             Psico<span className="text-calm-400">necta</span>
           </h1>
           <p className="text-primary-300 text-xs mt-1 tracking-widest uppercase">

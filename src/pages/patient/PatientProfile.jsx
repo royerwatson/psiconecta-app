@@ -152,14 +152,14 @@ export default function PatientProfile() {
 
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
-      <h1 className="font-serif text-2xl font-bold text-warm-900">Mi perfil</h1>
+      <h1 className="text-2xl font-bold text-warm-900">Mi perfil</h1>
 
       {/* Foto + nombre */}
       <Card>
         <div className="flex flex-col items-center gap-4 py-4">
           <AvatarUpload size="2xl" />
           <div className="text-center">
-            <h2 className="font-serif text-xl font-bold text-warm-900">{profile?.full_name}</h2>
+            <h2 className="text-xl font-bold text-warm-900">{profile?.full_name}</h2>
             <p className="text-warm-500 text-sm mt-0.5">{profile?.email}</p>
           </div>
 
@@ -309,7 +309,7 @@ export default function PatientProfile() {
         <div className="flex flex-col items-center gap-4 py-2">
           <Hand size={48} strokeWidth={1.5} className="text-warm-400" />
           <div className="text-center">
-            <p className="font-serif text-lg font-semibold text-warm-900">¿Cerrar sesión?</p>
+            <p className="text-lg font-semibold text-warm-900">¿Cerrar sesión?</p>
             <p className="text-sm text-warm-500 mt-1">Puedes volver cuando quieras.</p>
           </div>
           <div className="grid grid-cols-2 gap-3 w-full mt-2">

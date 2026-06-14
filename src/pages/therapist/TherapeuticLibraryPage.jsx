@@ -97,7 +97,7 @@ function ExerciseDetail({ exercise, onAssign, onClose }) {
               {exercise.difficulty}
             </span>
           </div>
-          <h2 className="font-serif font-bold text-warm-900 text-base leading-snug">{exercise.title}</h2>
+          <h2 className="font-bold text-warm-900 text-base leading-snug">{exercise.title}</h2>
           <p className="text-xs text-warm-500 mt-1">{exercise.summary}</p>
         </div>
         <button onClick={onClose} className="p-1.5 rounded-lg hover:bg-warm-100 transition-colors shrink-0">
@@ -229,7 +229,7 @@ function AssignModal({ exercise, therapistId, onClose, onAssigned }) {
         <div className="w-10 h-1 bg-warm-200 rounded-full mx-auto mt-3 mb-1 sm:hidden" />
 
         <div className="p-5 border-b border-warm-100">
-          <p className="font-serif font-semibold text-warm-900">Asignar ejercicio</p>
+          <p className="font-semibold text-warm-900">Asignar ejercicio</p>
           <p className="text-xs text-warm-400 mt-0.5 line-clamp-1">{exercise.title}</p>
         </div>
 
@@ -367,7 +367,7 @@ export default function TherapeuticLibraryPage() {
 
       {/* Header */}
       <div>
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Biblioteca terapéutica</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Biblioteca terapéutica</h1>
         <p className="text-warm-500 text-sm mt-0.5">
           {LIBRARY.length} ejercicios · 8 categorías · Asignación en un clic
         </p>

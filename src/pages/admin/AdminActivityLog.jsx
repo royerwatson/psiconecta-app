@@ -208,7 +208,7 @@ export default function AdminActivityLog() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Registro de Actividad</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Registro de Actividad</h1>
           <p className="text-warm-500 text-sm mt-1">
             Feed cronológico de eventos en la plataforma
           </p>

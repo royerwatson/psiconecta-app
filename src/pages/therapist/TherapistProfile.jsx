@@ -202,7 +202,7 @@ export default function TherapistProfile() {
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex items-center justify-between">
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Mi perfil</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Mi perfil</h1>
         <Button size="sm" variant={editing ? 'outline' : 'secondary'}
           onClick={() => setEditing(!editing)}>
           {editing ? 'Cancelar' : <><Pencil size={13} strokeWidth={1.8} className="inline mr-1" />Editar</>}
@@ -214,7 +214,7 @@ export default function TherapistProfile() {
         <div className="flex items-center gap-4">
           <AvatarUpload size="xl" />
           <div className="flex-1 min-w-0">
-            <h2 className="font-serif text-xl font-bold text-warm-900 leading-tight">{profile?.full_name}</h2>
+            <h2 className="text-xl font-bold text-warm-900 leading-tight">{profile?.full_name}</h2>
             <p className="text-warm-500 text-sm mt-0.5">{therapist?.specialty}</p>
             {editing && (
               <p className="text-xs text-warm-400 mt-1 italic">El nombre se gestiona a través del administrador.</p>

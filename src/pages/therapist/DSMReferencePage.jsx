@@ -184,7 +184,7 @@ export default function DSMReferencePage() {
       <div>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="font-serif text-2xl font-bold text-warm-900">DSM-5-TR</h1>
+            <h1 className="text-2xl font-bold text-warm-900">DSM-5-TR</h1>
             <p className="text-warm-500 text-sm mt-0.5">
               {DSM5TR.length} capítulos · {totalDiagnoses} diagnósticos · Edición 2022
             </p>
@@ -278,7 +278,7 @@ export default function DSMReferencePage() {
                 <div className={`px-3 py-1 rounded-full text-xs font-semibold border ${chapterColorMap[chapter.chapterId]}`}>
                   {chapter.diagnoses.length} diagnósticos
                 </div>
-                <h2 className="font-serif text-base font-bold text-warm-800">{chapter.chapter}</h2>
+                <h2 className="text-base font-bold text-warm-800">{chapter.chapter}</h2>
               </div>
               <div className="flex flex-col gap-2">
                 {chapter.diagnoses.map(d => (

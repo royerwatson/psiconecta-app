@@ -411,7 +411,7 @@ export default function ChatPage() {
       } flex-col w-full sm:w-72 border-r border-warm-100 bg-white rounded-l-2xl overflow-hidden`}>
 
         <div className="px-4 py-4 border-b border-warm-100">
-          <h2 className="font-serif text-lg font-semibold text-warm-900">Mensajes</h2>
+          <h2 className="text-lg font-semibold text-warm-900">Mensajes</h2>
         </div>
 
         <div className="flex-1 overflow-y-auto">

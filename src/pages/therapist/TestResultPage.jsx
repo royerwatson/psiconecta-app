@@ -300,7 +300,7 @@ export default function TestResultPage() {
         <div className="flex items-start gap-3">
           <div className="flex-1 min-w-0">
             <p className="text-xs text-warm-400 mb-1">Resultado de test</p>
-            <h1 className="font-serif text-xl font-bold text-warm-900">{test?.name}</h1>
+            <h1 className="text-xl font-bold text-warm-900">{test?.name}</h1>
             <p className="text-sm text-warm-500 mt-1">
               Paciente: <strong>{patient?.full_name}</strong>
             </p>

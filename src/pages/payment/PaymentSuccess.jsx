@@ -98,7 +98,7 @@ export default function PaymentSuccess() {
             <CheckCircle2 size={42} strokeWidth={1.6} className="text-emerald-500" />
           </div>
 
-          <h2 className="hero-reveal hero-reveal-1 font-serif text-2xl font-bold text-warm-900 dark:text-white mb-2">
+          <h2 className="hero-reveal hero-reveal-1 text-2xl font-bold text-warm-900 dark:text-white mb-2">
             ¡Tu cita está confirmada!
           </h2>
           <p className="hero-reveal hero-reveal-2 text-warm-500 dark:text-slate-400 text-sm mb-7">

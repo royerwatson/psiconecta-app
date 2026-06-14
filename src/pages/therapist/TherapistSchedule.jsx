@@ -186,7 +186,7 @@ export default function TherapistSchedule() {
       {/* ── Header ── */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Mi agenda</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Mi agenda</h1>
           <p className="text-warm-500 text-sm mt-1">
             {format(weekStart, "'Semana del' d", { locale: es })}
             {' – '}
@@ -373,7 +373,7 @@ export default function TherapistSchedule() {
       {/* ── Disponibilidad configurada ── */}
       {availability.length > 0 && (
         <div>
-          <h2 className="font-serif text-lg font-semibold text-warm-900 mb-3">Horarios activos</h2>
+          <h2 className="text-lg font-semibold text-warm-900 mb-3">Horarios activos</h2>
           <div className="flex flex-wrap gap-2">
             {availability.map((av) => (
               <Badge key={av.id} variant="calm">
@@ -387,7 +387,7 @@ export default function TherapistSchedule() {
       {/* ── Fechas bloqueadas ── */}
       {blockedDates.length > 0 && (
         <div>
-          <h2 className="font-serif text-lg font-semibold text-warm-900 mb-3">Días bloqueados</h2>
+          <h2 className="text-lg font-semibold text-warm-900 mb-3">Días bloqueados</h2>
           <div className="flex flex-col gap-2">
             {blockedDates.map((b) => (
               <div key={b.id} className="flex items-center gap-3 bg-red-50 border border-red-100 rounded-2xl px-4 py-3">

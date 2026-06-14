@@ -210,7 +210,7 @@ function JournalEditor({ entry, onSave, onCancel }) {
         onChange={e => setTitle(e.target.value)}
         placeholder="Título (opcional)"
         maxLength={200}
-        className="w-full font-serif text-lg font-semibold text-warm-900 placeholder:text-warm-300 bg-transparent border-b border-warm-100 pb-2 outline-none focus:border-primary-300 transition-colors"
+        className="w-full text-lg font-semibold text-warm-900 placeholder:text-warm-300 bg-transparent border-b border-warm-100 pb-2 outline-none focus:border-primary-300 transition-colors"
       />
 
       {/* Área de escritura */}
@@ -303,7 +303,7 @@ function EntryCard({ entry, onEdit, onDelete }) {
               )}
             </div>
             {entry.title && (
-              <p className="font-serif font-semibold text-warm-900 text-sm mb-0.5">{entry.title}</p>
+              <p className="font-semibold text-warm-900 text-sm mb-0.5">{entry.title}</p>
             )}
             <p className="text-sm text-warm-600 leading-relaxed">
               {expanded ? entry.content : preview}
@@ -441,7 +441,7 @@ export default function JournalPage() {
           >
             ← Volver
           </button>
-          <h1 className="font-serif text-xl font-bold text-warm-900">
+          <h1 className="text-xl font-bold text-warm-900">
             {view === 'edit' ? 'Editar entrada' : 'Nueva entrada'}
           </h1>
         </div>
@@ -461,7 +461,7 @@ export default function JournalPage() {
       {/* Encabezado */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Mi Diario</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Mi Diario</h1>
           <p className="text-warm-500 text-sm mt-1">
             {entries.length === 0
               ? 'Un espacio privado para ti'
@@ -477,7 +477,7 @@ export default function JournalPage() {
       {!loading && entries.length === 0 && (
         <div className="bg-gradient-to-br from-primary-50 to-calm-50 border border-primary-100 rounded-2xl p-8 text-center mb-6">
           <div className="mb-4 flex justify-center"><BookOpen size={48} strokeWidth={1.8} className="text-warm-300" /></div>
-          <p className="font-serif font-semibold text-warm-900 text-lg mb-2">
+          <p className="font-semibold text-warm-900 text-lg mb-2">
             Tu diario está esperando
           </p>
           <p className="text-warm-500 text-sm leading-relaxed mb-5">

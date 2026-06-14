@@ -216,7 +216,7 @@ export default function AdminStats() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Estadísticas</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Estadísticas</h1>
           <p className="text-warm-500 text-sm mt-1">Análisis de rendimiento de la plataforma</p>
         </div>
         <div className="flex gap-2">

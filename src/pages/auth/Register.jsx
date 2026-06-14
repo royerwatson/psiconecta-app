@@ -205,7 +205,7 @@ function PaymentStep({ onNext, onBack, paypalLinked, setPaypalLinked }) {
   return (
     <div className="animate-fade-in flex flex-col gap-5">
       <div>
-        <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Método de pago</h2>
+        <h2 className="text-xl font-semibold text-warm-900 mb-1">Método de pago</h2>
         <p className="text-sm text-warm-500">
           Vincula tu cuenta PayPal o tarjeta para agilizar tus pagos. Puedes hacerlo ahora o más tarde.
         </p>
@@ -276,7 +276,7 @@ function TermsStep({ onSubmit, onBack, loading, acceptTerms, setAcceptTerms, acc
   return (
     <form onSubmit={onSubmit} className="animate-fade-in flex flex-col gap-5">
       <div>
-        <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Términos y privacidad</h2>
+        <h2 className="text-xl font-semibold text-warm-900 mb-1">Términos y privacidad</h2>
         <p className="text-sm text-warm-500">Lee y acepta nuestras condiciones para continuar</p>
       </div>
 
@@ -564,7 +564,7 @@ export default function Register() {
                   d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
-            <h2 className="font-serif text-xl font-bold text-warm-900 mb-2">Verifica tu correo</h2>
+            <h2 className="text-xl font-bold text-warm-900 mb-2">Verifica tu correo</h2>
             <p className="text-warm-500 text-sm leading-relaxed mb-6">
               Te enviamos un enlace de verificación a <strong>{form.email}</strong>.
               Revisa tu bandeja de entrada (y carpeta de spam) y haz clic en el enlace para activar tu cuenta.
@@ -602,7 +602,7 @@ export default function Register() {
           <div className="w-12 h-12 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-calm">
             <PsiconectaLogo size={30} color="white" />
           </div>
-          <h1 className="font-serif text-2xl font-bold text-primary-800">
+          <h1 className="text-2xl font-bold text-primary-800">
             Psico<span className="text-calm-500">necta</span>
           </h1>
         </div>
@@ -615,7 +615,7 @@ export default function Register() {
           {/* ── PASO 1: Selección de rol ── */}
           {step === 1 && (
             <div className="animate-fade-in">
-              <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">¿Cómo usarás Psiconecta?</h2>
+              <h2 className="text-xl font-semibold text-warm-900 mb-1">¿Cómo usarás Psiconecta?</h2>
               <p className="text-sm text-warm-500 mb-6">Elige tu rol para personalizar tu experiencia</p>
               <div className="flex flex-col gap-3">
                 <RoleCard
@@ -638,7 +638,7 @@ export default function Register() {
           {step === 2 && (
             <form onSubmit={handleStep2} className="animate-fade-in flex flex-col gap-4">
               <div>
-                <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Datos personales</h2>
+                <h2 className="text-xl font-semibold text-warm-900 mb-1">Datos personales</h2>
                 <p className="text-sm text-warm-500">
                   {role === 'therapist' ? 'Cuenta profesional' : 'Cuenta de paciente'}
                 </p>
@@ -726,7 +726,7 @@ export default function Register() {
           {step === 3 && (
             <form onSubmit={handleStep3} className="animate-fade-in flex flex-col gap-4">
               <div>
-                <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Información de contacto</h2>
+                <h2 className="text-xl font-semibold text-warm-900 mb-1">Información de contacto</h2>
                 <p className="text-sm text-warm-500">Dónde te encontramos y cómo comunicarnos</p>
               </div>
 
@@ -787,7 +787,7 @@ export default function Register() {
           {step === 4 && role === 'therapist' && (
             <form onSubmit={handleStep4Therapist} className="animate-fade-in flex flex-col gap-4">
               <div>
-                <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Datos profesionales</h2>
+                <h2 className="text-xl font-semibold text-warm-900 mb-1">Datos profesionales</h2>
                 <p className="text-sm text-warm-500">Verificaremos tus credenciales antes de activar tu perfil</p>
               </div>
 

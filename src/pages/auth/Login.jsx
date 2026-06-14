@@ -102,7 +102,7 @@ export default function Login() {
           <div className="w-14 h-14 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-calm">
               <PsiconectaLogo size={36} color="white" />
             </div>
-          <h1 className="font-serif text-3xl font-bold text-primary-800">
+          <h1 className="text-3xl font-bold text-primary-800">
             Psico<span className="text-calm-500">necta</span>
           </h1>
           <p className="text-warm-500 mt-2 text-sm">Tu espacio de bienestar mental</p>
@@ -110,7 +110,7 @@ export default function Login() {
 
         {/* Card */}
         <div className="bg-white rounded-3xl shadow-float p-8 border border-warm-100">
-          <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Iniciar sesión</h2>
+          <h2 className="text-xl font-semibold text-warm-900 mb-1">Iniciar sesión</h2>
           <p className="text-sm text-warm-500 mb-6">Bienvenido/a de vuelta</p>
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">

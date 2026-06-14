@@ -198,7 +198,7 @@ function PlanStep({ step, value, onChange }) {
             {step.num}
           </span>
           <StepIcon size={16} strokeWidth={1.8} />
-          <h3 className="font-serif font-semibold text-warm-900 text-sm">{step.title}</h3>
+          <h3 className="font-semibold text-warm-900 text-sm">{step.title}</h3>
         </div>
         <p className="text-xs text-warm-500 leading-relaxed mt-1 ml-8">{step.hint}</p>
       </div>
@@ -368,7 +368,7 @@ export default function SafetyPlanPage() {
     return (
       <div className="flex flex-col gap-6 animate-fade-in">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Plan de seguridad</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Plan de seguridad</h1>
           <p className="text-warm-500 text-sm mt-0.5">
             Intervención Stanley-Brown · Protocolo para pacientes de alto riesgo
           </p>
@@ -540,7 +540,7 @@ export default function SafetyPlanPage() {
             <div className="bg-primary-50 px-4 py-3">
               <div className="flex items-center gap-2">
                 <span className="w-6 h-6 rounded-full bg-primary-500 text-white text-xs font-bold flex items-center justify-center">+</span>
-                <h3 className="font-serif font-semibold text-warm-900 text-sm">Razones para vivir</h3>
+                <h3 className="font-semibold text-warm-900 text-sm">Razones para vivir</h3>
               </div>
               <p className="text-xs text-warm-500 leading-relaxed mt-1 ml-8">
                 Cosas, personas o metas que el/la paciente considera importantes y que hacen que la vida valga la pena.

@@ -303,7 +303,7 @@ function SaveModal({ scale, score, answers, therapistId, onClose, onSaved }) {
         className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-float border border-warm-100"
         onClick={e => e.stopPropagation()}
       >
-        <p className="font-serif font-semibold text-warm-900 mb-1">Guardar resultado</p>
+        <p className="font-semibold text-warm-900 mb-1">Guardar resultado</p>
         <p className="text-xs text-warm-400 mb-4">
           {scale.name} · {score}/{scale.maxScore} pts · {band?.label}
         </p>
@@ -416,7 +416,7 @@ function ApplyScaleModal({ scale, therapistId, onClose, onApplied }) {
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4 animate-fade-in" onClick={onClose}>
       <div className="bg-white rounded-2xl p-5 max-w-sm w-full shadow-float border border-warm-100" onClick={e => e.stopPropagation()}>
-        <p className="font-serif font-semibold text-warm-900 mb-1">Aplicar a paciente</p>
+        <p className="font-semibold text-warm-900 mb-1">Aplicar a paciente</p>
         <p className="text-xs text-warm-400 mb-4">{scale.name} · El paciente lo completará desde su dashboard</p>
 
         <p className="text-xs font-semibold text-warm-600 mb-2">Paciente</p>
@@ -515,7 +515,7 @@ export default function ClinicalScalesPage() {
     return (
       <><div className="flex flex-col gap-6 animate-fade-in">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Escalas clínicas</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Escalas clínicas</h1>
           <p className="text-warm-500 text-sm mt-0.5">
             Herramientas de evaluación validadas con puntuación automática
           </p>
@@ -580,7 +580,7 @@ export default function ClinicalScalesPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span className="text-lg">{scale.icon}</span>
-              <span className="font-serif font-bold text-warm-900">{scale.name}</span>
+              <span className="font-bold text-warm-900">{scale.name}</span>
               <span className={cn('text-[10px] px-2 py-0.5 rounded-full border font-medium', th.pill)}>
                 {scale.domain}
               </span>

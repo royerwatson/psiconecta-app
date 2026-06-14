@@ -93,7 +93,7 @@ export default function AdminReviews() {
     <div className="flex flex-col gap-6 animate-fade-in">
       {/* Header */}
       <div>
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Gestión de Reseñas</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Gestión de Reseñas</h1>
         <p className="text-warm-500 text-sm mt-1">
           Todas las evaluaciones post-sesión de la plataforma
         </p>
@@ -317,7 +317,7 @@ export default function AdminReviews() {
             onClick={e => e.stopPropagation()}>
             <div className="text-center mb-5">
               <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-3"><Trash2 size={24} className="text-red-400" strokeWidth={1.8} /></div>
-              <p className="font-serif font-semibold text-warm-900">¿Eliminar reseña?</p>
+              <p className="font-semibold text-warm-900">¿Eliminar reseña?</p>
               <p className="text-sm text-warm-500 mt-1">
                 Esta acción es permanente y no se puede deshacer.
               </p>

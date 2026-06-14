@@ -123,7 +123,7 @@ export default function PricingPage() {
         <span className="hero-reveal hero-reveal-1 inline-block bg-primary-100 text-primary-700 text-xs font-semibold px-4 py-1.5 rounded-full mb-4">
           Para terapeutas
         </span>
-        <h1 className="hero-reveal hero-reveal-1 font-serif text-4xl font-bold text-warm-900 mb-4 leading-tight">
+        <h1 className="hero-reveal hero-reveal-1 text-4xl font-bold text-warm-900 mb-4 leading-tight">
           Planes que crecen<br/>contigo
         </h1>
         <p className="hero-reveal hero-reveal-2 text-warm-500 text-lg leading-relaxed max-w-xl mx-auto">
@@ -273,7 +273,7 @@ export default function PricingPage() {
 
       {/* FAQ */}
       <div className="max-w-2xl mx-auto px-4 pb-20">
-        <h2 className="font-serif text-2xl font-bold text-warm-900 text-center mb-8">
+        <h2 className="text-2xl font-bold text-warm-900 text-center mb-8">
           Preguntas frecuentes
         </h2>
         <div className="space-y-4">

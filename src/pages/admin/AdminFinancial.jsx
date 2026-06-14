@@ -141,7 +141,7 @@ export default function AdminFinancial() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Reportes Financieros</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Reportes Financieros</h1>
           <p className="text-warm-500 text-sm mt-1">Ingresos y facturación de la plataforma</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">

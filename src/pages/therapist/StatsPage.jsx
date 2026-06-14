@@ -182,7 +182,7 @@ export default function StatsPage() {
         <div className="w-16 h-16 bg-primary-50 rounded-2xl flex items-center justify-center">
           <Lock size={28} strokeWidth={1.5} className="text-primary-400" />
         </div>
-        <h2 className="font-serif text-xl font-bold text-warm-900">Estadísticas avanzadas</h2>
+        <h2 className="text-xl font-bold text-warm-900">Estadísticas avanzadas</h2>
         <p className="text-warm-500 text-sm leading-relaxed">
           Esta funcionalidad está disponible para los planes <strong>Pro</strong> y <strong>Premium</strong>.
           Actualiza tu plan para acceder a métricas detalladas de ingresos, retención y más.
@@ -206,7 +206,7 @@ export default function StatsPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Estadísticas</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Estadísticas</h1>
           <p className="text-warm-500 text-sm mt-0.5">
             {format(thisStart, 'MMMM yyyy', { locale: es })} · Plan{' '}
             <span className={plan === 'premium' ? 'text-amber-600 font-semibold' : 'text-primary-600 font-semibold'}>

@@ -93,7 +93,7 @@ export default function AdminLayout() {
       {/* Sidebar */}
       <aside className="w-56 bg-primary-900 flex flex-col fixed top-0 left-0 h-full z-20 hidden sm:flex">
         <div className="px-5 py-6 border-b border-primary-800">
-          <p className="font-serif text-xl font-bold text-white">
+          <p className="text-xl font-bold text-white">
             Psico<span className="text-calm-300">necta</span>
           </p>
           <p className="text-xs text-primary-300 mt-0.5">Panel Admin</p>

@@ -157,7 +157,7 @@ export default function TherapistMatchPage() {
               Pregunta {step + 1} de {QUESTIONS.length}
             </span>
           </div>
-          <h2 className="font-serif text-xl font-bold text-warm-900 leading-snug">
+          <h2 className="text-xl font-bold text-warm-900 leading-snug">
             {currentQ.q}
           </h2>
         </div>
@@ -180,7 +180,7 @@ export default function TherapistMatchPage() {
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Tus mejores matches</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Tus mejores matches</h1>
           <p className="text-warm-500 text-sm mt-1">Basado en tus respuestas y disponibilidad</p>
         </div>
         <button onClick={restart} className="text-xs text-primary-500 hover:text-primary-700 font-medium transition-colors">

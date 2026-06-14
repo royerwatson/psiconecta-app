@@ -166,7 +166,7 @@ export default function AdminAIAlerts() {
       {/* Header */}
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Alertas de bienestar IA</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Alertas de bienestar IA</h1>
           <p className="text-warm-500 text-sm mt-1">Monitoreo del check-in diario de pacientes</p>
         </div>
         {counts.unreviewed > 0 && (

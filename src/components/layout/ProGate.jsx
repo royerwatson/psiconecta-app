@@ -43,7 +43,7 @@ export default function ProGate({ children, featureName = 'esta herramienta' }) 
         <Lock size={28} strokeWidth={1.5} className="text-primary-400" />
       </div>
       <div>
-        <h2 className="font-serif text-xl font-bold text-warm-900 mb-2">
+        <h2 className="text-xl font-bold text-warm-900 mb-2">
           Disponible en el plan Suscripción
         </h2>
         <p className="text-warm-500 text-sm leading-relaxed">

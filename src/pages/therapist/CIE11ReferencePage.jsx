@@ -193,7 +193,7 @@ export default function CIE11ReferencePage() {
       <div>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h1 className="font-serif text-2xl font-bold text-warm-900">CIE-11</h1>
+            <h1 className="text-2xl font-bold text-warm-900">CIE-11</h1>
             <p className="text-warm-500 text-sm mt-0.5">
               {CIE11.length} capítulos · {totalDiagnoses} diagnósticos · OMS 2022
             </p>
@@ -302,7 +302,7 @@ export default function CIE11ReferencePage() {
                   {chapter.diagnoses.length} diagnósticos
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h2 className="font-serif text-base font-bold text-warm-800">{chapter.chapter}</h2>
+                  <h2 className="text-base font-bold text-warm-800">{chapter.chapter}</h2>
                   <p className="text-[10px] text-warm-400 font-mono">{chapter.block}</p>
                 </div>
               </div>

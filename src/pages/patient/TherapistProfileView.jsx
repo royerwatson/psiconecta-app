@@ -525,7 +525,7 @@ export default function TherapistProfileView() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <p className="font-serif text-xl font-bold text-warm-900 mb-2">¡Pago exitoso!</p>
+              <p className="text-xl font-bold text-warm-900 mb-2">¡Pago exitoso!</p>
               <p className="text-sm text-warm-500">Tu cita ha sido confirmada. Redirigiendo...</p>
             </div>
           )}

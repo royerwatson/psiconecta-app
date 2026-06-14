@@ -83,7 +83,7 @@ export default function PatientList() {
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Mis pacientes</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Mis pacientes</h1>
           <p className="text-warm-500 text-sm mt-1">{patients.length} pacientes en total</p>
         </div>
       </div>

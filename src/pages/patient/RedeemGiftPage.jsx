@@ -92,7 +92,7 @@ export default function RedeemGiftPage() {
               <div className="w-14 h-14 bg-primary-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Gift size={28} className="text-primary-600" strokeWidth={1.6} />
               </div>
-              <h1 className="font-serif text-2xl font-bold text-warm-900">Canjear regalo</h1>
+              <h1 className="text-2xl font-bold text-warm-900">Canjear regalo</h1>
               <p className="text-warm-500 text-sm mt-1">
                 Ingresa el código que recibiste por email para agregar crédito a tu cuenta.
               </p>
@@ -148,7 +148,7 @@ export default function RedeemGiftPage() {
             <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
               <Check size={36} className="text-green-500" strokeWidth={2} />
             </div>
-            <h2 className="font-serif text-2xl font-bold text-warm-900 mb-1">¡Código canjeado!</h2>
+            <h2 className="text-2xl font-bold text-warm-900 mb-1">¡Código canjeado!</h2>
             <p className="text-warm-500 text-sm mb-6">
               El crédito ya fue agregado a tu cuenta y se descontará automáticamente en tu próxima sesión.
             </p>

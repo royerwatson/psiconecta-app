@@ -319,7 +319,7 @@ export default function MyTasksPage() {
 
       {/* Encabezado */}
       <div className="mb-6">
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Mis Tareas</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Mis Tareas</h1>
         <p className="text-warm-500 text-sm mt-1">
           Actividades y ejercicios asignados por tu terapeuta
         </p>

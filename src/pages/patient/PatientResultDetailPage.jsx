@@ -238,7 +238,7 @@ export default function PatientResultDetailPage() {
         </button>
 
         {/* Header */}
-        <h1 className="font-serif text-xl font-bold text-warm-900">{test?.name}</h1>
+        <h1 className="text-xl font-bold text-warm-900">{test?.name}</h1>
         <p className="text-sm text-warm-400 mt-1 flex items-center gap-1.5"><Calendar size={13} strokeWidth={1.8} className="shrink-0" />{formatDateTime(session.completed_at)}</p>
       </div>
 

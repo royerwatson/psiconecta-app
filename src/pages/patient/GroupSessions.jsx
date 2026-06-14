@@ -67,7 +67,7 @@ export default function GroupSessions() {
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div>
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Terapia grupal</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Terapia grupal</h1>
         <p className="text-warm-500 text-sm mt-1">Sesiones grupales facilitadas por terapeutas</p>
       </div>
 

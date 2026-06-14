@@ -34,7 +34,7 @@ export default function ForgotPassword() {
           <div className="w-14 h-14 bg-gradient-brand rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-calm">
               <PsiconectaLogo size={36} color="white" />
             </div>
-          <h1 className="font-serif text-3xl font-bold text-primary-800">
+          <h1 className="text-3xl font-bold text-primary-800">
             Psico<span className="text-calm-500">necta</span>
           </h1>
         </div>
@@ -47,7 +47,7 @@ export default function ForgotPassword() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h2 className="font-serif text-xl font-bold text-warm-900 mb-2">¡Correo enviado!</h2>
+              <h2 className="text-xl font-bold text-warm-900 mb-2">¡Correo enviado!</h2>
               <p className="text-warm-500 text-sm mb-6">
                 Revisa tu bandeja de entrada en <strong>{email}</strong> y sigue las instrucciones para restablecer tu contraseña.
               </p>
@@ -57,7 +57,7 @@ export default function ForgotPassword() {
             </div>
           ) : (
             <>
-              <h2 className="font-serif text-xl font-semibold text-warm-900 mb-1">Recuperar contraseña</h2>
+              <h2 className="text-xl font-semibold text-warm-900 mb-1">Recuperar contraseña</h2>
               <p className="text-sm text-warm-500 mb-6">
                 Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña.
               </p>

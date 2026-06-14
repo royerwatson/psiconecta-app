@@ -328,7 +328,7 @@ export default function PeerConsultationPage() {
         {/* Header */}
         <div className="px-4 py-4 border-b border-warm-100 shrink-0">
           <div className="flex items-center gap-2 mb-3">
-            <h2 className="font-serif text-base font-semibold text-warm-900 flex-1">Colegas</h2>
+            <h2 className="text-base font-semibold text-warm-900 flex-1">Colegas</h2>
             {totalUnread > 0 && (
               <span className="bg-primary-600 text-white text-[10px] font-bold rounded-full px-1.5 py-0.5">
                 {totalUnread}

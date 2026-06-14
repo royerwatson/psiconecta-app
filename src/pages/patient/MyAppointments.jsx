@@ -337,7 +337,7 @@ export default function MyAppointments() {
   return (
     <div className="flex flex-col gap-6 animate-fade-in">
       <div>
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Mis citas</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Mis citas</h1>
         <p className="text-warm-500 text-sm mt-1">{upcoming.length} próximas, {past.length} anteriores</p>
       </div>
 

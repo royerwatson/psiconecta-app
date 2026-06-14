@@ -34,7 +34,7 @@ export default function PendingTestsSection({ userId }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="font-serif text-lg font-semibold text-warm-900">
+        <h2 className="text-lg font-semibold text-warm-900">
           Tests pendientes
         </h2>
         <span className="text-xs px-2.5 py-1 rounded-full bg-primary-100 text-primary-700 font-semibold">

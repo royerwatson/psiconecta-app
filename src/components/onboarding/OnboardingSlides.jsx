@@ -110,7 +110,7 @@ export default function OnboardingSlides() {
           <div className="w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-4">
             {(() => { const SlideIcon = slide.Icon; return <SlideIcon size={36} strokeWidth={1.8} className="text-white" /> })()}
           </div>
-          <h2 className="font-serif text-2xl font-bold text-white leading-tight">
+          <h2 className="text-2xl font-bold text-white leading-tight">
             {slide.title}
           </h2>
         </div>

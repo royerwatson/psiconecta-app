@@ -123,7 +123,7 @@ export default function MyResultsPage() {
         >
           ← Volver
         </button>
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Mis resultados</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Mis resultados</h1>
         <p className="text-sm text-warm-500 mt-1">
           {totalSessions === 0
             ? 'Aún no tienes resultados disponibles'

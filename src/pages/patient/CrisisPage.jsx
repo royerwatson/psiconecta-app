@@ -254,7 +254,7 @@ export default function CrisisPage() {
       {/* Banner de anclaje */}
       <div className="bg-gradient-to-br from-calm-500 to-primary-600 rounded-2xl p-6 mb-6 text-white text-center shadow-float">
         <Heart size={32} strokeWidth={1.8} className="text-white mx-auto mb-2" fill="currentColor" />
-        <h1 className="font-serif text-2xl font-bold mb-1">Estás a salvo</h1>
+        <h1 className="text-2xl font-bold mb-1">Estás a salvo</h1>
         <p className="text-white/80 text-sm leading-relaxed">
           Estás dando el paso más importante: pedir ayuda.<br />
           Tómate un momento. Estamos aquí contigo.
@@ -299,7 +299,7 @@ export default function CrisisPage() {
       {/* Sección: Respiración */}
       {section === 'breathe' && (
         <div className="bg-white rounded-2xl border border-warm-100 shadow-card p-6 animate-fade-in">
-          <h2 className="font-serif text-lg font-semibold text-warm-900 text-center mb-1">
+          <h2 className="text-lg font-semibold text-warm-900 text-center mb-1">
             Respiración 4-7-8
           </h2>
           <p className="text-xs text-warm-500 text-center mb-5">

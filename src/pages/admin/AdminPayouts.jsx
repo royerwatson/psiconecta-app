@@ -235,7 +235,7 @@ export default function AdminPayouts() {
       {/* Header */}
       <div className="flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Pagos a Terapeutas</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Pagos a Terapeutas</h1>
           <p className="text-warm-500 text-sm mt-1">Gestión de liquidaciones y transferencias</p>
         </div>
         {earnings.length > 0 && (

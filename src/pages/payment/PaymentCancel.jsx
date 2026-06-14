@@ -30,7 +30,7 @@ export default function PaymentCancel() {
             </svg>
           </div>
 
-          <h2 className="font-serif text-2xl font-bold text-warm-900 mb-2">
+          <h2 className="text-2xl font-bold text-warm-900 mb-2">
             Pago cancelado
           </h2>
           <p className="text-warm-500 text-sm mb-8">

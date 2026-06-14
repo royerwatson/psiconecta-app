@@ -107,7 +107,7 @@ export default function AdminGroupSessions() {
     <div className="flex flex-col gap-6 animate-fade-in">
       <div className="flex items-start justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-serif text-2xl font-bold text-warm-900">Sesiones grupales</h1>
+          <h1 className="text-2xl font-bold text-warm-900">Sesiones grupales</h1>
           <p className="text-warm-500 text-sm mt-1">Gestión de terapia grupal</p>
         </div>
         <Button onClick={() => setCreateModal(true)}>+ Nueva sesión grupal</Button>

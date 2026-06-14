@@ -343,7 +343,7 @@ export default function TakeTestPage() {
     <div className="min-h-screen bg-gradient-to-br from-primary-50 to-calm-50 flex items-center justify-center p-6">
       <div className="bg-white rounded-3xl shadow-lg p-8 max-w-sm w-full text-center">
         <div className="flex justify-center mb-4"><AlertTriangle size={48} strokeWidth={1.8} className="text-warm-400" /></div>
-        <h2 className="font-serif text-xl font-semibold text-warm-900 mb-2">Algo salió mal</h2>
+        <h2 className="text-xl font-semibold text-warm-900 mb-2">Algo salió mal</h2>
         <p className="text-sm text-warm-500 mb-6">{errorMsg}</p>
         <button onClick={() => navigate(-1)}
           className="w-full py-3 rounded-2xl bg-primary-500 text-white font-semibold hover:bg-primary-600 transition-colors">
@@ -367,7 +367,7 @@ export default function TakeTestPage() {
       <div className="bg-white rounded-3xl shadow-lg p-8 max-w-md w-full">
         <div className="text-center mb-6">
           <div className="flex justify-center mb-4"><ClipboardList size={48} strokeWidth={1.8} className="text-warm-400" /></div>
-          <h1 className="font-serif text-2xl font-semibold text-warm-900 mb-2">{test?.name}</h1>
+          <h1 className="text-2xl font-semibold text-warm-900 mb-2">{test?.name}</h1>
           {assignment?.reason && (
             <p className="text-sm text-warm-500 italic">"{assignment.reason}"</p>
           )}
@@ -525,7 +525,7 @@ export default function TakeTestPage() {
             <CheckCircle2 size={40} strokeWidth={1.8} className="text-white" />
           </div>
 
-          <h2 className="font-serif text-2xl font-bold text-warm-900 mb-3">
+          <h2 className="text-2xl font-bold text-warm-900 mb-3">
             ¡Gracias por completar el test!
           </h2>
 

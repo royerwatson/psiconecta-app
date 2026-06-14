@@ -110,7 +110,7 @@ function ProtocolCard({ protocol, isOpen, onToggle }) {
               </span>
             )}
           </div>
-          <h3 className="font-serif font-semibold text-warm-900 text-base leading-snug">{protocol.name}</h3>
+          <h3 className="font-semibold text-warm-900 text-base leading-snug">{protocol.name}</h3>
           <p className="text-xs text-warm-500 mt-0.5 line-clamp-2">{protocol.indication}</p>
         </div>
 
@@ -242,7 +242,7 @@ export default function TherapeuticProtocolsPage() {
 
       {/* ── Encabezado ── */}
       <div className="mb-6">
-        <h1 className="font-serif text-2xl font-bold text-warm-900">Protocolos Terapéuticos</h1>
+        <h1 className="text-2xl font-bold text-warm-900">Protocolos Terapéuticos</h1>
         <p className="text-warm-500 text-sm mt-1">
           Guías de aplicación clínica paso a paso · {PROTOCOLS.length} protocolos disponibles
         </p>
@@ -350,7 +350,7 @@ export default function TherapeuticProtocolsPage() {
                 <div className="flex items-center gap-3 mb-3">
                   <ModalityIcon name={mod.icon} size={22} strokeWidth={1.5} className="text-warm-600" />
                   <div>
-                    <h2 className="font-serif font-bold text-warm-800 text-lg">{mod.fullName}</h2>
+                    <h2 className="font-bold text-warm-800 text-lg">{mod.fullName}</h2>
                     <p className="text-xs text-warm-400">{mod.description}</p>
                   </div>
                   <div className="flex-1 h-px bg-warm-100 ml-2" />
