@@ -231,7 +231,8 @@ src/
 ├── store/authStore.js               # Zustand: user, profile, role, fetchProfile
 ├── lib/
 │   ├── supabase.js                  # Cliente Supabase
-│   └── utils.js                    # formatPrice, formatDateTime, cn, getDisplayName, isAnonymous
+│   ├── utils.js                    # formatPrice, formatDateTime, cn, getDisplayName, isAnonymous
+│   └── generatePatientPDF.js       # Genera PDF clínico client-side (jsPDF CDN dinámico)
 ├── context/
 │   └── CurrencyContext.jsx          # Provider global tipo de cambio USD→DOP
 ├── hooks/
@@ -282,12 +283,12 @@ src/
 | Tabla | Descripción |
 |-------|-------------|
 | `profiles` | Todos los usuarios (role, full_name, avatar_url, **is_anonymous**, gender, birth_date, preferred_language) |
-| `therapist_profiles` | Perfil extendido (specialty, price, **subscription_plan**, **commission_rate**, verified, **payment_method**, paypal_email, bank_*) |
+| `therapist_profiles` | Perfil extendido (specialty, price, **subscription_plan**, **commission_rate**, **billing_cycle**, verified, **payment_method**, paypal_email, bank_*) |
 | `payouts` | Liquidaciones a terapeutas (amount, status, payment_method, reference, paid_at) |
 | `sessions` | Citas (status, price, **platform_commission**, **therapist_net**, video_room_url, is_urgent) |
 | `messages` | Chat (sender_id, receiver_id, content, **read_at**) |
 | `therapist_credentials` | Docs de verificación (**document_type**, status, **rejection_reason**) |
-| `subscription_payments` | Historial pagos de suscripción $79.99 USD/mes |
+| `subscription_payments` | Historial pagos de suscripción ($79.99/mes o $799/año) + `billing_cycle` |
 | `tests` / `test_assignments` / `test_sessions` / `test_results` | Sistema psicométrico completo |
 | `mood_entries` | Estado de ánimo diario del paciente |
 | `ai_checkins` | Check-ins IA con risk_level (low/medium/high) |
@@ -325,6 +326,7 @@ src/
 | `migration_device_tokens.sql` | **Ejecutado** ✅ 2026-06-09 — tabla `device_tokens` para push FCM/APNs |
 | `migration_fix_availability.sql` | **Ejecutado** ✅ — RLS explícita por operación en `therapist_availability` + UNIQUE constraint |
 | `fix_find_therapist_columns.md` | **Fix código** ✅ — Removidas columnas `languages/years_experience/approaches/education` de `FindTherapist.jsx` y `TherapistMatchPage.jsx` (requieren `migration_payouts_and_payment_fields.sql` pendiente) |
+| `migration_annual_billing.sql` | **Ejecutado** ✅ 2026-06-14 — `billing_cycle TEXT DEFAULT 'monthly' CHECK (monthly\|annual)` en `therapist_profiles` y `subscription_payments`; índice `idx_therapist_profiles_billing_cycle` |
 
 ---
 
@@ -407,7 +409,8 @@ src/
 | Plan | Precio | Comisión | Herramientas |
 |------|--------|----------|--------------|
 | **Gratuito** | $0/mes | **20%** | Perfil, agenda, chat, videollamadas |
-| **Suscripción** | $79.99/mes USD | **10%** | Todo + tests, DSM, CIE, escalas, crisis, biblioteca, colegas, protocolos, estadísticas |
+| **Suscripción mensual** | $79.99/mes USD | **10%** | Todo + tests, DSM, CIE, escalas, crisis, biblioteca, colegas, protocolos, estadísticas, PDF clínico |
+| **Suscripción anual** | $799/año USD (~17% dto.) | **10%** | Igual que mensual · ahorro $159.88/año · `billing_cycle='annual'` |
 
 ### Moneda
 - Pagos procesados en **USD** vía PayPal
@@ -431,6 +434,8 @@ Flujo: terapeuta sube docs → admin aprueba/rechaza cada uno con motivo → cua
 | `create-daily-room` | Crea sala Daily.co server-side (DAILY_API_KEY en secrets) |
 | `create-paypal-order` | Orden PayPal + comisión según plan del terapeuta |
 | `capture-paypal-order` | Captura pago, actualiza sesión, envía emails |
+| `create-subscription-order` | Orden PayPal suscripción — acepta `billingCycle` (monthly $79.99 / annual $799), guarda `billing_cycle` en `subscription_payments` |
+| `capture-subscription-payment` | Captura + activa plan Pro — +30 días si mensual, +365 días si anual; escribe `billing_cycle` en `therapist_profiles` |
 | `ai-checkin` | Analiza check-in con Claude API, detecta riesgo |
 | `process-payout` | Liquidación al terapeuta vía PayPal |
 | `notify-new-message` | Email al recibir mensaje |
@@ -538,6 +543,7 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Realtime en alertas IA admin (INSERT ai_checkins → toast + prepend sin recargar)
 - [x] Realtime en verificaciones admin (INSERT therapist_credentials → toast + auto-refresh)
 - [x] CSV export en AdminPayouts (tab Historial, 11 columnas, respeta búsqueda activa)
+- [x] **Reporte PDF de progreso clínico** — `generatePatientPDF.js` (jsPDF vía CDN, sin npm). Botón "Exportar PDF" en expediente del paciente (solo plan Pro + hasAccess). Secciones: resumen numérico, sesiones, notas clínicas con nivel de riesgo, tareas (% completadas), check-ins IA con colores, tests completados. Sin datos de contacto ni pagos. Paginado, footer confidencial.
 - [x] Plan de crisis (Safety Planning Intervention)
 - [x] Biblioteca terapéutica (40+ ejercicios)
 - [x] Terapeuta asigna ejercicios desde la biblioteca al ver perfil del paciente (tab Tareas → "Desde biblioteca")
@@ -557,10 +563,11 @@ VITE_PAYPAL_CLIENT_ID=...
 - [x] Pago sesiones PayPal (flujo completo)
 - [x] Comisión 10% automática sobre cada sesión
 - [x] Plan Suscripción **$79.99 USD/mes** — Edge Functions create/capture funcionando, email confirmación, downgrade automático
-- [x] Liquidaciones a terapeutas (AdminPayouts)
+- [x] **Plan anual $799/año** — toggle mensual/anual en SubscriptionPage + PricingPage, badge "−17%", savings callout, `billing_cycle` en BD + Edge Functions, MRR admin corregido (anual ÷ 12)
+- [x] Liquidaciones a terapeutas (AdminPayouts) + CSV export
 - [x] Conversión USD → DOP en tiempo real
-- [x] Landing pública de precios (/pricing)
-- [x] Panel admin de suscripciones + MRR
+- [x] Landing pública de precios (/pricing) con toggle mensual/anual
+- [x] Panel admin de suscripciones + MRR + métrica "Ciclo Anual"
 - [x] Sistema de reembolsos — política temporal (>24h=100%, 2-24h=50%, <2h=bloqueado), Edge Function process-refund, panel admin `/admin/refunds`
 - [x] Política de cancelación con motivo — campo de motivo en modal, email al terapeuta con razón incluida
 
