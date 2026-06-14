@@ -9,7 +9,7 @@ import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
 import DeleteAccountSection from '@/components/shared/DeleteAccountSection'
 import toast from 'react-hot-toast'
-import { Bell, Lock, ClipboardList, Hand, EyeOff } from 'lucide-react'
+import { Bell, Lock, ClipboardList, Hand, EyeOff, Gift, ChevronRight, Loader2, Check } from 'lucide-react'
 
 // ── Toggle UI ──────────────────────────────────────────────────────
 function Toggle({ checked, onChange }) {
@@ -51,6 +51,49 @@ export default function PatientProfile() {
   const [prefs, setPrefs]             = useState(DEFAULT_PREFS)
   const [loadingPrefs, setLoadingPrefs] = useState(false)
   const [savingPrefs, setSavingPrefs] = useState(false)
+
+  // Gift cards / crédito
+  const [creditBalance, setCreditBalance]   = useState(null)
+  const [giftCode, setGiftCode]             = useState('')
+  const [redeemStatus, setRedeemStatus]     = useState('idle') // idle | loading | success | error
+  const [redeemMsg, setRedeemMsg]           = useState('')
+
+  useEffect(() => {
+    if (user) loadCreditBalance()
+  }, [user])
+
+  const loadCreditBalance = async () => {
+    const { data } = await supabase.rpc('get_patient_credit_balance', { p_user_id: user.id })
+    setCreditBalance(data ?? 0)
+  }
+
+  const handleRedeem = async () => {
+    const code = giftCode.trim().toUpperCase()
+    if (!code) { toast.error('Ingresa el código de regalo'); return }
+    setRedeemStatus('loading')
+    setRedeemMsg('')
+    try {
+      const { data: { session: authSession } } = await supabase.auth.getSession()
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/redeem-gift-card`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authSession?.access_token}` },
+          body: JSON.stringify({ code }),
+        }
+      )
+      const data = await res.json()
+      if (!res.ok) { setRedeemStatus('error'); setRedeemMsg(data.error ?? 'Error al canjear'); return }
+      setCreditBalance(data.newBalance)
+      setGiftCode('')
+      setRedeemStatus('success')
+      setRedeemMsg(`¡+$${Number(data.amountUsd).toFixed(2)} USD agregados a tu cuenta!`)
+      setTimeout(() => setRedeemStatus('idle'), 4000)
+    } catch {
+      setRedeemStatus('error')
+      setRedeemMsg('Error de conexión. Intenta de nuevo.')
+    }
+  }
 
   useEffect(() => {
     if (notifModal) fetchPrefs()
@@ -160,6 +203,80 @@ export default function PatientProfile() {
               </button>
             </div>
           </div>
+        </div>
+      </Card>
+
+      {/* ── Gift Cards / Crédito ── */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Gift size={16} strokeWidth={1.8} className="text-primary-500" />
+            Crédito de regalo
+          </CardTitle>
+        </CardHeader>
+
+        {/* Balance */}
+        <div className="flex items-center justify-between px-1 mb-4">
+          <div>
+            <p className="text-xs text-warm-400 font-medium">Tu saldo disponible</p>
+            <p className="text-3xl font-black text-warm-900 leading-none mt-0.5">
+              {creditBalance === null
+                ? <span className="text-warm-200 text-lg">Cargando…</span>
+                : `$${Number(creditBalance).toFixed(2)}`}
+              {creditBalance !== null && <span className="text-warm-400 text-base font-medium ml-1">USD</span>}
+            </p>
+            {creditBalance > 0 && (
+              <p className="text-xs text-primary-600 mt-1">Se descuenta automáticamente en tu próxima sesión</p>
+            )}
+          </div>
+          {creditBalance > 0 && (
+            <div className="w-12 h-12 rounded-2xl bg-primary-50 flex items-center justify-center">
+              <Gift size={22} strokeWidth={1.6} className="text-primary-500" />
+            </div>
+          )}
+        </div>
+
+        {/* Formulario de canje */}
+        <div className="border-t border-warm-100 pt-4">
+          <p className="text-xs font-semibold text-warm-600 mb-3">Canjear código de regalo</p>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              value={giftCode}
+              onChange={e => { setGiftCode(e.target.value.toUpperCase()); setRedeemStatus('idle') }}
+              placeholder="PSICO-XXXX-XXXX"
+              maxLength={14}
+              className="flex-1 border border-warm-200 rounded-xl px-3 py-2.5 text-sm font-mono tracking-widest uppercase text-center focus:outline-none focus:ring-2 focus:ring-primary-300 text-warm-900 placeholder:text-warm-300 placeholder:tracking-normal placeholder:font-sans placeholder:text-xs"
+            />
+            <button
+              onClick={handleRedeem}
+              disabled={redeemStatus === 'loading' || redeemStatus === 'success'}
+              className={`px-4 py-2.5 rounded-xl text-sm font-semibold flex items-center gap-1.5 transition-all shrink-0 ${
+                redeemStatus === 'success'
+                  ? 'bg-emerald-500 text-white'
+                  : 'bg-primary-600 hover:bg-primary-700 text-white disabled:opacity-60'
+              }`}
+            >
+              {redeemStatus === 'loading' && <Loader2 size={14} className="animate-spin" />}
+              {redeemStatus === 'success' && <Check size={14} />}
+              {redeemStatus === 'success' ? '¡Canjeado!' : 'Canjear'}
+            </button>
+          </div>
+
+          {/* Feedback */}
+          {redeemStatus === 'success' && (
+            <p className="text-xs text-emerald-600 font-semibold mt-2 flex items-center gap-1">
+              <Check size={12} /> {redeemMsg}
+            </p>
+          )}
+          {redeemStatus === 'error' && (
+            <p className="text-xs text-red-500 mt-2">{redeemMsg}</p>
+          )}
+
+          <p className="text-[11px] text-warm-400 mt-3 leading-relaxed">
+            ¿No tienes un código? Pide a alguien que te regale sesiones desde{' '}
+            <a href="/regalo" className="text-primary-500 hover:underline">psiconecta.app/regalo</a>
+          </p>
         </div>
       </Card>
 
