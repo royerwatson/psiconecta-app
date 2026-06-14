@@ -1,5 +1,72 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-14 (v46 — Gift card UI en perfil del paciente)*
+*Última actualización: 2026-06-14 (v51 — Tipografía global + Plan Pro + coherencia landing)*
+
+---
+
+## ⚡ Sesión 2026-06-14 (v51) — Tipografía global Plus Jakarta Sans + coherencia landing
+
+### Descripción
+Corrección global de tipografía: `font-serif` (Lora/Georgia) eliminado de todos los archivos JSX. Adición de features al Plan Pro. Badges de calculadoras unificados. Fondo de calculadoras unificado con la landing.
+
+### Cambios
+
+**Tipografía global**
+- `font-serif` removido de **59 archivos JSX** vía `sed` batch — toda la plataforma usa ahora exclusivamente `Plus Jakarta Sans Variable` (definida en `tailwind.config.js` como `fontFamily.sans`)
+- Raíz del problema: Tailwind `fontFamily.serif` mapeaba a `['Lora', 'Georgia', 'serif']`, causando inconsistencia visual en headings de páginas internas y públicas
+
+**Plan Pro — nuevos features (3 archivos)**
+- `SubscriptionPage.jsx`: añadidos `TrendingUp` + `UserCheck` imports y dos nuevas features: "Análisis clínico longitudinal inteligente" / "Acompañamiento 1:1 con coordinador clínico"
+- `PricingPage.jsx`: mismos dos puntos añadidos al array de features
+- `LandingPage.jsx`: actualizados en el `PlanCard` features array
+
+**Calculadoras landing — coherencia visual**
+- `PatientTimeCalc`: fondo `#0a0a0f` → `bg-psiconecta`; card izquierda glass oscuro → `bg-white shadow-sm border-slate-100`; todos los textos oscuros; slider violet en lugar de thumb blanco; badge `font-serif` eliminado
+- `TherapistTimeCalc`: fondo `#f8f7ff` → `bg-psiconecta`; badge "Para terapeutas" → **"Para profesionales"**
+- Ambos badges: clase `tracking-widest uppercase border inline-style` → `bg-accent-100 text-accent-700 text-xs font-semibold` (idéntico al badge de la sección "Para profesionales" existente)
+
+### Archivos modificados (v51)
+| Archivo | Tipo | Cambio |
+|---------|------|--------|
+| `src/**/*.jsx` (59 archivos) | MODIFIED | `font-serif` eliminado globalmente |
+| `src/pages/therapist/SubscriptionPage.jsx` | MODIFIED | 2 nuevas features Pro + imports TrendingUp/UserCheck |
+| `src/pages/public/PricingPage.jsx` | MODIFIED | 2 nuevas features Pro |
+| `src/pages/public/LandingPage.jsx` | MODIFIED | 2 nuevas features Pro + badges calculadoras + fondos |
+
+---
+
+## ⚡ Sesión 2026-06-14 (v50) — GiftPage: logo, tipografía y corrección de coma
+
+### Descripción
+Correcciones de detalle en GiftPage para mantener coherencia con la identidad visual de Psiconecta.
+
+- **Logo**: igualado al de la landing (36×36, gradiente `#4f46e5→#7c3aed`, border-radius 12, shadow, texto 18px `#0f172a` + `necta` en violet)
+- **Tipografía**: `Plus Jakarta Sans` definida en el root div; eliminado `Georgia, serif` de h1/h2
+- **Coma**: "apoya, y transforma" → "apoya y transforma"
+
+---
+
+## ⚡ Sesión 2026-06-14 (v49) — GiftPage fondo claro bg-psiconecta
+
+### Descripción
+Fondo oscuro `#060612` reemplazado por `linear-gradient(160deg, #f0f2ff → #faf5ff → #f5f5f7)` (mismo que landing). Todos los textos, inputs y cards adaptados al tema claro. Ambient glows reducidos a opacidad 0.06-0.12.
+
+---
+
+## ⚡ Sesión 2026-06-14 (v48) — GiftPage premium redesign + navbar Sparkles pill
+
+### Descripción
+Rediseño completo de `/regalo` y actualización del navbar de la landing.
+
+**LandingPage.jsx**
+- Navbar: `🎁 Regalar` → pill `bg-gradient-to-r from-violet-600 to-fuchsia-500` con icono `Sparkles`
+- Imports: `Gift`, `Sparkles` añadidos
+
+**GiftPage.jsx — rediseño premium**
+- Layout 2 columnas: formulario izquierda, live card preview derecha (sticky)
+- `GiftCardPreview` component: gradiente `#3b0d8a→#6d28d9→#0ea5e9`, shine radial, círculos deco, campos De/Para dinámicos
+- PayPal pill shape, trust badges (SSL, entrega inmediata, 12 meses)
+- Paso pago: card preview mini + resumen limpio
+- Paso éxito: check verde, card reveal + código mono-font
 
 ---
 
