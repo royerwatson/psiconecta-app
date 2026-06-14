@@ -57,8 +57,8 @@ CREATE POLICY "Paciente ve sus propios créditos"
   ON patient_credits FOR SELECT
   USING (auth.uid() = user_id);
 
--- 3. Columna credit_used en session_payments para rastrear uso de crédito
-ALTER TABLE session_payments
+-- 3. Columnas para rastrear uso de crédito en sesiones
+ALTER TABLE sessions
   ADD COLUMN IF NOT EXISTS credit_used_usd DECIMAL(10,2) DEFAULT 0,
   ADD COLUMN IF NOT EXISTS gift_card_id UUID REFERENCES gift_cards(id) ON DELETE SET NULL;
 
