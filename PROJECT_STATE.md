@@ -3,6 +3,51 @@
 
 ---
 
+## ⚡ Sesión 2026-06-14 (v47) — Premium redesign GiftPage + navbar pill
+
+### Descripción
+Rediseño completo de `/regalo` con estética dark cinematic premium, y reemplazo del emoji en el navbar de la landing por un pill con gradiente.
+
+### LandingPage.jsx
+- Navbar: reemplazado `🎁 Regalar` por pill `bg-gradient-to-r from-violet-600 to-fuchsia-500` con icono `Sparkles` de lucide
+- Footer: eliminado emoji del link
+- Imports: añadidos `Gift`, `Sparkles`
+
+### GiftPage.jsx — rediseño completo
+**Background:** `#060612` con tres ambient glows fijos (violet / pink / cyan) en posición `fixed`
+
+**Hero:**
+- Badge pill "EL REGALO QUE CAMBIA VIDAS" con borde violet semitransparente
+- H1 con gradiente `violet → pink → cyan` via `WebkitBackgroundClip: text`
+
+**Layout dos columnas (desktop):**
+- Izquierda: formulario (monto + datos remitente + destinatario + CTA)
+- Derecha sticky: live preview de la tarjeta + "¿Cómo funciona?" 4 pasos
+
+**Componente `GiftCardPreview`:**
+- Gradiente `#3b0d8a → #6d28d9 → #0ea5e9`
+- Shine overlay radial + círculos decorativos
+- Muestra logo, monto (48px bold), de/para, validez
+- Prop `mini` para versión compacta en paso de pago
+
+**Formulario:**
+- Inputs con `bg-white/8`, `border-white/15`, focus violet ring
+- Botones de monto con glow box-shadow en seleccionado
+- CTA con gradiente violet→purple→pink, shadow 40px
+
+**Trust badges:** Shield (SSL) · Clock (entrega inmediata) · Star (12 meses)
+
+**Paso pago:** card preview mini + summary items + PayPal pill + security badge
+**Paso éxito:** check en ring verde, card preview + código en mono font, botones
+
+### Archivos modificados (v47)
+| Archivo | Tipo | Cambio |
+|---------|------|--------|
+| `src/pages/public/GiftPage.jsx` | MODIFIED | Rediseño premium completo |
+| `src/pages/public/LandingPage.jsx` | MODIFIED | Navbar pill + imports Gift/Sparkles |
+
+---
+
 ## ⚡ Sesión 2026-06-14 (v46) — Gift card UI en perfil del paciente
 
 ### Descripción

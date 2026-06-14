@@ -22,6 +22,8 @@ import {
   ChevronDown,
   BadgeCheck,
   FileText,
+  Gift,
+  Sparkles,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { analytics } from '@/lib/analytics'
@@ -549,7 +551,10 @@ export default function LandingPage() {
               <Link to="/terapeutas"   className="hover:text-primary-600 transition-colors">Terapeutas</Link>
               <Link to="/blog"         className="hover:text-primary-600 transition-colors">Blog</Link>
               <Link to="/pricing"      className="hover:text-primary-600 transition-colors">Planes</Link>
-              <Link to="/regalo"       className="hover:text-primary-600 transition-colors flex items-center gap-1">🎁 Regalar</Link>
+              <Link to="/regalo" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-90 transition-all shadow-sm shadow-violet-200">
+                <Sparkles size={13} strokeWidth={2} />
+                Regalar
+              </Link>
             </nav>
 
             <div className="flex items-center gap-2">
@@ -904,7 +909,7 @@ export default function LandingPage() {
               { label: 'Ver terapeutas',         href: '/terapeutas' },
               { label: 'Blog de salud mental',   href: '/blog' },
               { label: 'Planes y precios',       href: '/pricing' },
-              { label: 'Regalar sesiones 🎁',    href: '/regalo' },
+              { label: 'Regalar sesiones',        href: '/regalo' },
               { label: 'Recursos de crisis',     href: '/patient/crisis' },
             ]} />
 
