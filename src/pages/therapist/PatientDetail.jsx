@@ -12,7 +12,8 @@ import { formatDate, formatDateTime, formatPrice, sanitize } from '@/lib/utils'
 import { Skeleton } from '@/components/ui/Spinner'
 import toast from 'react-hot-toast'
 import PatientTestsTab from '@/components/psychometrics/PatientTestsTab'
-import { MessageCircle, Lock, Calendar, ClipboardList, CheckCircle2, Bot, FlaskConical, AlertTriangle, Eye, Unlock, AlertCircle, Check, BookOpen, Search, X, FileDown } from 'lucide-react'
+import LongitudinalAnalysis from '@/components/psychometrics/LongitudinalAnalysis'
+import { MessageCircle, Lock, Calendar, ClipboardList, CheckCircle2, Bot, FlaskConical, AlertTriangle, Eye, Unlock, AlertCircle, Check, BookOpen, Search, X, FileDown, TrendingUp } from 'lucide-react'
 import { generatePatientPDF } from '@/lib/generatePatientPDF'
 import { LIBRARY, CATEGORIES } from '@/data/therapeuticLibrary'
 import { cn } from '@/lib/utils'
@@ -224,11 +225,12 @@ export default function PatientDetail() {
   const unreadCheckins = checkins.filter(c => c.risk_level === 'high' && !c.notified).length
 
   const TABS = [
-    { id: 'history',  label: 'Historial clínico', count: history.length   },
-    { id: 'tasks',    label: 'Tareas',             count: tasks.length     },
-    { id: 'sessions', label: 'Sesiones',           count: sessions.length  },
-    { id: 'checkins', label: 'Check-ins',          count: unreadCheckins, alert: unreadCheckins > 0 },
-    { id: 'tests',    label: 'Tests',              count: 0                },
+    { id: 'history',      label: 'Historial clínico', count: history.length   },
+    { id: 'tasks',        label: 'Tareas',             count: tasks.length     },
+    { id: 'sessions',     label: 'Sesiones',           count: sessions.length  },
+    { id: 'checkins',     label: 'Check-ins',          count: unreadCheckins, alert: unreadCheckins > 0 },
+    { id: 'tests',        label: 'Tests',              count: 0                },
+    { id: 'longitudinal', label: 'Evolución',          count: 0                },
   ]
 
   return (
@@ -503,6 +505,17 @@ export default function PatientDetail() {
         <Card>
           <PatientTestsTab therapistId={user.id} patientId={patientId} />
         </Card>
+      )}
+
+      {/* Análisis longitudinal */}
+      {tab === 'longitudinal' && (
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 mb-1">
+            <TrendingUp size={16} className="text-primary-500" strokeWidth={1.8} />
+            <h2 className="font-semibold text-warm-900 text-sm">Análisis clínico longitudinal</h2>
+          </div>
+          <LongitudinalAnalysis patientId={patientId} therapistId={user.id} />
+        </div>
       )}
 
       {/* Modal historial */}
