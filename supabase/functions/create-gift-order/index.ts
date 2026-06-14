@@ -105,18 +105,11 @@ Deno.serve(async (req) => {
             value:         amount.toFixed(2),
           },
         }],
-        payment_source: {
-          paypal: {
-            experience_context: {
-              brand_name:         'Psiconecta',
-              locale:             'es-DO',
-              landing_page:       'LOGIN',
-              shipping_preference: 'NO_SHIPPING',
-              user_action:        'PAY_NOW',
-              return_url: `${Deno.env.get('APP_URL') ?? 'https://psiconecta.app'}/regalo/success`,
-              cancel_url: `${Deno.env.get('APP_URL') ?? 'https://psiconecta.app'}/regalo`,
-            },
-          },
+        application_context: {
+          brand_name:          'Psiconecta',
+          locale:              'es-DO',
+          user_action:         'PAY_NOW',
+          shipping_preference: 'NO_SHIPPING',
         },
       }),
     })
