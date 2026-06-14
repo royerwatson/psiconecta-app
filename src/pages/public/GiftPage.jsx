@@ -109,8 +109,13 @@ function PayPalGiftButton({ formData, amountUsd, onSuccess, onError }) {
     window.paypal.Buttons({
       style: { layout:'vertical', color:'gold', shape:'pill', label:'pay', height:50 },
       createOrder: async () => {
+        const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
         const res  = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-gift-order`,
-          { method:'POST', headers:{'Content-Type':'application/json'},
+          { method:'POST', headers:{
+              'Content-Type':'application/json',
+              'Authorization': `Bearer ${anonKey}`,
+              'apikey': anonKey,
+            },
             body: JSON.stringify({ amountUsd, senderName:formData.senderName, senderEmail:formData.senderEmail,
               recipientName:formData.recipientName, recipientEmail:formData.recipientEmail, message:formData.message }) })
         const data = await res.json()
@@ -120,8 +125,13 @@ function PayPalGiftButton({ formData, amountUsd, onSuccess, onError }) {
       onApprove: async (paypalData) => {
         setProcessing(true)
         try {
+          const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
           const res  = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/capture-gift-payment`,
-            { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ orderId: paypalData.orderID }) })
+            { method:'POST', headers:{
+                'Content-Type':'application/json',
+                'Authorization': `Bearer ${anonKey}`,
+                'apikey': anonKey,
+              }, body: JSON.stringify({ orderId: paypalData.orderID }) })
           const data = await res.json()
           if (!res.ok) throw new Error(data.error ?? 'Error capturando pago')
           onSuccess(data)
