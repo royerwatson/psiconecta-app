@@ -50,6 +50,8 @@ const PLANS = [
       'Protocolos terapéuticos',
       'Dashboard de estadísticas avanzadas',
       'Exporta el expediente clínico completo en PDF',
+      'Análisis clínico longitudinal inteligente',
+      'Acompañamiento 1:1 con coordinador clínico',
     ],
   },
 ]

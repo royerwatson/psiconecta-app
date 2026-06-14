@@ -14,7 +14,7 @@ import PayPalSubscriptionButton from '@/components/payment/PayPalSubscriptionBut
 import toast from 'react-hot-toast'
 import { Check, Zap, Star, AlertCircle, Lock, FlaskConical,
   BookOpen, BookMarked, LayoutDashboard, Shield, Library,
-  Stethoscope, FolderOpen } from 'lucide-react'
+  Stethoscope, FolderOpen, TrendingUp, UserCheck } from 'lucide-react'
 import { useCurrencyContext } from '@/context/CurrencyContext'
 
 // ── Definición de planes ──────────────────────────────────────────────────────
@@ -64,7 +64,9 @@ const PLANS = [
       { text: 'Consulta con colegas',         Icon: Stethoscope  },
       { text: 'Protocolos terapéuticos',      Icon: FolderOpen   },
       { text: 'Dashboard de estadísticas',    Icon: Star         },
-      { text: 'Expediente clínico en PDF',   Icon: BookMarked   },
+      { text: 'Expediente clínico en PDF',                     Icon: BookMarked   },
+      { text: 'Análisis clínico longitudinal inteligente',     Icon: TrendingUp   },
+      { text: 'Acompañamiento 1:1 con coordinador clínico',   Icon: UserCheck    },
     ],
   },
 ]
