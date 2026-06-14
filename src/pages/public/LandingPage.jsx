@@ -53,6 +53,200 @@ function getInitials(fullName) {
   return (parts[0][0] + parts[1][0]).toUpperCase()
 }
 
+/* ─── Calculadora de tiempo para pacientes ─── */
+function PatientTimeCalc() {
+  const [sessions, setSessions] = useState(4)
+
+  const TRAVEL_PER_SESSION  = 60   // min promedio ida+vuelta a terapia presencial
+  const COORD_PER_SESSION   = 20   // min coordinando horario por teléfono
+  const SEARCH_TOTAL        = 180  // min buscando terapeuta (se amortiza / mes)
+  const REMINDER_PER_SESSION = 10  // min recordatorios / seguimiento manual
+
+  const travelSaved   = Math.round((sessions * TRAVEL_PER_SESSION) / 60 * 10) / 10
+  const coordSaved    = Math.round((sessions * COORD_PER_SESSION) / 60 * 10) / 10
+  const searchSaved   = Math.round(SEARCH_TOTAL / 60 * 10) / 10
+  const reminderSaved = Math.round((sessions * REMINDER_PER_SESSION) / 60 * 10) / 10
+  const totalSaved    = Math.round((travelSaved + coordSaved + searchSaved + reminderSaved) * 10) / 10
+  const daysPerYear   = Math.round(totalSaved * 12 / 8)
+
+  const bars = [
+    { label: 'Traslados eliminados',        h: travelSaved,   color: 'bg-primary-500' },
+    { label: 'Coordinación de horarios',    h: coordSaved,    color: 'bg-accent-500' },
+    { label: 'Búsqueda del terapeuta',      h: searchSaved,   color: 'bg-purple-500' },
+    { label: 'Recordatorios y seguimiento', h: reminderSaved, color: 'bg-pink-500' },
+  ]
+  const maxH = Math.max(...bars.map(b => b.h), 0.1)
+
+  return (
+    <section className="py-20 px-4 bg-psiconecta">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-12">
+          <span className="inline-block px-3 py-1.5 rounded-full bg-primary-100 text-primary-700 text-xs font-semibold mb-4">Para pacientes</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-3">
+            Descubre cuánto tiempo puedes recuperar
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+            La terapia presencial tiene costos ocultos de tiempo. Psiconecta los elimina.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Slider */}
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700">
+            <p className="text-xs font-semibold text-primary-600 uppercase tracking-widest mb-1">¿Cuántas sesiones al mes?</p>
+            <p className="text-6xl font-black text-slate-900 dark:text-white mb-1">{sessions}</p>
+            <p className="text-slate-400 text-sm mb-6">sesiones / mes</p>
+
+            <input
+              type="range" min={1} max={12} value={sessions}
+              onChange={e => setSessions(Number(e.target.value))}
+              className="w-full accent-primary-600 mb-8"
+            />
+
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Tiempo que ahorras al mes</p>
+            <div className="space-y-3">
+              {bars.map(b => (
+                <div key={b.label}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-slate-600 dark:text-slate-300">{b.label}</span>
+                    <span className="font-semibold text-slate-800 dark:text-white">{b.h}h</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${b.color} rounded-full transition-all duration-500`}
+                      style={{ width: `${(b.h / maxH) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Resultado */}
+          <div className="bg-gradient-to-br from-primary-600 to-purple-700 rounded-3xl p-8 text-white flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold text-primary-200 uppercase tracking-widest mb-4">Podrías recuperar</p>
+              <p className="text-7xl font-black mb-1 leading-none">{totalSaved}</p>
+              <p className="text-primary-200 text-lg mb-6">horas al mes</p>
+
+              <div className="bg-white/10 rounded-2xl px-5 py-4 mb-6">
+                <p className="text-3xl font-black">{daysPerYear} días al año</p>
+                <p className="text-primary-200 text-sm mt-1">que dejan de perderse en desplazamientos y gestión</p>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-sm text-primary-100">
+              <p>✓ Sesiones 100 % desde el navegador — sin apps</p>
+              <p>✓ Terapeuta asignado por IA según tu perfil</p>
+              <p>✓ Recordatorios y reprogramación automática</p>
+              <p>✓ Historial clínico y tareas en tu perfil</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+/* ─── Calculadora de tiempo para terapeutas ── */
+function TherapistTimeCalc() {
+  const [patients, setPatients] = useState(20)
+
+  // Horas ahorradas por paciente por mes
+  const AGENDA_PER_PT    = 0.55  // agenda, reagendas, recordatorios
+  const BILLING_PER_PT   = 0.30  // cobros, facturación, seguimiento de pagos
+  const TASKS_PER_PT     = 0.40  // tareas terapéuticas, seguimiento entre sesiones
+  const UNIQUE_PER_PT    = 0.65  // protocolos IA, tests psicométricos, notas asistidas, PDF clínico
+
+  const agendaSaved    = Math.round(patients * AGENDA_PER_PT * 10) / 10
+  const billingSaved   = Math.round(patients * BILLING_PER_PT * 10) / 10
+  const tasksSaved     = Math.round(patients * TASKS_PER_PT * 10) / 10
+  const uniqueSaved    = Math.round(patients * UNIQUE_PER_PT * 10) / 10
+  const totalSaved     = Math.round((agendaSaved + billingSaved + tasksSaved + uniqueSaved) * 10) / 10
+  const daysPerYear    = Math.round(totalSaved * 12 / 8)
+
+  const bars = [
+    { label: 'Agenda y reagendas',            h: agendaSaved,  color: 'bg-primary-500' },
+    { label: 'Cobros y facturación',           h: billingSaved, color: 'bg-accent-500' },
+    { label: 'Tareas y seguimiento',           h: tasksSaved,   color: 'bg-purple-500' },
+    { label: 'IA + protocolos + tests + PDF',  h: uniqueSaved,  color: 'bg-emerald-500' },
+  ]
+  const maxH = Math.max(...bars.map(b => b.h), 0.1)
+
+  return (
+    <section className="py-20 px-4">
+      <div className="max-w-5xl mx-auto">
+        <div className="text-center mb-12">
+          <span className="inline-block px-3 py-1.5 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold mb-4">Para terapeutas</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight mb-3">
+            Descubre cuántas horas recuperas al mes
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+            El papeleo no debería robarte tiempo de tus pacientes. Dinos cuántos tienes activos.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Slider */}
+          <div className="bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-700">
+            <p className="text-xs font-semibold text-accent-600 uppercase tracking-widest mb-1">¿Cuántos pacientes activos tienes?</p>
+            <p className="text-6xl font-black text-slate-900 dark:text-white mb-1">{patients}</p>
+            <p className="text-slate-400 text-sm mb-6">pacientes activos</p>
+
+            <div className="flex justify-between text-xs text-slate-400 mb-1">
+              <span>3</span><span>50</span>
+            </div>
+            <input
+              type="range" min={3} max={50} value={patients}
+              onChange={e => setPatients(Number(e.target.value))}
+              className="w-full accent-accent-600 mb-8"
+            />
+
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-4">Lo que Psiconecta automatiza por ti</p>
+            <div className="space-y-3">
+              {bars.map(b => (
+                <div key={b.label}>
+                  <div className="flex justify-between text-sm mb-1">
+                    <span className="text-slate-600 dark:text-slate-300">{b.label}</span>
+                    <span className="font-semibold text-slate-800 dark:text-white">~{b.h} h/mes</span>
+                  </div>
+                  <div className="h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full ${b.color} rounded-full transition-all duration-500`}
+                      style={{ width: `${(b.h / maxH) * 100}%` }}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Resultado */}
+          <div className="bg-gradient-to-br from-accent-600 to-primary-700 rounded-3xl p-8 text-white flex flex-col justify-between">
+            <div>
+              <p className="text-xs font-semibold text-accent-200 uppercase tracking-widest mb-4">Podrías recuperar</p>
+              <p className="text-7xl font-black mb-1 leading-none">{totalSaved}</p>
+              <p className="text-accent-200 text-lg mb-6">horas / mes</p>
+
+              <div className="bg-white/10 rounded-2xl px-5 py-4 mb-6">
+                <p className="text-3xl font-black">{daysPerYear} días al año</p>
+                <p className="text-accent-200 text-sm mt-1">devueltos a la atención clínica</p>
+              </div>
+            </div>
+
+            <div className="space-y-2 text-sm text-accent-100">
+              <p>✓ Agenda online con recordatorios automáticos</p>
+              <p>✓ Pagos vía PayPal sin gestión manual</p>
+              <p>✓ Tareas y seguimiento entre sesiones</p>
+              <p>✓ Protocolos TCC/DBT/ACT/EMDR + 45 tests + PDF clínico</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 /* ─── Quiz de matching ──────────────────────── */
 const QUIZ_QUESTIONS = [
   {
@@ -304,6 +498,9 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ── CALCULADORA PACIENTES ──────────────── */}
+        <PatientTimeCalc />
+
         {/* ── TESTIMONIOS ──────────────────────────
             Solo se muestra si hay reseñas reales: una sección de
             esqueletos eternos comunica "plataforma vacía". */}
@@ -423,6 +620,9 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* ── CALCULADORA TERAPEUTAS ─────────────── */}
+        <TherapistTimeCalc />
 
         {/* ── QUIZ DE MATCHING ───────────────────── */}
         <section className="py-20 px-4">
