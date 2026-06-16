@@ -6,18 +6,23 @@ export async function sendEmail({
   to,
   subject,
   html,
+  attachments,
 }: {
   to: string
   subject: string
   html: string
+  attachments?: Array<{ filename: string; content: string }>  // content = base64
 }) {
+  const body: Record<string, unknown> = { from: FROM_EMAIL, to, subject, html }
+  if (attachments?.length) body.attachments = attachments
+
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${RESEND_API_KEY}`,
     },
-    body: JSON.stringify({ from: FROM_EMAIL, to, subject, html }),
+    body: JSON.stringify(body),
   })
   const data = await res.json()
   if (!res.ok) console.error('Resend error:', data)

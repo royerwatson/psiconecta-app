@@ -1,5 +1,75 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-15 (v63 — Email post-pago + pantalla de éxito + fix redirect auth)*
+*Última actualización: 2026-06-15 (v64 — Prompt clínico + PDF adjunto en email + fix descarga PDF en app)*
+
+---
+
+## ⚡ Sesión 2026-06-15 (v64) — Prompt clínico + PDF en email + fix descarga
+
+### 1. Nuevo prompt clínico de Claude (capture-assessment-payment)
+
+Reemplazado el prompt genérico por el **System Prompt oficial Psiconecta v1.0**:
+- Rol: psicólogo clínico de Psiconecta para RD/Latinoamérica
+- Tono: cálido, clínico-accesible, validador-orientador, culturalmente adaptado
+- Palabras prohibidas: diagnóstico, trastorno, patología, enfermedad, anormal
+- Input: objeto JSON estructurado `{ instrumento, area, puntuacion_total, rango_maximo, categoria, dimensiones [{nombre, puntuacion, max, nivel}], respuestas_individuales, segmento }`
+- Output JSON con 4 campos: `parrafo_principal` (60-90 palabras, empieza con "Lo que muestran..."), `parrafo_patron` (dimensional, más personalizado), `parrafo_contexto` (40-60 palabras, cuándo surge), `frase_cierre` (20-30 palabras, esperanzadora)
+- Mapeo al schema DB sin migraciones: `interpretation = parrafo_principal\n\nparrafo_patron`, `normative_context = parrafo_contexto`, `recommendations = [{title: "Para tener en cuenta", description: frase_cierre}]`
+- `AREA_MAP`: ansiedad→"Ansiedad generalizada", depresion→"Estado de ánimo y depresión", sueno→"Calidad del sueño", burnout→"Agotamiento laboral"
+- `dimensiones.nivel`: pct ≥67 → "alta", ≥34 → "moderada", <34 → "leve"
+
+### 2. PDF adjunto en el correo (server-side)
+
+**`supabase/functions/capture-assessment-payment/index.ts`**:
+- Importa `pdf-lib` desde `https://esm.sh/pdf-lib@1.17.1`
+- Función `generatePDFBytes()`: genera PDF A4 profesional con pdf-lib:
+  - Header: "PSICONECTA" + nombre del instrumento
+  - Score card: recuadro violeta con puntuación, severidad, fecha, nombre
+  - Barras de dimensiones (texto + barra visual con rect)
+  - Sección Interpretación (2 párrafos)
+  - Sección Contexto
+  - Sección "Para tener en cuenta" (frase en box con fondo lavanda)
+  - Footer en cada página: "Este reporte es confidencial · psiconecta.app"
+- Base64 via `btoa(bytes.reduce(...))` → adjunto Resend
+- Fallo del PDF es non-fatal (try/catch interno)
+
+**`supabase/functions/_shared/email.ts`**:
+- `sendEmail()` ahora acepta `attachments?: Array<{ filename: string; content: string }>` (content = base64)
+- Se incluye en el body de Resend solo si el array tiene elementos
+
+### 3. Fix descarga PDF en la app
+
+**Causa raíz**: `cdnjs.cloudflare.com` no estaba en `script-src` del CSP en `vercel.json` → el script de jsPDF era bloqueado silenciosamente por el browser.
+
+**`vercel.json`**: añadido `https://cdnjs.cloudflare.com` a `script-src`.
+
+**`AssessmentReportPage.jsx`**:
+- Carga jsPDF con `id="jspdf-cdn"` para evitar duplicados + `setTimeout(resolve, 100)` para dar tiempo al UMD
+- Verifica `window.jspdf?.jsPDF` antes y después de cargar, lanza error descriptivo si no disponible
+- `handleDownload` muestra `toast.success('PDF descargado')` o `toast.error('...')` según resultado
+- Importa `toast` desde `react-hot-toast`
+
+### 4. Renombrado de secciones en reporte (app + email)
+- "Contexto normativo" → **"Contexto"**
+- "Recomendaciones" → **"Para tener en cuenta"**
+- `frase_cierre` se muestra como callout con fondo degradado primary→accent e itálica
+
+### Archivos modificados
+| Archivo | Cambio |
+|---------|--------|
+| `supabase/functions/capture-assessment-payment/index.ts` | Nuevo system prompt + generatePDFBytes() + adjunto email |
+| `supabase/functions/_shared/email.ts` | sendEmail acepta attachments + header "Contexto" |
+| `vercel.json` | CSP: añadido cdnjs.cloudflare.com a script-src |
+| `src/pages/patient/AssessmentReportPage.jsx` | jsPDF loading robusto + toast feedback + secciones renombradas |
+
+### Deploy
+```bash
+supabase functions deploy capture-assessment-payment --no-verify-jwt
+git add -A && git commit -m "feat: prompt clínico v1 + PDF adjunto en email + fix CSP jsPDF" && git push
+```
+
+---
+
+## ⚡ Sesión 2026-06-15 (v63) — Email post-pago + pantalla de éxito + fix redirect auth
 
 ---
 

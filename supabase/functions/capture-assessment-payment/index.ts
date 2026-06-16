@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { PDFDocument, StandardFonts, rgb } from 'https://esm.sh/pdf-lib@1.17.1'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { sendEmail, assessmentReportEmail } from '../_shared/email.ts'
 
@@ -81,7 +82,7 @@ serve(async (req) => {
 
     if (reportErr) console.error('Error saving report:', reportErr)
 
-    // Enviar reporte por correo electrónico
+    // Enviar reporte por correo electrónico con PDF adjunto
     try {
       const patientName = (
         await supabase.from('profiles').select('full_name').eq('id', user.id).single()
@@ -102,13 +103,29 @@ serve(async (req) => {
         reportUrl: `${Deno.env.get('APP_URL')}/patient/evaluaciones/${sessionId}`,
       })
 
+      // Generar PDF adjunto
+      let pdfAttachment: Array<{ filename: string; content: string }> | undefined
+      try {
+        const pdfBytes = await generatePDFBytes({
+          patientName,
+          session,
+          interpretation: report.interpretation,
+          normativeContext: report.normativeContext,
+          fraseCierre: report.recommendations?.[0]?.description ?? '',
+        })
+        const base64 = btoa(pdfBytes.reduce((s, b) => s + String.fromCharCode(b), ''))
+        pdfAttachment = [{ filename: `reporte_${session.slug}_psiconecta.pdf`, content: base64 }]
+      } catch (pdfErr) {
+        console.error('PDF generation error (non-fatal):', pdfErr)
+      }
+
       await sendEmail({
         to: user.email!,
         subject: `Tu reporte de ${session.instrument_full} · Psiconecta`,
         html: emailHtml,
+        attachments: pdfAttachment,
       })
     } catch (emailErr) {
-      // No bloquear el flujo si el email falla
       console.error('Error sending assessment email:', emailErr)
     }
 
@@ -228,4 +245,131 @@ async function generateReport(session: Record<string, unknown>) {
       recommendations: [],
     }
   }
+}
+
+/* ── Generador de PDF server-side ────────────────────────────────────── */
+async function generatePDFBytes({
+  patientName,
+  session,
+  interpretation,
+  normativeContext,
+  fraseCierre,
+}: {
+  patientName: string
+  session: Record<string, unknown>
+  interpretation: string
+  normativeContext: string
+  fraseCierre: string
+}): Promise<Uint8Array> {
+  const doc = await PDFDocument.create()
+  const regular = await doc.embedFont(StandardFonts.Helvetica)
+  const bold    = await doc.embedFont(StandardFonts.HelveticaBold)
+
+  const W = 595, H = 842, margin = 50
+  const cw = W - margin * 2
+  const ink   = rgb(0.08, 0.09, 0.14)
+  const muted = rgb(0.38, 0.45, 0.56)
+  const brand = rgb(0.31, 0.27, 0.90)
+
+  let page = doc.addPage([W, H])
+  let y = H - margin
+
+  function wrap(text: string, font: typeof regular, size: number, maxW: number): string[] {
+    const words = text.split(' ')
+    const lines: string[] = []
+    let line = ''
+    for (const word of words) {
+      const test = line ? `${line} ${word}` : word
+      if (font.widthOfTextAtSize(test, size) > maxW && line) {
+        lines.push(line); line = word
+      } else { line = test }
+    }
+    if (line) lines.push(line)
+    return lines
+  }
+
+  function addLines(lines: string[], font: typeof regular, size: number, color = ink, leading = size * 1.55) {
+    for (const line of lines) {
+      if (y < margin + 30) { page = doc.addPage([W, H]); y = H - margin }
+      page.drawText(line, { x: margin, y, size, font, color })
+      y -= leading
+    }
+  }
+
+  function addParagraph(text: string, font: typeof regular, size: number, color = ink) {
+    addLines(wrap(text, font, size, cw), font, size, color)
+    y -= 6
+  }
+
+  function addSection(title: string) {
+    if (y < margin + 60) { page = doc.addPage([W, H]); y = H - margin }
+    y -= 6
+    page.drawRectangle({ x: margin, y: y - 2, width: cw, height: 1, color: rgb(0.88, 0.88, 0.92) })
+    y -= 14
+    addLines([title.toUpperCase()], bold, 8, brand, 14)
+    y -= 4
+  }
+
+  // ── Header ──────────────────────────────────────────────────────────
+  addLines(['PSICONECTA'], bold, 10, brand, 16)
+  addLines(['Reporte de Evaluación Psicométrica'], bold, 16, ink, 22)
+  addParagraph(session.instrument_full as string, regular, 11, muted)
+  y -= 4
+
+  // ── Score card ──────────────────────────────────────────────────────
+  const cardH = 52
+  page.drawRectangle({ x: margin, y: y - cardH, width: cw, height: cardH, color: rgb(0.31, 0.27, 0.90), borderRadius: 8 })
+  page.drawText(`${session.total_score} / ${session.max_score}`, { x: margin + 16, y: y - 22, size: 22, font: bold, color: rgb(1, 1, 1) })
+  page.drawText(session.severity_label as string, { x: margin + 16, y: y - 40, size: 10, font: regular, color: rgb(0.78, 0.75, 1) })
+  page.drawText(new Date().toLocaleDateString('es-DO', { year: 'numeric', month: 'long', day: 'numeric' }), { x: W - margin - 120, y: y - 22, size: 9, font: regular, color: rgb(0.78, 0.75, 1) })
+  page.drawText(patientName, { x: W - margin - 120, y: y - 38, size: 9, font: regular, color: rgb(0.78, 0.75, 1) })
+  y -= cardH + 18
+
+  // ── Dimensiones ─────────────────────────────────────────────────────
+  const dims = (session.dimension_scores as Array<{ name: string; pct: number }>) ?? []
+  if (dims.length > 0) {
+    addSection('Desglose por dimensión')
+    for (const d of dims) {
+      addLines([`${d.name}: ${d.pct}%`], regular, 10, ink, 15)
+      const barW = (cw - 80) * (d.pct / 100)
+      page.drawRectangle({ x: margin, y: y - 2, width: cw - 80, height: 5, color: rgb(0.92, 0.92, 0.96), borderRadius: 2 })
+      page.drawRectangle({ x: margin, y: y - 2, width: barW, height: 5, color: brand, borderRadius: 2 })
+      y -= 12
+    }
+    y -= 4
+  }
+
+  // ── Interpretación ─────────────────────────────────────────────────
+  addSection('Interpretación')
+  for (const para of interpretation.split('\n\n').filter(Boolean)) {
+    addParagraph(para, regular, 10)
+  }
+
+  // ── Contexto ──────────────────────────────────────────────────────
+  if (normativeContext) {
+    addSection('Contexto')
+    addParagraph(normativeContext, regular, 10)
+  }
+
+  // ── Para tener en cuenta ──────────────────────────────────────────
+  if (fraseCierre) {
+    addSection('Para tener en cuenta')
+    if (y < margin + 50) { page = doc.addPage([W, H]); y = H - margin }
+    const quoteLines = wrap(`"${fraseCierre}"`, regular, 10, cw - 20)
+    const quoteH = quoteLines.length * 16 + 16
+    page.drawRectangle({ x: margin, y: y - quoteH, width: cw, height: quoteH, color: rgb(0.96, 0.95, 1), borderRadius: 6 })
+    y -= 10
+    addLines(quoteLines, regular, 10, brand, 16)
+    y -= 8
+  }
+
+  // ── Footer ────────────────────────────────────────────────────────
+  const pages = doc.getPages()
+  for (const p of pages) {
+    p.drawText('Este reporte es confidencial · psiconecta.app', {
+      x: margin, y: 20, size: 8, font: regular, color: muted,
+    })
+  }
+
+  return doc.save()
 }

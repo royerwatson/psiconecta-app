@@ -8,6 +8,7 @@ import { Download, ArrowRight, RefreshCw, AlertCircle, CheckCircle, Users } from
 import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { ASSESSMENT_TESTS } from '@/data/assessmentTests'
+import toast from 'react-hot-toast'
 
 /* ── Gauge animado ────────────────────────────────────────── */
 function ScoreGauge({ score, maxScore, hex }) {
@@ -76,15 +77,20 @@ function RecCard({ rec, index }) {
 
 /* ── Generador de PDF ─────────────────────────────────────── */
 async function downloadPDF(session, report, profile) {
-  if (!window.jspdf) {
+  if (!window.jspdf?.jsPDF) {
     await new Promise((resolve, reject) => {
+      const existing = document.getElementById('jspdf-cdn')
+      if (existing) { existing.remove() }
       const s = document.createElement('script')
+      s.id = 'jspdf-cdn'
       s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
-      s.onload = resolve; s.onerror = reject
+      s.onload = () => setTimeout(resolve, 100)
+      s.onerror = () => reject(new Error('No se pudo cargar el generador de PDF'))
       document.head.appendChild(s)
     })
   }
 
+  if (!window.jspdf?.jsPDF) throw new Error('jsPDF no disponible')
   const { jsPDF } = window.jspdf
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
   const W = doc.internal.pageSize.getWidth()
@@ -206,8 +212,13 @@ export default function AssessmentReportPage() {
 
   async function handleDownload() {
     setDownloading(true)
-    try { await downloadPDF(session, report, profile) }
-    catch (e) { console.error(e) }
+    try {
+      await downloadPDF(session, report, profile)
+      toast.success('PDF descargado')
+    } catch (e) {
+      console.error(e)
+      toast.error('No se pudo generar el PDF. Intenta de nuevo.')
+    }
     setDownloading(false)
   }
 
