@@ -43,6 +43,7 @@ Deno.serve(async (req) => {
       maxRequests: 5,
       windowSeconds: 3600,
       functionName: 'confirm-credit-booking',
+      failOpen: false, // endpoint financiero: bloquear si falla la tabla
     })
     if (!rl.allowed) {
       return new Response(

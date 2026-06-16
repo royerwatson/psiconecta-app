@@ -45,6 +45,7 @@ Deno.serve(async (req) => {
       maxRequests: 10,
       windowSeconds: 3600,
       functionName: 'redeem-gift-card',
+      failOpen: false, // endpoint financiero: bloquear si falla la tabla
     })
     if (!rl.allowed) {
       return new Response(JSON.stringify({ error: 'Demasiados intentos. Intenta más tarde.' }), {

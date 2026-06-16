@@ -63,6 +63,7 @@ Deno.serve(async (req) => {
       maxRequests: 10,
       windowSeconds: 3600,
       functionName: 'create-paypal-order',
+      failOpen: false, // endpoint financiero: bloquear si falla la tabla
     })
     if (!rl.allowed) {
       return new Response(
