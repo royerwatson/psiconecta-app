@@ -33,15 +33,17 @@ export default function AuthCallback() {
       // Actualizar el store con la sesión OAuth (no hay onAuthStateChange)
       await fetchProfile(session.user)
 
+      const lsRedirect = localStorage.getItem('psiconecta_auth_redirect')
+      if (lsRedirect) localStorage.removeItem('psiconecta_auth_redirect')
+
       if (!profile?.role) {
-        // Usuario nuevo — necesita elegir rol
         navigate('/register?social=true')
       } else if (profile.role === 'therapist') {
         navigate('/therapist/dashboard')
       } else if (profile.role === 'admin') {
         navigate('/admin/dashboard')
       } else {
-        navigate('/patient/dashboard')
+        navigate(lsRedirect ?? '/patient/dashboard')
       }
     }
 
