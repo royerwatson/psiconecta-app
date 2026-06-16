@@ -396,7 +396,7 @@ export default function AdminStats() {
                       i === 1 ? 'text-warm-400' :
                       i === 2 ? 'text-amber-600' : 'text-warm-300'
                     }`}>{i + 1}</span>
-                    <Avatar name={t.profile?.full_name ?? ''} size="sm" />
+                    <Avatar name={t.profile?.full_name ?? ''} src={t.profile?.avatar_url} size="sm" />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm text-warm-900 truncate">{t.profile?.full_name}</p>
                       <p className="text-xs text-warm-400 truncate">{t.specialty}</p>

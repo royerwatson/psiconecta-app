@@ -13,11 +13,11 @@ import { Users, Calendar, DollarSign, XCircle } from 'lucide-react'
 
 const EMPTY_FORM = {
   therapist_id:    '',
-  topic:           '',
+  title:           '',
   description:     '',
   scheduled_at:    '',
   max_participants: 8,
-  price_per_person: 30,
+  price:           30,
 }
 
 export default function AdminGroupSessions() {
@@ -58,21 +58,21 @@ export default function AdminGroupSessions() {
     setForm(f => ({ ...f, [e.target.name]: e.target.value }))
 
   const createGroup = async () => {
-    if (!form.therapist_id || !form.topic || !form.scheduled_at) {
+    if (!form.therapist_id || !form.title || !form.scheduled_at) {
       toast.error('Completa los campos obligatorios')
       return
     }
     setSaving(true)
     const { error } = await supabase.from('group_sessions').insert({
       therapist_id:     form.therapist_id,
-      topic:            form.topic,
+      title:            form.title,
       description:      form.description,
       scheduled_at:     new Date(form.scheduled_at).toISOString(),
       max_participants: Number(form.max_participants),
-      price_per_person: Number(form.price_per_person),
+      price:            Number(form.price),
       status:           'scheduled',
     })
-    if (error) { toast.error('Error al crear sesión grupal'); setSaving(false); return }
+    if (error) { toast.error(error.message ?? 'Error al crear sesión grupal'); setSaving(false); return }
     toast.success('Sesión grupal creada')
     setCreateModal(false)
     setForm(EMPTY_FORM)
@@ -151,7 +151,7 @@ export default function AdminGroupSessions() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 flex-wrap">
                       <div>
-                        <p className="font-semibold text-warm-900">{g.topic}</p>
+                        <p className="font-semibold text-warm-900">{g.title}</p>
                         <p className="text-sm text-warm-500">{g.therapist?.full_name}</p>
                       </div>
                       <Badge variant={
@@ -166,7 +166,7 @@ export default function AdminGroupSessions() {
                     <div className="flex flex-wrap gap-3 mt-2 text-xs text-warm-500">
                       <span className="flex items-center gap-1"><Calendar size={11} strokeWidth={1.8} /> {formatSessionDate(g.scheduled_at)}</span>
                       <span className="flex items-center gap-1"><Users size={11} strokeWidth={1.8} /> {g.participants?.length ?? 0}/{g.max_participants} participantes</span>
-                      <span className="flex items-center gap-1"><DollarSign size={11} strokeWidth={1.8} /> {formatPrice(g.price_per_person)}/persona</span>
+                      <span className="flex items-center gap-1"><DollarSign size={11} strokeWidth={1.8} /> {formatPrice(g.price)}/persona</span>
                       {isFull && <span className="text-amber-600 font-medium">Cupo lleno</span>}
                     </div>
 
@@ -203,7 +203,7 @@ export default function AdminGroupSessions() {
             ))}
           </Select>
 
-          <Input label="Tema / título de la sesión *" name="topic" value={form.topic}
+          <Input label="Tema / título de la sesión *" name="title" value={form.title}
             onChange={handleChange} placeholder="Ej: Manejo de la ansiedad" />
 
           <Textarea label="Descripción" name="description" value={form.description}
@@ -216,8 +216,8 @@ export default function AdminGroupSessions() {
           <div className="grid grid-cols-2 gap-3">
             <Input label="Máx. participantes" name="max_participants" type="number"
               value={form.max_participants} onChange={handleChange} min={2} max={20} />
-            <Input label="Precio por persona (USD)" name="price_per_person" type="number"
-              value={form.price_per_person} onChange={handleChange} min={0} />
+            <Input label="Precio por persona (USD)" name="price" type="number"
+              value={form.price} onChange={handleChange} min={0} />
           </div>
 
           <Button fullWidth loading={saving} onClick={createGroup}>

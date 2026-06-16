@@ -166,16 +166,27 @@ export default function TherapistProfile() {
     const maxSize = 10 * 1024 * 1024 // 10 MB
     if (file.size > maxSize) { toast.error('El archivo no puede superar 10 MB'); return }
 
+    const ext = file.name.split('.').pop().toLowerCase()
+    const ALLOWED = ['pdf', 'jpg', 'jpeg', 'png']
+    if (!ALLOWED.includes(ext)) {
+      toast.error('Solo se permiten archivos PDF, JPG o PNG')
+      return
+    }
+
+    // Determinar contentType correcto aunque el sistema no lo detecte
+    const MIME_MAP = { pdf: 'application/pdf', jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png' }
+    const contentType = file.type || MIME_MAP[ext] || 'application/octet-stream'
+
     setUploadingDoc(docType)
-    const ext  = file.name.split('.').pop().toLowerCase()
     const path = `${user.id}/${docType}-${Date.now()}.${ext}`
 
     const { error: uploadError } = await supabase.storage
       .from('credentials')
-      .upload(path, file, { contentType: file.type, upsert: false })
+      .upload(path, file, { contentType, upsert: false })
     if (uploadError) {
-      console.error('[credentials] upload error:', uploadError)
-      toast.error('Error subiendo el documento. Verifica que el archivo sea PDF, JPG o PNG.')
+      console.warn('[credentials] upload error:', uploadError)
+      const msg = uploadError.message ?? uploadError.error ?? 'Error desconocido'
+      toast.error(`Error subiendo el documento: ${msg}`)
       setUploadingDoc(null)
       return
     }
@@ -186,7 +197,12 @@ export default function TherapistProfile() {
       document_url:  path,
       status:        'pending',
     })
-    if (dbError) { toast.error('Error registrando el documento'); setUploadingDoc(null); return }
+    if (dbError) {
+      console.warn('[credentials] db insert error:', dbError)
+      toast.error('Error registrando el documento: ' + (dbError.message ?? ''))
+      setUploadingDoc(null)
+      return
+    }
 
     // Marcar perfil como pendiente de revisión
     await supabase.from('therapist_profiles')

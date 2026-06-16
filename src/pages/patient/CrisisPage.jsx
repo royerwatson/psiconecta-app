@@ -20,16 +20,30 @@ import { AlertTriangle, Phone, MessageCircle, ClipboardList, CheckCircle2, Wind,
 
 // ─── Líneas de crisis ─────────────────────────────────────────────────────────
 
+// Mapeo de código de país (guardado en profiles.country) → nombre de línea
+const COUNTRY_CODE_MAP = {
+  DO: 'República Dominicana',
+  MX: 'México',
+  CO: 'Colombia',
+  AR: 'Argentina',
+  ES: 'España',
+  VE: 'Venezuela',
+  CL: 'Chile',
+  PE: 'Perú',
+  EC: 'Ecuador',
+}
+
 const CRISIS_LINES = [
-  { country: 'México',        name: 'SAPTEL',                    number: '55 5259-8121',  available: '24/7' },
-  { country: 'Colombia',      name: 'Línea 106',                  number: '106',           available: '24/7' },
-  { country: 'Argentina',     name: 'Centro de Asistencia',       number: '135',           available: '24/7' },
-  { country: 'España',        name: 'Teléfono Esperanza',         number: '717 003 717',   available: '24/7' },
-  { country: 'Venezuela',     name: 'CEDHA',                      number: '0800-CEDHA00',  available: 'L-V' },
-  { country: 'Chile',         name: 'Salud Responde',             number: '600 360 7777',  available: '24/7' },
-  { country: 'Perú',          name: 'Línea 113',                  number: '113',           available: '24/7' },
-  { country: 'Ecuador',       name: 'Línea 171',                  number: '171',           available: '24/7' },
-  { country: 'Internacional', name: 'Crisis Text Line (en inglés)', number: 'Text HOME → 741741', available: '24/7' },
+  { country: 'República Dominicana', name: 'SALUD MENTAL RD',              number: '809-200-1400',  available: '24/7' },
+  { country: 'México',               name: 'SAPTEL',                        number: '55 5259-8121',  available: '24/7' },
+  { country: 'Colombia',             name: 'Línea 106',                     number: '106',           available: '24/7' },
+  { country: 'Argentina',            name: 'Centro de Asistencia',          number: '135',           available: '24/7' },
+  { country: 'España',               name: 'Teléfono Esperanza',            number: '717 003 717',   available: '24/7' },
+  { country: 'Venezuela',            name: 'CEDHA',                         number: '0800-CEDHA00',  available: 'L-V' },
+  { country: 'Chile',                name: 'Salud Responde',                number: '600 360 7777',  available: '24/7' },
+  { country: 'Perú',                 name: 'Línea 113',                     number: '113',           available: '24/7' },
+  { country: 'Ecuador',              name: 'Línea 171',                     number: '171',           available: '24/7' },
+  { country: 'Internacional',        name: 'Crisis Text Line (en inglés)',   number: 'Text HOME → 741741', available: '24/7' },
 ]
 
 // ─── Respiración 4-7-8 ───────────────────────────────────────────────────────
@@ -223,24 +237,40 @@ function SafetyPlanSection({ plan }) {
 export default function CrisisPage() {
   const { user }  = useAuthStore()
   const navigate  = useNavigate()
-  const [plan, setPlan]         = useState(null)
-  const [loading, setLoading]   = useState(true)
-  const [section, setSection]   = useState('breathe') // 'breathe' | 'plan' | 'lines'
+  const [plan, setPlan]             = useState(null)
+  const [loading, setLoading]       = useState(true)
+  const [section, setSection]       = useState('breathe') // 'breathe' | 'plan' | 'lines'
+  const [userCountry, setUserCountry] = useState(null)   // código ISO
 
-  useEffect(() => { if (user) fetchPlan() }, [user])
+  useEffect(() => { if (user) fetchData() }, [user])
 
-  const fetchPlan = async () => {
-    const { data } = await supabase
-      .from('safety_plans')
-      .select('*')
-      .eq('patient_id', user.id)
-      .eq('status', 'active')
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .single()
-    setPlan(data ?? null)
+  const fetchData = async () => {
+    const [{ data: planData }, { data: profileData }] = await Promise.all([
+      supabase
+        .from('safety_plans')
+        .select('*')
+        .eq('patient_id', user.id)
+        .eq('status', 'active')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single(),
+      supabase
+        .from('profiles')
+        .select('country')
+        .eq('id', user.id)
+        .single(),
+    ])
+    setPlan(planData ?? null)
+    setUserCountry(profileData?.country ?? null)
     setLoading(false)
   }
+
+  // Filtrar líneas: si el país del usuario tiene línea local, mostrar solo esa + Internacional
+  const visibleLines = (() => {
+    const countryName = userCountry ? COUNTRY_CODE_MAP[userCountry] : null
+    if (!countryName) return CRISIS_LINES
+    return CRISIS_LINES.filter(l => l.country === countryName || l.country === 'Internacional')
+  })()
 
   const TABS = [
     { id: 'breathe', label: 'Respirar',       show: true       },
@@ -369,7 +399,7 @@ export default function CrisisPage() {
             </p>
           </div>
 
-          {CRISIS_LINES.map((line, i) => (
+          {visibleLines.map((line, i) => (
             <div
               key={i}
               className="bg-white rounded-2xl border border-warm-100 shadow-card px-4 py-4 flex items-center gap-3"
@@ -389,8 +419,11 @@ export default function CrisisPage() {
           ))}
 
           <p className="text-xs text-warm-400 text-center mt-2 leading-relaxed px-4">
-            Si no aparece tu país, busca "línea de crisis salud mental" + tu país.
-            También puedes escribirle a tu terapeuta en cualquier momento.
+            {userCountry && !COUNTRY_CODE_MAP[userCountry]
+              ? 'No encontramos una línea local para tu país. Busca "línea de crisis salud mental" + tu país o comunícate con emergencias locales.'
+              : 'En caso de emergencia inmediata llama al número de emergencias de tu país (911, 112, 119…).'
+            }
+            {' '}También puedes escribirle a tu terapeuta en cualquier momento.
           </p>
         </div>
       )}

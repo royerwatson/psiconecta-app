@@ -300,7 +300,7 @@ export default function TherapistDashboard() {
                 }`}>
                 <div className="p-4">
                   <div className="flex items-start gap-3">
-                    <Avatar name={alert.patient?.full_name ?? ''} size="md" />
+                    <Avatar name={alert.patient?.full_name ?? ''} src={alert.patient?.avatar_url} size="md" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between gap-2 flex-wrap">
                         <div>
@@ -449,7 +449,7 @@ function SessionCard({ session, onStart, onView }) {
   const canVideo = canStartVideo(session.scheduled_at)
   return (
     <Card className="flex items-center gap-4">
-      <Avatar name={getDisplayName(session.patient)} size="md" />
+      <Avatar name={getDisplayName(session.patient)} src={session.patient?.avatar_url} size="md" />
       <div className="flex-1 min-w-0">
         <p className="font-semibold text-warm-900 truncate">{getDisplayName(session.patient)}</p>
         <p className="text-sm text-warm-500">{formatSessionDate(session.scheduled_at)}</p>

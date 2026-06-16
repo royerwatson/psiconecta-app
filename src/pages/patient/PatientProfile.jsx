@@ -245,7 +245,7 @@ export default function PatientProfile() {
               value={giftCode}
               onChange={e => { setGiftCode(e.target.value.toUpperCase()); setRedeemStatus('idle') }}
               placeholder="PSICO-XXXX-XXXX"
-              maxLength={14}
+              maxLength={15}
               className="flex-1 border border-warm-200 rounded-xl px-3 py-2.5 text-sm font-mono tracking-widest uppercase text-center focus:outline-none focus:ring-2 focus:ring-primary-300 text-warm-900 placeholder:text-warm-300 placeholder:tracking-normal placeholder:font-sans placeholder:text-xs"
             />
             <button

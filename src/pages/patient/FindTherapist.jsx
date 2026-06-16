@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
 import ConsentModal from '@/components/patient/ConsentModal'
 import toast from 'react-hot-toast'
-import { DollarSign, Zap, AlertTriangle, Search, Calendar, Crown, Star, Clock } from 'lucide-react'
+import { DollarSign, Zap, AlertTriangle, Search, Calendar, Crown, Star, Clock, Gift } from 'lucide-react'
 import { useCurrencyContext } from '@/context/CurrencyContext'
 import { addDays, format, getISODay } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -44,6 +44,8 @@ export default function FindTherapist() {
   const [availSlots, setAvailSlots]     = useState({})
   const [selectedDate, setSelectedDate] = useState(null)
   const [loadingSlots, setLoadingSlots] = useState(false)
+  const [creditBalance, setCreditBalance] = useState(0)
+  const [applyCredit, setApplyCredit]     = useState(false)
   const navigate = useNavigate()
 
   useEffect(() => { fetchTherapists() }, [specialty, isUrgent])
@@ -97,12 +99,35 @@ export default function FindTherapist() {
     return nameMatch && minOk && maxOk
   })
 
+  const loadCreditBalance = async () => {
+    if (!user?.id) return
+    const now = new Date().toISOString()
+    const { data, error } = await supabase
+      .from('patient_credits')
+      .select('amount_usd, expires_at')
+      .eq('user_id', user.id)
+    if (error) { console.error('[FindTherapist] credit balance error:', error); return }
+    const total = (data ?? [])
+      .filter(r => !r.expires_at || r.expires_at > now)
+      .reduce((sum, r) => sum + parseFloat(r.amount_usd), 0)
+    setCreditBalance(total)
+  }
+
+  // Cargar crédito al entrar al paso de pago
+  useEffect(() => {
+    if (bookingStep === 'payment') {
+      loadCreditBalance()
+      setApplyCredit(false)
+    }
+  }, [bookingStep])
+
   const handleCloseBooking = () => {
     setSelectedTherapist(null)
     setBookingForm({ date: '', time: '' })
     setBookingStep('form')
     setAvailSlots({})
     setSelectedDate(null)
+    setApplyCredit(false)
   }
 
   const loadSlots = async (therapist) => {
@@ -292,7 +317,7 @@ export default function FindTherapist() {
                 <div className="relative shrink-0">
                   <div className={t.subscription_plan === 'pro' || t.subscription_plan === 'premium'
                     ? 'avatar-ring-pro rounded-full' : 'avatar-ring rounded-full'}>
-                    <Avatar name={t.profile?.full_name ?? ''} size="lg" />
+                    <Avatar name={t.profile?.full_name ?? ''} src={t.profile?.avatar_url} size="lg" />
                   </div>
                   <span className="absolute -bottom-0.5 -right-0.5 status-online" />
                 </div>
@@ -396,7 +421,7 @@ export default function FindTherapist() {
             {bookingStep === 'form' && (
               <>
                 <div className="flex items-center gap-3 bg-slate-50 rounded-2xl p-3.5 border border-slate-100">
-                  <Avatar name={selectedTherapist.profile?.full_name ?? ''} size="md" />
+                  <Avatar name={selectedTherapist.profile?.full_name ?? ''} src={selectedTherapist.profile?.avatar_url} size="md" />
                   <div>
                     <p className="font-semibold text-warm-900">{selectedTherapist.profile?.full_name}</p>
                     <p className="text-sm text-warm-500">{selectedTherapist.specialty}</p>
@@ -488,10 +513,12 @@ export default function FindTherapist() {
 
             {/* ── PASO 2: Pago con PayPal ── */}
             {bookingStep === 'payment' && (() => {
-              const scheduledAt = new Date(`${bookingForm.date}T${bookingForm.time}`)
-              const hoursUntil  = (scheduledAt - new Date()) / 1000 / 60 / 60
-              const urgent      = hoursUntil < 24
-              const price       = +(selectedTherapist.price_per_session * (urgent ? 1.3 : 1)).toFixed(2)
+              const scheduledAt  = new Date(`${bookingForm.date}T${bookingForm.time}`)
+              const hoursUntil   = (scheduledAt - new Date()) / 1000 / 60 / 60
+              const urgent       = hoursUntil < 24
+              const price        = +(selectedTherapist.price_per_session * (urgent ? 1.3 : 1)).toFixed(2)
+              const creditApplied = applyCredit ? +Math.min(creditBalance, price).toFixed(2) : 0
+              const paypalAmount  = +Math.max(0, price - creditApplied).toFixed(2)
 
               return (
                 <>
@@ -518,21 +545,75 @@ export default function FindTherapist() {
                         <span className="font-medium">incluido</span>
                       </div>
                     )}
+                    {creditApplied > 0 && (
+                      <div className="flex justify-between text-green-600 mt-1">
+                        <span>Crédito aplicado</span>
+                        <span className="font-medium">- ${creditApplied.toFixed(2)} USD</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-warm-900 font-bold mt-2 pt-2 border-t border-warm-200">
                       <span>Total</span>
-                      <span>{formatWithLocal(price)}</span>
+                      <span>{paypalAmount > 0 ? formatWithLocal(paypalAmount) : <span className="text-green-600">¡Cubierto con crédito!</span>}</span>
                     </div>
                   </div>
 
-                  <PayPalButton
-                    therapistId={selectedTherapist.user_id}
-                    scheduledAt={scheduledAt.toISOString()}
-                    isUrgent={urgent}
-                    priceBase={selectedTherapist.price_per_session}
-                    therapistName={selectedTherapist.profile?.full_name ?? 'el terapeuta'}
-                    onSuccess={handlePaymentSuccess}
-                    onError={handlePaymentError}
-                  />
+                  {/* Banner de crédito disponible */}
+                  {creditBalance > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => setApplyCredit(a => !a)}
+                      className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border-2 transition-all text-sm ${
+                        applyCredit
+                          ? 'border-green-400 bg-green-50 text-green-700'
+                          : 'border-warm-200 bg-white text-warm-600 hover:border-primary-300'
+                      }`}
+                    >
+                      <span className="flex items-center gap-2">
+                        <Gift size={15} strokeWidth={1.8} className={applyCredit ? 'text-green-500' : 'text-primary-400'} />
+                        Tienes <strong>${Number(creditBalance).toFixed(2)} USD</strong> en crédito de regalo
+                      </span>
+                      <span className={`text-xs font-semibold ${applyCredit ? 'text-green-600' : 'text-primary-500'}`}>
+                        {applyCredit ? '✓ Aplicado' : 'Aplicar'}
+                      </span>
+                    </button>
+                  )}
+
+                  {paypalAmount > 0 ? (
+                    <PayPalButton
+                      therapistId={selectedTherapist.user_id}
+                      scheduledAt={scheduledAt.toISOString()}
+                      isUrgent={urgent}
+                      priceBase={selectedTherapist.price_per_session}
+                      therapistName={selectedTherapist.profile?.full_name ?? 'el terapeuta'}
+                      creditUsed={creditApplied}
+                      onSuccess={handlePaymentSuccess}
+                      onError={handlePaymentError}
+                    />
+                  ) : (
+                    // Sesión cubierta 100% con crédito — sin PayPal
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const { data: bookingId, error } = await supabase.rpc('confirm_credit_booking', {
+                            p_therapist_id: selectedTherapist.user_id,
+                            p_scheduled_at: scheduledAt.toISOString(),
+                            p_is_urgent:    urgent,
+                            p_price_base:   selectedTherapist.price_per_session,
+                            p_credit_used:  creditApplied,
+                          })
+                          if (error) { toast.error(error.message ?? 'Error al confirmar la cita'); return }
+                          handlePaymentSuccess(bookingId)
+                        } catch (err) {
+                          console.warn('[confirm_credit_booking]', err)
+                          toast.error('Error inesperado al confirmar la cita')
+                        }
+                      }}
+                      className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors"
+                    >
+                      Confirmar cita sin pago adicional →
+                    </button>
+                  )}
 
                   <p className="text-[11px] text-warm-400 text-center leading-relaxed">
                     El cobro se realiza en <strong>USD</strong>. La conversión a tu moneda local

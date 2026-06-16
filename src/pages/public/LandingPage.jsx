@@ -24,6 +24,9 @@ import {
   FileText,
   Gift,
   Sparkles,
+  BarChart2,
+  Moon,
+  Briefcase,
 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { analytics } from '@/lib/analytics'
@@ -550,7 +553,8 @@ export default function LandingPage() {
               <a href="#como-funciona" className="hover:text-primary-600 transition-colors">Cómo funciona</a>
               <Link to="/terapeutas"   className="hover:text-primary-600 transition-colors">Terapeutas</Link>
               <Link to="/blog"         className="hover:text-primary-600 transition-colors">Blog</Link>
-              <Link to="/pricing"      className="hover:text-primary-600 transition-colors">Planes</Link>
+              <Link to="/pricing"        className="hover:text-primary-600 transition-colors">Planes</Link>
+              <Link to="/evaluaciones"   className="hover:text-primary-600 transition-colors">Evaluaciones</Link>
               <Link to="/regalo" className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-semibold bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white hover:opacity-90 transition-all shadow-sm shadow-violet-200">
                 <Sparkles size={13} strokeWidth={2} />
                 Regalar
@@ -859,6 +863,29 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ── EVALUACIONES — teaser compacto ─────── */}
+        <section className="py-16 px-4 dark:bg-[#0f1117]">
+          <div className="max-w-6xl mx-auto">
+            <div className="rounded-3xl bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 border border-primary-100 dark:border-primary-800 p-8 flex flex-col md:flex-row items-center gap-6">
+              <div className="flex-1 text-center md:text-left">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-accent-100 text-accent-700 text-xs font-semibold mb-3">
+                  <Sparkles size={12} strokeWidth={2} /> Nuevo
+                </span>
+                <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white mb-2">
+                  Evaluaciones psicométricas con reporte IA
+                </h2>
+                <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">
+                  Ansiedad, depresión, burnout, sueño y más. Test gratuito · Reporte completo desde <strong className="text-primary-600">$4.99</strong>.
+                </p>
+              </div>
+              <Link to="/evaluaciones" className="btn-premium btn-primary-premium text-sm px-6 py-3 shrink-0">
+                Ver evaluaciones
+                <ArrowRight size={16} strokeWidth={1.8} />
+              </Link>
+            </div>
+          </div>
+        </section>
+
         {/* ── CTA FINAL ──────────────────────────── */}
         <section className="py-24 px-4 bg-gradient-brand">
           <div className="max-w-3xl mx-auto text-center">
@@ -905,12 +932,13 @@ export default function LandingPage() {
             </div>
 
             <FooterColumn title="Pacientes" links={[
-              { label: 'Cómo funciona',         href: '#como-funciona' },
-              { label: 'Ver terapeutas',         href: '/terapeutas' },
-              { label: 'Blog de salud mental',   href: '/blog' },
-              { label: 'Planes y precios',       href: '/pricing' },
-              { label: 'Regalar sesiones',        href: '/regalo' },
-              { label: 'Recursos de crisis',     href: '/patient/crisis' },
+              { label: 'Cómo funciona',             href: '#como-funciona' },
+              { label: 'Evaluaciones con reporte',  href: '#evaluaciones' },
+              { label: 'Ver terapeutas',            href: '/terapeutas' },
+              { label: 'Blog de salud mental',      href: '/blog' },
+              { label: 'Planes y precios',          href: '/pricing' },
+              { label: 'Regalar sesiones',          href: '/regalo' },
+              { label: 'Recursos de crisis',        href: '/patient/crisis' },
             ]} />
 
             <FooterColumn title="Terapeutas" links={[

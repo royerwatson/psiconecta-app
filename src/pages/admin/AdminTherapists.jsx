@@ -287,7 +287,7 @@ export default function AdminTherapists() {
           {filtered.map(t => (
             <div key={t.id} className={`bg-white rounded-2xl border border-warm-100 p-4 ${!t.is_active ? 'opacity-70' : ''}`}>
               <div className="flex items-start gap-3">
-                <Avatar name={t.profile?.full_name ?? ''} size="md" />
+                <Avatar name={t.profile?.full_name ?? ''} src={t.profile?.avatar_url} size="md" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-start justify-between gap-2 flex-wrap">
                     <div>
@@ -373,7 +373,7 @@ export default function AdminTherapists() {
         {selected && (
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3 bg-warm-50 rounded-xl p-3">
-              <Avatar name={selected.profile?.full_name ?? ''} size="lg" />
+              <Avatar name={selected.profile?.full_name ?? ''} src={selected.profile?.avatar_url} size="lg" />
               <div>
                 <p className="font-bold text-warm-900">{selected.profile?.full_name}</p>
                 <p className="text-sm text-warm-500">{selected.specialty}</p>

@@ -29,6 +29,7 @@ const THERAPIST_PRIMARY = [
 ]
 const THERAPIST_SECONDARY = [
   { to: '/therapist/subscription', icon: Crown,          label: 'Mi plan'       },
+  { to: '/therapist/groups',       icon: Users,          label: 'Mis grupos'    },
   { to: '/therapist/stats',        icon: TrendingUp,     label: 'Estadísticas'  },
   { to: '/therapist/tests',        icon: TestTube,       label: 'Tests'         },
   { to: '/therapist/dsm',          icon: BookOpen,       label: 'DSM-5-TR'   },
@@ -51,6 +52,7 @@ const PATIENT_SECONDARY = [
   { to: '/patient/tasks',    icon: ClipboardList, label: 'Mis Tareas' },
   { to: '/patient/journal',  icon: BookOpen,      label: 'Diario'     },
   { to: '/patient/sessions', icon: Clock,         label: 'Historial'  },
+  { to: '/patient/groups',   icon: Users,         label: 'Grupos'     },
   { to: '/patient/crisis',   icon: Heart,         label: 'Apoyo'      },
 ]
 

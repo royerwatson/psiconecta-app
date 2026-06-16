@@ -396,7 +396,7 @@ export default function MyAppointments() {
             return (
               <Card key={session.id}>
                 <div className="flex items-start gap-3">
-                  <Avatar name={session.therapist?.full_name ?? ''} size="md" />
+                  <Avatar name={session.therapist?.full_name ?? ''} src={session.therapist?.avatar_url} size="md" />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between">
                       <div>
@@ -488,7 +488,7 @@ export default function MyAppointments() {
                         : 'border-warm-200 hover:border-warm-300 bg-white'
                     }`}
                   >
-                    <Avatar name={t.profile?.full_name ?? ''} size="sm" />
+                    <Avatar name={t.profile?.full_name ?? ''} src={t.profile?.avatar_url} size="sm" />
                     <div className="flex-1 min-w-0">
                       <p className="font-semibold text-sm text-warm-900 truncate">{t.profile?.full_name}</p>
                       <p className="text-xs text-warm-500 truncate">{t.specialty}</p>
@@ -651,7 +651,7 @@ export default function MyAppointments() {
         {reviewModal && (
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3 bg-warm-50 rounded-xl p-3">
-              <Avatar name={reviewModal.therapist?.full_name ?? ''} size="md" />
+              <Avatar name={reviewModal.therapist?.full_name ?? ''} src={reviewModal.therapist?.avatar_url} size="md" />
               <p className="font-semibold text-warm-900">{reviewModal.therapist?.full_name}</p>
             </div>
             <div className="text-center">

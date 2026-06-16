@@ -15,7 +15,9 @@ import { useCurrencyContext } from '@/context/CurrencyContext'
 import { Skeleton } from '@/components/ui/Spinner'
 import PayPalButton from '@/components/payment/PayPalButton'
 import toast from 'react-hot-toast'
-import { Star, MessageCircle, Calendar, Search, Zap, Gift } from 'lucide-react'
+import { Star, MessageCircle, Calendar, Search, Zap, Gift, Clock } from 'lucide-react'
+import { addDays, format, getISODay } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 /** Barra de distribución de estrellas (5→1) */
 function RatingBar({ star, count, total }) {
@@ -49,22 +51,73 @@ export default function TherapistProfileView() {
   const [bookStep, setBookStep] = useState('form') // 'form' | 'payment' | 'success'
   const [creditBalance, setCreditBalance] = useState(0)
   const [applyCredit, setApplyCredit] = useState(false)
+  const [availSlots, setAvailSlots] = useState({})
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [loadingSlots, setLoadingSlots] = useState(false)
 
   useEffect(() => { fetchTherapist() }, [therapistId])
 
-  // Cargar balance de crédito del paciente
-  useEffect(() => {
-    if (!user) return
-    supabase.rpc('get_patient_credit_balance', { p_user_id: user.id })
-      .then(({ data }) => setCreditBalance(data ?? 0))
-  }, [user])
+  // Cargar balance de crédito del paciente (query directa, sin RPC)
+  const loadCreditBalance = async () => {
+    if (!user?.id) return
+    const now = new Date().toISOString()
+    const { data, error } = await supabase
+      .from('patient_credits')
+      .select('amount_usd, expires_at')
+      .eq('user_id', user.id)
+    if (error) { console.error('[TherapistProfileView] credit balance error:', error); return }
+    const total = (data ?? [])
+      .filter(r => !r.expires_at || r.expires_at > now)
+      .reduce((sum, r) => sum + parseFloat(r.amount_usd), 0)
+    setCreditBalance(total)
+  }
+  useEffect(() => { loadCreditBalance() }, [user])
 
-  // Si el terapeuta desactiva urgentes y hoy estaba seleccionado, limpiar la fecha
+  // Recargar balance al entrar al paso de pago
   useEffect(() => {
-    if (!therapist?.available_urgent && bookForm.date === todayStr) {
-      setBookForm({ date: '', time: '' })
+    if (bookStep === 'payment') loadCreditBalance()
+  }, [bookStep])
+
+  const loadSlots = async () => {
+    setLoadingSlots(true)
+    setAvailSlots({})
+    setSelectedDate(null)
+    setBookForm({ date: '', time: '' })
+    const today = new Date()
+    const in28  = addDays(today, 28)
+    const [{ data: avail }, { data: blocked }, { data: occupied }] = await Promise.all([
+      supabase.from('therapist_availability').select('*').eq('therapist_id', therapistId),
+      supabase.from('therapist_blocked_dates').select('blocked_date').eq('therapist_id', therapistId)
+        .gte('blocked_date', format(today, 'yyyy-MM-dd')),
+      supabase.from('sessions').select('scheduled_at').eq('therapist_id', therapistId)
+        .in('status', ['scheduled', 'in_progress'])
+        .gte('scheduled_at', today.toISOString())
+        .lte('scheduled_at', in28.toISOString()),
+    ])
+    const blockedSet  = new Set((blocked ?? []).map(b => b.blocked_date))
+    const occupiedSet = new Set((occupied ?? []).map(s => s.scheduled_at.slice(0, 16)))
+    const slots = {}
+    for (let i = 0; i <= 28; i++) {
+      const day     = addDays(today, i)
+      const dateKey = format(day, 'yyyy-MM-dd')
+      if (blockedSet.has(dateKey)) continue
+      const isoDay   = getISODay(day)
+      const dayAvail = (avail ?? []).filter(a => a.day_of_week === isoDay)
+      if (!dayAvail.length) continue
+      const daySlots = []
+      for (const a of dayAvail) {
+        const [sh] = a.start_time.split(':').map(Number)
+        const [eh] = a.end_time.split(':').map(Number)
+        for (let h = sh; h < eh; h++) {
+          const slotKey = `${dateKey}T${String(h).padStart(2,'0')}:00`
+          if (!occupiedSet.has(slotKey)) daySlots.push(`${String(h).padStart(2,'0')}:00`)
+        }
+      }
+      if (daySlots.length) slots[dateKey] = daySlots
     }
-  }, [therapist?.available_urgent])
+    setAvailSlots(slots)
+    setLoadingSlots(false)
+  }
 
   const fetchTherapist = async () => {
     setLoading(true)
@@ -82,53 +135,15 @@ export default function TherapistProfileView() {
     setLoading(false)
   }
 
-  // ── Helpers para citas urgentes ──────────────────────────────────────────
-  const todayStr = new Date().toISOString().split('T')[0]
-
-  // Fecha mínima seleccionable: hoy si acepta urgentes, mañana si no
-  const minDate = (() => {
-    if (therapist?.available_urgent) return todayStr
-    const d = new Date(); d.setDate(d.getDate() + 1)
-    return d.toISOString().split('T')[0]
-  })()
-
-  const isToday = bookForm.date === todayStr
-
-  // Hora mínima cuando el paciente selecciona hoy: ahora + 2h redondeado al siguiente cuarto
-  const getMinTime = () => {
-    const minDt = new Date(Date.now() + 2 * 60 * 60 * 1000)
-    const h = minDt.getHours()
-    const m = minDt.getMinutes()
-    const roundedM = Math.ceil(m / 15) * 15
-    const finalH = roundedM >= 60 ? h + 1 : h
-    const finalM = roundedM >= 60 ? 0 : roundedM
-    if (finalH >= 23) return '23:00'
-    return `${String(finalH).padStart(2,'0')}:${String(finalM).padStart(2,'0')}`
-  }
-
-  // Si ya es tan tarde que no quedan franjas disponibles hoy
-  const noUrgentSlotsToday = isToday && getMinTime() >= '23:00'
-
   const handleBookContinue = () => {
     if (!bookForm.date || !bookForm.time) {
-      toast.error('Selecciona fecha y hora para tu cita')
+      toast.error('Selecciona una fecha y hora disponible')
       return
     }
     const scheduledAt = new Date(`${bookForm.date}T${bookForm.time}`)
     if (scheduledAt <= new Date()) {
       toast.error('La fecha y hora deben ser en el futuro')
       return
-    }
-    if (isToday) {
-      const minT = getMinTime()
-      if (bookForm.time < minT) {
-        toast.error(`La hora mínima para citas urgentes es ${minT} (2 horas desde ahora)`)
-        return
-      }
-      if (bookForm.time > '23:00') {
-        toast.error('Las citas urgentes deben programarse hasta las 23:00')
-        return
-      }
     }
     setBookStep('payment')
   }
@@ -147,6 +162,8 @@ export default function TherapistProfileView() {
     setShowBook(false)
     setBookStep('form')
     setBookForm({ date: '', time: '' })
+    setAvailSlots({})
+    setSelectedDate(null)
   }
 
   // Métricas de reseñas
@@ -202,7 +219,7 @@ export default function TherapistProfileView() {
 
         <div className="relative flex items-start gap-4">
           <div className={`shrink-0 ${(therapist.subscription_plan === 'pro' || therapist.subscription_plan === 'premium') ? 'avatar-ring-pro' : 'ring-2 ring-white/40'} rounded-full`}>
-            <Avatar name={therapist.profile?.full_name ?? ''} size="xl" />
+            <Avatar name={therapist.profile?.full_name ?? ''} src={therapist.profile?.avatar_url} size="xl" />
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-start gap-2 flex-wrap">
@@ -240,7 +257,7 @@ export default function TherapistProfileView() {
             <MessageCircle size={15} strokeWidth={2} /> Escribir
           </button>
           <button
-            onClick={() => setShowBook(true)}
+            onClick={() => { setShowBook(true); loadSlots() }}
             className="flex items-center justify-center gap-2 py-3 rounded-2xl bg-white hover:bg-white/90 text-indigo-700 text-sm font-bold transition-all shadow-lg active:scale-[0.97]"
           >
             <Calendar size={15} strokeWidth={2} /> Agendar
@@ -324,59 +341,61 @@ export default function TherapistProfileView() {
           {bookStep === 'form' && (
             <>
               <div className="flex items-center gap-3 bg-warm-50 rounded-xl p-3">
-                <Avatar name={therapist.profile?.full_name ?? ''} size="md" />
+                <Avatar name={therapist.profile?.full_name ?? ''} src={therapist.profile?.avatar_url} size="md" />
                 <div>
                   <p className="font-semibold text-warm-900">{therapist.profile?.full_name}</p>
                   <p className="text-sm text-warm-500">{therapist.specialty}</p>
                 </div>
               </div>
 
-              {/* Aviso urgente si acepta citas urgentes */}
-              {therapist?.available_urgent && (
-                <div className="flex items-center gap-2 text-xs bg-orange-50 border border-orange-100 rounded-xl px-3 py-2.5 text-orange-700">
-                  <Zap size={13} strokeWidth={1.8} className="shrink-0" />
-                  Este terapeuta acepta citas urgentes para hoy — disponibles desde 2 horas a partir de ahora hasta las 23:00 (+30% precio)
+              {/* ── Selector de slots ── */}
+              {loadingSlots ? (
+                <div className="flex flex-col gap-2">
+                  {[1,2,3].map(i => <div key={i} className="h-10 bg-warm-100 rounded-xl animate-pulse" />)}
                 </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-3">
-                <Input
-                  label="Fecha"
-                  type="date"
-                  value={bookForm.date}
-                  min={minDate}
-                  onChange={(e) => {
-                    const newDate = e.target.value
-                    const newIsToday = newDate === todayStr
-                    // Si cambia a hoy y la hora seleccionada ya no sería válida, limpiarla
-                    if (newIsToday && bookForm.time) {
-                      const minT = getMinTime()
-                      if (bookForm.time < minT || bookForm.time > '23:00') {
-                        setBookForm(f => ({ ...f, date: newDate, time: '' }))
-                        return
-                      }
-                    }
-                    setBookForm(f => ({ ...f, date: newDate }))
-                  }}
-                  required
-                />
-                <Input
-                  label="Hora"
-                  type="time"
-                  value={bookForm.time}
-                  min={isToday ? getMinTime() : undefined}
-                  max={isToday ? '23:00' : undefined}
-                  onChange={(e) => setBookForm(f => ({ ...f, time: e.target.value }))}
-                  required
-                />
-              </div>
-
-              {/* Sin horarios urgentes disponibles hoy */}
-              {noUrgentSlotsToday && (
-                <div className="text-xs bg-amber-50 border border-amber-100 rounded-xl px-3 py-2.5 text-amber-700 flex items-center gap-2">
-                  <Zap size={13} strokeWidth={1.8} className="shrink-0" />
-                  No hay franjas urgentes disponibles para hoy. Selecciona otro día.
+              ) : Object.keys(availSlots).length === 0 ? (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 text-sm text-amber-800 text-center">
+                  Este terapeuta no tiene disponibilidad en los próximos 28 días.
+                  Puedes contactarlo por chat para coordinar.
                 </div>
+              ) : (
+                <>
+                  <div>
+                    <p className="text-xs font-semibold text-warm-600 mb-2">Selecciona una fecha</p>
+                    <div className="grid grid-cols-3 gap-2 max-h-40 overflow-y-auto pr-1">
+                      {Object.keys(availSlots).map(dateKey => (
+                        <button key={dateKey}
+                          onClick={() => { setSelectedDate(dateKey); setBookForm(f => ({ ...f, date: dateKey, time: '' })) }}
+                          className={`py-2.5 px-2 rounded-xl border text-xs font-medium transition-all ${
+                            selectedDate === dateKey
+                              ? 'border-primary-400 bg-primary-50 text-primary-700'
+                              : 'border-warm-200 hover:border-warm-300 text-warm-700'
+                          }`}>
+                          {format(new Date(dateKey + 'T12:00'), "EEE d MMM", { locale: es })}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {selectedDate && availSlots[selectedDate] && (
+                    <div>
+                      <p className="text-xs font-semibold text-warm-600 mb-2">Selecciona una hora</p>
+                      <div className="flex flex-wrap gap-2">
+                        {availSlots[selectedDate].map(time => (
+                          <button key={time}
+                            onClick={() => setBookForm(f => ({ ...f, time }))}
+                            className={`px-4 py-2 rounded-xl border text-sm font-medium transition-all flex items-center gap-1.5 ${
+                              bookForm.time === time
+                                ? 'border-primary-400 bg-primary-50 text-primary-700'
+                                : 'border-warm-200 hover:border-warm-300 text-warm-700'
+                            }`}>
+                            <Clock size={12} strokeWidth={1.8} />{time}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               {bookingPreview && (
@@ -397,7 +416,7 @@ export default function TherapistProfileView() {
                 </div>
               )}
 
-              <Button fullWidth disabled={!bookForm.date || !bookForm.time || noUrgentSlotsToday} onClick={handleBookContinue}>
+              <Button fullWidth disabled={!bookForm.date || !bookForm.time} onClick={handleBookContinue}>
                 Continuar al pago →
               </Button>
               <p className="text-xs text-warm-400 text-center">
@@ -473,30 +492,24 @@ export default function TherapistProfileView() {
                   onError={(msg) => toast.error(msg)}
                 />
               ) : (
-                // Sesión cubierta 100% con crédito — no necesita PayPal
+                // Sesión cubierta 100% con crédito — sin PayPal
                 <button
                   type="button"
                   onClick={async () => {
-                    const { data: { session: authSession } } = await supabase.auth.getSession()
-                    const res = await fetch(
-                      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-paypal-order`,
-                      {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${authSession?.access_token}` },
-                        body: JSON.stringify({
-                          therapistId,
-                          scheduledAt: new Date(`${bookForm.date}T${bookForm.time}`).toISOString(),
-                          isUrgent: bookingPreview.urgent,
-                          priceBase: therapist.price_per_session,
-                          therapistName: therapist.profile?.full_name ?? 'el terapeuta',
-                          creditUsed: creditApplied,
-                          freeWithCredit: true,
-                        }),
-                      }
-                    )
-                    const data = await res.json()
-                    if (!res.ok) { toast.error(data.error ?? 'Error procesando'); return }
-                    handlePaymentSuccess(data.bookingId)
+                    try {
+                      const { data: bookingId, error } = await supabase.rpc('confirm_credit_booking', {
+                        p_therapist_id: therapistId,
+                        p_scheduled_at: new Date(`${bookForm.date}T${bookForm.time}`).toISOString(),
+                        p_is_urgent:    bookingPreview.urgent,
+                        p_price_base:   therapist.price_per_session,
+                        p_credit_used:  creditApplied,
+                      })
+                      if (error) { toast.error(error.message ?? 'Error al confirmar la cita'); return }
+                      handlePaymentSuccess(bookingId)
+                    } catch (err) {
+                      console.warn('[confirm_credit_booking]', err)
+                      toast.error('Error inesperado al confirmar la cita')
+                    }
                   }}
                   className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors"
                 >

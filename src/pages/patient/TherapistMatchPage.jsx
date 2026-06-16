@@ -207,7 +207,7 @@ export default function TherapistMatchPage() {
                 </div>
               )}
               <div className="flex items-start gap-4">
-                <Avatar name={t.profile?.full_name ?? ''} size="lg" />
+                <Avatar name={t.profile?.full_name ?? ''} src={t.profile?.avatar_url} size="lg" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-bold text-warm-900">{t.profile?.full_name}</p>

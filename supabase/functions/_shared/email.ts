@@ -621,6 +621,114 @@ export function newMessageEmail({
   `)
 }
 
+export function assessmentReportEmail({
+  patientName,
+  instrumentFull,
+  instrument,
+  totalScore,
+  maxScore,
+  severityLabel,
+  severityHex,
+  dimensionScores,
+  interpretation,
+  normativeContext,
+  recommendations,
+  reportUrl,
+}: {
+  patientName: string
+  instrumentFull: string
+  instrument: string
+  totalScore: number
+  maxScore: number
+  severityLabel: string
+  severityHex: string
+  dimensionScores: Array<{ name: string; pct: number }>
+  interpretation: string
+  normativeContext: string
+  recommendations: Array<{ title: string; description: string }>
+  reportUrl: string
+}) {
+  const dimBars = dimensionScores.map(d => `
+    <tr>
+      <td style="padding:6px 0;">
+        <p style="margin:0 0 4px;font-size:13px;color:#475569;font-weight:600;">${d.name}</p>
+        <table width="100%" cellpadding="0" cellspacing="0">
+          <tr>
+            <td width="${d.pct}%" style="background:${severityHex};height:8px;border-radius:4px;"></td>
+            <td style="padding-left:8px;font-size:12px;font-weight:700;color:#1e293b;white-space:nowrap;">${d.pct}%</td>
+          </tr>
+        </table>
+      </td>
+    </tr>`).join('')
+
+  const recCards = recommendations.map((r, i) => `
+    <tr>
+      <td style="padding:10px 0;">
+        <table width="100%" cellpadding="0" cellspacing="0" style="background:#f8fafc;border-radius:12px;padding:14px 18px;">
+          <tr>
+            <td style="padding-right:14px;font-size:20px;width:36px;vertical-align:top;">
+              ${['✅', '🔍', '🗣️', '📅'][i] ?? '💡'}
+            </td>
+            <td>
+              <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#1e293b;">${r.title}</p>
+              <p style="margin:0;font-size:13px;color:#64748b;line-height:1.6;">${r.description}</p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`).join('')
+
+  return baseLayout(`
+    <p style="margin:0 0 4px;font-size:22px;font-weight:800;color:#1e293b;">Tu reporte está listo, ${patientName} 📊</p>
+    <p style="margin:0 0 28px;font-size:15px;color:#64748b;">
+      Aquí tienes el resultado completo de tu evaluación con ${instrumentFull}.
+    </p>
+
+    <!-- Score card -->
+    <div style="background:linear-gradient(135deg,#4f46e5 0%,#7e22ce 100%);border-radius:18px;padding:24px 28px;margin-bottom:24px;text-align:center;">
+      <p style="margin:0 0 4px;font-size:12px;color:#c4b5fd;font-weight:600;letter-spacing:1px;text-transform:uppercase;">${instrument}</p>
+      <p style="margin:0;font-size:48px;font-weight:900;color:#ffffff;line-height:1;">${totalScore}<span style="font-size:22px;font-weight:600;color:#a78bfa;"> / ${maxScore}</span></p>
+      <div style="display:inline-block;background:${severityHex};color:#ffffff;font-size:14px;font-weight:700;padding:6px 20px;border-radius:99px;margin-top:12px;">${severityLabel}</div>
+    </div>
+
+    <!-- Dimensiones -->
+    ${dimensionScores.length > 0 ? `
+    <div style="background:#f8fafc;border-radius:14px;padding:20px 24px;margin-bottom:24px;">
+      <p style="margin:0 0 14px;font-size:13px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Desglose por dimensión</p>
+      <table width="100%" cellpadding="0" cellspacing="0">${dimBars}</table>
+    </div>` : ''}
+
+    <!-- Interpretación -->
+    <div style="margin-bottom:24px;">
+      <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Interpretación</p>
+      <p style="margin:0;font-size:14px;color:#334155;line-height:1.75;">${interpretation.replace(/\n\n/g, '</p><p style="margin:12px 0 0;font-size:14px;color:#334155;line-height:1.75;">')}</p>
+    </div>
+
+    <!-- Contexto normativo -->
+    <div style="background:#eef2ff;border-left:4px solid #4f46e5;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
+      <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.5px;">Contexto normativo</p>
+      <p style="margin:0;font-size:14px;color:#334155;line-height:1.7;">${normativeContext}</p>
+    </div>
+
+    <!-- Recomendaciones -->
+    <div style="margin-bottom:28px;">
+      <p style="margin:0 0 10px;font-size:13px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;">Recomendaciones</p>
+      <table width="100%" cellpadding="0" cellspacing="0">${recCards}</table>
+    </div>
+
+    <div style="text-align:center;margin-bottom:16px;">
+      ${btn('Ver reporte completo en la app', reportUrl)}
+    </div>
+    <div style="text-align:center;">
+      ${btn('Buscar terapeuta', `${APP_URL}/patient/find`, '#059669')}
+    </div>
+
+    <p style="margin:24px 0 0;font-size:12px;color:#94a3b8;text-align:center;">
+      Este reporte es confidencial · Guárdalo para compartirlo con tu psicólogo
+    </p>
+  `)
+}
+
 export function giftCardEmail({
   recipientName,
   senderName,

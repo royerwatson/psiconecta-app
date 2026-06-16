@@ -244,7 +244,7 @@ export default function PatientDashboard() {
 
           <div className="flex items-center gap-3 relative">
             <div className="relative shrink-0">
-              <Avatar name={nextSession.therapist?.full_name ?? ''} size="md"
+              <Avatar name={nextSession.therapist?.full_name ?? ''} src={nextSession.therapist?.avatar_url} size="md"
                 className="ring-2 ring-white/30" />
               <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-green-400 rounded-full border-2 border-primary-700" />
             </div>

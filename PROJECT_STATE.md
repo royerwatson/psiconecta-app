@@ -1,5 +1,289 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-14 (v52 — Fix FindTherapist + RLS profiles restaurado)*
+*Última actualización: 2026-06-15 (v62 — Flujo completo de evaluaciones psicométricas con reporte)*
+
+---
+
+## ⚡ Sesión 2026-06-15 (v62) — Evaluaciones psicométricas end-to-end
+
+### Flujo implementado
+
+```
+/evaluaciones (landing) 
+  → /evaluaciones/elegir (selección de área)
+  → /evaluaciones/test/:slug (test pregunta a pregunta, sin cuenta)
+  → /evaluaciones/resultado/:slug (puntuación visible + secciones bloqueadas + paywall)
+  → /register o /login (si no autenticado)
+  → PayPal (pago único)
+  → /patient/evaluaciones/:sessionId (reporte completo)
+```
+
+### Instrumentos disponibles
+| Área | Instrumento | Items | Precio |
+|------|-------------|-------|--------|
+| Ansiedad & Estrés | GAD-7 | 7 | $4.99 |
+| Ánimo & Depresión | PHQ-9 | 9 | $4.99 |
+| Calidad del Sueño | ISI | 7 | $4.99 |
+| Trabajo & Burnout | MBI-GS | 10 | $6.99 |
+| Relaciones & Pareja | — | — | Próximamente |
+| Rasgos de Personalidad | — | — | Próximamente |
+
+### Reporte completo (6 secciones)
+1. **Gauge animado** — Score/maxScore con color por severidad
+2. **Desglose dimensional** — Barras por dimensión clínica (animadas)
+3. **Interpretación** — Claude analiza el patrón de respuestas ítem por ítem, no solo el puntaje
+4. **Contexto normativo** — Ubica al usuario en la población sin alarmar ni minimizar
+5. **Recomendaciones** — 4 acciones concretas y específicas (nunca genéricas)
+6. **Próximos pasos** — CTA a terapeuta + descarga PDF
+
+### Archivos creados
+| Archivo | Tipo | Descripción |
+|---------|------|-------------|
+| `src/data/assessmentTests.js` | NEW | 4 instrumentos con preguntas, escala, dimensiones, bandas de severidad + helpers |
+| `supabase/migration_assessment_sessions.sql` | NEW | Tablas `assessment_sessions` + `assessment_reports` con RLS |
+| `supabase/functions/create-assessment-order/index.ts` | NEW | Crea assessment_session (paid:false) + orden PayPal |
+| `supabase/functions/capture-assessment-payment/index.ts` | NEW | Captura PayPal + llama Claude sonnet-4-6 + guarda reporte |
+| `src/pages/public/EvaluacionesSelectPage.jsx` | NEW | `/evaluaciones/elegir` — grid de 6 áreas |
+| `src/pages/public/EvaluacionesTestPage.jsx` | NEW | `/evaluaciones/test/:slug` — test una pregunta a la vez, guarda en localStorage |
+| `src/pages/public/EvaluacionesResultadoPage.jsx` | NEW | `/evaluaciones/resultado/:slug` — score visible + 4 secciones bloqueadas + PayPal |
+| `src/pages/patient/AssessmentReportPage.jsx` | NEW | `/patient/evaluaciones/:sessionId` — reporte completo + gauge + PDF |
+| `src/App.jsx` | MODIFIED | 5 rutas nuevas + lazy imports |
+| `src/pages/public/EvaluacionesPage.jsx` | MODIFIED | CTAs apuntan a `/evaluaciones/elegir` |
+
+### Detalles técnicos
+- **Sin cuenta para el test**: respuestas guardadas en `localStorage` (`psiconecta_test_${slug}`)
+- **Auth requerido para pagar**: si no autenticado → `/register?redirect=/evaluaciones/resultado/:slug`
+- **Edge Function Claude**: usa `claude-sonnet-4-6`, prompt incluye respuestas ítem por ítem + dimensiones, retorna JSON con `interpretation`, `normativeContext`, `recommendations[]`
+- **Polling**: si el reporte no está listo al abrir la página, hace polling cada 3s hasta 20 intentos
+- **PDF**: jsPDF cargado dinámicamente desde CDN (sin dependencia en bundle)
+- **Idempotencia**: `capture-assessment-payment` verifica `alreadyPaid` antes de reaprocesar
+
+### Pasos manuales ejecutados
+- `supabase/migration_assessment_sessions.sql` ✅ 2026-06-15
+- `supabase functions deploy create-assessment-order` ✅ 2026-06-15
+- `supabase functions deploy capture-assessment-payment` ✅ 2026-06-15
+- `npm run build && vercel --prod` ✅ 2026-06-15
+
+---
+
+## ⚡ Sesión 2026-06-15 (v61 — Página /evaluaciones + copy premium)*
+
+---
+
+## ⚡ Sesión 2026-06-15 (v61) — Página /evaluaciones
+
+### Cambios
+
+1. **EvaluacionesPage.jsx** (NEW) — Página pública en `/evaluaciones` con flujo completo de evaluaciones psicométricas:
+   - Navbar con logo Psiconecta
+   - Hero: título, descripción, CTA y mockup de reporte bloqueado (puntuación visible + desglose dimensional con blur + lock overlay)
+   - Cómo funciona: 5 pasos (gratis / desde $4.99 / conectar terapeuta)
+   - Áreas de evaluación: 6 cards (Ansiedad, Ánimo, Sueño, Burnout, Relaciones, Personalidad) con instrumentos y precios
+   - Paquetes temáticos: 4 paquetes con ahorro de 28-40%
+   - Comparación de precio vs. sesión presencial
+   - Garantías: instrumentos validados, lectura profunda, reporte descargable
+   - CTA final + footer mínimo
+
+2. **App.jsx** (MODIFIED) — Ruta lazy `/evaluaciones` → `EvaluacionesPage`
+
+3. **LandingPage.jsx** (MODIFIED):
+   - Nav: link "Evaluaciones" a la izquierda de "Regalar"
+   - Sección evaluaciones reemplazada por teaser card compacto con link a `/evaluaciones`
+   - Footer: link "Evaluaciones con reporte" bajo Pacientes
+   - Eliminado bloque JSX huérfano que causaba build error (`Expected "}" but found "className"` en línea 903)
+
+4. **Copy ajustado** — Lenguaje más afable y premium (estilo Apple):
+   - Eliminado: "IA", "por IA", "Sin suscripción", "El momento de mayor receptividad."
+   - "Desbloquea tu reporte IA" → "Tu reporte completo"
+   - "Interpretación por IA" → "Lectura profunda"
+   - "Reporte de evaluación · IA" → "Reporte de evaluación"
+   - Footer hero: "Acceso inmediato · Reporte en minutos · Pago único"
+   - Footer CTA: "Reporte desde $4.99 · Acceso inmediato · Pago único"
+
+### Archivos
+- `src/pages/public/EvaluacionesPage.jsx` (NEW)
+- `src/App.jsx`
+- `src/pages/public/LandingPage.jsx`
+
+### Deploy
+- Pendiente: `npm run build && vercel --prod`
+
+---
+
+## ⚡ Sesión 2026-06-15 (v60) — Fix avatares grupales + líneas de crisis por país
+
+### Cambios
+
+1. **Avatar del terapeuta en sesiones grupales** — El query de "Mis inscripciones" en `GroupSessions.jsx` no incluía `avatar_url`, por lo que la foto no aparecía en esa vista. Fix: añadido al select de `group_session_participants`. ✅
+
+2. **Línea de crisis República Dominicana** — Agregada `809-200-1400` (Salud Mental RD, 24/7) a `CrisisPage.jsx`. ✅
+
+3. **Filtrado de líneas por país** — La página de crisis ahora lee `profiles.country` (código ISO guardado en el registro) y muestra solo la línea local del paciente + Internacional. Si el país no tiene línea en el catálogo, muestra todas. ✅
+
+### Archivos
+- `src/pages/patient/GroupSessions.jsx`
+- `src/pages/patient/CrisisPage.jsx`
+
+### Deploy
+- Vercel producción: `https://psiconecta.app` ✅
+
+---
+
+## ⚡ Sesión 2026-06-15 (v59) — Sistema de pagos para sesiones grupales
+
+### Implementado
+
+**Comisiones y estructura de pago:**
+- Plan gratuito: 25% Psiconecta / 75% terapeuta (`group_commission_rate = 0.25`)
+- Plan Pro/Premium: 15% Psiconecta / 85% terapeuta (`group_commission_rate = 0.15`)
+- Trigger `sync_commission_rate()` actualizado para mantener ambas columnas en sync al cambiar de plan
+
+**SQL pendiente de aplicar:** `supabase/migration_group_session_payments.sql`
+- `ALTER TABLE therapist_profiles ADD COLUMN group_commission_rate`
+- `ALTER TABLE group_session_participants ADD COLUMN paid, amount_paid, platform_fee, therapist_net, payment_intent_id, paid_at`
+- Vista `therapist_pending_earnings` actualizada para incluir ingresos de sesiones grupales
+- Policy `gsp_admin` para que admin gestione participantes
+
+**Edge Functions nuevas (pendientes de deploy):**
+- `supabase/functions/create-group-order/index.ts` — Crea orden PayPal para sesión grupal, calcula comisiones, verifica cupo
+- `supabase/functions/capture-group-payment/index.ts` — Captura pago PayPal e inserta en `group_session_participants` con `paid=true` y campos de comisión
+
+**Frontend:**
+- `src/pages/patient/GroupSessions.jsx` — Flujo completo: sesiones gratuitas usan insert directo; sesiones con precio abren modal `PaymentModal` con `GroupPayPalButton` inline que llama a `create-group-order` → `capture-group-payment`. Botón de inscripción muestra el precio si aplica.
+
+### Pasos para activar en producción
+```bash
+# 1. Aplicar SQL en Supabase SQL Editor
+#    → supabase/migration_group_session_payments.sql
+
+# 2. Deploy de Edge Functions
+supabase functions deploy create-group-order
+supabase functions deploy capture-group-payment
+```
+
+### Archivos
+- `supabase/migration_group_session_payments.sql`
+- `supabase/functions/create-group-order/index.ts`
+- `supabase/functions/capture-group-payment/index.ts`
+- `src/pages/patient/GroupSessions.jsx`
+
+---
+
+## ⚡ Sesión 2026-06-15 (v58) — Fix sesiones grupales desde admin
+
+### Problemas resueltos
+
+1. **RLS bloqueaba al admin** — `gs_all` solo permitía operaciones cuando `auth.uid() = therapist_id`, bloqueando al admin que inserta con el UUID de otro terapeuta. Fix: `migration_fix_group_sessions_rls.sql` añade policy `gs_admin` con acceso total para `role = 'admin'`. ✅
+
+2. **INSERT fallaba con HTTP 400** — El código usaba `topic` y `price_per_person` pero la tabla real tiene `title NOT NULL` y `price`. El `title` quedaba NULL y violaba el constraint. Fix: renombrados todos los campos en `AdminGroupSessions.jsx` (`topic→title`, `price_per_person→price`). ✅
+
+### Archivos
+- `supabase/migration_fix_group_sessions_rls.sql`
+- `src/pages/admin/AdminGroupSessions.jsx`
+
+---
+
+## ⚡ Sesión 2026-06-15 (v57) — Fix avatares de terapeuta
+
+### Problema resuelto
+
+**Fotos de perfil de terapeutas no se mostraban en ninguna pantalla** — El componente `<Avatar>` recibía `name` pero no `src`, así que siempre mostraba iniciales. El `avatar_url` sí estaba en los datos (la query lo seleccionaba correctamente), pero simplemente no se pasaba al componente.
+
+Archivos corregidos (se añadió `src={...avatar_url}` en cada `<Avatar>` de terapeuta/paciente):
+
+- `FindTherapist.jsx` — lista de terapeutas + modal de booking
+- `TherapistProfileView.jsx` — perfil público del terapeuta (header + booking)
+- `TherapistMatchPage.jsx` — resultados del match
+- `MyAppointments.jsx` — citas activas, cambio de terapeuta, modal de reseña
+- `SessionHistoryPage.jsx` — historial de sesiones
+- `PatientDashboard.jsx` — próxima sesión
+- `AdminTherapists.jsx` — lista y detalle de terapeuta
+- `AdminSubscriptions.jsx` — lista de suscripciones
+- `AdminStats.jsx` — ranking de terapeutas
+- `TherapistDashboard.jsx` — alertas IA + sesiones de pacientes
+- `TherapistSchedule.jsx` — detalle de sesión en agenda
+
+---
+
+## ⚡ Sesión 2026-06-15 (v56) — Fix RLS therapist_credentials
+
+### Problema resuelto
+
+**Terapeutas no podían subir documentos** — El storage upload al bucket `credentials` funcionaba, pero el INSERT en `therapist_credentials` fallaba con "new row violates row-level security policy". La política `tc_insert` no existía correctamente en producción. Fix: `supabase/migration_fix_tc_rls.sql` que hace DROP + recreación limpia de las 3 políticas (`tc_select`, `tc_insert`, `tc_update`). El `tc_select` ahora también permite que admins vean todos los documentos. ✅
+
+**Verificado:** Upload funcional en todas las etapas (título, exequátur, colegio). Las opciones de aprobar/rechazar son visibles en el admin. Flujo de revisión pendiente de prueba completa.
+
+### Archivos
+- `supabase/migration_fix_tc_rls.sql` — ejecutar en Supabase SQL Editor
+
+---
+
+## ⚡ Sesión 2026-06-15 (v55) — Crédito de regalo funcional end-to-end
+
+### Problemas resueltos
+
+1. **Botón "Confirmar cita sin pago adicional" no hacía nada** — El botón llamaba a `create-paypal-order` con `freeWithCredit: true`, pero esa función ignora ese flag y siempre crea una orden PayPal. El error se perdía en el catch sin feedback. Fix: función PostgreSQL SECURITY DEFINER `confirm_credit_booking` que en una sola transacción: crea la sesión como `scheduled`, descuenta `patient_credits` (elimina filas agotadas, actualiza parciales). El botón ahora usa `supabase.rpc('confirm_credit_booking', ...)` — sin CORS, sin Edge Function, atómica. ✅
+
+2. **Crédito no visible en FindTherapist** — Solo aparecía en TherapistProfileView. Fix: añadidos `creditBalance`, `applyCredit`, `loadCreditBalance` y banner de crédito idéntico al de TherapistProfileView. Ambas rutas de booking (FindTherapist y TherapistProfileView) muestran y aplican el crédito de regalo. ✅
+
+3. **Flujo completo verificado** — Cita con Dra. Laura Martínez agendada el 17/06/2026 a las 15:00, cubierta con crédito de regalo, pantalla de éxito mostrada, archivo `.ics` descargado para calendario. ✅
+
+### Archivos clave
+- `supabase/migration_confirm_credit_booking.sql` — función SQL a ejecutar en Supabase
+- `supabase/functions/confirm-credit-booking/index.ts` — Edge Function (ya no usada, reemplazada por RPC)
+- `src/pages/patient/TherapistProfileView.jsx` — botón verde usa `supabase.rpc`
+- `src/pages/patient/FindTherapist.jsx` — crédito añadido al paso de pago
+
+---
+
+## ⚡ Sesión 2026-06-15 (v54) — TherapistProfileView: slot picker + credit balance
+
+### Cambios
+
+1. **Selector de horarios por slots en TherapistProfileView** — Reemplazados los `<input type="date">` / `<input type="time">` nativos por el mismo grid de fechas y horas disponibles que usa `FindTherapist`. Al hacer click en "Agendar" se llama `loadSlots()` que consulta `therapist_availability`, `therapist_blocked_dates` y `sessions` para generar solo las franjas libres en los próximos 28 días.
+   - Nuevos imports: `addDays`, `format`, `getISODay` de `date-fns`; `es` de `date-fns/locale`; `Clock` de lucide-react
+   - Nuevo estado: `availSlots`, `selectedDate`, `loadingSlots`
+   - Eliminados helpers obsoletos: `todayStr`, `minDate`, `isToday`, `getMinTime`, `noUrgentSlotsToday`
+   - La preview de precio urgente (+30% si < 24h) se mantiene igual mediante `bookingPreview`
+
+2. **Credit balance en TherapistProfileView** — Reemplazado el RPC `get_patient_credit_balance` (que daba error 400 en producción) por query directa a `patient_credits`. El banner de crédito en el paso de pago funciona correctamente ✅
+   - Verificado: crédito $100.00 USD aparece, se aplica automáticamente, total muestra "¡Cubierto con crédito!" y aparece botón "Confirmar cita sin pago adicional →" ✅
+
+---
+
+## ⚡ Sesión 2026-06-14 (v53) — Gift Cards: debugging y fix completo
+
+### Problemas resueltos
+
+1. **Auth 401 en Edge Functions** — `create-gift-order` y `capture-gift-payment` son endpoints públicos pero Supabase requería encabezado `Authorization`. Fix: GiftPage.jsx añade `Bearer ${VITE_SUPABASE_ANON_KEY}` + `apikey` en ambas llamadas fetch.
+
+2. **Redirect a sandbox.paypal.com** — `payment_source.paypal` con `return_url`/`cancel_url` fuerza flujo redirect, incompatible con el popup de `window.paypal.Buttons()`. Fix: cambiado a `application_context` en `create-gift-order/index.ts`.
+
+3. **`INVALID_RESOURCE_ID`** — Orden creada con credenciales de producción PayPal (`PAYPAL_BASE_URL=https://api-m.paypal.com`) pero el SDK del frontend usaba Client ID de sandbox (`VITE_PAYPAL_CLIENT_ID=AZL5qAfBdit248...`). Fix: actualizar secrets Supabase a credenciales sandbox:
+   - `PAYPAL_BASE_URL` → `https://api-m.sandbox.paypal.com`
+   - `PAYPAL_CLIENT_ID` → mismo que `VITE_PAYPAL_CLIENT_ID`
+   - `PAYPAL_CLIENT_SECRET` → secret de la app sandbox
+
+4. **"No se pudo obtener token de PayPal"** — `PAYPAL_CLIENT_SECRET` incorrecto para el Client ID sandbox. Fix: obtener el secret correcto desde developer.paypal.com → Apps → app sandbox.
+
+5. **Deploy Edge Functions** — `capture-gift-payment` y `redeem-gift-card` no estaban desplegadas. Fix: `npx supabase functions deploy capture-gift-payment` + `redeem-gift-card`.
+
+6. **`maxLength={14}` en input de canje** — el código `PSICO-XXXX-XXXX` tiene 15 caracteres. El campo bloqueaba la última letra. Fix: `maxLength={14}` → `maxLength={15}` en `PatientProfile.jsx`.
+
+### Flujo verificado ✅ end-to-end
+- `/regalo` → formulario → PayPal popup → captura → "¡Listo, gracias!" con código `PSICO-XRAU-8ULW` ✅
+- Perfil paciente → ingresar código → "Canjear" → crédito acreditado ✅
+
+### Archivos modificados (v53)
+| Archivo | Cambio |
+|---------|--------|
+| `src/pages/public/GiftPage.jsx` | Auth headers (anon key) en fetch `createOrder` + `onApprove` |
+| `supabase/functions/create-gift-order/index.ts` | `payment_source.paypal` → `application_context` |
+| `src/pages/patient/PatientProfile.jsx` | `maxLength={14}` → `maxLength={15}` |
+
+### Acciones manuales ejecutadas
+- Secrets Supabase: `PAYPAL_BASE_URL`, `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET` → sandbox ✅
+- Deploy: `capture-gift-payment`, `redeem-gift-card`, `create-gift-order` ✅
+- Build + deploy Vercel: `npm run build && npx vercel --prod` ✅
 
 ---
 

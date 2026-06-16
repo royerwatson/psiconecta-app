@@ -418,7 +418,7 @@ export default function TherapistSchedule() {
         {selectedSession && (
           <div className="flex flex-col gap-4">
             <div className="flex items-center gap-3 bg-warm-50 rounded-xl p-3">
-              <Avatar name={getDisplayName(selectedSession.patient)} size="lg" />
+              <Avatar name={getDisplayName(selectedSession.patient)} src={selectedSession.patient?.avatar_url} size="lg" />
               <div>
                 <p className="font-semibold text-warm-900">{getDisplayName(selectedSession.patient)}</p>
                 <p className="text-sm text-warm-500">

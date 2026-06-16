@@ -1,9 +1,55 @@
-import { Suspense, lazy, useEffect } from 'react'
+import { Suspense, lazy, useEffect, Component } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { useAuthStore } from '@/store/authStore'
 import { usePageTracking } from '@/hooks/usePageTracking'
 import { LoadingScreen } from '@/components/ui/Spinner'
+
+// ── ErrorBoundary — captura ChunkLoadError tras nuevos deploys ────────────
+class ChunkErrorBoundary extends Component {
+  constructor(props) {
+    super(props)
+    this.state = { hasError: false, reloaded: false }
+  }
+
+  static getDerivedStateFromError(error) {
+    const isChunkError =
+      error?.name === 'ChunkLoadError' ||
+      /loading chunk/i.test(error?.message ?? '') ||
+      /failed to fetch dynamically imported module/i.test(error?.message ?? '') ||
+      /importing a module script failed/i.test(error?.message ?? '')
+    return { hasError: true, isChunkError }
+  }
+
+  componentDidCatch(error) {
+    console.warn('[ChunkErrorBoundary]', error?.message)
+  }
+
+  componentDidUpdate(_, prevState) {
+    // Si el error es de chunk y aún no hemos recargado, recargar una vez
+    if (this.state.hasError && this.state.isChunkError && !this.state.reloaded) {
+      this.setState({ reloaded: true })
+      window.location.reload()
+    }
+  }
+
+  render() {
+    if (this.state.hasError && !this.state.isChunkError) {
+      return (
+        <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-6">
+          <p className="text-gray-600">Algo salió mal al cargar esta página.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-teal-600 text-white rounded-lg text-sm"
+          >
+            Recargar
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 
 // Layout y guards — siempre presentes, carga estática
 import Layout        from '@/components/layout/Layout'
@@ -55,6 +101,7 @@ const PeerConsultationPage     = lazy(() => import('@/pages/therapist/PeerConsul
 const TherapeuticProtocolsPage = lazy(() => import('@/pages/therapist/TherapeuticProtocolsPage'))
 const StatsPage                = lazy(() => import('@/pages/therapist/StatsPage'))
 const SubscriptionPage         = lazy(() => import('@/pages/therapist/SubscriptionPage'))
+const TherapistGroupSessions   = lazy(() => import('@/pages/therapist/TherapistGroupSessions'))
 
 // Paciente
 const PatientDashboard       = lazy(() => import('@/pages/patient/PatientDashboard'))
@@ -93,7 +140,12 @@ const PrivacyPage            = lazy(() => import('@/pages/public/PrivacyPage'))
 const RefundPage             = lazy(() => import('@/pages/public/RefundPage'))
 const NotFoundPage           = lazy(() => import('@/pages/public/NotFoundPage'))
 const GiftPage               = lazy(() => import('@/pages/public/GiftPage'))
-const RedeemGiftPage         = lazy(() => import('@/pages/patient/RedeemGiftPage'))
+const EvaluacionesPage          = lazy(() => import('@/pages/public/EvaluacionesPage'))
+const EvaluacionesSelectPage    = lazy(() => import('@/pages/public/EvaluacionesSelectPage'))
+const EvaluacionesTestPage      = lazy(() => import('@/pages/public/EvaluacionesTestPage'))
+const EvaluacionesResultadoPage = lazy(() => import('@/pages/public/EvaluacionesResultadoPage'))
+const AssessmentReportPage      = lazy(() => import('@/pages/patient/AssessmentReportPage'))
+const RedeemGiftPage            = lazy(() => import('@/pages/patient/RedeemGiftPage'))
 const AppEntry               = lazy(() => import('@/pages/shared/AppEntry'))
 
 // ── Fallback de carga ─────────────────────────────────────────────────────
@@ -132,6 +184,7 @@ export default function App() {
         }}
       />
 
+      <ChunkErrorBoundary>
       <Suspense fallback={<PageLoader />}>
         <Routes>
           {/* Páginas públicas */}
@@ -144,7 +197,11 @@ export default function App() {
           <Route path="/reembolsos"      element={<RefundPage />} />
           <Route path="/pricing"         element={<PricingPage />} />
           <Route path="/regalo"          element={<GiftPage />} />
-          <Route path="/canjear"         element={<RedeemGiftPage />} />
+          <Route path="/evaluaciones"               element={<EvaluacionesPage />} />
+          <Route path="/evaluaciones/elegir"        element={<EvaluacionesSelectPage />} />
+          <Route path="/evaluaciones/test/:slug"    element={<EvaluacionesTestPage />} />
+          <Route path="/evaluaciones/resultado/:slug" element={<EvaluacionesResultadoPage />} />
+          <Route path="/canjear"                    element={<RedeemGiftPage />} />
           <Route path="/auth/callback"   element={<AuthCallback />} />
 
           {/* Auth — pacientes y terapeutas */}
@@ -199,6 +256,9 @@ export default function App() {
             } />
             <Route path="/therapist/subscription" element={
               <TherapistRoute><SubscriptionPage /></TherapistRoute>
+            } />
+            <Route path="/therapist/groups" element={
+              <TherapistRoute><TherapistGroupSessions /></TherapistRoute>
             } />
             <Route path="/therapist/stats" element={
               <TherapistRoute><ProGate featureName="las estadísticas avanzadas"><StatsPage /></ProGate></TherapistRoute>
@@ -277,6 +337,9 @@ export default function App() {
             <Route path="/patient/results/:sessionId" element={
               <ClientRoute><PatientResultDetailPage /></ClientRoute>
             } />
+            <Route path="/patient/evaluaciones/:sessionId" element={
+              <ClientRoute><AssessmentReportPage /></ClientRoute>
+            } />
 
           </Route>
 
@@ -304,6 +367,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
+      </ChunkErrorBoundary>
     </BrowserRouter>
   )
 }

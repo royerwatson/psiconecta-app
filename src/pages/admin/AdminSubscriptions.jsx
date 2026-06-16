@@ -154,7 +154,7 @@ export default function AdminSubscriptions() {
             const PlanIcon = plan.Icon
             return (
               <div key={t.user_id} className="bg-white border border-warm-100 rounded-2xl p-4 flex items-center gap-4 flex-wrap">
-                <Avatar name={t.profile?.full_name ?? ''} size="md" />
+                <Avatar name={t.profile?.full_name ?? ''} src={t.profile?.avatar_url} size="md" />
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <p className="font-semibold text-warm-900 text-sm">{t.profile?.full_name}</p>

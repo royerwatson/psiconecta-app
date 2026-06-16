@@ -88,7 +88,7 @@ function SessionCard({ session, onSaveFeedback }) {
         onClick={() => setExpanded(v => !v)}
         className="w-full text-left px-5 py-4 flex items-start gap-4 hover:bg-warm-50 transition-colors"
       >
-        <Avatar name={session.therapist?.full_name ?? ''} size="md" className="shrink-0 mt-0.5" />
+        <Avatar name={session.therapist?.full_name ?? ''} src={session.therapist?.avatar_url} size="md" className="shrink-0 mt-0.5" />
 
         <div className="flex-1 min-w-0">
           <p className="font-semibold text-warm-900 text-sm">{session.therapist?.full_name ?? 'Terapeuta'}</p>
