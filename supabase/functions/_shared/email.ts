@@ -44,11 +44,35 @@ function baseLayout(content: string) {
       <table width="560" cellpadding="0" cellspacing="0" style="background:#ffffff;border-radius:20px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08);">
         <!-- Header -->
         <tr>
-          <td style="background:linear-gradient(135deg,#4f46e5 0%,#7e22ce 100%);padding:32px 40px;text-align:center;">
-            <p style="margin:0;font-size:28px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;">
-              Psico<span style="color:#a78bfa;">necta</span>
-            </p>
-            <p style="margin:6px 0 0;font-size:13px;color:#c4b5fd;">Tu espacio de bienestar mental</p>
+          <td style="background:linear-gradient(135deg,#4f46e5 0%,#7e22ce 100%);padding:28px 40px 24px;">
+            <!-- Logo + wordmark -->
+            <table cellpadding="0" cellspacing="0" width="100%">
+              <tr>
+                <td align="center">
+                  <table cellpadding="0" cellspacing="0">
+                    <tr>
+                      <!-- Ícono SVG -->
+                      <td style="vertical-align:middle;padding-right:12px;">
+                        <div style="width:44px;height:44px;background:rgba(255,255,255,0.15);border-radius:12px;display:flex;align-items:center;justify-content:center;">
+                          <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:8px auto;">
+                            <path d="M13 5C3 10 3 22 13 27" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                            <path d="M19 5C29 10 29 22 19 27" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                            <circle cx="16" cy="16" r="4" fill="white"/>
+                          </svg>
+                        </div>
+                      </td>
+                      <!-- Wordmark -->
+                      <td style="vertical-align:middle;">
+                        <p style="margin:0;font-size:26px;font-weight:800;color:#ffffff;letter-spacing:-0.5px;line-height:1;">
+                          Psico<span style="color:#a78bfa;">necta</span>
+                        </p>
+                        <p style="margin:3px 0 0;font-size:12px;color:#c4b5fd;letter-spacing:0.2px;">Tu espacio de bienestar mental</p>
+                      </td>
+                    </tr>
+                  </table>
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
         <!-- Content -->

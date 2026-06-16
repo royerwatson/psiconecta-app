@@ -1,5 +1,40 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-15 (v64 — Prompt clínico + PDF adjunto en email + fix descarga PDF en app)*
+*Última actualización: 2026-06-16 (v66 — Logo SVG real en correos y PDFs)*
+
+---
+
+## ⚡ Sesión 2026-06-16 (v66) — Logo SVG real en correos y PDFs
+
+**Problema:** Los paths SVG del logo eran una aproximación simple (arcos poco curvados, trazo fino). El logo real tiene arcos más abiertos y pronunciados, trazo más grueso y círculo central mayor.
+
+**Corrección en los 3 lugares:**
+
+| Archivo | Cambio |
+|---|---|
+| `_shared/email.ts` | SVG inline: paths `M13 5C3 10 3 22 13 27` / `M19 5C29 10 29 22 19 27`, stroke-width 3, r=4 |
+| `capture-assessment-payment/index.ts` | pdf-lib: paths y-flipped `M13 27C3 22 3 10 13 5` / `M19 27C29 22 29 10 19 5`, borderWidth 3×scale, circle size=4×scale |
+| `AssessmentReportPage.jsx` | jsPDF: bezier relativo cp1=(±10,5) cp2=(±10,17) end=(0,22), lineWidth 0.9, circle r=4×scale |
+
+**Deploy:** `supabase functions deploy --no-verify-jwt` + `git push`
+
+---
+
+## ⚡ Sesión 2026-06-15 (v65) — Logo en emails
+
+**Archivo modificado:** `supabase/functions/_shared/email.ts`
+
+La función `baseLayout()` (usada por TODOS los templates de correo) ahora incluye el logo SVG de Psiconecta en el header:
+- Ícono SVG inline (dos arcos + círculo central, blanco sobre fondo semitransparente con `border-radius:12px`)
+- Wordmark "Psiconecta" a la derecha del ícono
+- Tagline "Tu espacio de bienestar mental"
+- Layout usando `<table>` anidado (compatible con clientes de correo)
+- Cambio propagado automáticamente a: confirmación de citas, recordatorios, cancelaciones, tarjetas regalo, correo de reporte de evaluaciones, y cualquier email futuro
+
+**También en esta sesión — PDFs con logo:**
+- `capture-assessment-payment/index.ts` → `generatePDFBytes()`: logo SVG dibujado con `drawSvgPath` (2 arcos y-flipped) + `drawCircle` (punto central) + `drawRectangle` (caja púrpura 24×24pt) usando pdf-lib. Importado `LineCapStyle`.
+- `AssessmentReportPage.jsx` → `downloadPDF()`: logo dibujado con `doc.roundedRect` + `doc.lines()` bezier cúbico + `doc.circle`. Secciones renombradas: "Contexto normativo"→"Contexto", "Recomendaciones"→"Para tener en cuenta" (frase en cursiva con color brand, sin numeración).
+
+**Deploy:** `supabase functions deploy` (edge functions) + `git push` (frontend)
 
 ---
 

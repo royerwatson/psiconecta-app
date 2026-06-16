@@ -97,7 +97,7 @@ export default function AdminDashboard() {
       supabase.from('patient_tasks').select('*', { count: 'exact', head: true }).is('completed_at', null),
       supabase.from('patient_tasks').select('*', { count: 'exact', head: true }).not('completed_at', 'is', null),
       supabase.from('patient_journal').select('*', { count: 'exact', head: true }),
-      supabase.from('therapist_credentials').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
+      supabase.from('therapist_credentials').select('*, therapist_profiles!inner(verification_status)', { count: 'exact', head: true }).eq('status', 'pending').neq('therapist_profiles.verification_status', 'verified'),
       supabase.from('refunds').select('*', { count: 'exact', head: true }).in('status', ['pending', 'disputed', 'failed']),
       supabase.from('deletion_requests').select('*', { count: 'exact', head: true }).eq('status', 'pending'),
     ])

@@ -65,7 +65,7 @@ export default function AdminLayout() {
     let active = true
     const fetchPending = async () => {
       const [creds, alerts, refunds, deletions] = await Promise.all([
-        supabase.from('therapist_credentials').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('therapist_credentials').select('id, therapist_profiles!inner(verification_status)', { count: 'exact', head: true }).eq('status', 'pending').neq('therapist_profiles.verification_status', 'verified'),
         supabase.from('ai_checkins').select('id', { count: 'exact', head: true }).in('risk_level', ['high', 'medium']).is('therapist_reviewed_at', null),
         supabase.from('refunds').select('id', { count: 'exact', head: true }).in('status', ['pending', 'disputed', 'failed']),
         supabase.from('deletion_requests').select('id', { count: 'exact', head: true }).eq('status', 'pending'),

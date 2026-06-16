@@ -108,6 +108,22 @@ async function downloadPDF(session, report, profile) {
 
   const checkPage = () => { if (y > 270) { doc.addPage(); y = 20 } }
 
+  // Logo Psiconecta
+  const logoSz = 10, logoSc = logoSz / 32, lx = 15
+  doc.setFillColor(79, 70, 229)
+  doc.roundedRect(lx, y, logoSz, logoSz, 1.5, 1.5, 'F')
+  doc.setDrawColor(255, 255, 255)
+  doc.setLineWidth(0.9)
+  doc.setLineCap('round')
+  // Left arc: M13 5 C3 10 3 22 13 27  → relativo desde (13,5): cp1=(-10,5) cp2=(-10,17) end=(0,22)
+  doc.lines([[-10*logoSc, 5*logoSc, -10*logoSc, 17*logoSc, 0, 22*logoSc]], lx + 13*logoSc, y + 5*logoSc, [1, 1], 'S', false)
+  // Right arc: M19 5 C29 10 29 22 19 27 → relativo desde (19,5): cp1=(10,5) cp2=(10,17) end=(0,22)
+  doc.lines([[10*logoSc, 5*logoSc, 10*logoSc, 17*logoSc, 0, 22*logoSc]], lx + 19*logoSc, y + 5*logoSc, [1, 1], 'S', false)
+  // Círculo central
+  doc.setFillColor(255, 255, 255)
+  doc.circle(lx + 16*logoSc, y + 16*logoSc, 4*logoSc, 'F')
+  y += logoSz + 4
+
   // Header
   addText('PSICONECTA', { size: 9, bold: true, color: [79, 70, 229] })
   addText('Reporte de Evaluación Psicométrica', { size: 18, bold: true })
@@ -133,19 +149,20 @@ async function downloadPDF(session, report, profile) {
   addText(report.interpretation, { size: 11 })
   y += 4; checkPage()
 
-  // Contexto normativo
-  addText('Contexto normativo', { size: 13, bold: true })
+  // Contexto
+  addText('Contexto', { size: 13, bold: true })
   addText(report.normative_context, { size: 11 })
   y += 4; checkPage()
 
-  // Recomendaciones
-  addText('Recomendaciones', { size: 13, bold: true })
-  ;(report.recommendations ?? []).forEach((r, i) => {
-    checkPage()
-    addText(`${i + 1}. ${r.title}`, { size: 11, bold: true })
-    addText(r.description, { size: 11 })
-    y += 2
-  })
+  // Para tener en cuenta
+  if ((report.recommendations ?? []).length > 0) {
+    addText('Para tener en cuenta', { size: 13, bold: true })
+    ;(report.recommendations ?? []).forEach((r) => {
+      checkPage()
+      addText(`"${r.description}"`, { size: 11, color: [79, 70, 229] })
+      y += 2
+    })
+  }
 
   y += 8; checkPage()
   addText('Este reporte es confidencial y de uso personal. Compártelo con tu psicólogo.', { size: 9, color: [148, 163, 184] })

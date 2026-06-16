@@ -180,11 +180,21 @@ export default function AdminTherapists() {
   // Completar verificación — activa al terapeuta (todos los docs aprobados)
   const completeVerification = async () => {
     setActing(true)
+
+    // 1. Marcar perfil como verificado
     const { error } = await supabase
       .from('therapist_profiles')
       .update({ verification_status: 'verified', verified: true })
       .eq('user_id', selected.user_id)
     if (error) { toast.error('Error completando verificación'); setActing(false); return }
+
+    // 2. Sincronizar credenciales individuales que aún queden en 'pending'
+    await supabase
+      .from('therapist_credentials')
+      .update({ status: 'verified', rejection_reason: null })
+      .eq('therapist_id', selected.user_id)
+      .eq('status', 'pending')
+
     toast.success('Terapeuta verificado y activado correctamente')
     setSelected(null)
     setActing(false)

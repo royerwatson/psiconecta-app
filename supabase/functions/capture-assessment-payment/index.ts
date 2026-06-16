@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
-import { PDFDocument, StandardFonts, rgb } from 'https://esm.sh/pdf-lib@1.17.1'
+import { PDFDocument, StandardFonts, rgb, LineCapStyle } from 'https://esm.sh/pdf-lib@1.17.1'
 import { getCorsHeaders } from '../_shared/cors.ts'
 import { sendEmail, assessmentReportEmail } from '../_shared/email.ts'
 
@@ -311,6 +311,29 @@ async function generatePDFBytes({
   }
 
   // ── Header ──────────────────────────────────────────────────────────
+  // Logo: caja púrpura 24×24pt con ícono SVG
+  const LOGO_SZ = 24
+  const LOGO_F = LOGO_SZ / 32          // factor escala (SVG 32×32 → 24pt)
+  const logoBottom = y - LOGO_SZ
+  const WHITE = rgb(1, 1, 1)
+
+  page.drawRectangle({ x: margin, y: logoBottom, width: LOGO_SZ, height: LOGO_SZ, color: brand, borderRadius: 6 })
+
+  // Arcos y-flipped: SVG y-down → PDF y-up  (new_y = 32 - svg_y)
+  // Left arc:  M13 5 C3 10 3 22 13 27  →  M13 27 C3 22 3 10 13 5
+  // Right arc: M19 5 C29 10 29 22 19 27 →  M19 27 C29 22 29 10 19 5
+  const arcOpts = {
+    x: margin, y: logoBottom, scale: LOGO_F,
+    borderColor: WHITE, borderWidth: 3 * LOGO_F, borderLineCap: LineCapStyle.Round,
+  }
+  page.drawSvgPath('M13 27C3 22 3 10 13 5', arcOpts)
+  page.drawSvgPath('M19 27C29 22 29 10 19 5', arcOpts)
+
+  // Círculo central (simétrico, no necesita flip)
+  page.drawCircle({ x: margin + 16 * LOGO_F, y: logoBottom + 16 * LOGO_F, size: 4 * LOGO_F, color: WHITE })
+
+  y -= LOGO_SZ + 10
+
   addLines(['PSICONECTA'], bold, 10, brand, 16)
   addLines(['Reporte de Evaluación Psicométrica'], bold, 16, ink, 22)
   addParagraph(session.instrument_full as string, regular, 11, muted)
