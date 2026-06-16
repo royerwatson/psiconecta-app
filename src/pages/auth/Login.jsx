@@ -71,7 +71,10 @@ export default function Login() {
 
       // El rol ya está en el store después de signIn → fetchProfile
       const role = useAuthStore.getState().role
-      const destination = from ?? (
+      // Prioridad: state.from → localStorage respaldo → dashboard por rol
+      const lsRedirect = localStorage.getItem('psiconecta_auth_redirect')
+      if (lsRedirect) localStorage.removeItem('psiconecta_auth_redirect')
+      const destination = from ?? lsRedirect ?? (
         role === 'therapist' ? '/therapist/dashboard' :
         role === 'admin'     ? '/admin/dashboard' :
         '/patient/dashboard'

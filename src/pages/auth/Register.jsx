@@ -11,7 +11,7 @@
  *   6. Términos y condiciones + Política de privacidad
  */
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { supabase } from '@/lib/supabase'
 import Button from '@/components/ui/Button'
@@ -393,6 +393,7 @@ export default function Register() {
 
   const { signUp, updateProfile } = useAuthStore()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleChange = (e) =>
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
@@ -540,11 +541,16 @@ export default function Register() {
       // Use the store role (populated by fetchProfile inside signUp) — more
       // reliable than the local form state which can be stale after async ops.
       const storeRole = useAuthStore.getState().role
-      navigate(
+      // Respetar redirect de evaluaciones (state o localStorage)
+      const fromState = location.state?.from?.pathname
+      const lsRedirect = localStorage.getItem('psiconecta_auth_redirect')
+      if (lsRedirect) localStorage.removeItem('psiconecta_auth_redirect')
+      const destination = fromState ?? lsRedirect ?? (
         storeRole === 'therapist' ? '/therapist/dashboard' :
         storeRole === 'admin'     ? '/admin/dashboard' :
         '/patient/dashboard'
       )
+      navigate(destination)
     } catch (err) {
       toast.error(err.message ?? 'Error al crear la cuenta')
     } finally {

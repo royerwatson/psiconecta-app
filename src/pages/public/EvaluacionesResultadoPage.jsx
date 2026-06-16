@@ -254,11 +254,12 @@ export default function EvaluacionesResultadoPage() {
   }
 
   function handleUnlock() {
-    // Si no está logueado, mandar a registro con redirect de vuelta
     if (!user) {
-      navigate(`/register?redirect=/evaluaciones/resultado/${slug}`)
+      // Guardar destino en localStorage como respaldo (sobrevive email verification)
+      localStorage.setItem('psiconecta_auth_redirect', `/evaluaciones/resultado/${slug}`)
+      // Pasar también via state (Login.jsx lo lee directamente)
+      navigate('/login', { state: { from: { pathname: `/evaluaciones/resultado/${slug}` } } })
     }
-    // Si ya está logueado, el botón PayPal ya está visible
   }
 
   return (
@@ -396,10 +397,13 @@ export default function EvaluacionesResultadoPage() {
                     onClick={handleUnlock}
                     className="w-full flex items-center justify-center gap-2 py-3.5 bg-primary-600 text-white font-bold rounded-2xl hover:bg-primary-700 transition-colors"
                   >
-                    Ver mi reporte completo <ChevronRight size={18} />
+                    Iniciar sesión para pagar <ChevronRight size={18} />
                   </button>
                   <p className="text-xs text-slate-400 text-center">
-                    Crea tu cuenta gratis para pagar y guardar el reporte
+                    ¿No tienes cuenta? <span className="underline cursor-pointer" onClick={() => {
+                      localStorage.setItem('psiconecta_auth_redirect', `/evaluaciones/resultado/${slug}`)
+                      navigate('/register', { state: { from: { pathname: `/evaluaciones/resultado/${slug}` } } })
+                    }}>Regístrate gratis</span>
                   </p>
                 </div>
               )}
