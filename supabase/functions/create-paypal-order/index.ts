@@ -71,24 +71,35 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Leer datos de la petición
-    const { therapistId, scheduledAt, isUrgent, priceBase, therapistName } = await req.json()
-    if (!therapistId || !scheduledAt || priceBase == null) throw new Error('Faltan campos requeridos')
+    // Leer datos de la petición (priceBase viene del cliente solo como hint — se ignora)
+    const { therapistId, scheduledAt, isUrgent, therapistName } = await req.json()
+    if (!therapistId || !scheduledAt) throw new Error('Faltan campos requeridos')
 
-    const finalPrice = +(priceBase * (isUrgent ? 1.3 : 1)).toFixed(2)
+    // Validar que la fecha es futura (al menos 30 min de margen)
+    const scheduledMs = new Date(scheduledAt).getTime()
+    if (isNaN(scheduledMs) || scheduledMs < Date.now() + 30 * 60 * 1000) {
+      throw new Error('La fecha de la sesión debe ser en el futuro')
+    }
 
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // Obtener tasa de comisión del terapeuta según su plan
-    const { data: therapistProfile } = await supabaseAdmin
+    // Obtener precio y comisión del terapeuta desde DB (nunca confiar en el cliente)
+    const { data: therapistProfile, error: tpError } = await supabaseAdmin
       .from('therapist_profiles')
-      .select('commission_rate, subscription_plan')
+      .select('commission_rate, subscription_plan, price_per_session, verified, verification_status')
       .eq('user_id', therapistId)
       .single()
 
+    if (tpError || !therapistProfile) throw new Error('Terapeuta no encontrado')
+    if (!therapistProfile.verified || therapistProfile.verification_status !== 'verified') {
+      throw new Error('El terapeuta no está habilitado para recibir citas')
+    }
+
+    const priceBase      = therapistProfile.price_per_session ?? 0
+    const finalPrice     = +(priceBase * (isUrgent ? 1.3 : 1)).toFixed(2)
     const commissionRate  = therapistProfile?.commission_rate ?? 0.20
     const platformCommission = +(finalPrice * commissionRate).toFixed(2)
     const therapistNet       = +(finalPrice - platformCommission).toFixed(2)

@@ -9,6 +9,7 @@
  */
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { getCorsHeaders }  from '../_shared/cors.ts'
+import { checkRateLimit }  from '../_shared/rateLimit.ts'
 
 Deno.serve(async (req) => {
   const corsHeaders = getCorsHeaders(req)
@@ -37,12 +38,24 @@ Deno.serve(async (req) => {
       })
     }
 
+    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
+
+    // Rate limiting: máx. 10 intentos de canje por usuario por hora (previene fuerza bruta de códigos)
+    const rl = await checkRateLimit(supabaseAdmin, user.id, {
+      maxRequests: 10,
+      windowSeconds: 3600,
+      functionName: 'redeem-gift-card',
+    })
+    if (!rl.allowed) {
+      return new Response(JSON.stringify({ error: 'Demasiados intentos. Intenta más tarde.' }), {
+        status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     const { code } = await req.json().catch(() => ({}))
     if (!code?.trim()) throw new Error('Falta el código de regalo')
 
     const normalizedCode = code.trim().toUpperCase()
-
-    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
     // Buscar gift card
     const { data: giftCard, error: gcError } = await supabaseAdmin

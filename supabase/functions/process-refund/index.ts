@@ -63,6 +63,15 @@ Deno.serve(async (req) => {
     if (sessErr || !session) throw new Error('Sesión no encontrada')
     if (session.status !== 'scheduled') throw new Error('Solo se pueden cancelar sesiones programadas')
 
+    // Protección anti-doble-reembolso: verificar que no exista ya un refund activo para esta sesión
+    const { data: existingRefund } = await supabaseAdmin
+      .from('refunds')
+      .select('id, status')
+      .eq('session_id', sessionId)
+      .in('status', ['processing', 'completed'])
+      .maybeSingle()
+    if (existingRefund) throw new Error('Esta sesión ya tiene un reembolso en proceso')
+
     // ── Calcular política de reembolso ────────────────────────────────────────
     const hoursUntil = (new Date(session.scheduled_at).getTime() - Date.now()) / (1000 * 60 * 60)
 

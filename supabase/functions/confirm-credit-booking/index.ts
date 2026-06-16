@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { checkRateLimit } from '../_shared/rateLimit.ts'
 
 const APP_ORIGIN = Deno.env.get('APP_URL') ?? 'https://psiconecta-app.vercel.app'
 
@@ -33,16 +34,32 @@ Deno.serve(async (req) => {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
     if (authError || !user) throw new Error('Unauthorized')
 
-    const { therapistId, scheduledAt, isUrgent, priceBase, therapistName, creditUsed } = await req.json()
-    if (!therapistId || !scheduledAt || priceBase == null || creditUsed == null) {
+    // Rate limiting: máx. 5 reservas con crédito por usuario por hora
+    const adminForRL = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    )
+    const rl = await checkRateLimit(adminForRL, user.id, {
+      maxRequests: 5,
+      windowSeconds: 3600,
+      functionName: 'confirm-credit-booking',
+    })
+    if (!rl.allowed) {
+      return new Response(
+        JSON.stringify({ error: 'Demasiadas reservas. Intenta en unos minutos.' }),
+        { status: 429, headers: { ...getCorsHeaders(req), 'Content-Type': 'application/json' } }
+      )
+    }
+
+    const { therapistId, scheduledAt, isUrgent, creditUsed } = await req.json()
+    if (!therapistId || !scheduledAt || creditUsed == null) {
       throw new Error('Faltan campos requeridos')
     }
 
-    const finalPrice   = +(priceBase * (isUrgent ? 1.3 : 1)).toFixed(2)
-    const creditAmount = +Math.min(creditUsed, finalPrice).toFixed(2)
-
-    if (creditAmount < finalPrice) {
-      throw new Error('Crédito insuficiente para cubrir la sesión')
+    // Validar que la fecha es futura (al menos 30 min de margen)
+    const scheduledMs = new Date(scheduledAt).getTime()
+    if (isNaN(scheduledMs) || scheduledMs < Date.now() + 30 * 60 * 1000) {
+      throw new Error('La fecha de la sesión debe ser en el futuro')
     }
 
     // Admin client con service role para operaciones privilegiadas
@@ -51,12 +68,25 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    // 1. Obtener comisión del terapeuta
-    const { data: tp } = await admin
+    // 1. Obtener precio y comisión del terapeuta desde DB (nunca confiar en el cliente)
+    const { data: tp, error: tpError } = await admin
       .from('therapist_profiles')
-      .select('commission_rate, subscription_plan')
+      .select('commission_rate, subscription_plan, price_per_session, verified, verification_status')
       .eq('user_id', therapistId)
       .single()
+
+    if (tpError || !tp) throw new Error('Terapeuta no encontrado')
+    if (!tp.verified || tp.verification_status !== 'verified') {
+      throw new Error('El terapeuta no está habilitado para recibir citas')
+    }
+
+    const priceBase        = tp.price_per_session ?? 0
+    const finalPrice       = +(priceBase * (isUrgent ? 1.3 : 1)).toFixed(2)
+    const creditAmount     = +Math.min(creditUsed, finalPrice).toFixed(2)
+
+    if (creditAmount < finalPrice) {
+      throw new Error('Crédito insuficiente para cubrir la sesión')
+    }
 
     const commissionRate      = tp?.commission_rate ?? 0.20
     const platformCommission  = +(finalPrice * commissionRate).toFixed(2)

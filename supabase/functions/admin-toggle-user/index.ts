@@ -40,6 +40,20 @@ Deno.serve(async (req) => {
     const { userId, activate } = await req.json()
     if (!userId) return new Response('Missing userId', { status: 400, headers: corsHeaders })
 
+    // Prevenir que un admin se desactive a sí mismo o a otro admin
+    if (userId === user.id) {
+      return new Response(JSON.stringify({ error: 'No puedes modificar tu propia cuenta' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+    const { data: targetProfile } = await supabaseAdmin
+      .from('profiles').select('role').eq('id', userId).single()
+    if (targetProfile?.role === 'admin') {
+      return new Response(JSON.stringify({ error: 'No se puede desactivar una cuenta de administrador' }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
     // Update profile is_active flag
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
