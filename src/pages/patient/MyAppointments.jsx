@@ -191,40 +191,34 @@ export default function MyAppointments() {
     try {
       const { data: { session: authSession } } = await supabase.auth.getSession()
       const token = authSession?.access_token
+      if (!token) throw new Error('No autorizado')
 
-      if (token && session.payment_intent_id) {
-        // Cancelar con reembolso vía Edge Function
-        const res = await fetch(
-          `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-refund`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ sessionId: session.id, reason: cancelReason.trim() || null }),
-          }
-        )
-        const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? 'Error procesando el reembolso')
+      // Siempre usar process-refund: maneja PayPal y créditos de gift card
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/process-refund`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ sessionId: session.id, reason: cancelReason.trim() || null }),
+        }
+      )
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Error procesando la cancelación')
 
-        const msg = data.refundAmount > 0
-          ? `Sesión cancelada. Reembolso de ${formatPrice(data.refundAmount)} en camino.`
-          : 'Sesión cancelada.'
-        toast.success(msg, { duration: 5000 })
-      } else {
-        // Sin pago registrado — cancelar directamente
-        await supabase.from('sessions').update({ status: 'cancelled' }).eq('id', session.id)
-        toast.success('Sesión cancelada')
-      }
+      const isCredit = !session.payment_intent_id
+      const msg = data.refundAmount > 0
+        ? `Sesión cancelada. ${isCredit ? 'Crédito restaurado' : 'Reembolso'} de ${formatPrice(data.refundAmount)}.`
+        : 'Sesión cancelada.'
+      toast.success(msg, { duration: 5000 })
 
       fetchSessions()
 
       // Email de cancelación (best-effort)
-      if (token) {
-        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-cancellation`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ sessionId: session.id, reason: cancelReason.trim() || null }),
-        }).catch(() => {})
-      }
+      fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-cancellation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ sessionId: session.id, reason: cancelReason.trim() || null }),
+      }).catch(() => {})
     } catch (err) {
       toast.error(err.message ?? 'Error al cancelar la sesión')
     } finally {

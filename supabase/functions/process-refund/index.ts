@@ -143,8 +143,26 @@ Deno.serve(async (req) => {
         console.error('[process-refund] PayPal error:', paypalErr)
         refundStatus = 'failed'
       }
+    } else if (!session.payment_intent_id && refundAmount > 0) {
+      // Pago con créditos de gift card — restaurar a patient_credits
+      try {
+        const { error: creditErr } = await supabaseAdmin
+          .from('patient_credits')
+          .insert({
+            user_id:    user.id,
+            amount_usd: refundAmount,
+            source:     'refund',
+            expires_at: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toISOString(),
+          })
+        if (creditErr) throw creditErr
+        refundStatus = 'completed'
+        console.log(`[process-refund] Crédito restaurado: ${refundAmount} USD → patient_credits (user ${user.id})`)
+      } catch (creditErr) {
+        console.error('[process-refund] Error restaurando crédito:', creditErr)
+        refundStatus = 'failed'
+      }
     } else if (refundAmount === 0) {
-      // Sin pago o reembolso 0% — marcar como completado sin llamar a PayPal
+      // Sin reembolso (< 2h) — marcar como completado sin acción monetaria
       refundStatus = 'completed'
     }
 

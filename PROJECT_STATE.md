@@ -1,9 +1,34 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-16 (v66 — Logo SVG real en correos y PDFs)*
+*Última actualización: 2026-06-16 (v67 — Fix cancelación de sesiones con créditos de gift card)*
 
 ---
 
-## ⚡ Sesión 2026-06-16 (v66) — Logo SVG real en correos y PDFs
+## ⚡ Sesión 2026-06-16 (v67) — Fix cancelación de sesiones con créditos de gift card
+
+**Problema:** Al cancelar una sesión pagada con créditos de gift card, el toast mostraba "Sesión cancelada" pero la sesión seguía visible y no se devolvían los créditos.
+
+**Causa raíz (dos bugs combinados):**
+1. `MyAppointments.jsx` → `confirmCancel()`: la rama `else` hacía un `supabase.from('sessions').update({ status: 'cancelled' })` directo, bloqueado por RLS (el paciente no tiene permiso de UPDATE en `sessions`). El update fallaba silenciosamente pero el toast se disparaba igual.
+2. `process-refund/index.ts`: solo manejaba reembolsos PayPal. Para sesiones sin `payment_intent_id` (gift card), ninguna rama restauraba los créditos a `patient_credits`.
+
+**Fix aplicado:**
+
+| Archivo | Cambio |
+|---|---|
+| `MyAppointments.jsx` | `confirmCancel()` siempre llama a `process-refund` (elimina el else con update directo). Toast diferencia "Crédito restaurado" vs "Reembolso" según `payment_intent_id` |
+| `process-refund/index.ts` | Nueva rama `else if (!session.payment_intent_id && refundAmount > 0)`: inserta fila en `patient_credits` con `source: 'refund'`, `amount_usd: refundAmount`, `expires_at: +1 año |
+
+**Deploy requerido:** `supabase functions deploy process-refund --no-verify-jwt` + `git push`
+
+---
+
+## ⚡ Sesión 2026-06-16 (v66) — Logo SVG real en correos y PDFs + Fix admin credenciales
+
+**Fix admin credenciales:**
+- **Error "Error aprobando documento"**: faltaba política UPDATE en `therapist_credentials`. Creado y ejecutado `EJECUTAR_fix_credentials_admin_update.sql` en Supabase Dashboard.
+- **Dashboard mostraba pendientes después de aprobar**: queries de `AdminDashboard.jsx` y `AdminLayout.jsx` ahora excluyen credenciales de terapeutas ya verificados (join con `therapist_profiles!inner`). `completeVerification()` en `AdminTherapists.jsx` también sincroniza los rows de `therapist_credentials` a `verified`.
+
+**Logo SVG real en correos y PDFs:**
 
 **Problema:** Los paths SVG del logo eran una aproximación simple (arcos poco curvados, trazo fino). El logo real tiene arcos más abiertos y pronunciados, trazo más grueso y círculo central mayor.
 
