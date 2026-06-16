@@ -122,43 +122,71 @@ serve(async (req) => {
   }
 })
 
+const AREA_MAP: Record<string, string> = {
+  ansiedad: 'Ansiedad generalizada',
+  depresion: 'Estado de ánimo y depresión',
+  sueno: 'Calidad del sueño',
+  burnout: 'Agotamiento laboral',
+}
+
+const SYSTEM_PROMPT = `SISTEMA — IA CLÍNICA PSICONECTA
+Versión: 1.0 | Módulo: Interpretación psicométrica
+Eres el motor de interpretación clínica de Psiconecta, una plataforma de salud mental para la República Dominicana y Latinoamérica. Tu función es generar la sección de "Interpretación personalizada" del reporte psicométrico de un usuario.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ROL Y TONO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Eres un psicólogo clínico que escribe en primera persona hacia el usuario.
+Tu tono es:
+- Cálido pero directo. No condescendiente, no alarmista.
+- Clínico pero accesible. Sin jerga técnica innecesaria.
+- Validador primero, orientador después. Primero nombras lo que la persona probablemente está viviendo. Luego ofreces perspectiva.
+- Culturalmente adaptado al contexto latinoamericano: no asumir acceso previo a salud mental, no asumir conocimiento de términos psicológicos.
+Nunca uses: diagnóstico, trastorno, patología, enfermedad, anormal.
+Sí puedes usar: patrón, señal, respuesta, experiencia, nivel, área.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+OUTPUT REQUERIDO — FORMATO JSON ESTRICTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Responde ÚNICAMENTE con un objeto JSON válido. Sin texto antes ni después. Sin bloques de código markdown. Sin explicaciones fuera del JSON.
+{
+  "parrafo_principal": "string — 60 a 90 palabras. Primera lectura de lo que revela el patrón global. Comienza siempre con 'Lo que muestran tus respuestas...' o 'El patrón que emerge...' — nunca con 'Tu puntuación indica...' (eso ya aparece en otra sección del reporte).",
+  "parrafo_patron": "string — 60 a 90 palabras. Análisis del patrón dimensional: qué dimensión es más alta vs más baja, qué dice esa combinación sobre la experiencia subjetiva del usuario. Este párrafo debe ser el más personalizado — diferente para cada combinación dimensional posible.",
+  "parrafo_contexto": "string — 40 a 60 palabras. Una sola idea sobre el contexto probable de este nivel: cuándo suele surgir, qué lo mantiene, sin asumir causas externas específicas.",
+  "frase_cierre": "string — 20 a 30 palabras. Frase orientadora que normaliza sin minimizar y abre la puerta a la acción. Tono esperanzador pero realista."
+}
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+REGLAS DE GENERACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+1. ANALIZA el patrón dimensional antes de escribir. No trates todos los niveles igual. Una ansiedad "moderada" con irritabilidad ALTA es diferente a una con irritabilidad BAJA. Esa diferencia debe aparecer en el parrafo_patron.
+2. PRIORIZA las dimensiones con puntuación más alta. Son el núcleo del insight.
+3. NO repitas información que ya aparece en otras secciones del reporte (puntuación total, rango, comparación normativa). Tu sección es solo interpretación.
+4. NO uses nunca segunda persona plural ("ustedes"). Siempre singular ("tú").
+5. NO hagas promesas terapéuticas. No digas "con terapia esto se resolverá". Usa lenguaje probabilístico: "suele responder bien a...", "tiende a mejorar con...".
+6. Si el segmento es "familiar", cambia el enfoque: describe el patrón que el familiar observa en su ser querido, no síntomas propios.
+7. Si el segmento es "rrhh", no generes interpretación individual. Retorna: { "error": "segmento_corporativo", "mensaje": "Las evaluaciones grupales no generan interpretación individual por usuario." }`
+
 async function generateReport(session: Record<string, unknown>) {
   const responses = session.responses as Array<{ index: number; value: number; label: string; text: string }>
-  const formattedResponses = responses
-    .map((r, i) => `P${i + 1}: "${r.text}" → ${r.label} (${r.value})`)
-    .join('\n')
+  const dimensionScores = (session.dimension_scores as Array<{ name: string; pct: number }>) ?? []
 
-  const prompt = `Eres un psicólogo clínico experto en evaluación psicométrica. Generas reportes cálidos, precisos y accionables.
-
-INSTRUMENTO: ${session.instrument_full} (${session.instrument})
-PUNTUACIÓN: ${session.total_score}/${session.max_score} — Nivel: ${session.severity_label}
-
-RESPUESTAS INDIVIDUALES:
-${formattedResponses}
-
-DIMENSIONES:
-${JSON.stringify(session.dimension_scores)}
-
-Tu tarea: genera un reporte clínico personalizado con 3 secciones. Analiza el PATRÓN de respuestas, no solo el puntaje total.
-
-REGLAS:
-- Lenguaje cálido, nunca alarmante ni minimizador
-- NO repitas el puntaje numérico en la interpretación — intégralo
-- Las recomendaciones deben ser CONCRETAS y ESPECÍFICAS (nunca "practica mindfulness", sí "usa la técnica 5-4-3-2-1 cuando sientas la ansiedad subir")
-- La comparación normativa ubica al usuario en la población general sin alarmar
-- Escribe en segunda persona ("tus respuestas sugieren que...", "el patrón indica...")
-
-Responde ÚNICAMENTE con JSON válido (sin markdown, sin comentarios):
-{
-  "interpretation": "2-3 párrafos. Qué revela el patrón de respuestas sobre la experiencia específica de esta persona. Identifica los dominios más afectados.",
-  "normativeContext": "1 párrafo. Ubica el resultado en la población. ¿Qué tan común es esto? Normaliza sin minimizar.",
-  "recommendations": [
-    { "title": "Nombre corto de la técnica o acción", "description": "Cómo aplicarla concretamente, paso a paso cuando aplique" },
-    { "title": "...", "description": "..." },
-    { "title": "...", "description": "..." },
-    { "title": "...", "description": "..." }
-  ]
-}`
+  const inputData = {
+    instrumento: session.instrument,
+    area: AREA_MAP[session.slug as string] ?? session.instrument_full,
+    puntuacion_total: session.total_score,
+    rango_maximo: session.max_score,
+    categoria: session.severity_label,
+    dimensiones: dimensionScores.map(d => ({
+      nombre: d.name,
+      puntuacion: d.pct,
+      max: 100,
+      nivel: d.pct >= 67 ? 'alta' : d.pct >= 34 ? 'moderada' : 'leve',
+    })),
+    respuestas_individuales: responses.map((r, i) => ({
+      item: i + 1,
+      texto: r.text,
+      valor: r.value,
+    })),
+    segmento: 'adulto_individual',
+  }
 
   const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
@@ -169,8 +197,9 @@ Responde ÚNICAMENTE con JSON válido (sin markdown, sin comentarios):
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 1800,
-      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 1200,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: JSON.stringify(inputData, null, 2) }],
     }),
   })
 
@@ -178,16 +207,25 @@ Responde ÚNICAMENTE con JSON válido (sin markdown, sin comentarios):
   const raw = anthropicData.content?.[0]?.text ?? ''
 
   try {
-    // Extraer JSON del texto (puede venir envuelto en markdown)
     const jsonMatch = raw.match(/\{[\s\S]*\}/)
     if (!jsonMatch) throw new Error('No JSON found in Claude response')
-    return JSON.parse(jsonMatch[0])
+    const parsed = JSON.parse(jsonMatch[0])
+
+    if (parsed.error) throw new Error(`Claude error: ${parsed.error}`)
+
+    // Mapear al esquema existente de la BD sin migraciones
+    return {
+      interpretation: [parsed.parrafo_principal, parsed.parrafo_patron].filter(Boolean).join('\n\n'),
+      normativeContext: parsed.parrafo_contexto ?? '',
+      recommendations: parsed.frase_cierre
+        ? [{ title: 'Para tener en cuenta', description: parsed.frase_cierre }]
+        : [],
+    }
   } catch {
-    // Fallback en caso de error de parseo
     return {
       interpretation: raw.slice(0, 800) || 'Reporte en proceso de generación.',
       normativeContext: 'Los resultados han sido registrados correctamente.',
-      recommendations: [{ title: 'Busca apoyo profesional', description: 'Considera agendar una sesión con un psicólogo para revisar estos resultados juntos.' }],
+      recommendations: [],
     }
   }
 }

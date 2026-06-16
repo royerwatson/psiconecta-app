@@ -317,21 +317,27 @@ export default function AssessmentReportPage() {
           </div>
         )}
 
-        {/* 4. Comparación normativa */}
+        {/* 4. Contexto */}
         {report?.normative_context && (
           <div className="bg-primary-50 rounded-3xl border border-primary-100 shadow-sm p-6">
-            <p className="text-xs font-bold text-primary-400 uppercase tracking-widest mb-4">Contexto normativo</p>
+            <p className="text-xs font-bold text-primary-400 uppercase tracking-widest mb-4">Contexto</p>
             <p className="text-slate-700 text-sm leading-relaxed">{report.normative_context}</p>
           </div>
         )}
 
-        {/* 5. Recomendaciones */}
+        {/* 5. Para tener en cuenta (frase_cierre) */}
         {report?.recommendations?.length > 0 && (
           <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Recomendaciones</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Para tener en cuenta</p>
             <div className="space-y-3">
               {report.recommendations.map((rec, i) => (
-                <RecCard key={i} rec={rec} index={i} />
+                rec.title === 'Para tener en cuenta'
+                  ? (
+                    <div key={i} className="bg-gradient-to-br from-primary-50 to-accent-50 border border-primary-100 rounded-2xl p-5">
+                      <p className="text-slate-700 text-sm leading-relaxed italic">"{rec.description}"</p>
+                    </div>
+                  )
+                  : <RecCard key={i} rec={rec} index={i} />
               ))}
             </div>
           </div>

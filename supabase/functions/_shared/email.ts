@@ -704,9 +704,9 @@ export function assessmentReportEmail({
       <p style="margin:0;font-size:14px;color:#334155;line-height:1.75;">${interpretation.replace(/\n\n/g, '</p><p style="margin:12px 0 0;font-size:14px;color:#334155;line-height:1.75;">')}</p>
     </div>
 
-    <!-- Contexto normativo -->
+    <!-- Contexto -->
     <div style="background:#eef2ff;border-left:4px solid #4f46e5;border-radius:8px;padding:16px 20px;margin-bottom:24px;">
-      <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.5px;">Contexto normativo</p>
+      <p style="margin:0 0 6px;font-size:12px;font-weight:700;color:#6366f1;text-transform:uppercase;letter-spacing:0.5px;">Contexto</p>
       <p style="margin:0;font-size:14px;color:#334155;line-height:1.7;">${normativeContext}</p>
     </div>
 

@@ -1,5 +1,76 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-15 (v62 — Flujo completo de evaluaciones psicométricas con reporte)*
+*Última actualización: 2026-06-15 (v63 — Email post-pago + pantalla de éxito + fix redirect auth)*
+
+---
+
+## ⚡ Sesión 2026-06-15 (v63) — Email de reporte + fix flujo post-pago
+
+### Problema resuelto
+El flujo post-pago redirigía a `/patient/evaluaciones/:sessionId` pero el reporte no se encontraba. Causa real: el redirect post-login/register no funcionaba — el usuario nunca llegaba a pagar.
+
+### Cambios implementados
+
+#### 1. Email del reporte completo
+**`supabase/functions/_shared/email.ts`** — nueva función `assessmentReportEmail()`:
+- Tarjeta de puntuación con gradiente morado (score + badge de severidad)
+- Barras de dimensiones con porcentajes
+- Interpretación en párrafos
+- Contexto normativo con borde violeta
+- 4 recomendaciones con íconos emoji
+- 2 CTAs: "Ver reporte en la app" + "Buscar terapeuta" (verde)
+
+#### 2. Edge Function actualizada
+**`supabase/functions/capture-assessment-payment/index.ts`**:
+- Después de guardar el reporte en Supabase, fetcha `profiles.full_name` del usuario
+- Llama `assessmentReportEmail()` y envía con `sendEmail()`
+- Retorna `{ sessionId, success: true, email: user.email }` (email para mostrar en UI)
+- El fallo de email no bloquea el flujo de pago (try/catch silencioso)
+
+#### 3. Pantalla de éxito inline post-pago
+**`src/pages/public/EvaluacionesResultadoPage.jsx`**:
+- Estado `paid: { sessionId, email }` en lugar de `navigate()`
+- Pantalla de éxito muestra: ✅ ícono verde, "¡Tu reporte está listo!", email donde se envió
+- Botón "Ver reporte en la app" → `/patient/evaluaciones/:sessionId`
+- Botón "Buscar terapeuta" → `/patient/find`
+- Ya no hay redirect abrupto al dashboard
+
+#### 4. Fix redirect post-auth (crítico)
+El bug real: Login leía `location.state?.from?.pathname` pero EvaluacionesResultadoPage enviaba `?redirect=` como query param — incompatibles. Register ignoraba cualquier redirect.
+
+**`src/pages/public/EvaluacionesResultadoPage.jsx`**:
+- Botón principal → `/login` con `state: { from: { pathname } }` + `localStorage.setItem('psiconecta_auth_redirect', ...)`
+- Link "Regístrate gratis" → `/register` con los mismos state + localStorage
+
+**`src/pages/auth/Login.jsx`**:
+- Lee `localStorage.getItem('psiconecta_auth_redirect')` como respaldo si no hay `state.from`
+- Prioridad: `state.from` → `localStorage` → dashboard por rol
+
+**`src/pages/auth/Register.jsx`**:
+- Importa `useLocation` y `useNavigate`
+- Post-registro: lee `location.state?.from?.pathname` y `localStorage` antes de ir al dashboard
+
+**`src/pages/auth/AuthCallback.jsx`**:
+- Lee `localStorage.getItem('psiconecta_auth_redirect')` para OAuth y verificación de email
+- Solo aplica a pacientes (role = patient)
+
+### Archivos modificados
+| Archivo | Cambio |
+|---------|--------|
+| `supabase/functions/_shared/email.ts` | NEW `assessmentReportEmail()` |
+| `supabase/functions/capture-assessment-payment/index.ts` | Envío de email + retorna `email` |
+| `src/pages/public/EvaluacionesResultadoPage.jsx` | Success screen inline + redirect con state/localStorage |
+| `src/pages/auth/Login.jsx` | Lee localStorage como respaldo de redirect |
+| `src/pages/auth/Register.jsx` | Respeta state.from + localStorage post-registro |
+| `src/pages/auth/AuthCallback.jsx` | Lee localStorage para OAuth/email-verify |
+
+### Deploy ejecutado
+```bash
+supabase functions deploy capture-assessment-payment  # ✅ 2026-06-15
+git push  # → Vercel auto-deploy ✅ 2026-06-15
+```
+
+### Estado
+✅ Flujo verificado end-to-end en producción: test → resultado → login → pago PayPal → pantalla de éxito → correo recibido
 
 ---
 
