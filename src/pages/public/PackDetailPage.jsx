@@ -8,7 +8,9 @@ import { supabase } from '@/lib/supabase'
 import { useAuthStore } from '@/store/authStore'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import { ASSESSMENT_PACKS, getPackTests, getPackOriginalPrice } from '@/data/assessmentPacks'
-import { CheckCircle2, ChevronRight, ArrowLeft, Clock, Lock, Sparkles, Crown } from 'lucide-react'
+import { CheckCircle2, ChevronRight, ArrowLeft, Clock, Lock, Sparkles, Crown, HeartPulse, Briefcase, Layers } from 'lucide-react'
+
+const PACK_ICONS = { HeartPulse, Briefcase, Layers }
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID
 const SUPABASE_URL     = import.meta.env.VITE_SUPABASE_URL
@@ -145,8 +147,8 @@ export default function PackDetailPage() {
           {/* Header del pack */}
           <div className={`card p-6 sm:p-8 mb-6 border-2 ${pack.highlight ? 'border-primary-300 dark:border-primary-700' : 'border-slate-100 dark:border-slate-800'}`}>
             <div className="flex items-start gap-4 mb-5">
-              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${ICON_BG[pack.color] ?? ICON_BG.primary} flex items-center justify-center text-2xl shrink-0 shadow-md`}>
-                {pack.icon}
+              <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${ICON_BG[pack.color] ?? ICON_BG.primary} flex items-center justify-center shrink-0 shadow-md`}>
+                {(() => { const Icon = PACK_ICONS[pack.icon] ?? Layers; return <Icon size={26} strokeWidth={1.8} color="white" /> })()}
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 flex-wrap mb-1">

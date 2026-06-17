@@ -6,7 +6,9 @@
  */
 import { useState, useEffect } from 'react'
 import { useParams, useSearchParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, HeartPulse, Briefcase, Layers } from 'lucide-react'
+
+const PACK_ICONS = { HeartPulse, Briefcase, Layers }
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import { ASSESSMENT_TESTS, getSeverityBand, getDimensionScores } from '@/data/assessmentTests'
 import { ASSESSMENT_PACKS } from '@/data/assessmentPacks'
@@ -235,7 +237,8 @@ export default function PackTestPage() {
           {current === 0 && (
             <div className="mb-6 text-center">
               <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary-50 border border-primary-100 text-xs font-semibold text-primary-700">
-                {pack.icon} {pack.name} · Test {testIndex + 1} de {totalTests}
+                {(() => { const Icon = PACK_ICONS[pack.icon] ?? Layers; return <Icon size={13} strokeWidth={2} /> })()}
+                {pack.name} · Test {testIndex + 1} de {totalTests}
               </span>
               <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mt-4">
                 {test.timeframe}
