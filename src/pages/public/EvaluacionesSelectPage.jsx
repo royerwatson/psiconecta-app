@@ -3,9 +3,10 @@
  * Ruta: /evaluaciones/elegir (pública)
  */
 import { Link, useNavigate } from 'react-router-dom'
-import { HeartPulse, BrainCircuit, Moon, Briefcase, Users, UserCheck, ArrowRight, ChevronRight, Sparkles } from 'lucide-react'
+import { HeartPulse, BrainCircuit, Moon, Briefcase, Users, UserCheck, ArrowRight, ChevronRight, Sparkles, Crown } from 'lucide-react'
 import { PsiconectaLogo } from '@/components/ui/Spinner'
 import { AREA_LIST } from '@/data/assessmentTests'
+import { PACK_LIST } from '@/data/assessmentPacks'
 
 const ICONS = {
   ansiedad:     HeartPulse,
@@ -106,6 +107,48 @@ export default function EvaluacionesSelectPage() {
                 </button>
               )
             })}
+          </div>
+
+          {/* ── Sección de Paquetes Temáticos ── */}
+          <div className="mt-10 mb-6">
+            <div className="text-center mb-5">
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">¿Quieres más de una evaluación?</p>
+              <h2 className="text-xl font-extrabold text-slate-900">Paquetes temáticos</h2>
+              <p className="text-sm text-slate-500 mt-1">Evalúa varias áreas a la vez y ahorra hasta un 40%</p>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {PACK_LIST.map((pack) => (
+                <Link
+                  key={pack.slug}
+                  to={`/evaluaciones/pack/${pack.slug}`}
+                  className={`group relative flex flex-col p-5 rounded-2xl border transition-all hover:shadow-md hover:-translate-y-0.5 ${
+                    pack.highlight
+                      ? 'bg-primary-50 border-primary-200 ring-1 ring-primary-300'
+                      : 'bg-white border-slate-100 shadow-sm'
+                  }`}
+                >
+                  {pack.highlight && (
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-primary-700 bg-primary-100 px-2 py-0.5 rounded-full mb-2 self-start">
+                      <Crown size={10} strokeWidth={2} /> Más popular
+                    </span>
+                  )}
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div>
+                      <span className="text-xl mr-1">{pack.icon}</span>
+                      <p className="text-sm font-bold text-slate-800 inline">{pack.name}</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400 leading-relaxed mb-3">{pack.instruments}</p>
+                  <div className="flex items-center justify-between mt-auto">
+                    <div>
+                      <span className={`text-lg font-black ${pack.highlight ? 'text-primary-700' : 'text-slate-900'}`}>${pack.price}</span>
+                      <span className="ml-2 text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100">-{pack.save}</span>
+                    </div>
+                    <ChevronRight size={14} className="text-slate-300 group-hover:text-slate-500 transition-colors" />
+                  </div>
+                </Link>
+              ))}
+            </div>
           </div>
 
           {/* Footer info */}
