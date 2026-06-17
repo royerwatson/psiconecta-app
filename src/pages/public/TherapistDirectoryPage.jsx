@@ -42,8 +42,7 @@ export default function TherapistDirectoryPage() {
       .from('therapist_profiles')
       .select(`
         user_id, full_name, specialty, bio, price_per_session,
-        rating, review_count, subscription_plan, verified,
-        profile:profiles(id, full_name, avatar_url)
+        rating, review_count, subscription_plan, verified
       `)
       .eq('verified', true)
 
@@ -239,7 +238,7 @@ export default function TherapistDirectoryPage() {
 
 /* ─── Card individual ─────────────────────── */
 function TherapistCard({ therapist, isPro }) {
-  const name    = therapist.profile?.full_name ?? therapist.full_name ?? 'Terapeuta'
+  const name    = therapist.full_name ?? 'Terapeuta'
   const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
   const rating  = therapist.rating ?? 0
   const reviews = therapist.review_count ?? 0
@@ -249,13 +248,7 @@ function TherapistCard({ therapist, isPro }) {
     <div className="card p-5 flex flex-col gap-4 hover:shadow-lg transition-shadow">
       {/* Header */}
       <div className="flex items-start gap-3">
-        {therapist.profile?.avatar_url ? (
-          <img
-            src={therapist.profile.avatar_url}
-            alt={name}
-            className="w-12 h-12 rounded-full object-cover ring-2 ring-primary-100 dark:ring-primary-900 shrink-0"
-          />
-        ) : (
+        {false ? null : (
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-accent-500 flex items-center justify-center shrink-0">
             <span className="text-white font-bold text-sm">{initials}</span>
           </div>
