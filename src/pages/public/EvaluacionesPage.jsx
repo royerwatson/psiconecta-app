@@ -30,10 +30,9 @@ const AREAS = [
 ]
 
 const PACKAGES = [
-  { name: 'Pack Bienestar Emocional',   price: '$12.99', save: '30%', includes: 'GAD-7 + PHQ-9 + PSQI · Reporte integrado cruzado' },
-  { name: 'Pack Vida Laboral',           price: '$14.99', save: '28%', includes: 'MBI + GAD-7 · Recomendaciones para entorno laboral' },
-  { name: 'Pack Relaciones y Familia',   price: '$17.99', save: '28%', includes: 'FACES-III + DAS · Guía de conversación para pareja' },
-  { name: 'Pack Evaluación Completa',    price: '$24.99', save: '40%', includes: '6 instrumentos · Reporte de 10-12 págs · 20% dcto. en 1ª sesión', highlight: true },
+  { slug: 'bienestar', name: 'Pack Bienestar Emocional',   icon: '🌿', price: '$12.99', save: '30%', includes: 'GAD-7 + PHQ-9 + ISI · Reporte integrado cruzado' },
+  { slug: 'laboral',   name: 'Pack Vida Laboral',           icon: '💼', price: '$14.99', save: '28%', includes: 'MBI-GS + GAD-7 · Recomendaciones para entorno laboral' },
+  { slug: 'completo',  name: 'Pack Evaluación Completa',    icon: '⭐', price: '$24.99', save: '40%', includes: '4 instrumentos clínicos · Reporte de 10-12 págs · 20% dcto. en 1ª sesión', highlight: true },
 ]
 
 /* ─── Componentes ────────────────────────────────────────── */
@@ -246,26 +245,35 @@ export default function EvaluacionesPage() {
             <p className="text-slate-500">Evalúa varias dimensiones a la vez y ahorra hasta un 40%.</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {PACKAGES.map(({ name, price, save, includes, highlight }) => (
-              <div key={name} className={`rounded-2xl p-5 border ${
-                highlight
-                  ? 'bg-primary-50 border-primary-200 ring-1 ring-primary-300'
-                  : 'bg-white border-slate-100 shadow-sm'
-              }`}>
+            {PACKAGES.map(({ slug, name, icon, price, save, includes, highlight }) => (
+              <Link
+                key={slug}
+                to={`/evaluaciones/pack/${slug}`}
+                className={`rounded-2xl p-5 border transition-all hover:shadow-md hover:-translate-y-0.5 ${
+                  highlight
+                    ? 'bg-primary-50 border-primary-200 ring-1 ring-primary-300'
+                    : 'bg-white border-slate-100 shadow-sm'
+                }`}
+              >
                 {highlight && (
                   <span className="inline-flex items-center gap-1 text-xs font-bold text-primary-700 bg-primary-100 px-2.5 py-1 rounded-full mb-3">
                     <Sparkles size={11} strokeWidth={2} /> Más popular
                   </span>
                 )}
                 <div className="flex items-start justify-between gap-2 mb-2">
-                  <p className={`font-bold text-sm leading-tight ${highlight ? 'text-primary-800' : 'text-slate-800'}`}>{name}</p>
+                  <p className={`font-bold text-sm leading-tight ${highlight ? 'text-primary-800' : 'text-slate-800'}`}>
+                    {icon && <span className="mr-1">{icon}</span>}{name}
+                  </p>
                   <div className="text-right shrink-0">
                     <p className={`text-xl font-black ${highlight ? 'text-primary-700' : 'text-slate-900'}`}>{price}</p>
                     <span className="text-xs font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded-full border border-emerald-100">-{save}</span>
                   </div>
                 </div>
-                <p className="text-xs text-slate-500 leading-relaxed">{includes}</p>
-              </div>
+                <p className="text-xs text-slate-500 leading-relaxed mb-3">{includes}</p>
+                <span className={`inline-flex items-center gap-1 text-xs font-semibold ${highlight ? 'text-primary-600' : 'text-slate-500'}`}>
+                  Ver pack <ChevronRight size={12} strokeWidth={2} />
+                </span>
+              </Link>
             ))}
           </div>
         </div>

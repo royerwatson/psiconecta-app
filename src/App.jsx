@@ -147,6 +147,9 @@ const EvaluacionesTestPage      = lazy(() => import('@/pages/public/Evaluaciones
 const EvaluacionesResultadoPage = lazy(() => import('@/pages/public/EvaluacionesResultadoPage'))
 const AssessmentReportPage      = lazy(() => import('@/pages/patient/AssessmentReportPage'))
 const RedeemGiftPage            = lazy(() => import('@/pages/patient/RedeemGiftPage'))
+const PackDetailPage            = lazy(() => import('@/pages/public/PackDetailPage'))
+const PackTestPage              = lazy(() => import('@/pages/public/PackTestPage'))
+const PackReportPage            = lazy(() => import('@/pages/public/PackReportPage'))
 const AppEntry               = lazy(() => import('@/pages/shared/AppEntry'))
 
 // ── Fallback de carga ─────────────────────────────────────────────────────
@@ -203,6 +206,9 @@ export default function App() {
           <Route path="/evaluaciones/elegir"        element={<EvaluacionesSelectPage />} />
           <Route path="/evaluaciones/test/:slug"    element={<EvaluacionesTestPage />} />
           <Route path="/evaluaciones/resultado/:slug" element={<EvaluacionesResultadoPage />} />
+          <Route path="/evaluaciones/pack/:packSlug"                              element={<PackDetailPage />} />
+          <Route path="/evaluaciones/pack/:packSlug/test/:testSlug"              element={<PackTestPage />} />
+          <Route path="/evaluaciones/pack/:packSlug/reporte/:purchaseId"         element={<PackReportPage />} />
           <Route path="/canjear"                    element={<RedeemGiftPage />} />
           <Route path="/auth/callback"   element={<AuthCallback />} />
 

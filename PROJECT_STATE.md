@@ -1,5 +1,123 @@
 # PROJECT_STATE.md — Estado del Proyecto Psiconecta
-*Última actualización: 2026-06-16 (v67 — Fix cancelación de sesiones con créditos de gift card)*
+*Última actualización: 2026-06-16 (v71 — Perfiles públicos SEO de terapeutas)*
+
+---
+
+## ⚡ Sesión 2026-06-16 (v71) — Perfiles públicos SEO de terapeutas
+
+**Objetivo:** Cada terapeuta verificado tiene su propia URL indexable por Google, mejorando el SEO y la conversión.
+
+**Implementación:**
+- SQL: `ALTER TABLE therapist_profiles ADD COLUMN slug TEXT UNIQUE` + generación automática desde `full_name` (minúsculas, tildes normalizadas, espacios → guiones)
+- Nueva página `TherapistPublicProfilePage.jsx` en `/terapeutas/:slug` con foto, nombre, especialidad, bio, disponibilidad semanal, precio y CTA "Agendar sesión"
+- Meta tags SEO individuales por perfil (título, descripción, URL canónica)
+- `TherapistDirectoryPage.jsx`: cards ahora incluyen botón "Ver perfil" que enlaza a `/terapeutas/:slug`
+- `App.jsx`: nueva ruta `/terapeutas/:slug`
+
+**Archivos nuevos/modificados:**
+- `src/pages/public/TherapistPublicProfilePage.jsx` (nuevo)
+- `src/pages/public/TherapistDirectoryPage.jsx` (botón Ver perfil + campo slug en select)
+- `src/App.jsx` (nueva ruta)
+- `supabase/migration_therapist_slug.sql` (nuevo)
+
+---
+
+## ⚡ Sesión 2026-06-16 (v70) — Fix directorio público de terapeutas
+
+**Problema:** `/terapeutas` mostraba pantalla vacía aunque había terapeutas verificados.
+
+**Causas (3 encadenadas):**
+1. Sin política RLS `SELECT` para `anon` en `therapist_profiles` → query retornaba vacío
+2. Join `profiles!therapist_profiles_user_id_fkey` daba 400 porque la FK no tiene ese nombre exacto en Supabase
+3. `full_name` no existía como columna en `therapist_profiles` → 400 Bad Request
+
+**Fixes aplicados:**
+- SQL: `CREATE POLICY "Public can view verified therapists" ON therapist_profiles FOR SELECT TO anon USING (verified = true)`
+- `TherapistDirectoryPage.jsx`: eliminado join con `profiles`, query ahora usa solo columnas de `therapist_profiles`
+- SQL: `ALTER TABLE therapist_profiles ADD COLUMN IF NOT EXISTS full_name TEXT`
+- SQL: `ALTER TABLE therapist_profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT`
+- SQL: `UPDATE therapist_profiles SET full_name = p.full_name, avatar_url = p.avatar_url FROM profiles p WHERE tp.user_id = p.id`
+- `TherapistDirectoryPage.jsx`: select incluye `full_name` y `avatar_url`, card usa estos campos directamente
+
+---
+
+## ⚡ Sesión 2026-06-16 (v69) — Fix Google OAuth consent screen
+
+**Problema:** La pantalla de selección de cuenta de Google mostraba "Ir a kudldawuehduidhipvmn.supabase.co" en vez de "Ir a psiconecta.app".
+
+**Causa raíz:** La app OAuth estaba en estado **Prueba** en Google Cloud Console. En modo Prueba, Google puede mostrar el dominio del redirect URI (Supabase) en lugar del dominio de la app.
+
+**Fix aplicado:**
+- Verificado que `psiconecta.app` ya estaba en **Dominios autorizados** del OAuth consent screen
+- Verificado que **Página principal** apunta a `https://psiconecta.app`
+- Cambiado estado de publicación de **Prueba → En producción** (Google Auth Platform → Público)
+
+**Estado actual:** En revisión por Google (1–5 días hábiles). El login con Google sigue funcionando durante la revisión. Una vez aprobado, el texto mostrará "Ir a psiconecta.app" y desaparecerá la advertencia de "app no verificada".
+
+**Proyecto Google Cloud:** `Make` (make-480322) — contiene la credencial OAuth `Supabase_Psiconecta`
+
+---
+
+## ⚡ Sesión 2026-06-16 (v68) — Auditoría de seguridad completa
+
+**Alcance:** Edge Functions, políticas RLS, flujos de pago (PayPal + gift cards), autenticación, frontend.
+**Resultado:** 7 vulnerabilidades identificadas — 6 corregidas en código, 1 documentada como pendiente.
+
+### Vulnerabilidades corregidas
+
+| ID | Severidad | Descripción | Archivo |
+|----|-----------|-------------|---------|
+| V-01 | CRÍTICO | `create-paypal-order` confiaba en `priceBase` del cliente → manipulación de precio | `create-paypal-order/index.ts` |
+| V-02 | CRÍTICO | `confirm-credit-booking` confiaba en `priceBase` del cliente → mismo vector | `confirm-credit-booking/index.ts` |
+| V-03 | CRÍTICO | `capture-gift-payment` no requería JWT → cualquiera con un `orderId` podía activar una gift card ajena | `capture-gift-payment/index.ts` |
+| V-04 | ALTO | `admin-toggle-user` no validaba el rol del target → un admin podía desactivar a otro admin o a sí mismo | `admin-toggle-user/index.ts` |
+| V-05 | MEDIO | `process-refund` sin guard anti-doble-reembolso → race condition podía emitir dos reembolsos | `process-refund/index.ts` |
+| V-06 | MEDIO | `confirm-credit-booking` y `redeem-gift-card` sin rate limiting | ambos archivos |
+| V-07 | BAJO | Rate limiter fail-open silencioso: si `rate_limit_log` fallaba, la petición se permitía sin log | `_shared/rateLimit.ts` |
+
+**V-01/V-02:** ambas funciones ahora leen `price_per_session` directamente de `therapist_profiles` en DB. También validan que el terapeuta esté verificado y que `scheduledAt` sea al menos 30 min en el futuro.
+
+**V-03:** `capture-gift-payment` ahora exige `Authorization` header y valida el JWT antes de procesar la captura.
+
+**V-04:** `admin-toggle-user` rechaza auto-modificación y cualquier intento de modificar otro admin.
+
+**V-05:** `process-refund` consulta `refunds` por `session_id` con `status IN ('processing','completed')` antes de crear un nuevo reembolso.
+
+**V-06:** Rate limiting añadido con `failOpen: false`: `confirm-credit-booking` (5/h), `redeem-gift-card` (10/h).
+
+**V-07:** `rateLimit.ts` reescrito con `failOpen?: boolean`. Todos los endpoints financieros usan `failOpen: false` — si la tabla falla, la petición se bloquea (no se permite en silencio). Siempre loguea el error.
+
+### Pendiente
+
+**V-08 (BAJO):** `notify-cancellation` no verifica que el `sessionId` pertenezca al usuario. Riesgo: disparar notificaciones de sesiones ajenas. Mitigación: la función solo envía emails, no modifica datos.
+
+### Archivos modificados en v68
+
+- `supabase/functions/create-paypal-order/index.ts`
+- `supabase/functions/confirm-credit-booking/index.ts`
+- `supabase/functions/capture-gift-payment/index.ts`
+- `supabase/functions/admin-toggle-user/index.ts`
+- `supabase/functions/process-refund/index.ts`
+- `supabase/functions/redeem-gift-card/index.ts`
+- `supabase/functions/_shared/rateLimit.ts`
+
+### Deploy pendiente
+
+```bash
+rm -f .git/HEAD.lock .git/index.lock
+git add supabase/functions/create-paypal-order/index.ts \
+        supabase/functions/confirm-credit-booking/index.ts \
+        supabase/functions/capture-gift-payment/index.ts \
+        supabase/functions/admin-toggle-user/index.ts \
+        supabase/functions/process-refund/index.ts \
+        supabase/functions/redeem-gift-card/index.ts \
+        supabase/functions/_shared/rateLimit.ts
+git commit -m "security: auditoria v68 — 7 vulnerabilidades corregidas"
+git push
+supabase functions deploy create-paypal-order confirm-credit-booking \
+  capture-gift-payment admin-toggle-user process-refund redeem-gift-card \
+  --no-verify-jwt
+```
 
 ---
 
