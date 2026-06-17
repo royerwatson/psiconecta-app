@@ -43,7 +43,7 @@ export default function TherapistDirectoryPage() {
       .select(`
         user_id, full_name, specialty, bio, price_per_session,
         rating, review_count, subscription_plan, verified,
-        profile:profiles!therapist_profiles_user_id_fkey(id, full_name, avatar_url)
+        profile:profiles(id, full_name, avatar_url)
       `)
       .eq('verified', true)
 
