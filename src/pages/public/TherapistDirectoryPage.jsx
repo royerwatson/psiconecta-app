@@ -42,7 +42,7 @@ export default function TherapistDirectoryPage() {
       .from('therapist_profiles')
       .select(`
         user_id, full_name, specialty, bio, price_per_session,
-        rating, review_count, subscription_plan, verified, avatar_url
+        rating, review_count, subscription_plan, verified, avatar_url, slug
       `)
       .eq('verified', true)
 
@@ -298,14 +298,24 @@ function TherapistCard({ therapist, isPro }) {
         )}
       </div>
 
-      <Link
-        to="/register"
-        onClick={() => analytics.bookTherapist(therapist.user_id)}
-        className="btn-premium btn-primary-premium text-xs py-2.5 w-full justify-center"
-      >
-        Agendar sesión
-        <ArrowRight size={14} strokeWidth={2} />
-      </Link>
+      <div className="flex gap-2">
+        {therapist.slug && (
+          <Link
+            to={`/terapeutas/${therapist.slug}`}
+            className="btn-premium btn-secondary-premium text-xs py-2.5 flex-1 justify-center"
+          >
+            Ver perfil
+          </Link>
+        )}
+        <Link
+          to="/register"
+          onClick={() => analytics.bookTherapist(therapist.user_id)}
+          className="btn-premium btn-primary-premium text-xs py-2.5 flex-1 justify-center"
+        >
+          Agendar
+          <ArrowRight size={14} strokeWidth={2} />
+        </Link>
+      </div>
     </div>
   )
 }

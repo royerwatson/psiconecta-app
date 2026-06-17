@@ -132,7 +132,8 @@ const SubscriptionSuccess = lazy(() => import('@/pages/payment/SubscriptionSucce
 // Público
 const LandingPage            = lazy(() => import(/* webpackChunkName: "page-landing" */ '@/pages/public/LandingPage'))
 const PricingPage            = lazy(() => import('@/pages/public/PricingPage'))
-const TherapistDirectoryPage = lazy(() => import('@/pages/public/TherapistDirectoryPage'))
+const TherapistDirectoryPage      = lazy(() => import('@/pages/public/TherapistDirectoryPage'))
+const TherapistPublicProfilePage  = lazy(() => import('@/pages/public/TherapistPublicProfilePage'))
 const BlogListPage           = lazy(() => import('@/pages/public/BlogListPage'))
 const BlogPostPage           = lazy(() => import('@/pages/public/BlogPostPage'))
 const TermsPage              = lazy(() => import('@/pages/public/TermsPage'))
@@ -189,7 +190,8 @@ export default function App() {
         <Routes>
           {/* Páginas públicas */}
           <Route path="/"                element={<LandingPage />} />
-          <Route path="/terapeutas"      element={<TherapistDirectoryPage />} />
+          <Route path="/terapeutas"         element={<TherapistDirectoryPage />} />
+          <Route path="/terapeutas/:slug"   element={<TherapistPublicProfilePage />} />
           <Route path="/blog"            element={<BlogListPage />} />
           <Route path="/blog/:slug"      element={<BlogPostPage />} />
           <Route path="/terminos"        element={<TermsPage />} />
