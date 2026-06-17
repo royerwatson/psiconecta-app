@@ -41,8 +41,8 @@ export default function TherapistDirectoryPage() {
     let query = supabase
       .from('therapist_profiles')
       .select(`
-        user_id, specialty, bio, price_per_session,
-        rating, review_count, subscription_plan, verified
+        user_id, full_name, specialty, bio, price_per_session,
+        rating, review_count, subscription_plan, verified, avatar_url
       `)
       .eq('verified', true)
 
@@ -248,7 +248,13 @@ function TherapistCard({ therapist, isPro }) {
     <div className="card p-5 flex flex-col gap-4 hover:shadow-lg transition-shadow">
       {/* Header */}
       <div className="flex items-start gap-3">
-        {false ? null : (
+        {therapist.avatar_url ? (
+          <img
+            src={therapist.avatar_url}
+            alt={name}
+            className="w-12 h-12 rounded-full object-cover ring-2 ring-primary-100 dark:ring-primary-900 shrink-0"
+          />
+        ) : (
           <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-400 to-accent-500 flex items-center justify-center shrink-0">
             <span className="text-white font-bold text-sm">{initials}</span>
           </div>
