@@ -41,7 +41,7 @@ export default function TherapistDirectoryPage() {
     let query = supabase
       .from('therapist_profiles')
       .select(`
-        user_id, full_name, specialty, bio, price_per_session,
+        user_id, specialty, bio, price_per_session,
         rating, review_count, subscription_plan, verified
       `)
       .eq('verified', true)
